@@ -1,0 +1,4 @@
+[submodule "swig"]
+	path = swig
+	url = https://github.com/swig/swig.git
+	branch = master
