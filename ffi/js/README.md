@@ -10,12 +10,6 @@ Follow the top-level [README.md](../../README.md)
 $ npm i -g node-gyp
 ```
 
-### Install typscript
-
-```bash
-$ npm i -g typescript
-```
-
 ## Build `blsct.node` module
 
 ```bash
