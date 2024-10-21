@@ -17,7 +17,7 @@ Darwin*)
   ;;
 esac
 
-pushd ./navio.core
+pushd ./navio-core
 
 ./autogen.sh
 
