@@ -11,7 +11,7 @@ $(wrap): $(interface)
 	$(swig) -c++ -javascript -node $(interface)
 
 run:
-	npm run build && cd build && LD_LIBRARY_PATH=$(lib) node ../test.js
+	npm run build && cd build && LD_LIBRARY_PATH=$(lib) DYLD_LIBRARY_PATH=$(lib) node ../test.js
 
 clean:
 	rm -f $(wrap)

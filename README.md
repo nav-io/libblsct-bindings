@@ -1,39 +1,21 @@
 # libblsct-bindings
 
-## Preparation
+## How to set up the environment
 
-### Common
+1. Move to the repository root
 
-1. Move to the repository root directory
 
-1. Create a symbolic link to `navio-core`
-
-   ```bash
-   ln -s path/to/navio-core
-   ```
-
-1. Initialize and update `swig` submodule:
+1. Fetch navio-core and swig submodules
 
    ```bash
    git submodule update --init --remote --recursive
    ```
-
-### Install libblsct
 
 1. Build `src/libblsct.a`:
 
    ```bash
    ./script/build-libblsct.sh
    ```
-
-1. Initialize and update `swig` submodule:
-
-   ```bash
-   cd ffi
-   git submodule update --init --recursive
-   ```
-
-### Install Swig
 
 1. Install `PCRE2` and `bison`
 
@@ -54,13 +36,14 @@
    export PATH="/opt/homebrew/opt/bison/bin:$PATH"
    ```
 
-1. Build `swig` and install it under `swig` directoy
+1. Build `swig`
 
    ```bash
    ./script/build-swig.sh
    ```
 
-1. Add locally built `Swig` to the `PATH`
+
+1. Add locally built `swig` to the PATH
 
    ```bash
    source ./script/activate-swig.sh

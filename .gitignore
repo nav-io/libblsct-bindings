@@ -4,4 +4,3 @@ lib/
 build/
 *.o
 test
-navio-core
