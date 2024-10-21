@@ -21,6 +21,10 @@ pushd ./navio.core
 
 ./autogen.sh
 
+pushd depends
+make -j${num_cores}
+popd
+
 if [ "$os" == 'linux' ]; then
   arch=$(uname -m)
   DEPENDS_OPT=
@@ -31,9 +35,6 @@ if [ "$os" == 'linux' ]; then
   ./configure --enable-build-libblsct-only $DEPENDS_OPT
 
 elif [ "$os" == 'macos' ]; then
-  pushd depends
-  make -j${num_cores}
-  popd
   depends_dir=$(find ./depends -type d -name 'aarch64*' -maxdepth 1 | head -n 1)
   ./configure --prefix=$(pwd)/${depends_dir} --enable-build-libblsct-only
 else
