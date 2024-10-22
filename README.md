@@ -28,13 +28,15 @@
    On macOS:
 
    ```bash
-   brew install pcre2 
+   brew install pcre2 bison 
    ```
 
    and add bison to the path
    ```bash
    export PATH="/opt/homebrew/opt/bison/bin:$PATH"
    ```
+
+   Note that macOS comes with `bison`, but that `bison` has a different set of options from the ones that swig expects
 
 1. Build `swig`
 

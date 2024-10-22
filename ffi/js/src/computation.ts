@@ -392,7 +392,7 @@ abstract class DisposableObj<T extends DisposableObj<any>> {
   serialize = (): string => blsct.to_hex(this.get(), this.objSize)
 
   deserialize = (hex: string): T => {
-    const serObj = blsct.hexToMallocedBuf(hex)
+    const serObj = blsct.hex_to_malloced_buf(hex)
     const serObjSize = hex.length / 2
     return new (this.constructor as any)(serObj, serObjSize) as T 
   }
@@ -1041,7 +1041,7 @@ class Tx extends DisposableObj<Tx> {
   serialize = (): string => blsct.to_hex(this.get(), this.getSize())
 
   deserialize = (hex: string): Tx => {
-    const ser_tx = blsct.hexToMallocedBuf(hex)
+    const ser_tx = blsct.hex_to_malloced_buf(hex)
     const ser_tx_size = hex.length / 2
     const tx = new Tx(ser_tx, ser_tx_size, this.computation)  
     return tx
