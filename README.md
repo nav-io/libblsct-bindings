@@ -27,6 +27,8 @@
 
    On macOS:
 
+   Regarding bison, although Xcode includes bison, the version is 2.3 which  does not work with swig. Newer version of bison needs to installed.
+
    ```bash
    brew install pcre2 bison 
    ```
@@ -36,14 +38,11 @@
    export PATH="/opt/homebrew/opt/bison/bin:$PATH"
    ```
 
-   Note that macOS comes with `bison`, but that `bison` has a different set of options from the ones that swig expects
-
 1. Build `swig`
 
    ```bash
    ./script/build-swig.sh
    ```
-
 
 1. Add locally built `swig` to the PATH
 
