@@ -100,18 +100,20 @@ if (p == nullptr) { \
     return static_cast<size_t>(x);
   }
 
-  // trying to free the returned value results in error
+  // freeing the returned value results in error
   // swig seems to be taking care of freeing the allocated memory
   const char* to_hex(uint8_t* buf, size_t buf_size) {
     size_t dest_buf_size = 2 * buf_size + 1;
+
     char* s = static_cast<char*>(malloc(dest_buf_size));
     char* p = s;
-    for (size_t i = 0; i<buf_size; ++i) {
-        snprintf(p, dest_buf_size, "%02x", buf[i]);
-        p += 2;
-    }
-    *p = '\0';
+    size_t n = dest_buf_size;
 
+    for (size_t i = 0; i<buf_size; ++i) {
+        snprintf(p, n, "%02x", buf[i]);
+        p += 2;
+        n -= 2;
+    }
     return s;
   } 
 
@@ -297,10 +299,11 @@ if (p == nullptr) { \
     return vec->at(idx).msg;
   }
 
-  uint8_t* hexToMallocedBuf(const char* hex) {
-    size_t buf_len = std::strlen(hex) / 2;
-    uint8_t* buf = static_cast<uint8_t*>(malloc(buf_len));
+  uint8_t* hex_to_malloced_buf(const char* hex) {
+    size_t hex_len = std::strlen(hex);
+    size_t buf_len = hex_len / 2;
 
+    uint8_t* buf = static_cast<uint8_t*>(malloc(buf_len));
     const char* p = hex;
 
     for (size_t i=0; i<buf_len; ++i) {

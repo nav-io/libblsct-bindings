@@ -2,6 +2,13 @@
 
 set -e
 
+while [[ "$#" -gt 0 ]]; do
+  case $1 in
+    --dep) dep_flag=true ;;
+  esac
+  shift
+done
+
 case "$(uname)" in
 Linux*)
   num_cores=$(nproc)
@@ -18,6 +25,13 @@ Darwin*)
 esac
 
 pushd ./navio-core
+
+if [[ $dep_flag == true ]]; then
+  echo 'Buidling dependencies...'
+  pushd depends
+  make -j${num_cores}
+  popd
+fi
 
 ./autogen.sh
 
@@ -36,7 +50,7 @@ if [ "$os" == 'linux' ]; then
 
 elif [ "$os" == 'macos' ]; then
   depends_dir=$(find ./depends -type d -name 'aarch64*' -maxdepth 1 | head -n 1)
-  ./configure --prefix=$(pwd)/${depends_dir} --enable-build-libblsct-only
+  ./configure --prefix=$(pwd)/${depends_dir} --enable-build-libblsct-only --enable-debug
 else
 
   exit 0
