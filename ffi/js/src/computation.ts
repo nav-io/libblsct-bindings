@@ -10,9 +10,7 @@ export class Computation {
   }
 
   add2GC = (x: any): void => {
-    //console.log(`added to GC[${this.gc.length}]`)
     this.gc.push(x)
-
   }
 
   RandomScalar = (): Scalar => {
@@ -79,7 +77,6 @@ export class Computation {
       this,
     )
   }
-
 
   OutPoint = (
     txId: string,

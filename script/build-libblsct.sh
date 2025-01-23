@@ -24,7 +24,8 @@ Darwin*)
   ;;
 esac
 
-pushd ./navio-core
+#pushd ./navio-core
+pushd ~/repos/navio-core
 
 if [[ $dep_flag == true ]]; then
   echo 'Buidling dependencies...'
@@ -50,7 +51,7 @@ if [ "$os" == 'linux' ]; then
 
 elif [ "$os" == 'macos' ]; then
   depends_dir=$(find ./depends -type d -name 'aarch64*' -maxdepth 1 | head -n 1)
-  ./configure --prefix=$(pwd)/${depends_dir} --enable-build-libblsct-only --enable-debug
+  ./configure --prefix=$(pwd)/${depends_dir} --enable-build-libblsct-only
 else
 
   exit 0

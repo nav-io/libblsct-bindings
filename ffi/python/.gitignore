@@ -3,3 +3,5 @@ blsct.py
 *.so
 __pycache__
 !Makefile
+*.pyd
+*.cxx

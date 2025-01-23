@@ -2,6 +2,7 @@
 
 %{
 #include "../../navio-core/src/blsct/external_api/blsct.h"
+#include <../../navio-core/src/blsct/range_proof/bulletproofs/range_proof.h>
 %}
 
 %constant size_t DOUBLE_PUBLIC_KEY_SIZE = DOUBLE_PUBLIC_KEY_SIZE;
@@ -359,7 +360,7 @@ typedef struct {
 } BlsctTxRetVal;
 
 export void init();
-export bool set_chain(enum Chain chain);
+export bool set_c hain(enum Chain chain);
 
 // freeing allocated memory
 export void free_obj(void* rv);
@@ -507,14 +508,12 @@ export const BlsctPoint* get_tx_out_blinding_key(const CTxOut* tx_out);
 export uint16_t get_tx_out_view_tag(const CTxOut* tx_out);
 
 export const BlsctPoint* get_tx_out_range_proof_A(const CTxOut* tx_out);
-export const BlsctPoint* get_tx_out_range_proof_S(const CTxOut* tx_out);
-export const BlsctPoint* get_tx_out_range_proof_T1(const CTxOut* tx_out);
-export const BlsctPoint* get_tx_out_range_proof_T2(const CTxOut* tx_out);
-
-export const BlsctScalar* get_tx_out_range_proof_mu(const CTxOut* tx_out);
-export const BlsctScalar* get_tx_out_range_proof_a(const CTxOut* tx_out);
-export const BlsctScalar* get_tx_out_range_proof_b(const CTxOut* tx_out);
-export const BlsctScalar* get_tx_out_range_proof_t_hat(const CTxOut* tx_out);
+export const BlsctPoint* get_tx_out_range_proof_B(const CTxOut* tx_out);
+export const BlsctPoint* get_tx_out_range_proof_r_prime(const CTxOut* tx_out);
+export const BlsctPoint* get_tx_out_range_proof_s_prime(const CTxOut* tx_out);
+export const BlsctPoint* get_tx_out_range_proof_delta_prime(const CTxOut* tx_out);
+export const BlsctPoint* get_tx_out_range_proof_alpha_hat(const CTxOut* tx_out);
+export const BlsctScalar* get_tx_out_range_proof_tau_x(const CTxOut* tx_out);
 
 export const BlsctSignature* sign_message(
     const BlsctScalar* blsct_priv_key,
