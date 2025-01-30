@@ -49,12 +49,13 @@ for(let i=0; i<1; ++i) {
   process.stdout.write('.')
 
   // prove
-  const nonce1 = C.RandomPoint()
+  const nonce1 = C.BasePoint()
   const rp1 = C.buildRangeProof(
     [456],
     nonce1,
     'navcoin'
   )
+  console.log(`rp1: ${rp1.serialize()}`)
   const nonce2 = C.RandomPoint()
   const rp2 = C.buildRangeProof(
     [123, 234, 345, 456],
@@ -153,13 +154,12 @@ for(let i=0; i<1; ++i) {
     console.log(`blindingKey: ${txOut.getBlindingKey().toHex()}`)
     console.log(`viewTag: ${txOut.getViewTag()}`)
     console.log(`rangeProof.A: ${txOut.getRangeProof_A().toHex()}`)
-    console.log(`rangeProof.S: ${txOut.getRangeProof_S().toHex()}`)
-    console.log(`rangeProof.T1: ${txOut.getRangeProof_T1().toHex()}`)
-    console.log(`rangeProof.T2: ${txOut.getRangeProof_T2().toHex()}`)
-    console.log(`rangeProof.mu: ${txOut.getRangeProof_mu().toNumber()}`)
-    console.log(`rangeProof.a: ${txOut.getRangeProof_a().toNumber()}`)
-    console.log(`rangeProof.b: ${txOut.getRangeProof_b().toNumber()}`)
-    console.log(`rangeProof.t_hat: ${txOut.getRangeProof_t_hat().toNumber()}`)
+    console.log(`rangeProof.B: ${txOut.getRangeProof_B().toHex()}`)
+    console.log(`rangeProof.r_prime: ${txOut.getRangeProof_r_prime().toHex()}`)
+    console.log(`rangeProof.s_prime: ${txOut.getRangeProof_s_prime().toHex()}`)
+    console.log(`rangeProof.delta_prime: ${txOut.getRangeProof_delta_prime().toHex()}`)
+    console.log(`rangeProof.alpha_hat: ${txOut.getRangeProof_alpha_hat().toHex()}`)
+    console.log(`rangeProof.tau_x: ${txOut.getRangeProof_tau_x().toHex()}`)
   }
 }
 

@@ -61,6 +61,10 @@ if (p == nullptr) { \
     return static_cast<BlsctRangeProof*>(x);
   }
 
+  BlsctAmountRecoveryReq* cast_to_amount_recovery_req(void* x) {
+    return static_cast<BlsctAmountRecoveryReq*>(x);
+  }
+
   BlsctOutPoint* cast_to_out_point(void* x) {
     return static_cast<BlsctOutPoint*>(x);
   }
@@ -360,7 +364,7 @@ typedef struct {
 } BlsctTxRetVal;
 
 export void init();
-export bool set_c hain(enum Chain chain);
+export bool set_chain(enum Chain chain);
 
 // freeing allocated memory
 export void free_obj(void* rv);
@@ -374,6 +378,7 @@ export const char* scalar_to_hex(const BlsctScalar* blsct_scalar);
 
 // point
 export BlsctRetVal* gen_random_point();
+export BlsctRetVal* gen_base_point();
 export const char* point_to_hex(const BlsctPoint* blsct_point);
 
 // public key

@@ -1,8 +1,9 @@
 #!/bin/bash
 
-cp ~/repos/navio-core/src/libblsct.a ./lib
-cp ~/repos/navio-core/src/libunivalue_blsct.a ./lib
-cp ~/repos/navio-core/src/bls/lib/libbls384_256.a ./lib
-cp ~/repos/navio-core/src/bls/mcl/lib/libmcl.a ./lib
+repo_dir=./navio-core
 
+cp $repo_dir/src/libblsct.a ./lib
+cp $repo_dir/src/libunivalue_blsct.a ./lib
+cp $repo_dir/src/bls/lib/libbls384_256.a ./lib
+cp $repo_dir/src/bls/mcl/lib/libmcl.a ./lib
 
