@@ -10,9 +10,7 @@ export class Computation {
   }
 
   add2GC = (x: any): void => {
-    //console.log(`added to GC[${this.gc.length}]`)
     this.gc.push(x)
-
   }
 
   RandomScalar = (): Scalar => {
@@ -25,6 +23,10 @@ export class Computation {
 
   RandomPoint = (): Point => {
     return Point.random(this)
+  }
+
+  BasePoint = (): Point => {
+    return Point.basePoint(this)
   }
 
   ScalarToPublicKey = (scalar: Scalar): PublicKey => {
@@ -79,7 +81,6 @@ export class Computation {
       this,
     )
   }
-
 
   OutPoint = (
     txId: string,
@@ -317,7 +318,8 @@ export class Computation {
       blsct.free_obj(rv)
       throw new Error(`Verifying range proofs failed: ${rv.result}`)
     }
-    // the verifier of range proofs is not responsible for freeing the proofs
+    // only freeing range proof vector since the verifier is not
+    // responsible of freeing the proofs
     blsct.free_range_proof_vec(vec)
 
     const res = rv.value
@@ -389,7 +391,10 @@ abstract class DisposableObj<T extends DisposableObj<any>> {
     }
   }
 
-  serialize = (): string => blsct.to_hex(this.get(), this.objSize)
+  serialize = (): string => blsct.to_hex(
+    blsct.cast_to_uint8_t_ptr(this.get()),
+    this.objSize
+  )
 
   deserialize = (hex: string): T => {
     const serObj = blsct.hex_to_malloced_buf(hex)
@@ -443,6 +448,13 @@ export class Point extends DisposableObj<Point> {
 
   static random = (computation: Computation): Point => {
     const rv = blsct.gen_random_point()
+    const point = new Point(rv.value, computation)
+    blsct.free_obj(rv)
+    return point
+  }
+
+  static basePoint = (computation: Computation): Point => {
+    const rv = blsct.gen_base_point()
     const point = new Point(rv.value, computation)
     blsct.free_obj(rv)
     return point
@@ -893,38 +905,33 @@ export class TxOut extends DisposableObj<TxOut> {
     return new Point(point, this.computation)
   }
 
-  getRangeProof_S = (): Point => {
-    const point = blsct.get_tx_out_range_proof_S(this.get())
+  getRangeProof_B = (): Point => {
+    const point = blsct.get_tx_out_range_proof_B(this.get())
     return new Point(point, this.computation)
   }
 
-  getRangeProof_T1 = (): Point => {
-    const point = blsct.get_tx_out_range_proof_T1(this.get())
+  getRangeProof_r_prime = (): Point => {
+    const point = blsct.get_tx_out_range_proof_r_prime(this.get())
     return new Point(point, this.computation)
   }
 
-  getRangeProof_T2 = (): Point => {
-    const point = blsct.get_tx_out_range_proof_T2(this.get())
+  getRangeProof_s_prime = (): Point => {
+    const point = blsct.get_tx_out_range_proof_s_prime(this.get())
     return new Point(point, this.computation)
   }
 
-  getRangeProof_mu = (): Scalar => {
-    const scalar = blsct.get_tx_out_range_proof_mu(this.get())
-    return new Scalar(scalar, this.computation)
+  getRangeProof_delta_prime = (): Point => {
+    const point = blsct.get_tx_out_range_proof_delta_prime(this.get())
+    return new Point(point, this.computation)
   }
 
-  getRangeProof_a = (): Scalar => {
-    const scalar = blsct.get_tx_out_range_proof_a(this.get())
-    return new Scalar(scalar, this.computation)
+  getRangeProof_alpha_hat = (): Point => {
+    const point = blsct.get_tx_out_range_proof_alpha_hat(this.get())
+    return new Point(point, this.computation)
   }
 
-  getRangeProof_b = (): Scalar => {
-    const scalar = blsct.get_tx_out_range_proof_b(this.get())
-    return new Scalar(scalar, this.computation)
-  }
-
-  getRangeProof_t_hat = (): Scalar => {
-    const scalar = blsct.get_tx_out_range_proof_t_hat(this.get())
+  getRangeProof_tau_x = (): Scalar => {
+    const scalar = blsct.get_tx_out_range_proof_tau_x(this.get())
     return new Scalar(scalar, this.computation)
   }
 

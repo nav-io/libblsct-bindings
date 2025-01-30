@@ -2,6 +2,7 @@
 
 %{
 #include "../../navio-core/src/blsct/external_api/blsct.h"
+#include <../../navio-core/src/blsct/range_proof/bulletproofs/range_proof.h>
 %}
 
 %constant size_t DOUBLE_PUBLIC_KEY_SIZE = DOUBLE_PUBLIC_KEY_SIZE;
@@ -58,6 +59,10 @@ if (p == nullptr) { \
 
   BlsctRangeProof* cast_to_range_proof(void* x) {
     return static_cast<BlsctRangeProof*>(x);
+  }
+
+  BlsctAmountRecoveryReq* cast_to_amount_recovery_req(void* x) {
+    return static_cast<BlsctAmountRecoveryReq*>(x);
   }
 
   BlsctOutPoint* cast_to_out_point(void* x) {
@@ -373,6 +378,7 @@ export const char* scalar_to_hex(const BlsctScalar* blsct_scalar);
 
 // point
 export BlsctRetVal* gen_random_point();
+export BlsctRetVal* gen_base_point();
 export const char* point_to_hex(const BlsctPoint* blsct_point);
 
 // public key
@@ -507,14 +513,12 @@ export const BlsctPoint* get_tx_out_blinding_key(const CTxOut* tx_out);
 export uint16_t get_tx_out_view_tag(const CTxOut* tx_out);
 
 export const BlsctPoint* get_tx_out_range_proof_A(const CTxOut* tx_out);
-export const BlsctPoint* get_tx_out_range_proof_S(const CTxOut* tx_out);
-export const BlsctPoint* get_tx_out_range_proof_T1(const CTxOut* tx_out);
-export const BlsctPoint* get_tx_out_range_proof_T2(const CTxOut* tx_out);
-
-export const BlsctScalar* get_tx_out_range_proof_mu(const CTxOut* tx_out);
-export const BlsctScalar* get_tx_out_range_proof_a(const CTxOut* tx_out);
-export const BlsctScalar* get_tx_out_range_proof_b(const CTxOut* tx_out);
-export const BlsctScalar* get_tx_out_range_proof_t_hat(const CTxOut* tx_out);
+export const BlsctPoint* get_tx_out_range_proof_B(const CTxOut* tx_out);
+export const BlsctPoint* get_tx_out_range_proof_r_prime(const CTxOut* tx_out);
+export const BlsctPoint* get_tx_out_range_proof_s_prime(const CTxOut* tx_out);
+export const BlsctPoint* get_tx_out_range_proof_delta_prime(const CTxOut* tx_out);
+export const BlsctPoint* get_tx_out_range_proof_alpha_hat(const CTxOut* tx_out);
+export const BlsctScalar* get_tx_out_range_proof_tau_x(const CTxOut* tx_out);
 
 export const BlsctSignature* sign_message(
     const BlsctScalar* blsct_priv_key,

@@ -48,12 +48,11 @@ if [ "$os" == 'linux' ]; then
   fi
   ./configure --enable-build-libblsct-only $DEPENDS_OPT
 
-elif [ "$os" == 'macos' ]; then
-  depends_dir=$(find ./depends -type d -name 'aarch64*' -maxdepth 1 | head -n 1)
-  ./configure --prefix=$(pwd)/${depends_dir} --enable-build-libblsct-only --enable-debug
-else
-
-  exit 0
+  elif [ "$os" == 'macos' ]; then
+    depends_dir=$(find ./depends -type d -name 'aarch64*' -maxdepth 1 | head -n 1)
+    ./configure --prefix=$(pwd)/${depends_dir} --enable-build-libblsct-only
+  else
+    exit 0
 fi
 
 make clean
