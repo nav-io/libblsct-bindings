@@ -3,9 +3,10 @@ from lib.address import Address, AddressEncoding
 from lib.double_public_key import DoublePublicKey
 from lib.point import Point
 from lib.public_key import PublicKey
-from lib.scalar import Scalar
-from lib.token_id import TokenId
 from lib.range_proof import AmountRecoveryReq, RangeProof
+from lib.scalar import Scalar
+from lib.signature import Signature
+from lib.token_id import TokenId
 
 blsct.init()
 
@@ -70,8 +71,6 @@ token_id = TokenId()
 rp1 = RangeProof([456], nonce1, 'navcoin', token_id)
 #rp2 = RangeProof([123, 456], nonce2, 'rp2')
 
-print(f"rp1: {rp1.to_hex()}")
-
 rp_verify_res1 = RangeProof.verify_proofs([rp1])
 print(f"single-amount RangeProof verify: {rp_verify_res1}")
 
@@ -83,9 +82,15 @@ res = RangeProof.recover_amounts([req])
 for i, x in enumerate(res):
     print(f"Recovered amount {i}: {x}")
 
+# Signature generation/verification
+msg = "navio"
+priv_key = Scalar.random()
+sig = Signature(priv_key, msg)
+print(f"Signature {sig}")
 
-
-
+pub_key = PublicKey.from_scalar(priv_key)
+is_sig_valid = sig.verify(msg, pub_key)
+print(f"sig verification: {is_sig_valid}")
 
 
 
