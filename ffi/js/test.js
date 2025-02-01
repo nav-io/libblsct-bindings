@@ -49,31 +49,33 @@ for(let i=0; i<1; ++i) {
   process.stdout.write('.')
 
   // prove
-  const nonce1 = C.BasePoint()
+  const nonce1 = C.RandomPoint()
   const rp1 = C.buildRangeProof(
     [456],
     nonce1,
     'navcoin'
   )
   console.log(`rp1: ${rp1.serialize()}`)
-  // const nonce2 = C.RandomPoint()
-  // const rp2 = C.buildRangeProof(
-  //   [123, 234, 345, 456],
-  //   nonce2,
-  //   'navio'
-  // )
+  const nonce2 = C.RandomPoint()
+  const rp2 = C.buildRangeProof(
+    [123, 234, 345, 456],
+    nonce2,
+    'navio'
+  )
+  console.log(`rp2: ${rp2.serialize()}`)
 
   // verify
-  const veriRes = C.verifyRangeProof([rp1])
+  const veriRes = C.verifyRangeProof([rp1, rp2])
   if (!veriRes) {
     console.log(`Range proof verification failed at i=${i}`)
     break
   }
+  console.log(`Range proof verification ${i} passed`)
 
   // amount recovery
   const reqs = [
     new AmtRecoveryReq(rp1, nonce1),
-    //new AmtRecoveryReq(rp2, nonce2),
+    new AmtRecoveryReq(rp2, nonce2),
   ]
   const res = C.recoverAmount(reqs)
   console.log(`Recovery result ${res}`)
