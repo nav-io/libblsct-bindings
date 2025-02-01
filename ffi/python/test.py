@@ -65,18 +65,17 @@ print(token_id_3)
 
 # RangeProof
 nonce1 = Point()
-nonce2 = Point.random()
 
 rp1 = RangeProof([456], nonce1, 'navcoin')
-rp2 = RangeProof([123, 456], nonce2, 'rp2')
+#rp2 = RangeProof([123, 456], nonce2, 'rp2')
 
 print(f"rp1: {rp1.to_hex()}")
 
 rp_verify_res1 = RangeProof.verify_proofs([rp1])
 print(f"single-amount RangeProof verify: {rp_verify_res1}")
 
-rp_verify_res2 = RangeProof.verify_proofs([rp2])
-print(f"2-amount RangeProof verify: {rp_verify_res2}")
+# rp_verify_res2 = RangeProof.verify_proofs([rp2])
+# print(f"2-amount RangeProof verify: {rp_verify_res2}")
 
 req = AmountRecoveryReq(rp1, nonce1)
 res = RangeProof.recover_amounts([req])

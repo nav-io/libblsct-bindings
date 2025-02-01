@@ -49,7 +49,7 @@ for(let i=0; i<1; ++i) {
   process.stdout.write('.')
 
   // prove
-  const nonce1 = C.BasePoint()
+  const nonce1 = C.RandomPoint()
   const rp1 = C.buildRangeProof(
     [456],
     nonce1,
@@ -62,6 +62,7 @@ for(let i=0; i<1; ++i) {
     nonce2,
     'navio'
   )
+  console.log(`rp2: ${rp2.serialize()}`)
 
   // verify
   const veriRes = C.verifyRangeProof([rp1, rp2])
@@ -69,6 +70,7 @@ for(let i=0; i<1; ++i) {
     console.log(`Range proof verification failed at i=${i}`)
     break
   }
+  console.log(`Range proof verification ${i} passed`)
 
   // amount recovery
   const reqs = [

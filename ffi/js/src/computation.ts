@@ -25,10 +25,6 @@ export class Computation {
     return Point.random(this)
   }
 
-  BasePoint = (): Point => {
-    return Point.basePoint(this)
-  }
-
   ScalarToPublicKey = (scalar: Scalar): PublicKey => {
     return PublicKey.fromScalar(scalar, this)
   }
@@ -300,6 +296,7 @@ export class Computation {
       throw new Error(`Building range proof failed: ${rv.result}`)
     }
     const rangeProof = new RangeProof(rv.value, rv.value_size, this)
+    console.log(`rangeProofSize: ${rv.value_size}`)
     blsct.free_obj(rv)
  
     return rangeProof
@@ -333,11 +330,11 @@ export class Computation {
     const reqVec = blsct.create_amount_recovery_req_vec()
 
     for(const req of reqs) {
-      const req_ = blsct.gen_recover_amount_req(
+      const blsct_req = blsct.gen_recover_amount_req(
         req.rangeProof.get(),
         req.nonce.get(),
       )
-      blsct.add_to_amount_recovery_req_vec(reqVec, req_)
+      blsct.add_to_amount_recovery_req_vec(reqVec, blsct_req)
     }
 
     const rv = blsct.recover_amount(reqVec)
@@ -448,13 +445,6 @@ export class Point extends DisposableObj<Point> {
 
   static random = (computation: Computation): Point => {
     const rv = blsct.gen_random_point()
-    const point = new Point(rv.value, computation)
-    blsct.free_obj(rv)
-    return point
-  }
-
-  static basePoint = (computation: Computation): Point => {
-    const rv = blsct.gen_base_point()
     const point = new Point(rv.value, computation)
     blsct.free_obj(rv)
     return point
