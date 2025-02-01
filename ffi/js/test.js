@@ -49,20 +49,18 @@ for(let i=0; i<1; ++i) {
   process.stdout.write('.')
 
   // prove
-  const nonce1 = C.RandomPoint()
+  const nonce1 = C.BasePoint()
   const rp1 = C.buildRangeProof(
     [456],
     nonce1,
     'navcoin'
   )
-  console.log(`rp1: ${rp1.serialize()}`)
   const nonce2 = C.RandomPoint()
   const rp2 = C.buildRangeProof(
     [123, 234, 345, 456],
     nonce2,
     'navio'
   )
-  console.log(`rp2: ${rp2.serialize()}`)
 
   // verify
   const veriRes = C.verifyRangeProof([rp1, rp2])

@@ -66,7 +66,8 @@ print(token_id_3)
 # RangeProof
 nonce1 = Point()
 
-rp1 = RangeProof([456], nonce1, 'navcoin')
+token_id = TokenId()
+rp1 = RangeProof([456], nonce1, 'navcoin', token_id)
 #rp2 = RangeProof([123, 456], nonce2, 'rp2')
 
 print(f"rp1: {rp1.to_hex()}")

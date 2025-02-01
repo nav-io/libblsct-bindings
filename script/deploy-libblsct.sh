@@ -1,6 +1,6 @@
 #!/bin/bash
 
-repo_dir=./navio-core
+repo_dir=/Users/m/repos/navio-core
 
 cp $repo_dir/src/libblsct.a ./lib
 cp $repo_dir/src/libunivalue_blsct.a ./lib

@@ -21,6 +21,10 @@ export class Computation {
     return Scalar.fromNumber(n, this)
   }
 
+  BasePoint = (): Point => {
+    return Point.basePoint(this)
+  }
+
   RandomPoint = (): Point => {
     return Point.random(this)
   }
@@ -307,7 +311,7 @@ export class Computation {
   ): boolean => {
     const vec = blsct.create_range_proof_vec()
     for(const proof of proofs) {
-      blsct.add_range_proof_to_vec(vec, proof.get())
+      blsct.add_range_proof_to_vec(vec, proof.getSize(), proof.get())
     }
     
     const rv = blsct.verify_range_proofs(vec)
@@ -330,8 +334,10 @@ export class Computation {
     const reqVec = blsct.create_amount_recovery_req_vec()
 
     for(const req of reqs) {
+      console.log(`rangeProofSize: ${req.rangeProof.getSize()}`)
       const blsct_req = blsct.gen_recover_amount_req(
         req.rangeProof.get(),
+        req.rangeProof.getSize(),
         req.nonce.get(),
       )
       blsct.add_to_amount_recovery_req_vec(reqVec, blsct_req)
@@ -441,6 +447,13 @@ export class Scalar extends DisposableObj<Scalar> {
 export class Point extends DisposableObj<Point> {
   constructor(point: any, computation: Computation) {
     super(point, blsct.POINT_SIZE, computation)
+  }
+
+  static basePoint = (computation: Computation): Point => {
+    const rv = blsct.gen_base_point()
+    const point = new Point(rv.value, computation)
+    blsct.free_obj(rv)
+    return point
   }
 
   static random = (computation: Computation): Point => {

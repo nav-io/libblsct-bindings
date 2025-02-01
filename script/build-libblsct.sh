@@ -24,7 +24,7 @@ Darwin*)
   ;;
 esac
 
-pushd ./navio-core
+pushd /Users/m/repos/navio-core
 
 if [[ $dep_flag == true ]]; then
   echo 'Buidling dependencies...'

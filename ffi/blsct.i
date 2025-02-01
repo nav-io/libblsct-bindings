@@ -1,8 +1,7 @@
 %module blsct
 
 %{
-#include "../../navio-core/src/blsct/external_api/blsct.h"
-#include <../../navio-core/src/blsct/range_proof/bulletproofs_plus/range_proof.h>
+#include "../../../navio-core/src/blsct/external_api/blsct.h"
 %}
 
 %constant size_t DOUBLE_PUBLIC_KEY_SIZE = DOUBLE_PUBLIC_KEY_SIZE;
@@ -61,10 +60,6 @@ if (p == nullptr) { \
     return static_cast<BlsctRangeProof*>(x);
   }
 
-  BlsctAmountRecoveryReq* cast_to_amount_recovery_req(void* x) {
-    return static_cast<BlsctAmountRecoveryReq*>(x);
-  }
-
   BlsctOutPoint* cast_to_out_point(void* x) {
     return static_cast<BlsctOutPoint*>(x);
   }
@@ -99,6 +94,10 @@ if (p == nullptr) { \
 
   CScript* cast_to_cscript(void* x) {
     return static_cast<CScript*>(x);
+  }
+
+  BlsctAmountRecoveryReq* cast_to_amount_recovery_req(void* x) {
+    return static_cast<BlsctAmountRecoveryReq*>(x);
   }
 
   size_t cast_to_size_t(int x) {
@@ -158,6 +157,7 @@ if (p == nullptr) { \
 
   void add_range_proof_to_vec(
     void* vp_range_proofs,
+    size_t range_proof_size,
     void* vp_blsct_range_proof
   ) {
     RETURN_IF_NULL(vp_range_proofs);
@@ -170,7 +170,7 @@ if (p == nullptr) { \
     bulletproofs_plus::RangeProof<Mcl> range_proof;
 
     DataStream st{};
-    for(size_t i=0; i<RANGE_PROOF_SIZE; ++i) {
+    for(size_t i=0; i<range_proof_size; ++i) {
       st << blsct_range_proof[i];
     }
     range_proof.Unserialize(st);
@@ -377,8 +377,8 @@ export uint64_t scalar_to_uint64(BlsctScalar* blsct_scalar);
 export const char* scalar_to_hex(const BlsctScalar* blsct_scalar);
 
 // point
-export BlsctRetVal* gen_random_point();
 export BlsctRetVal* gen_base_point();
+export BlsctRetVal* gen_random_point();
 export const char* point_to_hex(const BlsctPoint* blsct_point);
 
 // public key
@@ -429,6 +429,7 @@ export BlsctBoolRetVal* verify_range_proofs(
 
 export BlsctAmountRecoveryReq* gen_recover_amount_req(
     const void* vp_blsct_range_proof,
+    const size_t range_proof_size,
     const void* vp_blsct_nonce
 );
 
