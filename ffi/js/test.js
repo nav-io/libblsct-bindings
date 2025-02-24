@@ -115,7 +115,7 @@ for(let i=0; i<1; ++i) {
   const txOut = C.TxOut(
     subAddr,
     outAmount,
-    'test-txout' ,
+    'test-txout',
   )
 
   const tx = C.Tx(

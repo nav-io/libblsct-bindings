@@ -24,20 +24,20 @@ Darwin*)
   ;;
 esac
 
-pushd /Users/m/repos/navio-core
+pushd ./navio-core
 
 if [[ $dep_flag == true ]]; then
   echo 'Buidling dependencies...'
   pushd depends
   make -j${num_cores}
-  popd
+  popd # pushd depends 
 fi
 
 ./autogen.sh
 
 pushd depends
 make -j${num_cores}
-popd
+popd # pushd depends
 
 if [ "$os" == 'linux' ]; then
   arch=$(uname -m)
@@ -58,7 +58,7 @@ fi
 make clean
 make -j${num_cores}
 
-popd
+popd # pushd ./navio-core
 
 if [ ! -d ./lib ]; then
   mkdir ./lib
