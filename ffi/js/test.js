@@ -55,7 +55,6 @@ for(let i=0; i<1; ++i) {
     nonce1,
     'navcoin'
   )
-  console.log(`rp1: ${rp1.serialize()}`)
   const nonce2 = C.RandomPoint()
   const rp2 = C.buildRangeProof(
     [123, 234, 345, 456],
@@ -69,6 +68,7 @@ for(let i=0; i<1; ++i) {
     console.log(`Range proof verification failed at i=${i}`)
     break
   }
+  console.log(`Range proof verification ${i} passed`)
 
   // amount recovery
   const reqs = [

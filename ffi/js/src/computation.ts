@@ -21,12 +21,12 @@ export class Computation {
     return Scalar.fromNumber(n, this)
   }
 
-  RandomPoint = (): Point => {
-    return Point.random(this)
-  }
-
   BasePoint = (): Point => {
     return Point.basePoint(this)
+  }
+
+  RandomPoint = (): Point => {
+    return Point.random(this)
   }
 
   ScalarToPublicKey = (scalar: Scalar): PublicKey => {
@@ -155,32 +155,32 @@ export class Computation {
   ///
 
   fromSeedToChildKey = (seed: Scalar): Scalar => {
-    const childKey = blsct.from_seed_to_child_key(seed.get())
+    const childKey = blsct.from_seed_to_child_key(seed.value())
     return new Scalar(childKey, this)
   }
 
   fromChildKeyToBlindingKey = (childKey: Scalar): Scalar => {
-    const blindingKey = blsct.from_child_key_to_blinding_key(childKey.get())
+    const blindingKey = blsct.from_child_key_to_blinding_key(childKey.value())
     return new Scalar(blindingKey, this)
   }
 
   fromChildKeyToTokenKey = (childKey: Scalar): Scalar => {
-    const tokenKey = blsct.from_child_key_to_token_key(childKey.get())
+    const tokenKey = blsct.from_child_key_to_token_key(childKey.value())
     return new Scalar(tokenKey, this)
   }
 
   fromChildKeyToTxKey = (childKey: Scalar): Scalar => {
-    const txKey = blsct.from_child_key_to_tx_key(childKey.get())
+    const txKey = blsct.from_child_key_to_tx_key(childKey.value())
     return new Scalar(txKey, this)
   }
 
   fromTxKeyToViewKey = (txKey: Scalar): Scalar => {
-    const viewKey = blsct.from_tx_key_to_view_key(txKey.get())
+    const viewKey = blsct.from_tx_key_to_view_key(txKey.value())
     return new Scalar(viewKey, this)
   }
 
   fromTxKeyToSpendingKey = (txKey: Scalar): Scalar => {
-    const spendingKey = blsct.from_tx_key_to_spending_key(txKey.get())
+    const spendingKey = blsct.from_tx_key_to_spending_key(txKey.value())
     return new Scalar(spendingKey, this)
   }
 
@@ -192,9 +192,9 @@ export class Computation {
     address: number,
   ): Scalar => {
     const privSpendingKey = blsct.calc_priv_spending_key(
-      blindingPubKey.get(),
-      viewKey.get(),
-      spendingKey.get(),
+      blindingPubKey.value(),
+      viewKey.value(),
+      spendingKey.value(),
       account,
       address
     )
@@ -206,8 +206,8 @@ export class Computation {
     viewKey: Scalar,
   ): number => {
     return blsct.calc_view_tag(
-      blindingPubKey.get(),
-      viewKey.get(),
+      blindingPubKey.value(),
+      viewKey.value(),
     )
   }
 
@@ -217,9 +217,9 @@ export class Computation {
     viewKey: Scalar,
   ): KeyId => {
     const hashId = blsct.calc_hash_id(
-      blindingPubKey.get(),
-      spendingPubKey.get(),
-      viewKey.get(),
+      blindingPubKey.value(),
+      spendingPubKey.value(),
+      viewKey.value(),
     )
     return new KeyId(hashId, this)
   }
@@ -229,8 +229,8 @@ export class Computation {
     viewKey: Scalar,
   ): PublicKey => {
     const blsct_nonce = blsct.calc_nonce(
-      blindingPubKey.get(),
-      viewKey.get(),
+      blindingPubKey.value(),
+      viewKey.value(),
     )
     return new Point(blsct_nonce, this)
   }
@@ -264,12 +264,12 @@ export class Computation {
   }
 
   signMessage = (privKey: Scalar, msg: string) => {
-    const sig = blsct.sign_message(privKey.get(), msg)
+    const sig = blsct.sign_message(privKey.value(), msg)
     return new Signature(sig, blsct.SIGNATURE_SIZE, this)
   }
 
   verifyMessage = (pubKey: PublicKey, msg: string, sig: Signature): boolean => {
-    return blsct.verify_msg_sig(pubKey.get(), msg, sig.get())
+    return blsct.verify_msg_sig(pubKey.value(), msg, sig.value())
   }
 
   buildRangeProof = (
@@ -289,9 +289,9 @@ export class Computation {
     }
     let rv = blsct.build_range_proof(
       vsVec,
-      nonce.get(),
+      nonce.value(),
       msg,
-      paramTokenId.get(),
+      paramTokenId.value(),
     )
     blsct.free_uint64_vec(vsVec)
     
@@ -300,6 +300,7 @@ export class Computation {
       throw new Error(`Building range proof failed: ${rv.result}`)
     }
     const rangeProof = new RangeProof(rv.value, rv.value_size, this)
+    console.log(`rangeProofSize: ${rv.value_size}`)
     blsct.free_obj(rv)
  
     return rangeProof
@@ -310,7 +311,7 @@ export class Computation {
   ): boolean => {
     const vec = blsct.create_range_proof_vec()
     for(const proof of proofs) {
-      blsct.add_range_proof_to_vec(vec, proof.get())
+      blsct.add_range_proof_to_vec(vec, proof.getSize(), proof.value())
     }
     
     const rv = blsct.verify_range_proofs(vec)
@@ -333,11 +334,13 @@ export class Computation {
     const reqVec = blsct.create_amount_recovery_req_vec()
 
     for(const req of reqs) {
-      const req_ = blsct.gen_recover_amount_req(
-        req.rangeProof.get(),
-        req.nonce.get(),
+      console.log(`rangeProofSize: ${req.rangeProof.getSize()}`)
+      const blsct_req = blsct.gen_recover_amount_req(
+        req.rangeProof.value(),
+        req.rangeProof.getSize(),
+        req.nonce.value(),
       )
-      blsct.add_to_amount_recovery_req_vec(reqVec, req_)
+      blsct.add_to_amount_recovery_req_vec(reqVec, blsct_req)
     }
 
     const rv = blsct.recover_amount(reqVec)
@@ -380,7 +383,7 @@ abstract class DisposableObj<T extends DisposableObj<any>> {
     computation.add2GC(obj)
   }
 
-  abstract get: () => any
+  abstract value: () => any
 
   getSize = (): number => this.objSize
 
@@ -392,7 +395,7 @@ abstract class DisposableObj<T extends DisposableObj<any>> {
   }
 
   serialize = (): string => blsct.to_hex(
-    blsct.cast_to_uint8_t_ptr(this.get()),
+    blsct.cast_to_uint8_t_ptr(this.value()),
     this.objSize
   )
 
@@ -424,16 +427,16 @@ export class Scalar extends DisposableObj<Scalar> {
     return scalar
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_scalar(this.obj)
   }
 
   toNumber(): number {
-    return blsct.scalar_to_uint64(this.get())
+    return blsct.scalar_to_uint64(this.value())
   }
 
   toHex = (): string => {
-    return blsct.scalar_to_hex(this.get())
+    return blsct.scalar_to_hex(this.value())
   }
 
   toPublicKey = (): PublicKey => {
@@ -446,13 +449,6 @@ export class Point extends DisposableObj<Point> {
     super(point, blsct.POINT_SIZE, computation)
   }
 
-  static random = (computation: Computation): Point => {
-    const rv = blsct.gen_random_point()
-    const point = new Point(rv.value, computation)
-    blsct.free_obj(rv)
-    return point
-  }
-
   static basePoint = (computation: Computation): Point => {
     const rv = blsct.gen_base_point()
     const point = new Point(rv.value, computation)
@@ -460,16 +456,23 @@ export class Point extends DisposableObj<Point> {
     return point
   }
 
-  isValid = (): boolean => {
-    return blsct.is_valid_point(this.get())
+  static random = (computation: Computation): Point => {
+    const rv = blsct.gen_random_point()
+    const point = new Point(rv.value, computation)
+    blsct.free_obj(rv)
+    return point
   }
 
-  get = (): any => {
+  isValid = (): boolean => {
+    return blsct.is_valid_point(this.value())
+  }
+
+  value = (): any => {
     return blsct.cast_to_point(this.obj)
   }
 
   toHex = (): string => {
-    return blsct.point_to_hex(this.get())
+    return blsct.point_to_hex(this.value())
   }
 }
 
@@ -487,11 +490,11 @@ export class PublicKey extends DisposableObj<PublicKey> {
   }
 
   static fromScalar = (scalar: Scalar, computation: Computation): PublicKey => {
-    const pubKey = blsct.scalar_to_pub_key(scalar.get())
+    const pubKey = blsct.scalar_to_pub_key(scalar.value())
     return new PublicKey(pubKey, computation)
   }
   
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_pub_key(this.obj)
   }
 }
@@ -504,7 +507,7 @@ export class PrivateKey extends DisposableObj<PrivateKey> {
     blsct.free_obj(rv)
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_pub_key(this.obj)
   }
 }
@@ -514,12 +517,12 @@ export class KeyId extends DisposableObj<KeyId> {
     super(keyId, blsct.KEY_ID_SIZE, computation)
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_key_id(this.obj)
   }
 
   toHex = (): string => {
-    return blsct.get_key_id_hex(this.get())
+    return blsct.get_key_id_hex(this.value())
   }
 }
 
@@ -528,7 +531,7 @@ export class SubAddrId extends DisposableObj<SubAddrId> {
     super(subAddrId, blsct.SUB_ADDR_ID_SIZE, computation)
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_sub_addr_id(this.obj)
   }
 
@@ -542,11 +545,11 @@ export class SubAddrId extends DisposableObj<SubAddrId> {
   }
 
   getAccount = (): number => {
-    return blsct.get_sub_addr_id_account(this.get())
+    return blsct.get_sub_addr_id_account(this.value())
   }
 
   getAddress = (): number => {
-    return blsct.get_sub_addr_id_address(this.get())
+    return blsct.get_sub_addr_id_address(this.value())
   }
 }
 
@@ -555,7 +558,7 @@ export class SubAddr extends DisposableObj<SubAddr> {
     super(subAddr, blsct.SUB_ADDR_SIZE, computation)
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_sub_addr(this.obj)
   }
 
@@ -566,9 +569,9 @@ export class SubAddr extends DisposableObj<SubAddr> {
     computation: Computation,
   ): SubAddr => {
     const obj = blsct.derive_sub_address(
-      viewKey.get(),
-      spendingPubKey.get(),
-      subAddrId.get(),
+      viewKey.value(),
+      spendingPubKey.value(),
+      subAddrId.value(),
     )
     return new SubAddr(obj, computation)
   }
@@ -607,16 +610,16 @@ export class TokenId extends DisposableObj<TokenId> {
     return tokenId
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_token_id(this.obj)
   }
 
   getToken = (): number => {
-    return blsct.get_token_id_token(this.get())
+    return blsct.get_token_id_token(this.value())
   }
 
   getSubid = (): number => {
-    return blsct.get_token_id_subid(this.get())
+    return blsct.get_token_id_subid(this.value())
   }
 }
 
@@ -629,7 +632,7 @@ export class Signature extends DisposableObj<Signature> {
     super(signature, signatureSize, computation)
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_signature(this.obj)
   }
 }
@@ -658,7 +661,7 @@ export class DoublePublicKey extends DisposableObj<DoublePublicKey> {
     computation: Computation,
   ): DoublePublicKey => {
     const rv = blsct.gen_double_pub_key(
-      pk1.get(), pk2.get()
+      pk1.value(), pk2.value()
     )
     if (rv.result !== 0) {
       throw new Error(`Failed to generate a double public key: ${rv.result}`)
@@ -676,15 +679,15 @@ export class DoublePublicKey extends DisposableObj<DoublePublicKey> {
     computation: Computation,
   ): DoublePublicKey => {
     const obj = blsct.gen_dpk_with_keys_and_sub_addr_id(
-      viewKey.get(),
-      spendingPubKey.get(),
+      viewKey.value(),
+      spendingPubKey.value(),
       account,
       address,
     )
     return new DoublePublicKey(obj, computation) 
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_dpk(this.obj)
   }
 }
@@ -713,7 +716,7 @@ export class AddressUtil {
     computation: Computation,
   ): string {
     const rv = blsct.encode_address(
-      dpk.get(),
+      dpk.value(),
       encoding === 'Bech32' ? blsct.Bech32 : blsct.Bech32M
     )
     if (rv.result !== 0) {
@@ -737,7 +740,7 @@ export class RangeProof extends DisposableObj<RangeProof> {
     super(rangeProof, rangeProofSize, computation)
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_range_proof(this.obj)
   }
 }
@@ -753,7 +756,7 @@ export class OutPoint extends DisposableObj<OutPoint> {
     blsct.free_obj(rv)
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_out_point(this.obj)
   }
 }
@@ -779,9 +782,9 @@ export class TxIn extends DisposableObj<TxIn> {
     const rv = blsct.build_tx_in(
       amount,
       gamma,
-      spendingKey.get(),
-      tokenId.get(),
-      outPoint.get(),
+      spendingKey.value(),
+      tokenId.value(),
+      outPoint.value(),
       rbf,
     )
     const txIn = new TxIn(rv.value, rv.value_size, computation)
@@ -789,42 +792,42 @@ export class TxIn extends DisposableObj<TxIn> {
     return txIn
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_tx_in(this.obj)
   }
 
   getPrevOutHash = (): TxId => {
-    const txId = blsct.get_tx_in_prev_out_hash(this.get())
+    const txId = blsct.get_tx_in_prev_out_hash(this.value())
     return new TxId(txId, blsct.TX_ID_SIZE, this.computation)
   }
 
   getPrevOutN = (): number => {
-    return blsct.get_tx_in_prev_out_n(this.get())
+    return blsct.get_tx_in_prev_out_n(this.value())
   }
 
   getScriptSig = (): Script => {
-    const scriptSig = blsct.get_tx_in_script_sig(this.get())
+    const scriptSig = blsct.get_tx_in_script_sig(this.value())
     return new Script(scriptSig, blsct.SCRIPT_SIZE, this.computation)
   }
 
   getSequence = (): number => {
-    return blsct.get_tx_in_sequence(this.get())
+    return blsct.get_tx_in_sequence(this.value())
   }
 
   getScriptWitness = (): Script => {
-    const scriptWitness = blsct.get_tx_in_script_witness(this.get())
+    const scriptWitness = blsct.get_tx_in_script_witness(this.value())
     return new Script(scriptWitness, blsct.SCRIPT_SIZE, this.computation)
   }
 }
 
 export class SubAddress extends DisposableObj<SubAddress> {
   constructor(dpk: DoublePublicKey, computation: Computation) {
-    const rv = blsct.dpk_to_sub_addr(dpk.get())
+    const rv = blsct.dpk_to_sub_addr(dpk.value())
     super(rv.value, rv.value_size, computation)
     blsct.free_obj(rv)
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_sub_addr(this.obj)
   }
 }
@@ -853,10 +856,10 @@ export class TxOut extends DisposableObj<TxOut> {
       tokenId === undefined ?
         TokenId.fromTokenSubId(computation) : tokenId
     const rv = blsct.build_tx_out(
-      subAddr.get(),
+      subAddr.value(),
       amount,
       memo,
-      paramTokenId.get(),
+      paramTokenId.value(),
       outputType === 'Normal' ? blsct.Normal : blsct.StakedCommitment,
       minStake,
     )
@@ -868,75 +871,75 @@ export class TxOut extends DisposableObj<TxOut> {
     return txOut
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_tx_out(this.obj)
   }
 
   getValue = (): number => {
-    return blsct.get_tx_out_value(this.get())
+    return blsct.get_tx_out_value(this.value())
   }
 
   getScriptPubKey = (): Script => {
-    const scriptPubKey = blsct.get_tx_out_script_pubkey(this.get())
+    const scriptPubKey = blsct.get_tx_out_script_pubkey(this.value())
     return new Script(scriptPubKey, blsct.SCRIPT_SIZE, this.computation)
   }
 
   getSpendingKey = (): Point => {
-    const key = blsct.get_tx_out_spending_key(this.get())
+    const key = blsct.get_tx_out_spending_key(this.value())
     return new Point(key, this.computation)
   }
 
   getEphemeralKey = (): Point => {
-    const key = blsct.get_tx_out_ephemeral_key(this.get())
+    const key = blsct.get_tx_out_ephemeral_key(this.value())
     return new Point(key, this.computation)
   }
 
   getBlindingKey = (): Point => {
-    const key = blsct.get_tx_out_blinding_key(this.get())
+    const key = blsct.get_tx_out_blinding_key(this.value())
     return new Point(key, this.computation)
   }
 
   getViewTag = (): number => {
-    return blsct.get_tx_out_view_tag(this.get())
+    return blsct.get_tx_out_view_tag(this.value())
   }
 
   getRangeProof_A = (): Point => {
-    const point = blsct.get_tx_out_range_proof_A(this.get())
+    const point = blsct.get_tx_out_range_proof_A(this.value())
     return new Point(point, this.computation)
   }
 
   getRangeProof_B = (): Point => {
-    const point = blsct.get_tx_out_range_proof_B(this.get())
+    const point = blsct.get_tx_out_range_proof_B(this.value())
     return new Point(point, this.computation)
   }
 
   getRangeProof_r_prime = (): Point => {
-    const point = blsct.get_tx_out_range_proof_r_prime(this.get())
+    const point = blsct.get_tx_out_range_proof_r_prime(this.value())
     return new Point(point, this.computation)
   }
 
   getRangeProof_s_prime = (): Point => {
-    const point = blsct.get_tx_out_range_proof_s_prime(this.get())
+    const point = blsct.get_tx_out_range_proof_s_prime(this.value())
     return new Point(point, this.computation)
   }
 
   getRangeProof_delta_prime = (): Point => {
-    const point = blsct.get_tx_out_range_proof_delta_prime(this.get())
+    const point = blsct.get_tx_out_range_proof_delta_prime(this.value())
     return new Point(point, this.computation)
   }
 
   getRangeProof_alpha_hat = (): Point => {
-    const point = blsct.get_tx_out_range_proof_alpha_hat(this.get())
+    const point = blsct.get_tx_out_range_proof_alpha_hat(this.value())
     return new Point(point, this.computation)
   }
 
   getRangeProof_tau_x = (): Scalar => {
-    const scalar = blsct.get_tx_out_range_proof_tau_x(this.get())
+    const scalar = blsct.get_tx_out_range_proof_tau_x(this.value())
     return new Scalar(scalar, this.computation)
   }
 
   getTokenId = (): TokenId => {
-    const tokenId = blsct.get_tx_out_token_id(this.get())
+    const tokenId = blsct.get_tx_out_token_id(this.value())
     return new TokenId(tokenId, blsct.TOKEN_ID_SIZE, this.computation)
   }
 }
@@ -946,12 +949,12 @@ export class Script extends DisposableObj<Scalar> {
     super(script, scriptSize, computation)
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_cscript(this.obj)
   }
 
   toHex = (): string => {
-    const buf = blsct.cast_to_uint8_t_ptr(this.get())
+    const buf = blsct.cast_to_uint8_t_ptr(this.value())
     return blsct.to_hex(buf, blsct.SCRIPT_SIZE)
   }
 }
@@ -961,12 +964,12 @@ export class TxId extends DisposableObj<Scalar> {
     super(txId, txIdSize, computation)
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_uint8_t_ptr(this.obj)
   }
 
   toHex = (): string => {
-    const buf = blsct.cast_to_uint8_t_ptr(this.get())
+    const buf = blsct.cast_to_uint8_t_ptr(this.value())
     return blsct.to_hex(buf, blsct.TX_ID_SIZE)
   }
 }
@@ -1020,12 +1023,12 @@ class Tx extends DisposableObj<Tx> {
   ): Tx {
     const txInVec = blsct.create_tx_in_vec()
     for(const txIn of txIns) {
-      blsct.add_tx_in_to_vec(txInVec, txIn.get())
+      blsct.add_tx_in_to_vec(txInVec, txIn.value())
     }
 
     const txOutVec = blsct.create_tx_out_vec()
     for(const txOut of txOuts) {
-      blsct.add_tx_out_to_vec(txOutVec, txOut.get())
+      blsct.add_tx_out_to_vec(txOutVec, txOut.value())
     }
 
     const rv = blsct.build_tx(txInVec, txOutVec)
@@ -1041,11 +1044,11 @@ class Tx extends DisposableObj<Tx> {
     )
   }
 
-  get = (): any => {
+  value = (): any => {
     return blsct.cast_to_uint8_t_ptr(this.obj)
   }
 
-  serialize = (): string => blsct.to_hex(this.get(), this.getSize())
+  serialize = (): string => blsct.to_hex(this.value(), this.getSize())
 
   deserialize = (hex: string): Tx => {
     const ser_tx = blsct.hex_to_malloced_buf(hex)
@@ -1055,7 +1058,7 @@ class Tx extends DisposableObj<Tx> {
   }
 
   getTxIns = (): TxIn[] => {
-    const blsctTx = blsct.deserialize_tx(this.get(), this.getSize())
+    const blsctTx = blsct.deserialize_tx(this.value(), this.getSize())
     const blsctTxIns = blsct.get_tx_ins(blsctTx)
     const txInsSize = blsct.get_tx_ins_size(blsctTxIns)
 
@@ -1073,7 +1076,7 @@ class Tx extends DisposableObj<Tx> {
   }
 
   getTxOuts = (): TxOut[] => {
-    const blsctTx = blsct.deserialize_tx(this.get(), this.getSize())
+    const blsctTx = blsct.deserialize_tx(this.value(), this.getSize())
     const blsctTxOuts = blsct.get_tx_outs(blsctTx)
     const txOutsSize = blsct.get_tx_outs_size(blsctTxOuts)
 

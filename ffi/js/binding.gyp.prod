@@ -3,9 +3,9 @@
     {
       'target_name': 'blsct',
       'include_dirs': [
-         '../../../navio-core/src/bls/include',
-         '../../../navio-core/src/bls/mcl/include',
-         '../../../navio-core/src',
+         '../../navio-core/src/bls/include',
+         '../../navio-core/src/bls/mcl/include',
+         '../../navio-core/src',
       ],
       'libraries': [
         '../../../lib/libblsct.a',

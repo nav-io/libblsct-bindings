@@ -1,8 +1,7 @@
 %module blsct
 
 %{
-#include "../../navio-core/src/blsct/external_api/blsct.h"
-#include <../../navio-core/src/blsct/range_proof/bulletproofs/range_proof.h>
+#include "../../../navio-core/src/blsct/external_api/blsct.h"
 %}
 
 %constant size_t DOUBLE_PUBLIC_KEY_SIZE = DOUBLE_PUBLIC_KEY_SIZE;
@@ -61,10 +60,6 @@ if (p == nullptr) { \
     return static_cast<BlsctRangeProof*>(x);
   }
 
-  BlsctAmountRecoveryReq* cast_to_amount_recovery_req(void* x) {
-    return static_cast<BlsctAmountRecoveryReq*>(x);
-  }
-
   BlsctOutPoint* cast_to_out_point(void* x) {
     return static_cast<BlsctOutPoint*>(x);
   }
@@ -99,6 +94,10 @@ if (p == nullptr) { \
 
   CScript* cast_to_cscript(void* x) {
     return static_cast<CScript*>(x);
+  }
+
+  BlsctAmountRecoveryReq* cast_to_amount_recovery_req(void* x) {
+    return static_cast<BlsctAmountRecoveryReq*>(x);
   }
 
   size_t cast_to_size_t(int x) {
@@ -151,26 +150,27 @@ if (p == nullptr) { \
 
   // range_proof_vec
   void* create_range_proof_vec() {
-    auto vec = new(std::nothrow) std::vector<bulletproofs::RangeProof<Mcl>>;
+    auto vec = new(std::nothrow) std::vector<bulletproofs_plus::RangeProof<Mcl>>;
     HANDLE_MEM_ALLOC_FAILURE(vec);
     return static_cast<void*>(vec);
   }
 
   void add_range_proof_to_vec(
     void* vp_range_proofs,
+    size_t range_proof_size,
     void* vp_blsct_range_proof
   ) {
     RETURN_IF_NULL(vp_range_proofs);
     RETURN_IF_NULL(vp_blsct_range_proof);
 
-    auto range_proofs = static_cast<std::vector<bulletproofs::RangeProof<Mcl>>*>(vp_range_proofs);
+    auto range_proofs = static_cast<std::vector<bulletproofs_plus::RangeProof<Mcl>>*>(vp_range_proofs);
     auto blsct_range_proof = static_cast<BlsctRangeProof*>(vp_blsct_range_proof);
 
     // unserialize range proof
-    bulletproofs::RangeProof<Mcl> range_proof;
+    bulletproofs_plus::RangeProof<Mcl> range_proof;
 
     DataStream st{};
-    for(size_t i=0; i<RANGE_PROOF_SIZE; ++i) {
+    for(size_t i=0; i<range_proof_size; ++i) {
       st << blsct_range_proof[i];
     }
     range_proof.Unserialize(st);
@@ -181,7 +181,7 @@ if (p == nullptr) { \
 
   void free_range_proof_vec(const void* vp_range_proofs) {
     if (vp_range_proofs == nullptr) return;
-    auto range_proofs = static_cast<const std::vector<bulletproofs::RangeProof<Mcl>>*>(vp_range_proofs);
+    auto range_proofs = static_cast<const std::vector<bulletproofs_plus::RangeProof<Mcl>>*>(vp_range_proofs);
     delete range_proofs; 
   }
 
@@ -377,8 +377,8 @@ export uint64_t scalar_to_uint64(BlsctScalar* blsct_scalar);
 export const char* scalar_to_hex(const BlsctScalar* blsct_scalar);
 
 // point
-export BlsctRetVal* gen_random_point();
 export BlsctRetVal* gen_base_point();
+export BlsctRetVal* gen_random_point();
 export const char* point_to_hex(const BlsctPoint* blsct_point);
 
 // public key
@@ -429,6 +429,7 @@ export BlsctBoolRetVal* verify_range_proofs(
 
 export BlsctAmountRecoveryReq* gen_recover_amount_req(
     const void* vp_blsct_range_proof,
+    const size_t range_proof_size,
     const void* vp_blsct_nonce
 );
 
