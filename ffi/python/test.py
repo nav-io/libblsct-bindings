@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import blsct
 from lib.address import Address, AddressEncoding
 from lib.double_public_key import DoublePublicKey
@@ -19,6 +21,13 @@ from lib.range_proof import AmountRecoveryReq, RangeProof
 from lib.scalar import Scalar
 from lib.signature import Signature
 from lib.token_id import TokenId
+from lib.tx.out_point import OutPoint
+from lib.tx.sub_address import SubAddress
+from lib.tx.tx_in import TxIn
+from lib.tx.tx_out import TxOut
+from lib.tx.tx import Tx
+
+import secrets
 
 blsct.init()
 
@@ -27,11 +36,11 @@ s = Scalar.random()
 print(s)
 print(f"Scalar({s.to_hex()})")
 
-with Scalar(1) as one:
+with Scalar.from_int(1) as one:
   print(one)
 
 # Point
-pt = Point()
+pt = Point.random()
 print(pt)
 
 with Point.random() as pt:
@@ -67,7 +76,7 @@ print(f"Decoded Address: {dec_dpk}")
 assert enc_addr == Address.encode(dec_dpk, AddressEncoding.Bech32), "Address encoding/decoding not working"
 
 # TokenId
-token_id_1 = TokenId()
+token_id_1 = TokenId.default()
 print(token_id_1)
 
 token_id_2 = TokenId.from_token(123)
@@ -77,9 +86,9 @@ token_id_3 = TokenId.from_token_and_subid(123, 456)
 print(token_id_3)
 
 # RangeProof
-nonce1 = Point()
+nonce1 = Point.random()
 
-token_id = TokenId()
+token_id = TokenId.default()
 rp1 = RangeProof([456], nonce1, 'navcoin', token_id)
 #rp2 = RangeProof([123, 456], nonce2, 'rp2')
 
@@ -110,7 +119,7 @@ print(f"Seed: {seed}")
 
 child_key = ChildKey(seed)
 print(f"ChildKey: {child_key.to_hex()}")
- 
+
 blinding_key = child_key.to_blinding_key()
 print(f"BlindingKey: {blinding_key.to_hex()}")
 
@@ -170,3 +179,89 @@ dpk = DoublePublicKey.from_view_key_spending_pub_key_acct_addr(
   address,
 )
 print(f"dpk: {dpk}")
+
+# Tx related
+num_tx_in = 1
+num_tx_out = 1
+default_fee = 200000
+fee = (num_tx_in + num_tx_out) * default_fee
+out_amount = 10000
+in_amount = fee + out_amount
+out_amount = out_amount
+
+# tx in
+tx_id = secrets.token_hex(32)
+print(f"tx_id: {tx_id}")
+
+gamma = 100
+spending_key = Scalar.from_int(12)
+token_id = TokenId.default()
+out_index = 0
+out_point = OutPoint(tx_id, out_index)
+
+tx_in = TxIn.from_fields(
+  in_amount,
+  gamma,
+  spending_key,
+  token_id,
+  out_point,
+)
+
+# tx out
+pk1 = PublicKey()
+pk2 = PublicKey()
+dpk = DoublePublicKey.from_public_keys(pk1, pk2)
+sub_addr = SubAddress.from_dpk(dpk)
+
+tx_out = TxOut.from_fields(
+  sub_addr,
+  out_amount,
+  'test-txout',
+)
+
+# tx
+tx = Tx.from_tx_ins_tx_outs(
+  [tx_in],
+  [tx_out],
+)
+
+tx_hex = tx.serialize()
+print(f"tx_hex: {tx_hex}")
+
+tx2 = Tx.deserialize(tx_hex)
+tx2_hex = tx2.serialize()
+assert(tx_hex == tx2_hex)
+
+tx_ins = tx2.get_tx_ins()
+print(f"# of txIns: {len(tx_ins)}")
+
+tx_outs = tx2.get_tx_outs()
+print(f"# of txOuts: {len(tx_outs)}")
+
+print("<tx in>")
+for tx_in in tx_ins: 
+  print(f"prev_out_hash: {tx_in.get_prev_out_hash()}")
+  print(f"prev_out_n: {tx_in.get_prev_out_n()}")
+  print(f"scipt_sig: {tx_in.get_script_sig().to_hex()}")
+  print(f"sequence: {tx_in.get_sequence()}")
+  print(f"scipt_witness: {tx_in.get_script_witness().to_hex()}")
+
+print(f"<tx out>")
+for tx_out in tx_outs:
+  print(f"value: {tx_out.get_value()}")
+  print(f"script_pub_key: {tx_out.get_script_pub_key().to_hex()}")
+  print(f"token_id: token={tx_out.get_token_id().get_token()}, subid={tx_out.get_token_id().get_subid()}")
+ 
+  print(f"spending_key: {tx_out.get_spending_key()}")
+  print(f"ephemeral_key: {tx_out.get_ephemeral_key()}")
+  print(f"blinding_key: {tx_out.get_blinding_key()}")
+  print(f"view_tag: {tx_out.get_view_tag()}")
+
+  print(f"range_proof.A: {tx_out.get_range_proof_A().to_hex()}")
+  print(f"range_proof.B: {tx_out.get_range_proof_B().to_hex()}")
+  print(f"range_Proof.r_prime: {tx_out.get_range_proof_r_prime()}")
+  print(f"range_proof.s_prime: {tx_out.get_range_proof_s_prime()}")
+  print(f"range_proof.delta_prime: {tx_out.get_range_proof_delta_prime()}")
+  print(f"range_proof.alpha_hat: {tx_out.get_range_proof_alpha_hat()}")
+  print(f"range_proof.tau_x: {tx_out.get_range_proof_tau_x()}")
+
