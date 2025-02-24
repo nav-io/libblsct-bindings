@@ -232,7 +232,7 @@ export class Computation {
       blindingPubKey.value(),
       viewKey.value(),
     )
-    return new Point(blsct_nonce, this)
+    return new PublicKey(blsct_nonce, this)
   }
 
   deriveSubAddr = (

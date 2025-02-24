@@ -32,8 +32,16 @@ if (p == nullptr) { \
   return; \
 }
 
-  BlsctScalar* cast_to_scalar(void* x) {
-    return static_cast<BlsctScalar*>(x);
+  BlsctDoublePubKey* cast_to_dpk(void* x) {
+    return static_cast<BlsctDoublePubKey*>(x);
+  }
+
+  BlsctKeyId* cast_to_key_id(void* x) {
+    return static_cast<BlsctKeyId*>(x);
+  }
+
+  BlsctOutPoint* cast_to_out_point(void* x) {
+    return static_cast<BlsctOutPoint*>(x);
   }
 
   BlsctPoint* cast_to_point(void* x) {
@@ -44,28 +52,16 @@ if (p == nullptr) { \
     return static_cast<BlsctPubKey*>(x);
   }
 
-  BlsctTokenId* cast_to_token_id(void* x) {
-    return static_cast<BlsctTokenId*>(x);
-  }
-
-  BlsctSignature* cast_to_signature(void* x) {
-    return static_cast<BlsctSignature*>(x);
-  }
-
-  BlsctDoublePubKey* cast_to_dpk(void* x) {
-    return static_cast<BlsctDoublePubKey*>(x);
-  }
-
   BlsctRangeProof* cast_to_range_proof(void* x) {
     return static_cast<BlsctRangeProof*>(x);
   }
 
-  BlsctOutPoint* cast_to_out_point(void* x) {
-    return static_cast<BlsctOutPoint*>(x);
+  BlsctScalar* cast_to_scalar(void* x) {
+    return static_cast<BlsctScalar*>(x);
   }
 
-  CTxIn* cast_to_tx_in(void* x) {
-    return static_cast<CTxIn*>(x);
+  BlsctSignature* cast_to_signature(void* x) {
+    return static_cast<BlsctSignature*>(x);
   }
 
   BlsctSubAddr* cast_to_sub_addr(void* x) {
@@ -76,16 +72,20 @@ if (p == nullptr) { \
     return static_cast<BlsctSubAddrId*>(x);
   }
 
-  CTxOut* cast_to_tx_out(void* x) {
-    return static_cast<CTxOut*>(x);
+  BlsctTokenId* cast_to_token_id(void* x) {
+    return static_cast<BlsctTokenId*>(x);
   }
 
   CMutableTransaction* cast_to_tx(void* x) {
     return static_cast<CMutableTransaction*>(x);
   }
 
-  BlsctKeyId* cast_to_key_id(void* x) {
-    return static_cast<BlsctKeyId*>(x);
+  CTxIn* cast_to_tx_in(void* x) {
+    return static_cast<CTxIn*>(x);
+  }
+
+  CTxOut* cast_to_tx_out(void* x) {
+    return static_cast<CTxOut*>(x);
   }
 
   uint8_t* cast_to_uint8_t_ptr(void* x) {
