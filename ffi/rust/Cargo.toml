@@ -1,8 +1,15 @@
 [package]
-name = "test"
+name = "navio-bblsct"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Rust bindings for the Navio blsct external API"
+repository = "https://github.com/nav-io/libblsct-bindings"
+readme = "README.md"
+categories = ["cryptography", "privacy"]
+keywords = ["navio", "cryptocurrency", "binding", "bls", "privacy", "confidential", "transaction"]
 
 [build-dependencies]
-bindgen = "0.64.0"
-cc = "1.0.79"
+cc = "1.2.12"
+git2 = "0.20"
+num_cpus = "1.16"
