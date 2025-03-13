@@ -7,7 +7,7 @@ description = "Rust bindings for the Navio blsct external API"
 repository = "https://github.com/nav-io/libblsct-bindings"
 readme = "README.md"
 categories = ["cryptography", "privacy"]
-keywords = ["navio", "cryptocurrency", "binding", "bls", "privacy", "confidential", "transaction"]
+keywords = ["navio", "cryptocurrency", "bindings", "confidential", "transaction"]
 
 [build-dependencies]
 cc = "1.2.12"
