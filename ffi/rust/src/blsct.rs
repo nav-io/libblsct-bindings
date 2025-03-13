@@ -7,3 +7,13 @@ pub fn init() {
   unsafe { init_impl() }
 }
 
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn test_hello() {
+    init();
+  }
+}
+
