@@ -1,5 +1,5 @@
 [package]
-name = "navio-bblsct"
+name = "navio-blsct"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
