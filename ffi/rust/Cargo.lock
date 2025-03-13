@@ -276,7 +276,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "navio-bblsct"
+name = "navio-blsct"
 version = "0.1.0"
 dependencies = [
  "cc",
