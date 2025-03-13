@@ -6,5 +6,4 @@
 
 ```bash
 cargo run --example init-only
-```
-
+``` 
