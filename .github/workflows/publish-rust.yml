@@ -24,19 +24,13 @@ jobs:
         run: cargo install cargo-edit
 
       - name: Bump version
+        working-directory: ffi/rust
         run: cargo set-version --bump patch
 
       - name: Commit version bump
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add Cargo.toml Cargo.lock
-          git commit -m "Bump version"
-          git push origin main
-
-      - name: Publish to crates.io
-        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        working-directory: ffi/rust
           git add Cargo.toml Cargo.lock
           git commit -m "Bump version"
           git push origin main
