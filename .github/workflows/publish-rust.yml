@@ -37,3 +37,10 @@ jobs:
       - name: Publish to crates.io
         run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
         working-directory: ffi/rust
+          git add Cargo.toml Cargo.lock
+          git commit -m "Bump version"
+          git push origin main
+
+      - name: Publish to crates.io
+        run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        working-directory: ffi/rust
