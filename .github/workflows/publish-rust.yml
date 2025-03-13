@@ -28,6 +28,7 @@ jobs:
         run: cargo set-version --bump patch
 
       - name: Commit version bump
+        working-directory: ffi/rust
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
