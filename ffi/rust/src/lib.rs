@@ -1,6 +1,5 @@
-#![allow(non_snake_case)]
-
-pub mod blsct;
 pub mod common;
+pub mod ffi;
 pub mod scalar;
+pub mod point;
 
