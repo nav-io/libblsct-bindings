@@ -7,7 +7,7 @@ name = "navio_blsct"
 version = "0.0.4"
 description = "Python bindings for the Navio blsct library"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.13"
 dependencies = []
 
 [project.urls]
