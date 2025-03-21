@@ -7,8 +7,8 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        os: [macos-latest]
-        python-version: ["cp311"]
+        os: [macos-15]
+        python-version: ["cp313"]
 
     runs-on: ${{ matrix.os }}
 
@@ -18,7 +18,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.11"
+          python-version: "3.13"
 
       - name: Install Python dependencies
         run: pip install cibuildwheel twine
