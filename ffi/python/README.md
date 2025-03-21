@@ -1,11 +1,3 @@
-## Building
+# navio_blsct
 
-```bash
-$ make
-```
 
-## Running
-
-```bash
-$ make run
-```
