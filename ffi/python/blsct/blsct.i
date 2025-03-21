@@ -1,4 +1,4 @@
-%module navio_blsct
+%module blsct
 
 %{
 #include "../../navio-core/src/blsct/external_api/blsct.h"
