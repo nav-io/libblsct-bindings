@@ -1,0 +1,40 @@
+name: Publish to PyPI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build_wheels:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["cp310"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install cibuildwheel twine
+
+      - name: Build wheels with cibuildwheel
+        run: |
+          cd ffi/python
+          cibuildwheel --output-dir wheelhouse
+        env:
+          CIBW_PLATFORM: ${{ matrix.os == 'macos-latest' && 'macos' || 'linux' }}
+
+      - name: Upload to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: |
+          cd ffi/python
+          twine upload wheelhouse/*.whl
+
