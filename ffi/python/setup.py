@@ -12,15 +12,11 @@ std_cpp = "-std=c++20"
 
 package_dir = os.path.abspath(os.path.dirname(__file__))
 
-navio_blsct_dir = os.path.join(package_dir, "navio_blsct")
-lib_dir = os.path.join(navio_blsct_dir, "lib")
+blsct_dir = os.path.join(package_dir, "blsct")
+lib_dir = os.path.join(blsct_dir, "lib")
 
 navio_core_repo = "https://github.com/nav-io/navio-core"
 navio_core_dir = os.path.join(package_dir, "navio-core")
-
-swig_repo = "https://github.com/swig/swig.git"
-swig_dir = os.path.join(navio_blsct_dir, "swig")
-swig_version = "v4.3.0"
 
 src_path = os.path.join(navio_core_dir, "src")
 bls_path = os.path.join(src_path, "bls")
@@ -44,7 +40,7 @@ class CustomBuildExt(build_ext):
 
     for entry in depends_path.iterdir():
       if any(entry.name.startswith(arch) for arch in arches) and entry.is_dir():
-        return entry.resolve()  # return absolute path
+        return entry.resolve()
 
     raise FileNotFoundError("Arch dependency directory missing")
 
@@ -85,7 +81,7 @@ def print_directory_structure(start_path, level=0):
     if os.path.isdir(item_path):
       if item in exclude_dirs:
         print(f"{prefix}📂 {item}/")
-        continue  # Skip displaying the dir contents
+        continue
       print(f"{prefix}📂 {item}/")
       print_directory_structure(item_path, level + 1)
     else:
@@ -112,9 +108,9 @@ python_include_dirs = [
 ]
 
 swig_module = Extension(
-  "navio_blsct._navio_blsct",
+  "blsct._blsct",
   sources=[
-    "navio_blsct/navio_blsct.i",
+    "blsct/blsct.i",
   ],
   include_dirs=[
     python_include_dirs,
@@ -135,13 +131,11 @@ swig_module = Extension(
   ],
   swig_opts=[
     "-c++",
-    "-I" + os.path.join(swig_dir, "Lib"),
-    "-I" + os.path.join(swig_dir, "Lib/python"),
   ],
 )
 
 setup(
-  py_modules=["navio_blsct"],
+  py_modules=["blsct"],
   ext_modules=[swig_module],
   cmdclass={
     "build": build,
