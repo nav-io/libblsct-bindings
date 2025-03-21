@@ -34,7 +34,7 @@ jobs:
       - name: Build wheels with cibuildwheel
         run: |
           cd ffi/python
-          CIBW_BUILD="cp311-*" cibuildwheel --output-dir wheelhouse
+          CIBW_BUILD="cp313-*" cibuildwheel --output-dir wheelhouse
         env:
           CIBW_PLATFORM: ${{ matrix.os == 'macos-latest' && 'macos' || 'linux' }}
 
