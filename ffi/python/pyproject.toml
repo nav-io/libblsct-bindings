@@ -14,3 +14,7 @@ dependencies = []
 Homepage = "https://github.com/nav-io/libblsct-bindings"
 Repository = "https://github.com/nav-io/libblsct-bindings"
 
+[tool.pytest.ini_options]
+filterwarnings = [
+  "ignore:.*SwigPy.*__module__ attribute:DeprecationWarning"
+]
