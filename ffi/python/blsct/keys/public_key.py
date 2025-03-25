@@ -1,12 +1,10 @@
 import blsct
-from .managed_obj import ManagedObj
-from .scalar import Scalar
+from ..managed_obj import ManagedObj
+from ..scalar import Scalar
+from .child_key_desc.tx_key_desc.view_key import ViewKey
 from typing import Self, override
 
 class PublicKey(ManagedObj):
-  def __init__(self, obj):
-    super().__init__(obj)
-
   @staticmethod
   def random() -> Self:
     rv = blsct.gen_random_public_key()
@@ -18,6 +16,17 @@ class PublicKey(ManagedObj):
   def from_scalar(scalar: Scalar) -> Self:
     blsct_pub_key = blsct.scalar_to_pub_key(scalar.value())
     return PublicKey(blsct_pub_key)
+
+  @staticmethod
+  def generate_nonce(
+    blinding_pub_key: Self,
+    view_key: ViewKey
+  ) -> Self:
+   blsct_nonce = blsct.calc_nonce(
+     blinding_pub_key.value(),
+     view_key.value()
+   )
+   return PublicKey(blsct_nonce)
 
   @override
   def value(self):

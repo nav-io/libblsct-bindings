@@ -2,18 +2,17 @@ import blsct
 
 from blsct import Address, AddressEncoding
 from blsct import DoublePublicKey
-# from blsct.key_derivation import ChildKey
-# from blsct.key_derivation import BlindingKey
-# from blsct.key_derivation import TokenKey
-# from blsct.key_derivation import TxKey
-# from blsct.key_derivation import SpendingKey
-# from blsct.key_derivation import ViewKey
-# from blsct.key_derivation import KeyId
-# from blsct.key_derivation import Nonce
-# from blsct.key_derivation import PrivSpendingKey
-# from blsct.key_derivation import SubAddr
-# from blsct.key_derivation import SubAddrId
-# from blsct.key_derivation import ViewTag
+from blsct import ChildKey
+from blsct import BlindingKey
+from blsct import TokenKey
+from blsct import TxKey
+from blsct import SpendingKey
+from blsct import ViewKey
+from blsct import HashId
+from blsct import PrivSpendingKey
+from blsct import SubAddr
+from blsct import SubAddrId
+from blsct import ViewTag
 from blsct import Point
 from blsct import PublicKey
 from blsct import RangeProof, AmountRecoveryReq, AmountRecoveryRes
@@ -139,73 +138,73 @@ def test_sig_gen_verify():
   print(f"sig verification: {is_sig_valid}")
   assert(is_sig_valid == True)
 
-# # Key derivation
-# seed = Scalar.random()
-# print(f"Seed: {seed}")
-#
-# child_key = ChildKey(seed)
-# print(f"ChildKey: {child_key.to_hex()}")
-#
-# blinding_key = child_key.to_blinding_key()
-# print(f"BlindingKey: {blinding_key.to_hex()}")
-#
-# token_key = child_key.to_token_key()
-# print(f"TokenKey: {token_key.to_hex()}")
-#
-# tx_key = child_key.to_tx_key()
-# print(f"TxKey: {tx_key.to_hex()}")
-#
-# view_key = tx_key.to_view_key()
-# print(f"ViewKey: {view_key.to_hex()}")
-#
-# spending_key = tx_key.to_spending_key()
-# print(f"SpendingKey: {spending_key.to_hex()}")
-#
-# blinding_pub_key = PublicKey.from_scalar(blinding_key)
-# print(f"blinding_pub_key: {blinding_pub_key}")
-#
-# account = 123
-# address = 456
-#
-# priv_spending_key = PrivSpendingKey(
-#   blinding_pub_key,
-#   view_key,
-#   spending_key,
-#   account,
-#   address,
-# )
-# print(f"priv_spending_key: {priv_spending_key.to_hex()}")
-#
-# view_tag = ViewTag(blinding_pub_key, view_key)
-# print(f"view_tag: {view_tag}")
-#
-# spending_pub_key = PublicKey.from_scalar(spending_key)
-# print(f"spending_pub_key: {spending_pub_key}")
-#
-# hash_id = KeyId(
-#   blinding_pub_key,
-#   spending_pub_key,
-#   view_key,
-# )
-# print(f"hash_id: {hash_id.to_hex()}")
-#
-# nonce = Nonce(blinding_pub_key, view_key)
-# print(f"nonce: {nonce}")
-#
-# sub_addr_id = SubAddrId(account, address)
-# print(f"sub_addr_id: {sub_addr_id}")
-#
-# sub_addr = SubAddr(view_key, spending_pub_key, sub_addr_id)
-# print(f"sub_addr: {sub_addr}")
-#
-# dpk = DoublePublicKey.from_view_key_spending_pub_key_acct_addr(
-#   view_key,
-#   spending_pub_key,
-#   account,
-#   address,
-# )
-# print(f"dpk: {dpk}")
-#
+def test_key_derivation():
+  seed = Scalar.random()
+  print(f"Seed: {seed}")
+
+  child_key = ChildKey.from_scalar(seed)
+  print(f"ChildKey: {child_key.to_hex()}")
+
+  blinding_key = child_key.to_blinding_key()
+  print(f"BlindingKey: {blinding_key.to_hex()}")
+
+  token_key = child_key.to_token_key()
+  print(f"TokenKey: {token_key.to_hex()}")
+
+  tx_key = child_key.to_tx_key()
+  print(f"TxKey: {tx_key.to_hex()}")
+
+  view_key = tx_key.to_view_key()
+  print(f"ViewKey: {view_key.to_hex()}")
+
+  spending_key = tx_key.to_spending_key()
+  print(f"SpendingKey: {spending_key.to_hex()}")
+
+  blinding_pub_key = PublicKey.from_scalar(blinding_key)
+  print(f"blinding_pub_key: {blinding_pub_key}")
+
+  account = 123
+  address = 456
+
+  priv_spending_key = PrivSpendingKey.generate(
+    blinding_pub_key,
+    view_key,
+    spending_key,
+    account,
+    address,
+  )
+  print(f"priv_spending_key: {priv_spending_key.to_hex()}")
+
+  view_tag = ViewTag(blinding_pub_key, view_key)
+  print(f"view_tag: {view_tag}")
+
+  spending_pub_key = PublicKey.from_scalar(spending_key)
+  print(f"spending_pub_key: {spending_pub_key}")
+
+  hash_id = HashId.generate(
+    blinding_pub_key,
+    spending_pub_key,
+    view_key,
+  )
+  print(f"hash_id: {hash_id.to_hex()}")
+
+  nonce = PublicKey.generate_nonce(blinding_pub_key, view_key)
+  print(f"nonce: {nonce}")
+
+  sub_addr_id = SubAddrId.generate(account, address)
+  print(f"sub_addr_id: {sub_addr_id}")
+
+  sub_addr = SubAddr.generate(view_key, spending_pub_key, sub_addr_id)
+  print(f"sub_addr: {sub_addr}")
+
+  dpk = DoublePublicKey.from_view_key_spending_pub_key_acct_addr(
+    view_key,
+    spending_pub_key,
+    account,
+    address,
+  )
+  print(f"dpk: {dpk}")
+
 # # Tx related
 # num_tx_in = 1
 # num_tx_out = 1

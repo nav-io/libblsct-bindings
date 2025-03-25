@@ -1,13 +1,10 @@
 import blsct
 from .managed_obj import ManagedObj
-from .public_key import PublicKey
+from .keys.public_key import PublicKey
 from .scalar import Scalar
 from typing import Any, Self, override
 
 class Signature(ManagedObj):
-  def __init__(self, obj):
-    super().__init__(obj)
-
   @staticmethod
   def generate(priv_key: Scalar, msg: str) -> Self:
     sig = blsct.sign_message(priv_key.value(), msg)

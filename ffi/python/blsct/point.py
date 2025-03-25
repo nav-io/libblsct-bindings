@@ -3,9 +3,6 @@ from .managed_obj import ManagedObj
 from typing import Any, Self, override
 
 class Point(ManagedObj):
-  def __init__(self, obj):
-    super().__init__(obj)
-
   @staticmethod
   def random() -> Self:
     rv = blsct.gen_random_point()

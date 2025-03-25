@@ -315,15 +315,13 @@ export class Computation {
     }
     
     const rv = blsct.verify_range_proofs(vec)
-    if (rv.result !== 0) {
+		if (rv.result !== 0) {
       blsct.free_obj(rv)
       throw new Error(`Verifying range proofs failed: ${rv.result}`)
     }
-    // only freeing range proof vector since the verifier is not
-    // responsible of freeing the proofs
     blsct.free_range_proof_vec(vec)
 
-    const res = rv.value
+    const res = rv.value !== 0
     blsct.free_obj(rv)
     return res
   }
@@ -974,7 +972,6 @@ export class TxId extends DisposableObj<Scalar> {
   }
 }
 
-// not responsible for feeing given parameters
 export class AmtRecoveryReq {
   rangeProof: RangeProof
   nonce: Point
