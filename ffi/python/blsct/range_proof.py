@@ -32,9 +32,6 @@ class AmountRecoveryRes:
     return f"AmtRecoveryRes{is_succ=}:{amount=}:{message=}"
 
 class RangeProof(ManagedObj):
-  def __init__(self, obj):
-    super().__init__(obj)
-
   def set_size(self, obj_size: int):
     self.obj_size = obj_size
 

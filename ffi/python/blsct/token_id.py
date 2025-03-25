@@ -3,9 +3,6 @@ from .managed_obj import ManagedObj
 from typing import Self, override
 
 class TokenId(ManagedObj):
-  def __init__(self, obj):
-    super().__init__(obj)
-
   @staticmethod
   def from_token(token: int) -> Self:
     rv = blsct.gen_token_id(token);

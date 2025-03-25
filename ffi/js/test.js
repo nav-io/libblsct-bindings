@@ -231,7 +231,7 @@ for(let i=0; i<1; ++i) {
     blindingKey.toPublicKey(),
     viewKey,
   )
-  console.log(`nonce: ${nonce.toHex()}`)
+  console.log(`nonce: ${nonce}`)
 
   const subAddrId = C.SubAddrId(account, address)
   console.log(`subAddrId.account: ${subAddrId.getAccount()}`)

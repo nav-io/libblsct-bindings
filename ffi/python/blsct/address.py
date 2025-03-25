@@ -1,5 +1,5 @@
 import blsct
-from .double_public_key import DoublePublicKey
+from .keys.double_public_key import DoublePublicKey
 from enum import Enum, auto
 
 class AddressEncoding(Enum):
