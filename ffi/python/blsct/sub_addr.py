@@ -1,6 +1,7 @@
 import blsct
 from .managed_obj import ManagedObj
 from .scalar import Scalar
+from .keys.double_public_key import DoublePublicKey
 from .keys.public_key import PublicKey
 from .sub_addr_id import SubAddrId
 from typing import Any, Self, override
@@ -19,12 +20,14 @@ class SubAddr(ManagedObj):
     )
     return SubAddr(obj)
 
+  @staticmethod
+  def from_double_public_key(dpk: DoublePublicKey) -> Self:
+    rv = blsct.dpk_to_sub_addr(dpk.value())
+    inst = SubAddr(rv.value)
+    blsct.free_obj(rv)
+    return inst
+
   @override
   def value(self) -> Any:
     return blsct.cast_to_sub_addr(self.obj)
-
-  @override
-  def default(self) -> Self:
-    name = self.__class__.__name__
-    raise NotImplementedError(f"{name}.default()")
 

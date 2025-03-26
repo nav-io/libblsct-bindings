@@ -27,7 +27,8 @@ class Point(ManagedObj):
   def value(self) -> Any:
     return blsct.cast_to_point(self.obj)
 
-  @override
-  def default(self) -> Self:
-    return base_point()
+  @classmethod
+  def default_obj(cls) -> Any:
+    rv = blsct.gen_base_point()
+    return rv.value 
  

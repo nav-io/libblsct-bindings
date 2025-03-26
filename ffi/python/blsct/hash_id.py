@@ -25,9 +25,3 @@ class HashId(ManagedObj):
   @override
   def value(self) -> Any:
     return blsct.cast_to_key_id(self.obj)
-
-  @override
-  def default(self) -> Self:
-    name = self.__class__.__name__
-    raise NotImplementedError(f"{name}.default()")
-

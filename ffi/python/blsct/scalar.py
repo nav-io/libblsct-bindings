@@ -27,7 +27,8 @@ class Scalar(ManagedObj):
   def value(self) -> Any:
     return blsct.cast_to_scalar(self.obj)
 
-  @override
-  def default(self) -> Self:
-    return Scalar.from_int(0)
+  @classmethod
+  def default_obj(cls) -> Any:
+    rv = blsct.gen_scalar(0)
+    return rv.value
 

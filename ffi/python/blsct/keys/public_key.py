@@ -2,7 +2,7 @@ import blsct
 from ..managed_obj import ManagedObj
 from ..scalar import Scalar
 from .child_key_desc.tx_key_desc.view_key import ViewKey
-from typing import Self, override
+from typing import Any, Self, override
 
 class PublicKey(ManagedObj):
   @staticmethod
@@ -32,7 +32,8 @@ class PublicKey(ManagedObj):
   def value(self):
     return blsct.cast_to_pub_key(self.obj)
 
-  @override
-  def default(self) -> Self:
-    return PublicKey.random()
+  @classmethod
+  def default_obj(cls) -> Any:
+    rv = blsct.gen_random_public_key()
+    return rv.value
 
