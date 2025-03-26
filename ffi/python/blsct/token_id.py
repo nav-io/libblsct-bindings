@@ -1,6 +1,6 @@
 import blsct
 from .managed_obj import ManagedObj
-from typing import Self, override
+from typing import Any, Self, override
 
 class TokenId(ManagedObj):
   @staticmethod
@@ -27,10 +27,8 @@ class TokenId(ManagedObj):
   def value(self):
     return blsct.cast_to_token_id(self.obj)
 
-  @override
-  def default() -> Self:
+  @classmethod
+  def default_obj(cls) -> Any:
     rv = blsct.gen_default_token_id()
-    token_id = TokenId(rv.value)
-    blsct.free_obj(rv)
-    return token_id
+    return rv.value
 

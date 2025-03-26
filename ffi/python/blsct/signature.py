@@ -18,7 +18,7 @@ class Signature(ManagedObj):
     return blsct.cast_to_signature(self.obj)
 
   @override
-  def default(self) -> Self:
+  def default_obj(self) -> Self:
     name = self.__class__.__name__
-    raise NotImplementedError(f"{name}.default()")
+    raise NotImplementedError(f"{name}.default_obj()")
 

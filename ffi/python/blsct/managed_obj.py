@@ -1,18 +1,20 @@
 import blsct
 from abc import ABC, abstractmethod
+from typing import Any, Self
 
 class ManagedObj(ABC):
   def __init__(self, obj=None):
-    self.obj = obj
+    self.obj = self.default_obj() if obj is None else obj
     self._managed = False
 
   @abstractmethod
   def value(self):
     pass
 
-  @abstractmethod
-  def default(self):
-    pass
+  @classmethod
+  def default_obj(cls) -> Any:
+    name = cls.__name__
+    raise NotImplementedError(f"{name}.default_obj()")
 
   def __del__(self):
     if self.obj is not None:

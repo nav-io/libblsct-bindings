@@ -12,6 +12,8 @@
 %constant size_t SIGNATURE_SIZE = SIGNATURE_SIZE;
 %constant size_t SUB_ADDR_ID_SIZE = SUB_ADDR_ID_SIZE;
 %constant size_t TX_ID_SIZE = TX_ID_SIZE;
+%constant size_t BLSCT_IN_AMOUNT_ERROR = BLSCT_IN_AMOUNT_ERROR;
+%constant size_t BLSCT_OUT_AMOUNT_ERROR = BLSCT_OUT_AMOUNT_ERROR;
 
 %inline %{
 #define HANDLE_MEM_ALLOC_FAILURE(name) \

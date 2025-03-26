@@ -1,29 +1,33 @@
 import blsct
 
-from blsct import Address, AddressEncoding
-from blsct import DoublePublicKey
-from blsct import ChildKey
-from blsct import BlindingKey
-from blsct import TokenKey
-from blsct import TxKey
-from blsct import SpendingKey
-from blsct import ViewKey
-from blsct import HashId
-from blsct import PrivSpendingKey
-from blsct import SubAddr
-from blsct import SubAddrId
-from blsct import ViewTag
-from blsct import Point
-from blsct import PublicKey
-from blsct import RangeProof, AmountRecoveryReq, AmountRecoveryRes
-from blsct import Scalar
-from blsct import Signature
-from blsct import TokenId
-# from blsct.tx.out_point import OutPoint
-# from blsct.tx.sub_address import SubAddress
-# from blsct.tx.tx_in import TxIn
-# from blsct.tx.tx_out import TxOut
-# from blsct.tx.tx import Tx
+from blsct import (
+  Address,
+  AddressEncoding,
+  AmountRecoveryReq,
+  AmountRecoveryRes,
+  BlindingKey,
+  ChildKey,
+  DoublePublicKey,
+  HashId,
+  OutPoint,
+  Point,
+  PrivSpendingKey,
+  PublicKey,
+  RangeProof,
+  Scalar,
+  Signature,
+  SpendingKey,
+  SubAddr,
+  SubAddrId,
+  TokenId,
+  TokenKey,
+  Tx,
+  TxIn,
+  TxOut,
+  TxKey,
+  ViewKey,
+  ViewTag,
+)
 
 import secrets
 
@@ -38,22 +42,22 @@ def test_scalar():
     print(one)
 
 def test_point():
-  pt = Point.random()
+  pt = Point()
   print(pt)
 
   with Point.random() as pt:
     print(pt)
 
 def test_public_key():
-  pk = PublicKey.random()
+  pk = PublicKey()
   print(pk)
 
   with PublicKey.random() as pk:
     print(pk)
 
 def test_double_public_key():
-  pk1 = PublicKey.random()
-  pk2 = PublicKey.random()
+  pk1 = PublicKey()
+  pk2 = PublicKey()
   dpk = DoublePublicKey.from_public_keys(pk1, pk2)
   print(dpk)
 
@@ -61,8 +65,8 @@ def test_double_public_key():
     print(dpk)
 
 def test_address():
-  pk1 = PublicKey.random()
-  pk2 = PublicKey.random()
+  pk1 = PublicKey()
+  pk2 = PublicKey()
   dpk = DoublePublicKey.from_public_keys(pk1, pk2)
 
   enc_addr = Address.encode(dpk, AddressEncoding.Bech32)
@@ -74,7 +78,7 @@ def test_address():
   assert enc_addr == Address.encode(dec_dpk, AddressEncoding.Bech32), "Address encoding/decoding not working"
 
 def test_token_id():
-  token_id_1 = TokenId.default()
+  token_id_1 = TokenId()
   print(token_id_1)
 
   token_id_2 = TokenId.from_token(123)
@@ -88,7 +92,7 @@ def test_token_id():
 
 def test_range_proof():
   nonce1 = Point.random()
-  token_id_1 = TokenId.default()
+  token_id_1 = TokenId()
 
   rp1 = RangeProof.build([456], nonce1, 'navcoin', token_id_1)
   assert(RangeProof.verify_proofs([rp1]) == True)
@@ -205,51 +209,51 @@ def test_key_derivation():
   )
   print(f"dpk: {dpk}")
 
-# # Tx related
-# num_tx_in = 1
-# num_tx_out = 1
-# default_fee = 200000
-# fee = (num_tx_in + num_tx_out) * default_fee
-# out_amount = 10000
-# in_amount = fee + out_amount
-# out_amount = out_amount
-#
-# # tx in
-# tx_id = secrets.token_hex(32)
-# print(f"tx_id: {tx_id}")
-#
-# gamma = 100
-# spending_key = Scalar.from_int(12)
-# token_id = TokenId.default()
-# out_index = 0
-# out_point = OutPoint(tx_id, out_index)
-#
-# tx_in = TxIn.from_fields(
-#   in_amount,
-#   gamma,
-#   spending_key,
-#   token_id,
-#   out_point,
-# )
-#
-# # tx out
-# pk1 = PublicKey()
-# pk2 = PublicKey()
-# dpk = DoublePublicKey.from_public_keys(pk1, pk2)
-# sub_addr = SubAddress.from_dpk(dpk)
-#
-# tx_out = TxOut.from_fields(
-#   sub_addr,
-#   out_amount,
-#   'test-txout',
-# )
-#
-# # tx
-# tx = Tx.from_tx_ins_tx_outs(
-#   [tx_in],
-#   [tx_out],
-# )
-#
+def test_tx():
+  num_tx_in = 1
+  num_tx_out = 1
+  default_fee = 200000
+  fee = (num_tx_in + num_tx_out) * default_fee
+  out_amount = 10000
+  in_amount = fee + out_amount
+  out_amount = out_amount
+
+  # tx in
+  tx_id = secrets.token_hex(32)
+  print(f"tx_id: {tx_id}")
+
+  gamma = 100
+  spending_key = Scalar.from_int(12)
+  token_id = TokenId()
+  out_index = 0
+  out_point = OutPoint.generate(tx_id, out_index)
+
+  tx_in = TxIn.generate(
+    in_amount,
+    gamma,
+    spending_key,
+    token_id,
+    out_point,
+  )
+
+  # tx out
+  pk1 = PublicKey()
+  pk2 = PublicKey()
+  dpk = DoublePublicKey.from_public_keys(pk1, pk2)
+  sub_addr = SubAddr.from_double_public_key(dpk)
+
+  tx_out = TxOut.generate(
+    sub_addr,
+    out_amount,
+    'test-txout',
+  )
+
+  # tx
+  tx = Tx.generate(
+    [tx_in],
+    [tx_out],
+  )
+
 # tx_hex = tx.serialize()
 # print(f"tx_hex: {tx_hex}")
 #
