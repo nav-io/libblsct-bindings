@@ -254,43 +254,43 @@ def test_tx():
     [tx_out],
   )
 
-# tx_hex = tx.serialize()
-# print(f"tx_hex: {tx_hex}")
-#
-# tx2 = Tx.deserialize(tx_hex)
-# tx2_hex = tx2.serialize()
-# assert(tx_hex == tx2_hex)
-#
-# tx_ins = tx2.get_tx_ins()
-# print(f"# of txIns: {len(tx_ins)}")
-#
-# tx_outs = tx2.get_tx_outs()
-# print(f"# of txOuts: {len(tx_outs)}")
-#
-# print("<tx in>")
-# for tx_in in tx_ins: 
-#   print(f"prev_out_hash: {tx_in.get_prev_out_hash()}")
-#   print(f"prev_out_n: {tx_in.get_prev_out_n()}")
-#   print(f"scipt_sig: {tx_in.get_script_sig().to_hex()}")
-#   print(f"sequence: {tx_in.get_sequence()}")
-#   print(f"scipt_witness: {tx_in.get_script_witness().to_hex()}")
-#
-# print(f"<tx out>")
-# for tx_out in tx_outs:
-#   print(f"value: {tx_out.get_value()}")
-#   print(f"script_pub_key: {tx_out.get_script_pub_key().to_hex()}")
-#   print(f"token_id: token={tx_out.get_token_id().get_token()}, subid={tx_out.get_token_id().get_subid()}")
-#
-#   print(f"spending_key: {tx_out.get_spending_key()}")
-#   print(f"ephemeral_key: {tx_out.get_ephemeral_key()}")
-#   print(f"blinding_key: {tx_out.get_blinding_key()}")
-#   print(f"view_tag: {tx_out.get_view_tag()}")
-#
-#   print(f"range_proof.A: {tx_out.get_range_proof_A().to_hex()}")
-#   print(f"range_proof.B: {tx_out.get_range_proof_B().to_hex()}")
-#   print(f"range_Proof.r_prime: {tx_out.get_range_proof_r_prime()}")
-#   print(f"range_proof.s_prime: {tx_out.get_range_proof_s_prime()}")
-#   print(f"range_proof.delta_prime: {tx_out.get_range_proof_delta_prime()}")
-#   print(f"range_proof.alpha_hat: {tx_out.get_range_proof_alpha_hat()}")
-#   print(f"range_proof.tau_x: {tx_out.get_range_proof_tau_x()}")
-#
+  tx_hex = tx.serialize()
+  print(f"tx_hex: {tx_hex}")
+
+  tx2 = Tx.deserialize(tx_hex)
+  tx2_hex = tx2.serialize()
+  assert(tx_hex == tx2_hex)
+
+  tx_ins = tx2.get_tx_ins()
+  print(f"# of txIns: {len(tx_ins)}")
+
+  tx_outs = tx2.get_tx_outs()
+  print(f"# of txOuts: {len(tx_outs)}")
+
+  print("<tx in>")
+  for tx_in in tx_ins: 
+    print(f"prev_out_hash: {tx_in.get_prev_out_hash()}")
+    print(f"prev_out_n: {tx_in.get_prev_out_n()}")
+    print(f"scipt_sig: {tx_in.get_script_sig().to_hex()}")
+    print(f"sequence: {tx_in.get_sequence()}")
+    print(f"scipt_witness: {tx_in.get_script_witness().to_hex()}")
+
+  print(f"<tx out>")
+  for tx_out in tx_outs:
+    print(f"value: {tx_out.get_value()}")
+    print(f"script_pub_key: {tx_out.get_script_pub_key().to_hex()}")
+    print(f"token_id: token={tx_out.get_token_id().token()}, subid={tx_out.get_token_id().subid()}")
+
+    print(f"spending_key: {tx_out.get_spending_key()}")
+    print(f"ephemeral_key: {tx_out.get_ephemeral_key()}")
+    print(f"blinding_key: {tx_out.get_blinding_key()}")
+    print(f"view_tag: {tx_out.get_view_tag()}")
+
+    print(f"range_proof.A: {tx_out.get_range_proof_A().to_hex()}")
+    print(f"range_proof.B: {tx_out.get_range_proof_B().to_hex()}")
+    print(f"range_Proof.r_prime: {tx_out.get_range_proof_r_prime()}")
+    print(f"range_proof.s_prime: {tx_out.get_range_proof_s_prime()}")
+    print(f"range_proof.delta_prime: {tx_out.get_range_proof_delta_prime()}")
+    print(f"range_proof.alpha_hat: {tx_out.get_range_proof_alpha_hat()}")
+    print(f"range_proof.tau_x: {tx_out.get_range_proof_tau_x()}")
+

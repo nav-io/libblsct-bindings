@@ -4,6 +4,7 @@ from .tx_in import TxIn
 from .tx_out import TxOut
 from typing import Any, Self, override
 
+# stores serialized tx represented as uint8_t*
 class Tx(ManagedObj):
   @staticmethod
   def generate(
@@ -39,7 +40,42 @@ class Tx(ManagedObj):
 
   @override
   def value(self) -> Any:
-    return blsct.cast_to_tx(self.obj)
+    # self.obj is uint8_t*
+    return blsct.cast_to_uint8_t_ptr(self.obj)
+
+  def get_tx_ins(self) -> list[TxIn]:
+    # returns CMutableTransaction*
+    blsct_tx = blsct.deserialize_tx(self.value(), self.obj_size)
+
+    blsct_tx_ins = blsct.get_tx_ins(blsct_tx)
+    tx_ins_size = blsct.get_tx_ins_size(blsct_tx_ins)
+
+    tx_ins = []
+    for i in range(tx_ins_size):
+      rv = blsct.get_tx_in(blsct_tx_ins, i)
+      tx_in = TxIn(rv.value)
+      tx_ins.append(tx_in)
+      blsct.free_obj(rv)
+    blsct.free_obj(blsct_tx)
+
+    return tx_ins
+
+  def get_tx_outs(self) -> list[TxOut]:
+    # returns CMutableTransaction*
+    blsct_tx = blsct.deserialize_tx(self.value(), self.obj_size)
+
+    blsct_tx_outs = blsct.get_tx_outs(blsct_tx)
+    tx_outs_size = blsct.get_tx_outs_size(blsct_tx_outs)
+
+    tx_outs = []
+    for i in range(tx_outs_size):
+      rv = blsct.get_tx_out(blsct_tx_outs, i)
+      tx_out = TxOut(rv.value)
+      tx_outs.append(tx_out)
+      blsct.free_obj(rv)
+    blsct.free_obj(blsct_tx)
+
+    return tx_outs
 
   def serialize(self) -> str:
     return blsct.to_hex(
@@ -50,6 +86,7 @@ class Tx(ManagedObj):
   @classmethod
   def deserialize(cls, hex: str) -> Self:
     obj = blsct.hex_to_malloced_buf(hex)
-    obj_size = hex.length / 2
-    return cls(obj, obj_size) 
+    inst = cls(obj) 
+    inst.obj_size = int(len(hex) / 2)
+    return inst
 

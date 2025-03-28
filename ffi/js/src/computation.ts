@@ -786,6 +786,10 @@ export class TxIn extends DisposableObj<TxIn> {
       rbf,
     )
     const txIn = new TxIn(rv.value, rv.value_size, computation)
+    if (rv.result !== 0) {
+      blsct.free_obj(rv)
+      throw new Error(`Building TxIn failed: ${rv.result}`)
+    }
     blsct.free_obj(rv)
     return txIn
   }
@@ -862,6 +866,7 @@ export class TxOut extends DisposableObj<TxOut> {
       minStake,
     )
     if (rv.result !== 0) {
+      blsct.free_obj(rv)
       throw new Error(`Building TxOut failed: ${rv.result}`)
     }
     const txOut = new TxOut(rv.value, rv.value_size, computation)
