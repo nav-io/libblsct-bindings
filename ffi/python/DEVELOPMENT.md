@@ -1,3 +1,17 @@
+1. Install swig
+
+- macOS 
+
+```bash
+brew install swig
+```
+
+- Ubuntu
+
+```bash
+sudo apt-get install swig
+```
+
 1. Create a virtual environment
 
 ```bash
