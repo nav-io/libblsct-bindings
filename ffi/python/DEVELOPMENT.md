@@ -12,12 +12,6 @@ pip install --upgrade pip
 pip install setuptools wheel build twine
 ```
 
-1. Copy `blsct.i`
-
-```bash
-./prepare.sh
-```
-
 1. Build the package
 
 ```bash
