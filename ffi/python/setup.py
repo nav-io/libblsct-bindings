@@ -107,6 +107,13 @@ python_include_dirs = [
     if path.startswith("-I")
 ]
 
+extra_link_args = [std_cpp],
+extra_link_args = (
+    extra_link_args + ["-undefined", "dynamic_lookup"]
+    if sys.platform == "darwin"
+    else extra_link_args
+)
+
 swig_module = Extension(
   "blsct._blsct",
   sources=[
@@ -124,11 +131,7 @@ swig_module = Extension(
     std_cpp,
   ],
   extra_objects=[os.path.join(lib_dir, f) for f in dot_a_files],
-  extra_link_args=[
-    std_cpp,
-    "-undefined",
-    "dynamic_lookup",
-  ],
+  extra_link_args=extra_link_args,
   swig_opts=[
     "-c++",
   ],
