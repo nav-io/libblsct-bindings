@@ -1,6 +1,7 @@
 import itertools
 import multiprocessing
 import os
+import sys
 from pathlib import Path
 from setuptools import setup, Extension, find_packages
 from distutils.command.build import build as build_org
