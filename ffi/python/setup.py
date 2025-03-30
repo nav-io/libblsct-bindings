@@ -108,7 +108,7 @@ python_include_dirs = [
     if path.startswith("-I")
 ]
 
-extra_link_args = [std_cpp],
+extra_link_args = [std_cpp]
 extra_link_args = (
     extra_link_args + ["-undefined", "dynamic_lookup"]
     if sys.platform == "darwin"
