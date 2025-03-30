@@ -7,8 +7,8 @@ jobs:
   build_wheels:
     strategy:
       matrix:
-        os: [macos-15]
-        python-version: ["cp313"]
+        os: [ubuntu-24.04, macos-15]
+        python-version: ["cp312", "cp313"]
 
     runs-on: ${{ matrix.os }}
 
