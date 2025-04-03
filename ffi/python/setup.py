@@ -49,6 +49,9 @@ class CustomBuildExt(build_ext):
     subprocess.run(["git", "clone", "--depth", "1", navio_core_repo, navio_core_dir], check=True)
 
   def build_libblsct(self, num_cpus: str):
+    # install m4
+    subprocess.run(["sudo", "yum", "install", "-y", "autoconf", "automake", "libtool", "pkgconf", "m4"], check=True)
+
     depends = Path(navio_core_dir) / "depends"
 
     # Build dependencies

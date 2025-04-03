@@ -33,10 +33,6 @@ jobs:
 
       - name: Build wheels with cibuildwheel
         run: |
-          export PATH="/usr/bin:$PATH"
-          which autoconf
-          autoconf --version
-          unset PKG_CONFIG_PATH
           cd ffi/python
           CIBW_BUILD="cp313-*" cibuildwheel --output-dir wheelhouse
 
