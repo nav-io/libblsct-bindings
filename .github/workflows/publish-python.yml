@@ -31,19 +31,11 @@ jobs:
             brew install swig autoconf automake libtool pkg-config 
           fi
 
-      - name: Check autoconf version (after)
-        run: |
-          which autoconf
-          autoconf --version
-
-      - name: Use system autoconf
+      - name: Build wheels with cibuildwheel
         run: |
           export PATH="/usr/bin:$PATH"
           which autoconf
           autoconf --version
-
-      - name: Build wheels with cibuildwheel
-        run: |
           cd ffi/python
           CIBW_BUILD="cp313-*" cibuildwheel --output-dir wheelhouse
 
