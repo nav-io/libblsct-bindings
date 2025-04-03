@@ -20,5 +20,5 @@ filterwarnings = [
 ]
 
 [tool.cibuildwheel.linux]
-before-all = "yum install -y autoconf automake libtool pkgconf m4"
+before-all = "yum install -y libtool m4"
 
