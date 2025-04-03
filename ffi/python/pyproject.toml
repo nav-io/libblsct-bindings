@@ -20,6 +20,6 @@ filterwarnings = [
 ]
 
 [tool.cibuildwheel.linux]
-before-all = "yum install -y autoconf automake libtool pkgconf m4"
+before-all = "yum install -y libtool pkgconfig m4"
 manylinux-x86_64-image = "quay.io/pypa/manylinux_2_34_x86_64"
 
