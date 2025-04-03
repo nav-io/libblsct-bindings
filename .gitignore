@@ -5,4 +5,4 @@ build/
 *.o
 test
 compile_commands.json
-
+venv
