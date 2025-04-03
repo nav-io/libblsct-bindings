@@ -50,7 +50,7 @@ class CustomBuildExt(build_ext):
 
   def build_libblsct(self, num_cpus: str):
     # Build dependencies
-    subprocess.run(["make", "-j", num_cpus], cwd=os.path.join(navio_core_dir, "NO_NATPMP=1", "depends"), check=True)
+    subprocess.run(["make", "NO_NATPMP=1", "-j", num_cpus], cwd=os.path.join(navio_core_dir, "depends"), check=True)
 
     # Run autogen, configure, and make
     subprocess.run(["./autogen.sh"], cwd=navio_core_dir, check=True)
