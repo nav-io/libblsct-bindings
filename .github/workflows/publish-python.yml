@@ -23,13 +23,29 @@ jobs:
       - name: Install Python dependencies
         run: pip install cibuildwheel twine
 
+      - name: Check autoconf version (before)
+        run: |
+          which autoconf
+          autoconf --version
+
       - name: Install system dependencies
         run: |
           if [[ $RUNNER_OS == 'Linux' ]]; then
-            sudo apt-get update && sudo apt-get install -y swig autoconf automake libtool pkg-config m4 autoconf-archive
+            sudo apt-get update && sudo apt-get install -y swig autoconf automake libtool pkg-config 
           elif [[ $RUNNER_OS == 'macOS' ]]; then
             brew install swig autoconf automake libtool pkg-config 
           fi
+
+      - name: Check autoconf version (after)
+        run: |
+          which autoconf
+          autoconf --version
+
+      - name: Use system autoconf
+        run: |
+          export PATH="/usr/bin:$PATH"
+          which autoconf
+          autoconf --version
 
       - name: Build wheels with cibuildwheel
         run: |
