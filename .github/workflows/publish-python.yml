@@ -26,7 +26,7 @@ jobs:
       - name: Install system dependencies
         run: |
           if [[ $RUNNER_OS == 'Linux' ]]; then
-            sudo apt-get update && sudo apt-get install -y swig autoconf automake libtool pkg-config
+            sudo apt-get update && sudo apt-get install -y swig autoconf automake libtool pkg-config pkgconf-m4
           elif [[ $RUNNER_OS == 'macOS' ]]; then
             brew install swig autoconf automake libtool pkg-config
           fi
