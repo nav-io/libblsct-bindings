@@ -18,3 +18,7 @@ Repository = "https://github.com/nav-io/libblsct-bindings"
 filterwarnings = [
   "ignore:.*SwigPy.*__module__ attribute:DeprecationWarning"
 ]
+
+[tool.cibuildwheel.linux]
+before-all = "yum install -y autoconf automake libtool pkgconf m4"
+
