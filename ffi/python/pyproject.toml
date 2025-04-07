@@ -18,3 +18,8 @@ Repository = "https://github.com/nav-io/libblsct-bindings"
 filterwarnings = [
   "ignore:.*SwigPy.*__module__ attribute:DeprecationWarning"
 ]
+
+[tool.cibuildwheel.linux]
+before-all = "yum install -y libtool"
+manylinux-x86_64-image = "quay.io/pypa/manylinux_2_34_x86_64"
+

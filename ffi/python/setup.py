@@ -63,7 +63,6 @@ class CustomBuildExt(build_ext):
 
     # Run autogen, configure, and make
     subprocess.run(["./autogen.sh"], cwd=navio_core_dir, check=True)
-    depends = Path(navio_core_dir) / "depends"
     arch_path = self.get_arch_path(depends)
 
     subprocess.run(
