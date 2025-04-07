@@ -20,6 +20,6 @@ filterwarnings = [
 ]
 
 [tool.cibuildwheel.linux]
-before-all = "yum install -y libtool"
+before-all = "yum install -y libtool autoconf-archive"
 manylinux-x86_64-image = "quay.io/pypa/manylinux_2_34_x86_64"
-
+environment = { ACLOCAL_PATH = "/usr/share/aclocal", AUTOCONF = "/usr/bin/autoconf" }

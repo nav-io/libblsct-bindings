@@ -58,7 +58,7 @@ class CustomBuildExt(build_ext):
       ["make", "-j", num_cpus],
       cwd=os.path.join(navio_core_dir, "depends"),
       check=True,
-      env=env,
+      #env=env,
     )
 
     # Run autogen, configure, and make
