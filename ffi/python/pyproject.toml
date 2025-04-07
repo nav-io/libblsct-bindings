@@ -19,7 +19,11 @@ filterwarnings = [
   "ignore:.*SwigPy.*__module__ attribute:DeprecationWarning"
 ]
 
+[tool.cibuildwheel]
+archs = ["native"]
+
 [tool.cibuildwheel.linux]
 before-all = "yum install -y libtool autoconf-archive"
 manylinux-x86_64-image = "quay.io/pypa/manylinux_2_34_x86_64"
-environment = { CFLAGS = "-D_DEFAULT_SOURCE", ACLOCAL_PATH = "/usr/share/aclocal", AUTOCONF = "/usr/bin/autoconf" }
+environment = { ACLOCAL_PATH = "/usr/share/aclocal", AUTOCONF = "/usr/bin/autoconf" }
+
