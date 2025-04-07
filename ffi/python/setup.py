@@ -49,21 +49,18 @@ class CustomBuildExt(build_ext):
     subprocess.run(["git", "clone", "--depth", "1", navio_core_repo, navio_core_dir], check=True)
 
   def build_libblsct(self, num_cpus: str):
-    env = os.environ.copy()
-    env["AUTOCONF"] = "/usr/bin/autoconf"
-    env["ACLOCAL_PATH"] = "/usr/share/aclocal"
+    depends_path = Path(os.path.join(navio_core_dir, "depends"))
 
     # Build dependencies
     subprocess.run(
       ["make", "-j", num_cpus],
-      cwd=os.path.join(navio_core_dir, "depends"),
+      cwd=depends_path,
       check=True,
-      #env=env,
     )
 
     # Run autogen, configure, and make
     subprocess.run(["./autogen.sh"], cwd=navio_core_dir, check=True)
-    arch_path = self.get_arch_path(depends)
+    arch_path = self.get_arch_path(depends_path)
 
     subprocess.run(
       ["./configure", f"--prefix={arch_path}", "--enable-build-libblsct-only"],
