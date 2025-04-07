@@ -56,7 +56,6 @@ class CustomBuildExt(build_ext):
       ["make", "-j", num_cpus],
       cwd=depends_path,
       check=True,
-      #env=env,
     )
 
     # Run autogen, configure, and make
