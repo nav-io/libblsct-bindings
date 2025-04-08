@@ -34,7 +34,7 @@ jobs:
       - name: Build wheels with cibuildwheel
         run: |
           cd ffi/python
-          CIBW_BUILD="cp313-*" cibuildwheel --output-dir wheelhouse
+          cibuildwheel --output-dir wheelhouse
 
       - name: Upload to PyPI
         env:
