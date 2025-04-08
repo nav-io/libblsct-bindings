@@ -25,5 +25,5 @@ archs = ["native"]
 [tool.cibuildwheel.linux]
 before-all = "yum install -y libtool autoconf-archive"
 manylinux-x86_64-image = "quay.io/pypa/manylinux_2_28_x86_64"
-environment = { ACLOCAL_PATH = "/usr/share/aclocal", AUTOCONF = "/usr/bin/autoconf", CXXFLAGS = "-D_GLIBCXX_USE_CXX11_ABI=0" }
+environment = { ACLOCAL_PATH = "/usr/share/aclocal", AUTOCONF = "/usr/bin/autoconf" }
 
