@@ -39,6 +39,11 @@ jobs:
       - name: Build wheels with cibuildwheel
         run: |
           cd ffi/python
+          if [ "${{ matrix.python-version }}" = "3.12" ]; then
+            export CIBW_BUILD="cp312-*"
+          elif [ "${{ matrix.python-version }}" = "3.13" ]; then
+            export CIBW_BUILD="cp313-*"
+          fi
           cibuildwheel --output-dir wheelhouse
 
       - name: Upload to PyPI
