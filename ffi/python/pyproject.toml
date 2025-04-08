@@ -21,6 +21,7 @@ filterwarnings = [
 
 [tool.cibuildwheel]
 archs = ["native"]
+skip = ["*-musllinux*"]
 
 [tool.cibuildwheel.linux]
 before-all = "dnf install -y libtool autoconf-archive"
