@@ -24,5 +24,5 @@ archs = ["native"]
 
 [tool.cibuildwheel.linux]
 before-all = "yum install -y libtool autoconf-archive"
-environment = { ACLOCAL_PATH = "/usr/share/aclocal", AUTOCONF = "/usr/bin/autoconf" }
+environment = { ACLOCAL_PATH = "/usr/share/aclocal", AUTOCONF = "/usr/bin/autoconf", CXXFLAGS = "-D_GLIBCXX_USE_CXX11_ABI=0" }
 
