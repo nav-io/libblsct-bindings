@@ -46,6 +46,8 @@ class CustomBuildExt(build_ext):
     raise FileNotFoundError("Arch dependency directory missing")
 
   def clone_navio_core(self, num_cpus: str):
+    if os.path.isdir(navio_core_dir):
+      shutil.rmtree(navio_core_dir)
     subprocess.run(["git", "clone", "--depth", "1", navio_core_repo, navio_core_dir], check=True)
 
   def build_libblsct(self, num_cpus: str):
