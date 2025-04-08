@@ -14,6 +14,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          clean: true
+
+      - name: Clean up workspace
+        run: git clean -xdf
 
       - name: Set up Python
         uses: actions/setup-python@v4
