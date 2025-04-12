@@ -21,6 +21,8 @@ navio_core_repo = "https://github.com/gogoex/navio-core"
 navio_core_dir = os.path.join(package_dir, "navio-core")
 
 src_path = os.path.join(navio_core_dir, "src")
+secp256k1_path = os.path.join(src_path, "secp256k1")
+secp256k1_lib_path = os.path.join(secp256k1_path, ".libs")
 bls_path = os.path.join(src_path, "bls")
 bls_lib_path = os.path.join(bls_path, "lib")
 mcl_path = os.path.join(bls_path, "mcl")
@@ -30,7 +32,7 @@ libblsct_a = os.path.join(src_path, "libblsct.a")
 libunivalue_blsct_a = os.path.join(src_path, "libunivalue_blsct.a")
 libmcl_a = os.path.join(mcl_lib_path, "libmcl.a")
 libbls384_256_a = os.path.join(bls_lib_path, "libbls384_256.a")
-libsecp256k1_a = os.path.join(bls_lib_path, "libsecp256k1.a")
+libsecp256k1_a = os.path.join(secp256k1_lib_path, "libsecp256k1.a")
 
 dot_a_files = [libblsct_a, libunivalue_blsct_a, libmcl_a, libbls384_256_a, libsecp256k1_a]
 
