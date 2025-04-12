@@ -30,8 +30,9 @@ libblsct_a = os.path.join(src_path, "libblsct.a")
 libunivalue_blsct_a = os.path.join(src_path, "libunivalue_blsct.a")
 libmcl_a = os.path.join(mcl_lib_path, "libmcl.a")
 libbls384_256_a = os.path.join(bls_lib_path, "libbls384_256.a")
+libsecp256k1_a = os.path.join(bls_lib_path, "libsecp256k1.a")
 
-dot_a_files = [libblsct_a, libunivalue_blsct_a, libmcl_a, libbls384_256_a]
+dot_a_files = [libblsct_a, libunivalue_blsct_a, libmcl_a, libbls384_256_a, libsecp256k1_a]
 
 class CustomBuildExt(build_ext):
   def get_arch_path(self, depends_path: Path) -> Path:
@@ -140,7 +141,7 @@ swig_module = Extension(
     os.path.join(navio_core_dir, "src/bls/mcl/include"),
   ],
   library_dirs=[lib_dir],
-  libraries=["blsct", "univalue_blsct", "mcl", "bls384_256"],
+  libraries=["blsct", "univalue_blsct", "mcl", "bls384_256", "secp256k1"],
   extra_compile_args=[
     std_cpp,
   ],
