@@ -1,4 +1,4 @@
-from .blsct import *
+from .blsct import *
 
 from .address import Address, AddressEncoding
 from .hash_id import HashId
