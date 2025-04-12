@@ -17,9 +17,6 @@ jobs:
         with:
           clean: true
 
-      - name: Clean up workspace
-        run: git clean -xdf
-
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
