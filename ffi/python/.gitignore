@@ -8,4 +8,8 @@ blsct.py
 dist/
 navio-core/
 
+# sphinx
+docs/build/doctrees/
+docs/build/html/.buildinfo*
+docs/build/html/_sources/
 
