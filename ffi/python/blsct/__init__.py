@@ -1,4 +1,10 @@
-from .blsct import *
+import typing
+
+if not typing.TYPE_CHECKING:
+  try:
+    from .blsct import *
+  except ImportError:
+    pass
 
 from .address import Address, AddressEncoding
 from .hash_id import HashId
