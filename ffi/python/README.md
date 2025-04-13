@@ -12,11 +12,4 @@ pip install navio_blsct
 
 ## Usage
 
-1. Import the library
-
-```Python
-import blsct
-```
-
-2. Refer to [a test script](https://github.com/nav-io/libblsct-bindings/blob/main/ffi/python/tests/test_all.py) for usage examples
-
+Refer to the [documentation page](https://nav-io.github.io/libblsct-bindings/index.html)
