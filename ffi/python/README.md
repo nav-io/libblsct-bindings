@@ -1,15 +1,16 @@
 # navio_blsct
 
 ## Requirements
-Python 3.13
+Python 3.12 or above
 
-## Usage
+## Local installation
+
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install wheel build twine
-python3 -m build
-
+pip install build setuptools
+python -m build
+pip install dist/*.whl
 ```
 
 

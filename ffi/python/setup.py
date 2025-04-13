@@ -16,7 +16,8 @@ package_dir = os.path.abspath(os.path.dirname(__file__))
 blsct_dir = os.path.join(package_dir, "blsct")
 lib_dir = os.path.join(blsct_dir, "lib")
 
-navio_core_repo = "https://github.com/nav-io/navio-core"
+#navio_core_repo = "https://github.com/nav-io/navio-core"
+navio_core_repo = "https://github.com/gogoex/navio-core"
 navio_core_dir = os.path.join(package_dir, "navio-core")
 
 src_path = os.path.join(navio_core_dir, "src")
@@ -48,7 +49,8 @@ class CustomBuildExt(build_ext):
   def clone_navio_core(self, num_cpus: str):
     if os.path.isdir(navio_core_dir):
       shutil.rmtree(navio_core_dir)
-    subprocess.run(["git", "clone", "--depth", "1", navio_core_repo, navio_core_dir], check=True)
+    #subprocess.run(["git", "clone", "--depth", "1", navio_core_repo, navio_core_dir], check=True)
+    subprocess.run(["git", "clone", "--depth", "1", "--branch", "fix-undefined-symbol", navio_core_repo, navio_core_dir], check=True)
 
   def build_libblsct(self, num_cpus: str):
     depends_path = Path(os.path.join(navio_core_dir, "depends"))
