@@ -32,7 +32,7 @@ jobs:
         run: |
           cd ffi/python/docs
           ghp-import -n -f -b python-doc build/html
-          git push origin python-doc 
+          git push --force origin python-doc 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
