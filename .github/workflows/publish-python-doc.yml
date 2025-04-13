@@ -1,0 +1,38 @@
+name: Publish Python document page
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      - name: Install dependencies
+        run: |
+          pip install sphinx ghp-import
+
+      - name: Build HTML docs
+        run: |
+          cd ffi/python/docs
+          make html
+
+      - name: Deploy to GitHub Pages
+        run: |
+          cd ffi/python/docs
+          ghp-import -n -f -b gh-pages build/html
+          git push origin gh-pages
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
