@@ -1,16 +1,22 @@
 # navio_blsct
 
 ## Requirements
-Python 3.12 or above
+- Python 3.12 or 3.13
+- macOS (arm) or Linux
 
-## Local installation
+## Installation
 
 ```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install build setuptools
-python -m build
-pip install dist/*.whl
+pip install navio_blsct
 ```
 
+## Usage
+
+1. Import the library
+
+```Python
+import blsct
+```
+
+2. Refer to [a test script](https://github.com/nav-io/libblsct-bindings/blob/main/ffi/python/tests/test_all.py) for usage examples
 

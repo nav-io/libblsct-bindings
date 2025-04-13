@@ -1,4 +1,8 @@
-1. Install swig
+# Development
+
+## Setting up the environment
+
+1. Swig
 
 - macOS 
 
@@ -23,25 +27,42 @@ source venv/bin/activate
 
 ```bash
 pip install --upgrade pip
-pip install setuptools wheel build twine
+pip install setuptools build
 ```
 
-1. Build the package
+## Building the package
 
 ```bash
 python -m build
 ```
 
-1. Test the package
+## Testing the package
 
 ```bash
-pip install dist/mypackage-0.1.0-py3-none-any.whl
-python -c "import mypackage.mylibrary; print(mypackage.mylibrary.some_function())"
+pip install dist/*.whl
+python -c "import blsct"
 ```
 
-1. Upload the package
+## Testing with locally installed package
+
+1. cd to `ffi/python` directory
+
+1. Install the package
 
 ```bash
-twine upload dist/*
+python3 -m venv venv
+source venv/bin/activate
+pip install build setuptools
+python -m build
+pip install dist/*.whl
 ```
+
+1. Move to a directory that is not `ffi/python` in order to avoid for your test script to use sources under `ffi/python` as the pacakge. Files under the directory don't contain c++ libraries and other required files.
+
+1. Run your test script
+
+```bash
+python -c 'import blsct'
+```
+
 
