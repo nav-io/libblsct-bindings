@@ -1,4 +1,4 @@
-name: Test the latest navio_blsct packages
+name: Test Python packages
 
 on:
   workflow_dispatch:
