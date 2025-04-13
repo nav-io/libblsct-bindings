@@ -31,8 +31,8 @@ jobs:
       - name: Deploy to GitHub Pages
         run: |
           cd ffi/python/docs
-          ghp-import -n -f -b gh-pages build/html
-          git push origin gh-pages
+          ghp-import -n -f -b python-doc build/html
+          git push origin python-doc 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
