@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   build-docs:
-    runs-on: macos-14
+    runs-on: ubuntu-latest
 
     steps:
       - name: Check out repository
