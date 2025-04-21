@@ -1,10 +1,10 @@
 Installation
 ============
 
-To use navio_blsct, first install it using pip:
+To use navio_blsct, install the package using pip:
 
 .. code-block:: console
 
-   (.venv) $ pip install navio_blsct
+   $ pip install navio_blsct
 
 

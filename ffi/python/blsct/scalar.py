@@ -4,7 +4,8 @@ from typing import Any, Optional, override, Self
 
 class Scalar(ManagedObj):
   """
-  Represents a finite field element in the BLS12-381 G1 curve group.
+  Represents an element of the finite field :math:`\mathbb{F}_r`, where :math:`r` is the order of the generator point of the BLS12-381 G1 group.
+
   A wrapper of MclScalar_ in navio-core.
 
   .. _MclScalar: https://github.com/nav-io/navio-core/blob/master/src/blsct/arith/mcl/mcl_scalar.h
