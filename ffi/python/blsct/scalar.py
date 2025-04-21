@@ -11,11 +11,14 @@ class Scalar(ManagedObj):
   .. _MclScalar: https://github.com/nav-io/navio-core/blob/master/src/blsct/arith/mcl/mcl_scalar.h
 
   >>> from blsct import Scalar
-  >>> a = Scalar.from_int(123)
+  >>> a = Scalar(123)
   >>> a.to_int()
   123
   >>> a.to_hex()
   '7b'
+  >>> b = Scalar.random()
+  >>> b.to_hex()  # doctest: +SKIP
+  '2afe6b2a5222bf5768ddbdbe3e5ea71e964d5312a2761a165395ad231b710edd'
   """
   def __init__(self, value: Optional[int]):
     if isinstance(value, int):
@@ -23,6 +26,8 @@ class Scalar(ManagedObj):
       super().__init__(rv.value)
     elif value is None:
       super().__init__()
+    elif isinstance(value, object):
+      super().__init__(value)
     else:
       raise ValueError(f"Scalar can only be instantiated with int, but got '{type(value).__name__}'")
 
