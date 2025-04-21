@@ -1,28 +1,34 @@
 import blsct
 from .managed_obj import ManagedObj
-from typing import Any, Self, override
+from typing import Any, Optional, override, Self
 
 class Scalar(ManagedObj):
   """
-  Wrapper for the finite field object provided by the `mcl`_ library (mclBnFr).
+  Represents a finite field element in the BLS12-381 G1 curve group.
+  A wrapper of MclScalar_ in navio-core.
 
-  .. _mcl: https://github.com/herumi/mcl
+  .. _MclScalar: https://github.com/nav-io/navio-core/blob/master/src/blsct/arith/mcl/mcl_scalar.h
 
-  This class provides finite field operations over the scalar field used in the BLS12-381 curve.
+  >>> from blsct import Scalar
+  >>> a = Scalar.from_int(123)
+  >>> a.to_int()
+  123
+  >>> a.to_hex()
+  '7b'
   """
+  def __init__(self, value: Optional[int]):
+    if isinstance(value, int):
+      rv = blsct.gen_scalar(value)
+      super().__init__(rv.value)
+    elif value is None:
+      super().__init__()
+    else:
+      raise ValueError(f"Scalar can only be instantiated with int, but got '{type(value).__name__}'")
 
   @staticmethod
   def random() -> Self:
     """Generate a random scalar"""
     rv = blsct.gen_random_scalar()
-    scalar = Scalar(rv.value)
-    blsct.free_obj(rv)
-    return scalar
-
-  @staticmethod
-  def from_int(n: int) -> Self:
-    """Create a scalar from an integer"""
-    rv = blsct.gen_scalar(n)
     scalar = Scalar(rv.value)
     blsct.free_obj(rv)
     return scalar
@@ -37,12 +43,10 @@ class Scalar(ManagedObj):
 
   @override
   def value(self) -> Any:
-    """Return the underlying native object"""
     return blsct.cast_to_scalar(self.obj)
 
   @classmethod
   def default_obj(cls) -> Any:
-    """Return the underlying native object of the default Scalar object"""
     rv = blsct.gen_scalar(0)
     return rv.value
 

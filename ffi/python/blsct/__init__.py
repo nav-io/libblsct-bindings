@@ -3,6 +3,11 @@ import typing
 if not typing.TYPE_CHECKING:
   try:
     from .blsct import *
+
+    import blsct.blsct as swig_blsct
+    swig_blsct.init()
+    del swig_blsct
+
   except ImportError:
     pass
 

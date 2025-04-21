@@ -8,7 +8,6 @@ navio_blsct documentation
 
 .. toctree::
    installation
-   initialization
    
 Classes
 -------
