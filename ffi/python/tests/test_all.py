@@ -44,6 +44,11 @@ def test_scalar():
 def test_point():
   pt = Point()
   print(pt)
+  assert pt.is_valid(), "default Point should be valid"
+
+  with Point.base() as pt2:
+    print(pt2)
+    assert pt.to_hex() == pt2.to_hex(), "Point() should return the base point"
 
   with Point.random() as pt:
     print(pt)

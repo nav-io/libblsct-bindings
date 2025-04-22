@@ -12,4 +12,5 @@ navio_blsct
 Classes
 -------
 .. toctree::
+   point
    scalar
