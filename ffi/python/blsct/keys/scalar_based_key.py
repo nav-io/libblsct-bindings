@@ -10,3 +10,9 @@ class ScalarBasedKey(ManagedObj):
   def to_hex(self) -> str:
     return blsct.scalar_to_hex(self.value())
 
+  @classmethod
+  def default_obj(cls) -> Any:
+    rv = blsct.gen_random_scalar()
+    value = rv.value
+    blsct.free_obj(rv)
+    return value

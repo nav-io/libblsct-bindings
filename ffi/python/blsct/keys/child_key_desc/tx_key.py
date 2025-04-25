@@ -5,11 +5,19 @@ from .tx_key_desc.view_key import ViewKey
 from typing import Any
 
 class TxKey(ScalarBasedKey):
+  """
+  Represents a tx key. A tx key is a Scalar and introduces no new functionality; it serves purely as a semantic alias. Both SpendingKey and ViewKey are exclusively derived from a TxKey.
+
+  >>> from blsct import TxKey
+  >>> TxKey()
+  """
   def to_spending_key(self) -> SpendingKey:
+    """derive a spending key from the tx key"""
     obj = blsct.from_tx_key_to_spending_key(self.value())
     return SpendingKey(obj)
 
   def to_view_key(self) -> ViewKey:
+    """derive a view key from the tx key"""
     obj = blsct.from_tx_key_to_view_key(self.value())
     return ViewKey(obj)
 

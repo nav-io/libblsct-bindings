@@ -22,7 +22,11 @@ extensions = []
 templates_path = ['_templates']
 exclude_patterns = []
 
-
+autodoc_type_aliases = {
+  "DoublePublickey": "blsct.keys.double_public_key.DoublePublicKey",
+  "PublicKey": "blsct.keys.public_key.PublicKey",
+  "ViewKey": "blsct.keys.child_key_desc.tx_key_desc.view_key.ViewKey",
+}
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output

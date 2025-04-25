@@ -12,5 +12,16 @@ navio_blsct
 Classes
 -------
 .. toctree::
+   address
+   address_encoding
+   blinding_key
+   child_key
+   double_public_key
    point
+   priv_spending_key
+   public_key
    scalar
+   spending_key
+   token_key
+   tx_key
+   view_key
