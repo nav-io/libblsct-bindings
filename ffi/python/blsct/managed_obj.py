@@ -16,6 +16,13 @@ class ManagedObj(ABC):
     name = cls.__name__
     raise NotImplementedError(f"{name}.default_obj()")
 
+  def move(self) -> Any:
+    if self.obj is None:
+      raise ValueError("Object is None")
+    obj = self.obj
+    self.obj = None
+    return obj
+
   def __del__(self):
     if self.obj is not None:
       blsct.free_obj(self.obj)

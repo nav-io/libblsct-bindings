@@ -10,6 +10,12 @@ from .public_key import PublicKey
 from typing import Any, Self
 
 class PrivSpendingKey(ScalarBasedKey):
+  """
+  Represents a private spending key. A private spending key is a Scalar and introduces no new functionality; it serves purely as a semantic alias.
+
+  >>> from blsct import PrivSpendingKey
+  >>> PrivSpendingKey()
+  """
   @staticmethod
   def generate(
     blinding_pub_key: PublicKey,

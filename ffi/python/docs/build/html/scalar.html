@@ -16,7 +16,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="prev" title="Installation" href="installation.html" /> 
+    <link rel="next" title="SpendingKey" href="spending_key.html" />
+    <link rel="prev" title="PublicKey" href="public_key.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -25,7 +26,10 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="installation.html" title="Installation"
+          <a href="spending_key.html" title="SpendingKey"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="public_key.html" title="PublicKey"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">navio_blsct  documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Scalar</a></li> 
@@ -41,9 +45,10 @@
 <h1>Scalar<a class="headerlink" href="#scalar" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="blsct.Scalar">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blsct.</span></span><span class="sig-name descname"><span class="pre">Scalar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#blsct.Scalar" title="Link to this definition">¶</a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blsct.</span></span><span class="sig-name descname"><span class="pre">Scalar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#blsct.Scalar" title="Link to this definition">¶</a></dt>
 <dd><p>Represents an element of the finite field <span class="math notranslate nohighlight">\(\mathbb{F}_r\)</span>, where <span class="math notranslate nohighlight">\(r\)</span> is the order of the generator point of the BLS12-381 G1 group.</p>
 <p>A wrapper of <a class="reference external" href="https://github.com/nav-io/navio-core/blob/master/src/blsct/arith/mcl/mcl_scalar.h">MclScalar</a> in navio-core.</p>
+<p>Instantiating a Scalar object without a parameter returns a Scalar representing the value zero.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">blsct</span><span class="w"> </span><span class="kn">import</span> <span class="n">Scalar</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">Scalar</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span><span class="o">.</span><span class="n">to_int</span><span class="p">()</span>
@@ -53,6 +58,8 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">Scalar</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">to_hex</span><span class="p">()</span>
 <span class="go">&#39;2afe6b2a5222bf5768ddbdbe3e5ea71e964d5312a2761a165395ad231b710edd&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Scalar</span><span class="p">()</span><span class="o">.</span><span class="n">to_hex</span><span class="p">()</span>
+<span class="go">0</span>
 </pre></div>
 </div>
 <dl class="py method">
@@ -101,8 +108,13 @@
   </div>
   <div>
     <h4>Previous topic</h4>
-    <p class="topless"><a href="installation.html"
-                          title="previous chapter">Installation</a></p>
+    <p class="topless"><a href="public_key.html"
+                          title="previous chapter">PublicKey</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="spending_key.html"
+                          title="next chapter">SpendingKey</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -132,7 +144,10 @@
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="installation.html" title="Installation"
+          <a href="spending_key.html" title="SpendingKey"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="public_key.html" title="PublicKey"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">navio_blsct  documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Scalar</a></li> 

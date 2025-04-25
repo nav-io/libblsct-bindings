@@ -206,13 +206,24 @@ def test_key_derivation():
   sub_addr = SubAddr.generate(view_key, spending_pub_key, sub_addr_id)
   print(f"sub_addr: {sub_addr}")
 
-  dpk = DoublePublicKey.from_view_key_spending_pub_key_acct_addr(
+  dpk = DoublePublicKey.from_keys_and_acct_addr(
     view_key,
     spending_pub_key,
     account,
     address,
   )
   print(f"dpk: {dpk}")
+
+  # test also direct instantiation
+  SpendingKey()
+  ViewKey()
+  BlindingKey()
+  TokenKey()
+  TxKey()
+  ChildKey()
+  DoublePublicKey()
+  PrivSpendingKey()
+  PublicKey()
 
 def test_tx():
   num_tx_in = 1

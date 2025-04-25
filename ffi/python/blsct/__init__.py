@@ -11,7 +11,8 @@ if not typing.TYPE_CHECKING:
   except ImportError:
     pass
 
-from .address import Address, AddressEncoding
+from .address import Address
+from .address_encoding import AddressEncoding
 from .hash_id import HashId
 from .keys.child_key import ChildKey
 from .keys.child_key_desc.blinding_key import BlindingKey

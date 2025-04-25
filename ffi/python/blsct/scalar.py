@@ -10,6 +10,8 @@ class Scalar(ManagedObj):
 
   .. _MclScalar: https://github.com/nav-io/navio-core/blob/master/src/blsct/arith/mcl/mcl_scalar.h
 
+  Instantiating a Scalar object without a parameter returns a Scalar representing the value zero.
+
   >>> from blsct import Scalar
   >>> a = Scalar(123)
   >>> a.to_int()
@@ -19,8 +21,10 @@ class Scalar(ManagedObj):
   >>> b = Scalar.random()
   >>> b.to_hex()  # doctest: +SKIP
   '2afe6b2a5222bf5768ddbdbe3e5ea71e964d5312a2761a165395ad231b710edd'
+  >>> Scalar().to_hex()
+  0
   """
-  def __init__(self, value: Optional[int]):
+  def __init__(self, value: Optional[int] = None):
     if isinstance(value, int):
       rv = blsct.gen_scalar(value)
       super().__init__(rv.value)
@@ -54,5 +58,7 @@ class Scalar(ManagedObj):
   @classmethod
   def default_obj(cls) -> Any:
     rv = blsct.gen_scalar(0)
-    return rv.value
+    value = rv.value
+    blsct.free_obj(rv)
+    return value
 
