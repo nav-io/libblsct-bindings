@@ -11,6 +11,8 @@ class DoublePublicKey(ManagedObj):
   Instantiating a DoublePublicKey object without a parameter returns a DoublePublicKey consisting of two randomly generated PublicKeys.
 
   >>> from blsct import DoublePublicKey
+  >>> DoublePublicKey()
+  <blsct.keys.double_public_key.DoublePublicKey object at 0x10102a660>  # doctest: +SKIP
   """
   def __init__(self, obj=None):
     super().__init__(obj)

@@ -8,14 +8,16 @@ class PublicKey(ManagedObj):
   """
   Represents an element in the BLS12-381 G1 curve group that is used as a public key.
 
-  >>> from blsct import PublicKey
-  >>> from blsct import Scalar
+  >>> from blsct import PublicKey, Scalar, ViewKey
   >>> s = Scalar.random()
   >>> PublicKey.from_scalar(s)
   <blsct.keys.public_key.PublicKey object at 0x100bbfd90>  # doctest: +SKIP
   >>> PublicKey.random()
   <blsct.keys.public_key.PublicKey object at 0x1013f4190>  # doctest: +SKIP
-
+  >>> pk = PublicKey.random()
+  >>> vk = ViewKey()
+  >>> PublicKey.generate_nonce(pk, vk)
+  <blsct.keys.public_key.PublicKey object at 0x10100f950>  # doctest: +SKIP
   """
 
   @staticmethod
