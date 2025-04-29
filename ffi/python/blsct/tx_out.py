@@ -39,10 +39,6 @@ class TxOut(ManagedObj):
     blsct.free_obj(rv)
     return obj
 
-  @override
-  def value(self) -> Any:
-    return blsct.cast_to_tx_out(self.obj)
-
   def get_value(self) -> int:
     return blsct.get_tx_out_value(self.value())
 
@@ -96,4 +92,12 @@ class TxOut(ManagedObj):
   def get_token_id(self) -> TokenId:
     obj = blsct.get_tx_out_token_id(self.value())
     return TokenId(obj)
+
+  @override
+  def value(self) -> Any:
+    return blsct.cast_to_tx_out(self.obj)
+
+  @classmethod
+  def default_obj(cls) -> Any:
+    raise NotImplementedError("Cannot create a TxOut without required parameters.")
 

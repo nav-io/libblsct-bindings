@@ -33,10 +33,6 @@ class TxIn(ManagedObj):
     blsct.free_obj(rv)
     return obj
 
-  @override
-  def value(self) -> Any:
-    return blsct.cast_to_tx_in(self.obj)
-
   def get_prev_out_hash(self) -> TxId:
     tx_id = blsct.get_tx_in_prev_out_hash(self.value())
     return TxId(tx_id)
@@ -54,4 +50,12 @@ class TxIn(ManagedObj):
   def get_script_witness(self) -> Script:
     script_witness = blsct.get_tx_in_script_witness(self.value())
     return Script(script_witness)
+
+  @override
+  def value(self) -> Any:
+    return blsct.cast_to_tx_in(self.obj)
+
+  @classmethod
+  def default_obj(cls) -> Any:
+    raise NotImplementedError("Cannot create a TxIn without required parameters.")
 

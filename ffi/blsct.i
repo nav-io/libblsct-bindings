@@ -32,6 +32,14 @@ if (p == nullptr) { \
   return; \
 }
 
+  BlsctAmountRecoveryReq* cast_to_amount_recovery_req(void* x) {
+    return static_cast<BlsctAmountRecoveryReq*>(x);
+  }
+
+  CScript* cast_to_cscript(void* x) {
+    return static_cast<CScript*>(x);
+  }
+
   BlsctDoublePubKey* cast_to_dpk(void* x) {
     return static_cast<BlsctDoublePubKey*>(x);
   }
@@ -64,6 +72,10 @@ if (p == nullptr) { \
     return static_cast<BlsctSignature*>(x);
   }
 
+  size_t cast_to_size_t(int x) {
+    return static_cast<size_t>(x);
+  }
+
   BlsctSubAddr* cast_to_sub_addr(void* x) {
     return static_cast<BlsctSubAddr*>(x);
   }
@@ -92,16 +104,8 @@ if (p == nullptr) { \
     return static_cast<uint8_t*>(x);
   }
 
-  CScript* cast_to_cscript(void* x) {
-    return static_cast<CScript*>(x);
-  }
-
-  BlsctAmountRecoveryReq* cast_to_amount_recovery_req(void* x) {
-    return static_cast<BlsctAmountRecoveryReq*>(x);
-  }
-
-  size_t cast_to_size_t(int x) {
-    return static_cast<size_t>(x);
+  BlsctViewTag* cast_to_view_tag(void* x) {
+    return static_cast<BlsctViewTag*>(x);
   }
 
   // freeing the returned value results in error
