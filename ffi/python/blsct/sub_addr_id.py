@@ -8,7 +8,7 @@ class SubAddrId(ManagedObj):
 
   >>> from blsct import SubAddrId
   >>> SubAddrId.generate(123, 456)
-  <blsct.sub_addr_id.SubAddrId object at 0x1050d4ad0>
+  <blsct.sub_addr_id.SubAddrId object at 0x1050d4ad0>  # doctest: +SKIP
   """
   @staticmethod
   def generate(
