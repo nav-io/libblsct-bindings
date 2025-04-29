@@ -20,7 +20,7 @@ class ViewTag(ManagedObj):
   @staticmethod
   def generate(
     blinding_pub_key: PublicKey,
-    view_key: Scalar
+    view_key: ViewKey
   ) -> Self:
     """Generate a view tag from blinding public key and view key"""
     obj =  blsct.calc_view_tag(

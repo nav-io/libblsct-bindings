@@ -1,6 +1,7 @@
 import blsct
 from .managed_obj import ManagedObj
 from .scalar import Scalar
+from .keys.child_key_desc.tx_key_desc.view_key import ViewKey
 from .keys.double_public_key import DoublePublicKey
 from .keys.public_key import PublicKey
 from .sub_addr_id import SubAddrId
@@ -22,7 +23,7 @@ class SubAddr(ManagedObj):
   """
   @staticmethod
   def generate(
-    view_key: Scalar,
+    view_key: ViewKey,
     spending_pub_key: PublicKey,
     sub_addr_id: SubAddrId,
   ) -> Self:
