@@ -5,12 +5,24 @@ from .scalar import Scalar
 from typing import Any, Self, override
 
 class Signature(ManagedObj):
+  """
+  Represents the signature of a transaction.
+
+  >>> from blsct import PublicKey, Scalar, Signature
+  >>> sk = Scalar()
+  >>> pk = PublicKey.from_scalar(sk)
+  >>> sig = Signature.generate(sk, 'navio')
+  >>> sig.verify('navio', pk)
+  True
+  """
   @staticmethod
   def generate(priv_key: Scalar, msg: str) -> Self:
+    """Generate a signature using a private key and a message."""
     sig = blsct.sign_message(priv_key.value(), msg)
     return Signature(sig)
 
   def verify(self, msg: str, pub_key: PublicKey) -> bool:
+    """Verify a signature using the public key corresponding to the private key that signed the transaction."""
     return blsct.verify_msg_sig(pub_key.value(), msg, self.value())
 
   @override
@@ -19,6 +31,5 @@ class Signature(ManagedObj):
 
   @override
   def default_obj(self) -> Self:
-    name = self.__class__.__name__
-    raise NotImplementedError(f"{name}.default_obj()")
+    raise NotImplementedError(f"Cannot create a Signature without required parameters.")
 

@@ -38,11 +38,6 @@ class Tx(ManagedObj):
     blsct.free_obj(rv)
     return obj
 
-  @override
-  def value(self) -> Any:
-    # self.obj is uint8_t*
-    return blsct.cast_to_uint8_t_ptr(self.obj)
-
   def get_tx_ins(self) -> list[TxIn]:
     # returns CMutableTransaction*
     blsct_tx = blsct.deserialize_tx(self.value(), self.obj_size)
@@ -89,4 +84,13 @@ class Tx(ManagedObj):
     inst = cls(obj) 
     inst.obj_size = int(len(hex) / 2)
     return inst
+
+  @override
+  def value(self) -> Any:
+    # self.obj is uint8_t*
+    return blsct.cast_to_uint8_t_ptr(self.obj)
+
+  @classmethod
+  def default_obj(cls) -> Any:
+    raise NotImplementedError("Cannot create a Tx without required parameters.")
 

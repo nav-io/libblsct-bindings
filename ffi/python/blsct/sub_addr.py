@@ -7,12 +7,26 @@ from .sub_addr_id import SubAddrId
 from typing import Any, Self, override
 
 class SubAddr(ManagedObj):
+  """
+  Represents a sub-address.
+
+  >>> from blsct import ChildKey, DoublePublicKey, PublicKey, Scalar, SubAddr, SubAddrId
+  >>> view_key = ChildKey().to_tx_key().to_view_key()
+  >>> spending_pub_key = PublicKey()
+  >>> sub_addr_id = SubAddrId.generate(123, 456)
+  >>> SubAddr.generate(view_key, spending_pub_key, sub_addr_id)
+  <blsct.sub_addr.SubAddr object at 0x100fc2900>
+  >>> dpk = DoublePublicKey()
+  >>> SubAddr.from_double_public_key(dpk)
+  <blsct.sub_addr.SubAddr object at 0x101050410>
+  """
   @staticmethod
   def generate(
     view_key: Scalar,
     spending_pub_key: PublicKey,
     sub_addr_id: SubAddrId,
   ) -> Self:
+    """Derive a sub-address from a view key, a spending public key, and a sub-address ID"""
     obj = blsct.derive_sub_address(
       view_key.value(),
       spending_pub_key.value(),
@@ -22,6 +36,7 @@ class SubAddr(ManagedObj):
 
   @staticmethod
   def from_double_public_key(dpk: DoublePublicKey) -> Self:
+    """Derive a sub-address from a DoublePublicKey"""
     rv = blsct.dpk_to_sub_addr(dpk.value())
     inst = SubAddr(rv.value)
     blsct.free_obj(rv)
@@ -30,4 +45,8 @@ class SubAddr(ManagedObj):
   @override
   def value(self) -> Any:
     return blsct.cast_to_sub_addr(self.obj)
+
+  @override
+  def default_obj(self) -> Self:
+    raise NotImplementedError(f"Cannot create a SubAddr without required parameters.")
 

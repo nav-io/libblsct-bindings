@@ -42,7 +42,9 @@
  | <a href="#E"><strong>E</strong></a>
  | <a href="#F"><strong>F</strong></a>
  | <a href="#G"><strong>G</strong></a>
+ | <a href="#H"><strong>H</strong></a>
  | <a href="#I"><strong>I</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
@@ -109,6 +111,8 @@
 <h2 id="F">F</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="sub_addr.html#blsct.SubAddr.from_double_public_key">from_double_public_key() (blsct.SubAddr static method)</a>
+</li>
       <li><a href="double_public_key.html#blsct.DoublePublicKey.from_keys_and_acct_addr">from_keys_and_acct_addr() (blsct.DoublePublicKey static method)</a>
 </li>
       <li><a href="double_public_key.html#blsct.DoublePublicKey.from_public_keys">from_public_keys() (blsct.DoublePublicKey static method)</a>
@@ -121,13 +125,41 @@
         <li><a href="public_key.html#blsct.PublicKey.from_scalar">(blsct.PublicKey static method)</a>
 </li>
       </ul></li>
+      <li><a href="token_id.html#blsct.TokenId.from_token">from_token() (blsct.TokenId static method)</a>
+</li>
+      <li><a href="token_id.html#blsct.TokenId.from_token_and_subid">from_token_and_subid() (blsct.TokenId static method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="hash_id.html#blsct.HashId.generate">generate() (blsct.HashId static method)</a>
+
+      <ul>
+        <li><a href="out_point.html#blsct.OutPoint.generate">(blsct.OutPoint static method)</a>
+</li>
+        <li><a href="signature.html#blsct.Signature.generate">(blsct.Signature static method)</a>
+</li>
+        <li><a href="sub_addr.html#blsct.SubAddr.generate">(blsct.SubAddr static method)</a>
+</li>
+        <li><a href="sub_addr_id.html#blsct.SubAddrId.generate">(blsct.SubAddrId static method)</a>
+</li>
+        <li><a href="view_tag.html#blsct.ViewTag.generate">(blsct.ViewTag method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="public_key.html#blsct.PublicKey.generate_nonce">generate_nonce() (blsct.PublicKey static method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="H">H</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="hash_id.html#blsct.HashId">HashId (class in blsct)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -136,6 +168,14 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="point.html#blsct.Point.is_valid">is_valid() (blsct.Point method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="out_point.html#blsct.OutPoint">OutPoint (class in blsct)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -166,6 +206,10 @@
 </li>
       </ul></li>
   </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="range_proof.html#blsct.RangeProof">RangeProof (class in blsct)</a>
+</li>
+  </ul></td>
 </tr></table>
 
 <h2 id="S">S</h2>
@@ -173,9 +217,19 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="scalar.html#blsct.Scalar">Scalar (class in blsct)</a>
 </li>
+      <li><a href="script.html#blsct.Script">Script (class in blsct)</a>
+</li>
+      <li><a href="signature.html#blsct.Signature">Signature (class in blsct)</a>
+</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="spending_key.html#blsct.SpendingKey">SpendingKey (class in blsct)</a>
+</li>
+      <li><a href="sub_addr.html#blsct.SubAddr">SubAddr (class in blsct)</a>
+</li>
+      <li><a href="sub_addr_id.html#blsct.SubAddrId">SubAddrId (class in blsct)</a>
+</li>
+      <li><a href="token_id.html#blsct.TokenId.subid">subid() (blsct.TokenId method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -195,17 +249,29 @@
 </li>
       <li><a href="tx_key.html#blsct.TxKey.to_spending_key">to_spending_key() (blsct.TxKey method)</a>
 </li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="child_key.html#blsct.ChildKey.to_token_key">to_token_key() (blsct.ChildKey method)</a>
 </li>
       <li><a href="child_key.html#blsct.ChildKey.to_tx_key">to_tx_key() (blsct.ChildKey method)</a>
 </li>
       <li><a href="tx_key.html#blsct.TxKey.to_view_key">to_view_key() (blsct.TxKey method)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="token_id.html#blsct.TokenId.token">token() (blsct.TokenId method)</a>
+</li>
+      <li><a href="token_id.html#blsct.TokenId">TokenId (class in blsct)</a>
+</li>
       <li><a href="token_key.html#blsct.TokenKey">TokenKey (class in blsct)</a>
 </li>
+      <li><a href="tx.html#blsct.Tx">Tx (class in blsct)</a>
+</li>
+      <li><a href="tx_id.html#blsct.TxId">TxId (class in blsct)</a>
+</li>
+      <li><a href="tx_in.html#blsct.TxIn">TxIn (class in blsct)</a>
+</li>
       <li><a href="tx_key.html#blsct.TxKey">TxKey (class in blsct)</a>
+</li>
+      <li><a href="tx_out.html#blsct.TxOut">TxOut (class in blsct)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -213,7 +279,13 @@
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="signature.html#blsct.Signature.verify">verify() (blsct.Signature method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="view_key.html#blsct.ViewKey">ViewKey (class in blsct)</a>
+</li>
+      <li><a href="view_tag.html#blsct.ViewTag">ViewTag (class in blsct)</a>
 </li>
   </ul></td>
 </tr></table>
