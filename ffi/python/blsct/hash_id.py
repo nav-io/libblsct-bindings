@@ -11,7 +11,7 @@ class HashId(ManagedObj):
 
   >>> from blsct import ChildKey, HashId, PublicKey, ViewKey
   >>> HashId()
-  <blsct.hash_id.HashId object at 0x1050bcad0>
+  <blsct.hash_id.HashId object at 0x1050bcad0>  # doctest: +SKIP
   >>> blinding_pub_key = PublicKey()
   >>> spending_pub_key = PublicKey()
   >>> view_key = ChildKey().to_tx_key().to_view_key()

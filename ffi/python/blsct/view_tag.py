@@ -11,11 +11,11 @@ class ViewTag(ManagedObj):
 
   >>> from blsct import ChildKey, PublicKey, TxKey, ViewTag
   >>> ViewTag()
-  <blsct.view_tag.ViewTag object at 0x105b26660>
+  <blsct.view_tag.ViewTag object at 0x105b26660>  # doctest: +SKIP
   >>> blinding_pub_key = PublicKey()
   >>> view_key = ChildKey().to_tx_key().to_view_key()
   >>> ViewTag.generate(blinding_pub_key, view_key)
-  <blsct.view_tag.ViewTag object at 0x104bf2900>
+  <blsct.view_tag.ViewTag object at 0x104bf2900>  # doctest: +SKIP
   """
 
   @staticmethod

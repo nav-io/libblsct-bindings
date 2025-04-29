@@ -8,9 +8,9 @@ class TokenId(ManagedObj):
 
   >>> from blsct import TokenId
   >>> TokenId()
-  <blsct.token_id.TokenId object at 0x105a00ad0>
+  <blsct.token_id.TokenId object at 0x105a00ad0>  # doctest: +SKIP
   >>> TokenId.from_token(123)
-  <blsct.token_id.TokenId object at 0x105a8c050>
+  <blsct.token_id.TokenId object at 0x105a8c050>  # doctest: +SKIP
   >>> token_id = TokenId.from_token_and_subid(123, 456)
   >>> token_id.token()
   123
