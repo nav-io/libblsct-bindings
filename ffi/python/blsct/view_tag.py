@@ -1,4 +1,5 @@
 import blsct
+from .keys.child_key_desc.tx_key_desc.view_key import ViewKey
 from .keys.public_key import PublicKey
 from .managed_obj import ManagedObj
 from .scalar import Scalar

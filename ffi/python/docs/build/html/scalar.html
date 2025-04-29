@@ -16,8 +16,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="SpendingKey" href="spending_key.html" />
-    <link rel="prev" title="PublicKey" href="public_key.html" /> 
+    <link rel="next" title="Script" href="script.html" />
+    <link rel="prev" title="RangeProof" href="range_proof.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="Related">
       <h3>Navigation</h3>
@@ -26,10 +26,10 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
-          <a href="spending_key.html" title="SpendingKey"
+          <a href="script.html" title="Script"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="public_key.html" title="PublicKey"
+          <a href="range_proof.html" title="RangeProof"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">navio_blsct  documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Scalar</a></li> 
@@ -59,7 +59,9 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="n">b</span><span class="o">.</span><span class="n">to_hex</span><span class="p">()</span>
 <span class="go">&#39;2afe6b2a5222bf5768ddbdbe3e5ea71e964d5312a2761a165395ad231b710edd&#39;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">Scalar</span><span class="p">()</span><span class="o">.</span><span class="n">to_hex</span><span class="p">()</span>
-<span class="go">0</span>
+<span class="go">&#39;5e6efdcf00ce467de29a970adf3a09f8c93e51dc7f1405bbe9dffeeabf952fbe&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Scalar</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span><span class="o">.</span><span class="n">to_hex</span><span class="p">()</span>
+<span class="go">&#39;0&#39;</span>
 </pre></div>
 </div>
 <dl class="py method">
@@ -78,6 +80,12 @@
 <dt class="sig sig-object py" id="blsct.Scalar.to_int">
 <span class="sig-name descname"><span class="pre">to_int</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#blsct.Scalar.to_int" title="Link to this definition">¶</a></dt>
 <dd><p>Convert the scalar to an integer</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Scalar.zero">
+<span class="sig-name descname"><span class="pre">zero</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#blsct.Scalar.zero" title="Link to this definition">¶</a></dt>
+<dd><p>Return a zero scalar</p>
 </dd></dl>
 
 </dd></dl>
@@ -99,6 +107,7 @@
 <li><a class="reference internal" href="#blsct.Scalar.random"><code class="docutils literal notranslate"><span class="pre">Scalar.random()</span></code></a></li>
 <li><a class="reference internal" href="#blsct.Scalar.to_hex"><code class="docutils literal notranslate"><span class="pre">Scalar.to_hex()</span></code></a></li>
 <li><a class="reference internal" href="#blsct.Scalar.to_int"><code class="docutils literal notranslate"><span class="pre">Scalar.to_int()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.Scalar.zero"><code class="docutils literal notranslate"><span class="pre">Scalar.zero()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -108,13 +117,13 @@
   </div>
   <div>
     <h4>Previous topic</h4>
-    <p class="topless"><a href="public_key.html"
-                          title="previous chapter">PublicKey</a></p>
+    <p class="topless"><a href="range_proof.html"
+                          title="previous chapter">RangeProof</a></p>
   </div>
   <div>
     <h4>Next topic</h4>
-    <p class="topless"><a href="spending_key.html"
-                          title="next chapter">SpendingKey</a></p>
+    <p class="topless"><a href="script.html"
+                          title="next chapter">Script</a></p>
   </div>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
@@ -144,10 +153,10 @@
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
-          <a href="spending_key.html" title="SpendingKey"
+          <a href="script.html" title="Script"
              >next</a> |</li>
         <li class="right" >
-          <a href="public_key.html" title="PublicKey"
+          <a href="range_proof.html" title="RangeProof"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="index.html">navio_blsct  documentation</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Scalar</a></li> 
