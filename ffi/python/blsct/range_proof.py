@@ -63,7 +63,7 @@ class RangeProof(ManagedObj):
     return rp
 
   def verify_proofs(proofs: list[Self]) -> bool:
-    """Verify a list of range proofs"""
+    """Verify a list of range proofs."""
     vec = blsct.create_range_proof_vec()
     for proof in proofs:
       blsct.add_range_proof_to_vec(vec, proof.obj_size, proof.value())
@@ -79,7 +79,7 @@ class RangeProof(ManagedObj):
 
   def recover_amounts(reqs: list[AmountRecoveryReq]) -> list[AmountRecoveryRes]:
     """
-    Recover the amount from each given single-amount range proof. The results may include failures
+    Recover the amount from each given single-amount range proof. The results may include failures.
     """
     req_vec = blsct.create_amount_recovery_req_vec()
 
