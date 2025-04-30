@@ -1,41 +1,22 @@
 from __future__ import annotations
 import blsct
+from .amount_recovery_req import AmountRecoveryReq
+from .amount_recovery_res import AmountRecoveryRes
 from .managed_obj import ManagedObj
 from .point import Point
 from .token_id import TokenId
 from typing import Any, Self, override
 
-class AmountRecoveryReq:
-  def __init__(
-    self,
-    range_proof: "RangeProof",
-    nonce: Point,
-  ):
-    self.range_proof = range_proof
-    self.nonce = nonce
-
-class AmountRecoveryRes:
-  def __init__(
-    self,
-    is_succ: bool,
-    amount: int,
-    message: str,
-  ):
-    self.is_succ = is_succ
-    self.amount = amount
-    self.message = message
-  
-  def __str__(self):
-    is_succ = self.is_succ
-    amount = self.amount
-    message = self.message
-    return f"AmtRecoveryRes{is_succ=}:{amount=}:{message=}"
-
 class RangeProof(ManagedObj):
+  """
+  Represents an aggregated range proof of confidential transaction amounts.
+  """
   def set_size(self, obj_size: int):
+    """Set the size of the range proof object."""
     self.obj_size = obj_size
 
   def get_size(self) -> int:
+    """Get the size of the range proof object."""
     return self.obj_size
 
   @staticmethod
@@ -45,6 +26,7 @@ class RangeProof(ManagedObj):
     message: str,
     token_id: TokenId = None,
   ) -> Self:
+    """Build a range proof from a list of amounts, nonce, message and optional token ID."""
     vec = blsct.create_uint64_vec()
     for amount in amounts:
       blsct.add_to_uint64_vec(vec, amount)
@@ -85,6 +67,9 @@ class RangeProof(ManagedObj):
     return rv.value != 0
 
   def recover_amounts(reqs: list[AmountRecoveryReq]) -> list[AmountRecoveryRes]:
+    """
+    Try to recover the amount for each given single-amount range proof.
+    """
     req_vec = blsct.create_amount_recovery_req_vec()
 
     for req in reqs:

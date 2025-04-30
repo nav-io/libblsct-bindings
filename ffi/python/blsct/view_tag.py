@@ -5,7 +5,7 @@ from .managed_obj import ManagedObj
 from .scalar import Scalar
 from typing import Any, Self, override
 
-class ViewTag(ManagedObj):
+class ViewTag():
   """
   Represents a view tag consisting of a blinding public key and a view key.
 
@@ -24,11 +24,10 @@ class ViewTag(ManagedObj):
     view_key: ViewKey
   ) -> Self:
     """Generate a view tag from blinding public key and view key"""
-    obj =  blsct.calc_view_tag(
+    return blsct.calc_view_tag(
       blinding_pub_key.value(),
       view_key.value()
     )
-    return ViewTag.from_obj(obj)
 
   @override
   def value(self):
