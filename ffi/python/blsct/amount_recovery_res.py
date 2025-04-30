@@ -1,6 +1,8 @@
 class AmountRecoveryRes:
   """
   The result of recovering a single amount from a non-aggregated range proof.
+
+  Refer to :class:`RangeProof` for a usage example.
   """
   def __init__(
     self,
@@ -16,5 +18,5 @@ class AmountRecoveryRes:
     is_succ = self.is_succ
     amount = self.amount
     message = self.message
-    return f"AmtRecoveryRes{is_succ=}:{amount=}:{message=}"
+    return f"AmtRecoveryRes({is_succ=}, {amount=}, {message=})"
 

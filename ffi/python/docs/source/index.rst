@@ -14,6 +14,8 @@ Classes
 .. toctree::
    address
    address_encoding
+   amount_recovery_req
+   amount_recovery_res
    blinding_key
    child_key
    double_public_key

@@ -1,8 +1,11 @@
+from __future__ import annotations
 from .point import Point
 
 class AmountRecoveryReq:
   """
   A request for recovering a single amount from a non-aggregated range proof.
+
+  Refer to :class:`RangeProof` for a usage example.
   """
   def __init__(
     self,

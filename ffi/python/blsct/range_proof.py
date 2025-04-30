@@ -1,4 +1,3 @@
-from __future__ import annotations
 import blsct
 from .amount_recovery_req import AmountRecoveryReq
 from .amount_recovery_res import AmountRecoveryRes
@@ -9,7 +8,18 @@ from typing import Any, Self, override
 
 class RangeProof(ManagedObj):
   """
-  Represents an aggregated range proof of confidential transaction amounts.
+  Represents a (possibly aggregated) range proof for one or more confidential transaction amounts.
+
+  >>> from blsct import AmountRecoveryReq, AmountRecoveryRes, Point, RangeProof, TokenId
+  ...
+  >>> nonce = Point()
+  >>> token_id = TokenId()
+  >>> rp = RangeProof.build([456], nonce, 'navcoin', token_id)
+  >>> RangeProof.verify_proofs([rp])
+  True
+  >>> req = AmountRecoveryReq(rp, nonce)
+  >>> res = RangeProof.recover_amounts([req])
+  0: AmtRecoveryRes(is_succ=True, amount=456, message='navcoin')
   """
   def set_size(self, obj_size: int):
     """Set the size of the range proof object."""
@@ -53,6 +63,7 @@ class RangeProof(ManagedObj):
     return rp
 
   def verify_proofs(proofs: list[Self]) -> bool:
+    """Verify a list of range proofs."""
     vec = blsct.create_range_proof_vec()
     for proof in proofs:
       blsct.add_range_proof_to_vec(vec, proof.obj_size, proof.value())
@@ -68,7 +79,7 @@ class RangeProof(ManagedObj):
 
   def recover_amounts(reqs: list[AmountRecoveryReq]) -> list[AmountRecoveryRes]:
     """
-    Try to recover the amount for each given single-amount range proof.
+    Recover the amount from each given single-amount range proof. The results may include failures.
     """
     req_vec = blsct.create_amount_recovery_req_vec()
 
