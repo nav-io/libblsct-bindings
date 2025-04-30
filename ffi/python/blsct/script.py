@@ -4,9 +4,13 @@ from typing import Any, Self, override
 
 class Script(ManagedObj):
   """
-  Represents a script.
+  Represents a script, which may be a scriptPubKey, scriptSig, or scriptWitness.
+
+  A script appears as an attribute of :class:`TxOut` (scriptPubKey) or :class:`TxIn` (scriptSig and scriptWitness), and is not meant to be instantiated directly.
   """
+
   def to_hex(self) -> str:
+    """Convert the script to a hexadecimal string."""
     buf = blsct.cast_to_uint8_t_ptr(self.value())
     return blsct.to_hex(buf, blsct.SCRIPT_SIZE)
 
@@ -16,5 +20,5 @@ class Script(ManagedObj):
 
   @classmethod
   def default_obj(cls) -> Any:
-    raise NotImplementedError("Cannot create a Script without required parameters.")
+    raise NotImplementedError("Cannot directly instantiate create a Script without required parameters.")
 
