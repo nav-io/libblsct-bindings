@@ -25,6 +25,7 @@ exclude_patterns = []
 autodoc_type_aliases = {
   "DoublePublickey": "blsct.keys.double_public_key.DoublePublicKey",
   "PublicKey": "blsct.keys.public_key.PublicKey",
+  "RangeProof": "blsct.RangeProof",
   "ViewKey": "blsct.keys.child_key_desc.tx_key_desc.view_key.ViewKey",
 }
 
