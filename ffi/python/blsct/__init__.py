@@ -13,6 +13,8 @@ if not typing.TYPE_CHECKING:
 
 from .address import Address
 from .address_encoding import AddressEncoding
+from .amount_recovery_req import AmountRecoveryReq
+from .amount_recovery_res import AmountRecoveryRes
 from .hash_id import HashId
 from .keys.child_key import ChildKey
 from .keys.child_key_desc.blinding_key import BlindingKey
@@ -25,7 +27,7 @@ from .keys.priv_spending_key import PrivSpendingKey
 from .keys.public_key import PublicKey
 from .out_point import OutPoint
 from .point import Point
-from .range_proof import RangeProof, AmountRecoveryReq, AmountRecoveryRes
+from .range_proof import RangeProof
 from .scalar import Scalar
 from .script import Script
 from .signature import Signature

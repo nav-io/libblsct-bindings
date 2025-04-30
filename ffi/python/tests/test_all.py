@@ -1,4 +1,5 @@
 import blsct
+import sys
 
 from blsct import (
   Address,
@@ -31,18 +32,20 @@ from blsct import (
 
 import secrets
 
-blsct.init()
-
 def test_scalar():
-  s = Scalar.random()
+  s = Scalar()
   print(s)
   print(f"Scalar({s.to_hex()})")
 
-  with Scalar.from_int(1) as one:
+  with Scalar(1) as one:
     print(one)
 
 def test_point():
+  print("Point class:", Point)
+  print("Defined in module:", Point.__module__)
+  print("Module file:", sys.modules[Point.__module__].__file__)
   pt = Point()
+  print(pt.to_hex())
   print(pt)
   assert pt.is_valid(), "default Point should be valid"
 
@@ -184,7 +187,7 @@ def test_key_derivation():
   )
   print(f"priv_spending_key: {priv_spending_key.to_hex()}")
 
-  view_tag = ViewTag(blinding_pub_key, view_key)
+  view_tag = ViewTag.generate(blinding_pub_key, view_key)
   print(f"view_tag: {view_tag}")
 
   spending_pub_key = PublicKey.from_scalar(spending_key)
@@ -224,6 +227,8 @@ def test_key_derivation():
   DoublePublicKey()
   PrivSpendingKey()
   PublicKey()
+  ViewKey()
+  ViewTag()
 
 def test_tx():
   num_tx_in = 1
@@ -239,7 +244,7 @@ def test_tx():
   print(f"tx_id: {tx_id}")
 
   gamma = 100
-  spending_key = Scalar.from_int(12)
+  spending_key = Scalar(12)
   token_id = TokenId()
   out_index = 0
   out_point = OutPoint.generate(tx_id, out_index)
