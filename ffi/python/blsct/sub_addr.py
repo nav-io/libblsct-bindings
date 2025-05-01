@@ -11,7 +11,7 @@ class SubAddr(ManagedObj):
   """
   Represents a sub-address.
 
-  >>> from blsct import ChildKey, DoublePublicKey, PublicKey, Scalar, SubAddr, SubAddrId
+  >>> from blsct import ChildKey, DoublePublicKey, PublicKey, SubAddr, SubAddrId
   >>> view_key = ChildKey().to_tx_key().to_view_key()
   >>> spending_pub_key = PublicKey()
   >>> sub_addr_id = SubAddrId.generate(123, 456)

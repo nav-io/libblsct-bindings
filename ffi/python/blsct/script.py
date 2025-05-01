@@ -6,7 +6,7 @@ class Script(ManagedObj):
   """
   Represents a script, which may be a scriptPubKey, scriptSig, or scriptWitness.
 
-  A script appears as an attribute of :class:`TxOut` (scriptPubKey) or :class:`TxIn` (scriptSig and scriptWitness), and is not meant to be instantiated directly.
+  A :class:`Script` appears as an attribute of :class:`TxOut` (scriptPubKey) or :class:`TxIn` (scriptSig and scriptWitness), and is not meant to be instantiated directly.
   """
 
   def to_hex(self) -> str:

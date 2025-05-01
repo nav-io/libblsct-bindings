@@ -10,7 +10,7 @@ class Scalar(ManagedObj):
 
   .. _MclScalar: https://github.com/nav-io/navio-core/blob/master/src/blsct/arith/mcl/mcl_scalar.h
 
-  Instantiating a Scalar object without a parameter returns a Scalar representing the value zero.
+  Instantiating a Scalar without a parameter is equivalent to calling Scalar.random().
 
   >>> from blsct import Scalar
   >>> a = Scalar(123)
