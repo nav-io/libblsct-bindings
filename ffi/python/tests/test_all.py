@@ -314,4 +314,4 @@ def test_tx():
     print(f"range_proof.delta_prime: {tx_out.get_range_proof_delta_prime()}")
     print(f"range_proof.alpha_hat: {tx_out.get_range_proof_alpha_hat()}")
     print(f"range_proof.tau_x: {tx_out.get_range_proof_tau_x()}")
-
+  raise Error("")

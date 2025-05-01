@@ -152,7 +152,10 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="script.html">Script</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="script.html#blsct.Script"><code class="docutils literal notranslate"><span class="pre">Script</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="script.html#blsct.Script"><code class="docutils literal notranslate"><span class="pre">Script</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="script.html#blsct.Script.to_hex"><code class="docutils literal notranslate"><span class="pre">Script.to_hex()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="signature.html">Signature</a><ul>
@@ -197,7 +200,14 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tx.html">Tx</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tx.html#blsct.Tx"><code class="docutils literal notranslate"><span class="pre">Tx</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tx.html#blsct.Tx"><code class="docutils literal notranslate"><span class="pre">Tx</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tx.html#blsct.Tx.deserialize"><code class="docutils literal notranslate"><span class="pre">Tx.deserialize()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx.html#blsct.Tx.generate"><code class="docutils literal notranslate"><span class="pre">Tx.generate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx.html#blsct.Tx.get_tx_ins"><code class="docutils literal notranslate"><span class="pre">Tx.get_tx_ins()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx.html#blsct.Tx.get_tx_outs"><code class="docutils literal notranslate"><span class="pre">Tx.get_tx_outs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx.html#blsct.Tx.serialize"><code class="docutils literal notranslate"><span class="pre">Tx.serialize()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tx_id.html">TxId</a><ul>
@@ -209,7 +219,15 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tx_in.html">TxIn</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tx_in.html#blsct.TxIn"><code class="docutils literal notranslate"><span class="pre">TxIn</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tx_in.html#blsct.TxIn"><code class="docutils literal notranslate"><span class="pre">TxIn</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tx_in.html#blsct.TxIn.generate"><code class="docutils literal notranslate"><span class="pre">TxIn.generate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_in.html#blsct.TxIn.get_prev_out_hash"><code class="docutils literal notranslate"><span class="pre">TxIn.get_prev_out_hash()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_in.html#blsct.TxIn.get_prev_out_n"><code class="docutils literal notranslate"><span class="pre">TxIn.get_prev_out_n()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_in.html#blsct.TxIn.get_script_sig"><code class="docutils literal notranslate"><span class="pre">TxIn.get_script_sig()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_in.html#blsct.TxIn.get_script_witness"><code class="docutils literal notranslate"><span class="pre">TxIn.get_script_witness()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_in.html#blsct.TxIn.get_sequence"><code class="docutils literal notranslate"><span class="pre">TxIn.get_sequence()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tx_key.html">TxKey</a><ul>
@@ -221,7 +239,24 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="tx_out.html">TxOut</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="tx_out.html#blsct.TxOut"><code class="docutils literal notranslate"><span class="pre">TxOut</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tx_out.html#blsct.TxOut"><code class="docutils literal notranslate"><span class="pre">TxOut</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.generate"><code class="docutils literal notranslate"><span class="pre">TxOut.generate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_blinding_key"><code class="docutils literal notranslate"><span class="pre">TxOut.get_blinding_key()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_ephemeral_key"><code class="docutils literal notranslate"><span class="pre">TxOut.get_ephemeral_key()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_range_proof_A"><code class="docutils literal notranslate"><span class="pre">TxOut.get_range_proof_A()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_range_proof_B"><code class="docutils literal notranslate"><span class="pre">TxOut.get_range_proof_B()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_range_proof_alpha_hat"><code class="docutils literal notranslate"><span class="pre">TxOut.get_range_proof_alpha_hat()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_range_proof_delta_prime"><code class="docutils literal notranslate"><span class="pre">TxOut.get_range_proof_delta_prime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_range_proof_r_prime"><code class="docutils literal notranslate"><span class="pre">TxOut.get_range_proof_r_prime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_range_proof_s_prime"><code class="docutils literal notranslate"><span class="pre">TxOut.get_range_proof_s_prime()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_range_proof_tau_x"><code class="docutils literal notranslate"><span class="pre">TxOut.get_range_proof_tau_x()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_script_pub_key"><code class="docutils literal notranslate"><span class="pre">TxOut.get_script_pub_key()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_spending_key"><code class="docutils literal notranslate"><span class="pre">TxOut.get_spending_key()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_token_id"><code class="docutils literal notranslate"><span class="pre">TxOut.get_token_id()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_value"><code class="docutils literal notranslate"><span class="pre">TxOut.get_value()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tx_out.html#blsct.TxOut.get_view_tag"><code class="docutils literal notranslate"><span class="pre">TxOut.get_view_tag()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="view_key.html">ViewKey</a><ul>

@@ -102,6 +102,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="tx.html#blsct.Tx.deserialize">deserialize() (blsct.Tx class method)</a>
+</li>
       <li><a href="double_public_key.html#blsct.DoublePublicKey">DoublePublicKey (class in blsct)</a>
 </li>
   </ul></td>
@@ -155,14 +157,62 @@
 </li>
         <li><a href="sub_addr_id.html#blsct.SubAddrId.generate">(blsct.SubAddrId static method)</a>
 </li>
+        <li><a href="tx.html#blsct.Tx.generate">(blsct.Tx static method)</a>
+</li>
+        <li><a href="tx_in.html#blsct.TxIn.generate">(blsct.TxIn static method)</a>
+</li>
+        <li><a href="tx_out.html#blsct.TxOut.generate">(blsct.TxOut static method)</a>
+</li>
         <li><a href="view_tag.html#blsct.ViewTag.generate">(blsct.ViewTag static method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="public_key.html#blsct.PublicKey.generate_nonce">generate_nonce() (blsct.PublicKey static method)</a>
 </li>
+      <li><a href="tx_out.html#blsct.TxOut.get_blinding_key">get_blinding_key() (blsct.TxOut method)</a>
+</li>
+      <li><a href="tx_out.html#blsct.TxOut.get_ephemeral_key">get_ephemeral_key() (blsct.TxOut method)</a>
+</li>
+      <li><a href="tx_in.html#blsct.TxIn.get_prev_out_hash">get_prev_out_hash() (blsct.TxIn method)</a>
+</li>
+      <li><a href="tx_in.html#blsct.TxIn.get_prev_out_n">get_prev_out_n() (blsct.TxIn method)</a>
+</li>
+      <li><a href="tx_out.html#blsct.TxOut.get_range_proof_A">get_range_proof_A() (blsct.TxOut method)</a>
+</li>
+      <li><a href="tx_out.html#blsct.TxOut.get_range_proof_alpha_hat">get_range_proof_alpha_hat() (blsct.TxOut method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="tx_out.html#blsct.TxOut.get_range_proof_B">get_range_proof_B() (blsct.TxOut method)</a>
+</li>
+      <li><a href="tx_out.html#blsct.TxOut.get_range_proof_delta_prime">get_range_proof_delta_prime() (blsct.TxOut method)</a>
+</li>
+      <li><a href="tx_out.html#blsct.TxOut.get_range_proof_r_prime">get_range_proof_r_prime() (blsct.TxOut method)</a>
+</li>
+      <li><a href="tx_out.html#blsct.TxOut.get_range_proof_s_prime">get_range_proof_s_prime() (blsct.TxOut method)</a>
+</li>
+      <li><a href="tx_out.html#blsct.TxOut.get_range_proof_tau_x">get_range_proof_tau_x() (blsct.TxOut method)</a>
+</li>
+      <li><a href="tx_out.html#blsct.TxOut.get_script_pub_key">get_script_pub_key() (blsct.TxOut method)</a>
+</li>
+      <li><a href="tx_in.html#blsct.TxIn.get_script_sig">get_script_sig() (blsct.TxIn method)</a>
+</li>
+      <li><a href="tx_in.html#blsct.TxIn.get_script_witness">get_script_witness() (blsct.TxIn method)</a>
+</li>
+      <li><a href="tx_in.html#blsct.TxIn.get_sequence">get_sequence() (blsct.TxIn method)</a>
+</li>
       <li><a href="range_proof.html#blsct.RangeProof.get_size">get_size() (blsct.RangeProof method)</a>
+</li>
+      <li><a href="tx_out.html#blsct.TxOut.get_spending_key">get_spending_key() (blsct.TxOut method)</a>
+</li>
+      <li><a href="tx_out.html#blsct.TxOut.get_token_id">get_token_id() (blsct.TxOut method)</a>
+</li>
+      <li><a href="tx.html#blsct.Tx.get_tx_ins">get_tx_ins() (blsct.Tx method)</a>
+</li>
+      <li><a href="tx.html#blsct.Tx.get_tx_outs">get_tx_outs() (blsct.Tx method)</a>
+</li>
+      <li><a href="tx_out.html#blsct.TxOut.get_value">get_value() (blsct.TxOut method)</a>
+</li>
+      <li><a href="tx_out.html#blsct.TxOut.get_view_tag">get_view_tag() (blsct.TxOut method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -232,12 +282,14 @@
 </li>
       <li><a href="script.html#blsct.Script">Script (class in blsct)</a>
 </li>
-      <li><a href="range_proof.html#blsct.RangeProof.set_size">set_size() (blsct.RangeProof method)</a>
+      <li><a href="tx.html#blsct.Tx.serialize">serialize() (blsct.Tx method)</a>
 </li>
-      <li><a href="signature.html#blsct.Signature">Signature (class in blsct)</a>
+      <li><a href="range_proof.html#blsct.RangeProof.set_size">set_size() (blsct.RangeProof method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="signature.html#blsct.Signature">Signature (class in blsct)</a>
+</li>
       <li><a href="spending_key.html#blsct.SpendingKey">SpendingKey (class in blsct)</a>
 </li>
       <li><a href="sub_addr.html#blsct.SubAddr">SubAddr (class in blsct)</a>
@@ -258,6 +310,8 @@
 
       <ul>
         <li><a href="scalar.html#blsct.Scalar.to_hex">(blsct.Scalar method)</a>
+</li>
+        <li><a href="script.html#blsct.Script.to_hex">(blsct.Script method)</a>
 </li>
         <li><a href="tx_id.html#blsct.TxId.to_hex">(blsct.TxId method)</a>
 </li>

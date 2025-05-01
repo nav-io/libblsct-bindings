@@ -7,7 +7,7 @@ from typing import Any, Self, override
 
 class ViewTag():
   """
-  Represents a view tag consisting of a blinding public key and a view key.
+  Represents a view tag derived from a blinding public key and a view key.
 
   >>> from blsct import ChildKey, PublicKey, TxKey, ViewTag
   >>> ViewTag()
