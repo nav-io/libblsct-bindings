@@ -1,3 +1,5 @@
+# TypeScript binding
+
 ## Preparation  
 
 ### Install `libblsct.a`, `libbls384_256.a` and `libmcl.a`
@@ -31,3 +33,4 @@ make
 ```bash
 make run
 ```
+

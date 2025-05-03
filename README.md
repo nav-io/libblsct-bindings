@@ -1,52 +1,19 @@
 # libblsct-bindings
 
-## How to set up the environment
+`libblsct-bindings` exposes functionality from [navio-core](https://github.com/nav-io/navio-core) to support the construction of confidential transactions and the derivation of necessary keys for external use.
 
-1. Move to the repository root
+## Supported languages
+- [Python](https://github.com/nav-io/libblsct-bindings/blob/main/ffi/python/README.md)
+  - Available as a PyPI package
+  - Includes documentation
+- [TypeScript](https://github.com/nav-io/libblsct-bindings/blob/main/ffi/ts/README.md)
+  - Source code is available in this repository, but not yet published to npm
+  - Compiles to JavaScript (`.js`) and type definition files (`.d.ts`)
+  - Documentation is not available
+- [C](https://github.com/nav-io/libblsct-bindings/blob/main/ffi/c/README.md)
+  - The underlying libraries can be used directly from C
+  - Documentation is not avaialble
 
-
-1. Fetch navio-core and swig submodules
-
-   ```bash
-   git submodule update --init --remote --recursive
-   ```
-
-1. Build `src/libblsct.a`:
-
-   ```bash
-   ./script/build-libblsct.sh
-   ```
-
-1. Install `PCRE2` and `bison`
-
-   On Ubuntu:
-
-   ```bash
-   sudo apt install libpcre2-dev bison
-   ```
-
-   On macOS:
-
-   Regarding bison, although Xcode includes bison, the version is 2.3 which  does not work with swig. Newer version of bison needs to installed.
-
-   ```bash
-   brew install pcre2 bison 
-   ```
-
-   and add bison to the path
-   ```bash
-   export PATH="/opt/homebrew/opt/bison/bin:$PATH"
-   ```
-
-1. Build `swig`
-
-   ```bash
-   ./script/build-swig.sh
-   ```
-
-1. Add locally built `swig` to the PATH
-
-   ```bash
-   source ./script/activate-swig.sh
-   ```
-
+## Languages to be supported
+- [Rust](https://github.com/nav-io/libblsct-bindings/blob/main/ffi/rust/README.md)
+- [Go](https://github.com/nav-io/libblsct-bindings/blob/main/ffi/go/README.md)

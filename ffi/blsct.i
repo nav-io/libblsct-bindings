@@ -474,6 +474,8 @@ export BlsctTxRetVal* build_tx(
     const void* void_tx_outs
 );
 
+export const char* get_tx_id(const CMutableTransaction* tx);
+
 export CMutableTransaction* deserialize_tx(
     const uint8_t* ser_tx,
     const size_t ser_tx_size

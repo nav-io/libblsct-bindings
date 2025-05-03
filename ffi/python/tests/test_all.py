@@ -23,6 +23,7 @@ from blsct import (
   TokenId,
   TokenKey,
   Tx,
+  TxId,
   TxIn,
   TxOut,
   TxKey,
@@ -240,7 +241,7 @@ def test_tx():
   out_amount = out_amount
 
   # tx in
-  tx_id = secrets.token_hex(32)
+  tx_id = TxId.from_hex(secrets.token_hex(32))
   print(f"tx_id: {tx_id}")
 
   gamma = 100
@@ -282,6 +283,9 @@ def test_tx():
   tx2_hex = tx2.serialize()
   assert(tx_hex == tx2_hex)
 
+  deser_tx_id = tx2.get_tx_id()
+  print(f"tx_id (deser): {deser_tx_id}")
+
   tx_ins = tx2.get_tx_ins()
   print(f"# of txIns: {len(tx_ins)}")
 
@@ -314,4 +318,4 @@ def test_tx():
     print(f"range_proof.delta_prime: {tx_out.get_range_proof_delta_prime()}")
     print(f"range_proof.alpha_hat: {tx_out.get_range_proof_alpha_hat()}")
     print(f"range_proof.tau_x: {tx_out.get_range_proof_tau_x()}")
-  raise Error("")
+
