@@ -93,25 +93,25 @@ class TxOut(ManagedObj):
     obj = blsct.get_tx_out_range_proof_B(self.value())
     return Point(obj)
 
-  def get_range_proof_r_prime(self) -> Point:
+  def get_range_proof_r_prime(self) -> Scalar:
     """Get the range proof element r associated with the transaction output."""
     obj = blsct.get_tx_out_range_proof_r_prime(self.value())
-    return Point(obj)
+    return Scalar(obj)
 
-  def get_range_proof_s_prime(self) -> Point:
+  def get_range_proof_s_prime(self) -> Scalar:
     """Get the range proof element s' associated with the transaction output."""
     obj = blsct.get_tx_out_range_proof_s_prime(self.value())
-    return Point(obj)
+    return Scalar(obj)
 
-  def get_range_proof_delta_prime(self) -> Point:
+  def get_range_proof_delta_prime(self) -> Scalar:
     """Get the range proof element delta' associated with the transaction output."""
     obj = blsct.get_tx_out_range_proof_delta_prime(self.value())
-    return Point(obj)
+    return Scalar(obj)
 
-  def get_range_proof_alpha_hat(self) -> Point:
+  def get_range_proof_alpha_hat(self) -> Scalar:
     """Get the range proof element alpha hat associated with the transaction output."""
     obj = blsct.get_tx_out_range_proof_alpha_hat(self.value())
-    return Point(obj)
+    return Scalar(obj)
 
   def get_range_proof_tau_x(self) -> Scalar:
     """Get the range proof element tau x associated with the transaction output."""
