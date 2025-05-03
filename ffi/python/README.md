@@ -1,4 +1,4 @@
-# navio_blsct
+# Python binding
 
 ## Requirements
 - Python 3.12 or 3.13
