@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "navio_blsct" 
 version = "0.0.24"
-description = "Python bindings for the Navio blsct library"
+description = "Python binding for the Navio blsct library"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = []

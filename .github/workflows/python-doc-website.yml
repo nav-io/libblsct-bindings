@@ -1,7 +1,10 @@
-name: Publish Python doc
+name: Python: build doc website
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'ffi/python/docs/source/**'
 
 permissions:
   contents: write

@@ -1,7 +1,17 @@
-name: Test Python packages
+name: Python: run unit tests
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'ffi/python/**'
+    paths-ignore:
+      - '.pytest_cache/**'
+      - 'dist/**'
+      - 'docs/**'
+      - 'navio-core/**'
+      - 'navio_blsct.egg-info/**'
+      - 'venv/**'
 
 jobs:
   test:

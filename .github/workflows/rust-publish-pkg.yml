@@ -1,4 +1,4 @@
-name: Publish to crates.io
+name: Rust: publish package
 
 on:
   workflow_dispatch:
