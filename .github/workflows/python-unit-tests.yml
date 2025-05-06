@@ -5,13 +5,12 @@ on:
   push:
     paths:
       - 'ffi/python/**'
-    paths-ignore:
-      - '.pytest_cache/**'
-      - 'dist/**'
-      - 'docs/**'
-      - 'navio-core/**'
-      - 'navio_blsct.egg-info/**'
-      - 'venv/**'
+      - '!.pytest_cache/**'
+      - '!dist/**'
+      - '!docs/**'
+      - '!navio-core/**'
+      - '!navio_blsct.egg-info/**'
+      - '!venv/**'
 
 jobs:
   test:
