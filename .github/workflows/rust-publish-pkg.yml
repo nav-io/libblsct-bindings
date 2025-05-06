@@ -1,4 +1,4 @@
-name: Rust: publish package
+name: 'Rust: publish package'
 
 on:
   workflow_dispatch:

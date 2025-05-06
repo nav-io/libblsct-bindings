@@ -1,4 +1,4 @@
-name: Python: publish package
+name: 'Python: publish package'
 
 on:
   workflow_dispatch:

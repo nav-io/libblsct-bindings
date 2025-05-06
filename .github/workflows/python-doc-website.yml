@@ -1,4 +1,4 @@
-name: Python: build doc website
+name: 'Python: build doc website'
 
 on:
   workflow_dispatch:
