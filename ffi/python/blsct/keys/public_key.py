@@ -11,13 +11,13 @@ class PublicKey(ManagedObj):
   >>> from blsct import PublicKey, Scalar, ViewKey
   >>> s = Scalar.random()
   >>> PublicKey.from_scalar(s)
-  <blsct.keys.public_key.PublicKey object at 0x100bbfd90>  # doctest: +SKIP
+  PublicKey(<Swig Object of type 'BlsctPubKey *' at 0x100a52d60>)  # doctest: +SKIP 
   >>> PublicKey.random()
-  <blsct.keys.public_key.PublicKey object at 0x1013f4190>  # doctest: +SKIP
+  PublicKey(<Swig Object of type 'void *' at 0x100af72a0>)  # doctest: +SKIP
   >>> pk = PublicKey.random()
   >>> vk = ViewKey()
   >>> PublicKey.generate_nonce(pk, vk)
-  <blsct.keys.public_key.PublicKey object at 0x10100f950>  # doctest: +SKIP
+  PublicKey(<Swig Object of type 'BlsctPubKey *' at 0x10120fba0>)  # doctest: +SKIP
   """
 
   @staticmethod

@@ -11,9 +11,9 @@ class TxKey(ScalarBasedKey):
   >>> from blsct import TxKey
   >>> k = TxKey()
   >>> k.to_spending_key()
-  <blsct.keys.child_key_desc.tx_key_desc.spending_key.SpendingKey object at 0x10109c7d0>  # doctest: +SKIP
+  SpendingKey(5a3d7d4b7e50866f179a4041d5f1cd4e30c28367eb588f227ca41f4418e3087e)  # doctest: +SKIP
   >>> k.to_view_key()
-  <blsct.keys.child_key_desc.tx_key_desc.view_key.ViewKey object at 0x10109ca50>  # doctest: +SKIP
+  ViewKey(39fe0f1ec3d1704e1cf4261e0b827cb903800ba60e43bd706e44b749e53d8c0f)  # doctest: +SKIP
   """
   def to_spending_key(self) -> SpendingKey:
     """derive a spending key from the tx key"""

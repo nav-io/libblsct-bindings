@@ -11,11 +11,11 @@ class ViewTag():
 
   >>> from blsct import ChildKey, PublicKey, TxKey, ViewTag
   >>> ViewTag()
-  <blsct.view_tag.ViewTag object at 0x105b26660>  # doctest: +SKIP
+  ViewTag(0x102cb0c20)  # doctest: +SKIP
   >>> blinding_pub_key = PublicKey()
   >>> view_key = ChildKey().to_tx_key().to_view_key()
   >>> ViewTag.generate(blinding_pub_key, view_key)
-  <blsct.view_tag.ViewTag object at 0x104bf2900>  # doctest: +SKIP
+  12212  # doctest: +SKIP
   """
 
   @staticmethod
@@ -28,6 +28,13 @@ class ViewTag():
       blinding_pub_key.value(),
       view_key.value()
     )
+
+  def __str__(self):
+    name = self.__class__.__name__
+    return f"{name}({hex(id(self))})"
+
+  def __repr__(self):
+    return self.__str__()
 
   @override
   def value(self):

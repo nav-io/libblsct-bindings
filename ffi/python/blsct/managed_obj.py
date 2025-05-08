@@ -44,6 +44,9 @@ class ManagedObj(ABC):
     else:
       return f"{name}({self.obj})"
 
+  def __repr__(self):
+    return self.__str__()
+
   @classmethod
   def from_obj(cls, obj):
     inst = cls.__new__(cls)

@@ -8,9 +8,9 @@ class TokenId(ManagedObj):
 
   >>> from blsct import TokenId
   >>> TokenId()
-  <blsct.token_id.TokenId object at 0x105a00ad0>  # doctest: +SKIP
+  TokenId(<Swig Object of type 'void *' at 0x101738e10>)  # doctest: +SKIP
   >>> TokenId.from_token(123)
-  <blsct.token_id.TokenId object at 0x105a8c050>  # doctest: +SKIP
+  TokenId(<Swig Object of type 'void *' at 0x10063ced0>)  # doctest: +SKIP
   >>> token_id = TokenId.from_token_and_subid(123, 456)
   >>> token_id.token()
   123

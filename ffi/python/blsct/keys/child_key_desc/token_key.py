@@ -8,7 +8,7 @@ class TokenKey(ScalarBasedKey):
 
   >>> from blsct import TokenKey
   >>> TokenKey()
-  <blsct.keys.child_key_desc.token_key.TokenKey object at 0x101028ad0>  # doctest: +SKIP
+  TokenKey(56f28fc7efdd5d40c325fa73b1c00d7fcb6ac1c5bf7a579d781037f571a30307)  # doctest: +SKIP
   """
   pass
  
