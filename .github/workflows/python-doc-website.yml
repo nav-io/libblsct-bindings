@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - 'ffi/python/docs/source/**'
+      - 'ffi/python/blsct/**'
 
 permissions:
   contents: write
