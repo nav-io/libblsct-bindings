@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Tx &#8212; navio_blsct  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="TxId" href="tx_id.html" />
+    <link rel="prev" title="TokenKey" href="token_key.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="tx_id.html" title="TxId"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="token_key.html" title="TokenKey"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">navio_blsct  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="classes.html" accesskey="U">Classes</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Tx</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="tx">
+<h1>Tx<a class="headerlink" href="#tx" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="blsct.Tx">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">blsct.</span></span><span class="sig-name descname"><span class="pre">Tx</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#blsct.Tx" title="Link to this definition">¶</a></dt>
+<dd><p>Represents a confidential transaction.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">blsct</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChildKey</span><span class="p">,</span> <span class="n">DoublePublicKey</span><span class="p">,</span> <span class="n">OutPoint</span><span class="p">,</span> <span class="n">PublicKey</span><span class="p">,</span> <span class="n">SpendingKey</span><span class="p">,</span> <span class="n">SubAddr</span><span class="p">,</span> <span class="n">SubAddrId</span><span class="p">,</span> <span class="n">TokenId</span><span class="p">,</span> <span class="n">TX_ID_SIZE</span><span class="p">,</span> <span class="n">Tx</span><span class="p">,</span> <span class="n">TxId</span><span class="p">,</span> <span class="n">TxIn</span><span class="p">,</span> <span class="n">TxOut</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">secrets</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">num_tx_in</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">num_tx_out</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">default_fee</span> <span class="o">=</span> <span class="mi">200000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fee</span> <span class="o">=</span> <span class="p">(</span><span class="n">num_tx_in</span> <span class="o">+</span> <span class="n">num_tx_out</span><span class="p">)</span> <span class="o">*</span> <span class="n">default_fee</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_amount</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">in_amount</span> <span class="o">=</span> <span class="n">fee</span> <span class="o">+</span> <span class="n">out_amount</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tx_id</span> <span class="o">=</span> <span class="n">TxId</span><span class="o">.</span><span class="n">from_hex</span><span class="p">(</span><span class="n">secrets</span><span class="o">.</span><span class="n">token_hex</span><span class="p">(</span><span class="mi">32</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_index</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_point</span> <span class="o">=</span> <span class="n">OutPoint</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">tx_id</span><span class="p">,</span> <span class="n">out_index</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gamma</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">spending_key</span> <span class="o">=</span> <span class="n">SpendingKey</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">token_id</span> <span class="o">=</span> <span class="n">TokenId</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tx_in</span> <span class="o">=</span> <span class="n">TxIn</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">in_amount</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">spending_key</span><span class="p">,</span> <span class="n">token_id</span><span class="p">,</span> <span class="n">out_point</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sub_addr</span> <span class="o">=</span> <span class="n">SubAddr</span><span class="o">.</span><span class="n">from_double_public_key</span><span class="p">(</span><span class="n">DoublePublicKey</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tx_out</span> <span class="o">=</span> <span class="n">TxOut</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">sub_addr</span><span class="p">,</span> <span class="n">out_amount</span><span class="p">,</span> <span class="s1">&#39;navio&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tx</span> <span class="o">=</span> <span class="n">Tx</span><span class="o">.</span><span class="n">generate</span><span class="p">([</span><span class="n">tx_in</span><span class="p">],</span> <span class="p">[</span><span class="n">tx_out</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">tx_in</span> <span class="ow">in</span> <span class="n">tx</span><span class="o">.</span><span class="n">get_tx_ins</span><span class="p">():</span> 
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;prev_out_hash: </span><span class="si">{</span><span class="n">tx_in</span><span class="o">.</span><span class="n">get_prev_out_hash</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;prev_out_n: </span><span class="si">{</span><span class="n">tx_in</span><span class="o">.</span><span class="n">get_prev_out_n</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;script_sig: </span><span class="si">{</span><span class="n">tx_in</span><span class="o">.</span><span class="n">get_script_sig</span><span class="p">()</span><span class="o">.</span><span class="n">to_hex</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;sequence: </span><span class="si">{</span><span class="n">tx_in</span><span class="o">.</span><span class="n">get_sequence</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;script_witness: </span><span class="si">{</span><span class="n">tx_in</span><span class="o">.</span><span class="n">get_script_witness</span><span class="p">()</span><span class="o">.</span><span class="n">to_hex</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  
+<span class="go">prev_out_hash: TxId(b1166eabed80a211639e07c9382b905706123e51f35088d7b9ccfb768161adce)</span>
+<span class="go">prev_out_n: 0</span>
+<span class="go">script_sig: 00000000000000000000000000000000000000000000000000000000</span>
+<span class="go">sequence: 4294967295</span>
+<span class="go">script_witness: 00000000000000000000000000000000000000000000000000000000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">tx_out</span> <span class="ow">in</span> <span class="n">tx</span><span class="o">.</span><span class="n">get_tx_outs</span><span class="p">():</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;value: </span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_value</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;script_pub_key: </span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_script_pub_key</span><span class="p">()</span><span class="o">.</span><span class="n">to_hex</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;token_id: token=</span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_token_id</span><span class="p">()</span><span class="o">.</span><span class="n">token</span><span class="p">()</span><span class="si">}</span><span class="s2">, subid=</span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_token_id</span><span class="p">()</span><span class="o">.</span><span class="n">subid</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;spending_key: </span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_spending_key</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ephemeral_key: </span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_ephemeral_key</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;blinding_key: </span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_blinding_key</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;view_tag: </span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_view_tag</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;range_proof.A: </span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_range_proof_A</span><span class="p">()</span><span class="o">.</span><span class="n">to_hex</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;range_proof.B: </span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_range_proof_B</span><span class="p">()</span><span class="o">.</span><span class="n">to_hex</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;range_Proof.r_prime: </span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_range_proof_r_prime</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;range_proof.s_prime: </span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_range_proof_s_prime</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;range_proof.delta_prime: </span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_range_proof_delta_prime</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;range_proof.alpha_hat: </span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_range_proof_alpha_hat</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;range_proof.tau_x: </span><span class="si">{</span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_range_proof_tau_x</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="gp">... </span>  
+<span class="go">value: 0</span>
+<span class="go">script_pub_key: 51000000000000000000000000000000000000000000000000000000</span>
+<span class="go">token_id: token=0, subid=18446744073709551615</span>
+<span class="go">spending_key: Point(1 43c0386c950f8298bd2a6416dfb2696f08e155a76227f789eff0a78d8a7d0c1926b8b5de97818bff168917e8dec199d 170cdcb9cfc862168dfbfc52dea568ef38b2bdd424e17a7e5ebf72205c7e1c6a9783ee5e2719a77d684f1e3d1ee90cd)</span>
+<span class="go">ephemeral_key: Point(1 dbb54183f593cbb325c258a2f506feda30938d7ac5135e70fd695f596a8401a965c79b1d86c99bd935a9bdf7d0f7d63 19c3fb04fb219dedd2d0b328127edfc32de671874ed37db578f8c35a20215245abced2f511dd613a3a6bec06c892c43)</span>
+<span class="go">blinding_key: Point(1 11bfe37be891928ac997a4713ed23b20a4754c9acc59a223141637b31b6b478e1e5e3566ae2f57098199bdfaa2e0347a 5a88b4430f2e6bb3e066e97448e5246494e4057f7162dbabdee67018c56e5d46e88c91f1279662a5466b0cb09d557f)</span>
+<span class="go">view_tag: 43421</span>
+<span class="go">range_proof.A: 1 d1a9ece6622f7e9b1e4538ebadf8586054507823a8bf6752e30ac808963da12abcd0658351691197de6f0b1631723bf 72ed6a826f0c81bd803f55c64aed35b3dee639ef5f9023d73184ca05cc27f87b67374b1ead95dedb28ed6133e97c42</span>
+<span class="go">range_proof.B: 1 7f5c8c20c84286b59554aa4baeba056f97b69a4deb79bb646461bb6b69109a7888d6c28f457f95859e3cd14de30eea7 b22e8d359cdf4e9aa66579f94017aba1a4fcd146364f7555a5c97c5df33eb61583a9882469edd30555be5f67ea05ad</span>
+<span class="go">range_Proof.r_prime: Point(0)</span>
+<span class="go">range_proof.s_prime: Point(0)</span>
+<span class="go">range_proof.delta_prime: Point(0)</span>
+<span class="go">range_proof.alpha_hat: Point(0)</span>
+<span class="go">range_proof.tau_x: Scalar(707fe053abde7620ba50206b52c94f57d8301a70230c97fb0c9bbc10f6660a18)</span>
+<span class="go">value: 0</span>
+<span class="go">script_pub_key: 51000000000000000000000000000000000000000000000000000000</span>
+<span class="go">token_id: token=0, subid=18446744073709551615</span>
+<span class="go">spending_key: Point(1 187232c232f64c69aabdcc972fa53ee6348070dd95485d87e83381c51bf3390342473c27308293d2abe5f43660e38e5d 4768f24b50c7865c795231319d5347dbf60e5bbb3e317ef421d31a1893ef917647865fd4d12fdb8794f9a011b61cf7)</span>
+<span class="go">ephemeral_key: Point(1 f307fb2f34626f0da7af6bba99616eb3156d298ecbbda78551dbdb50a1e5fcdc171970ed07df01bcedacb4b56d606da be1c4985d574bca1a46f49e181144428e8ab22e2d33ada48720d6c307c97d1abc49a6a624b0db33f215766af2458d5)</span>
+<span class="go">blinding_key: Point(0)</span>
+<span class="go">view_tag: 21881</span>
+<span class="go">range_proof.A: 1 731fba528d2461adc510c2cea6538cb4c31869448ee04f83665aa24a83c6a79aff088893d908ad7df4236e8c10a7ed1 7f2fd4146dc6cf5e25f1e7334d364cf2463505e2c772e66ba7ecfcd7970ff8d38a7e3fa943adaacebeb336a9d21b76</span>
+<span class="go">range_proof.B: 1 af830e83f6438cc9bdcc52be4d43f09b330f849b6c61a825d003748716ef59b51904dc482f65ce6609bc90ed06ccb90 17c2b3479186582f7e831c2b62b2f2adadb38bd76f7a87ab6da34f2639d267d1567c6d24f2a67ae991291261abe3416</span>
+<span class="go">range_Proof.r_prime: Point(0)</span>
+<span class="go">range_proof.s_prime: Point(0)</span>
+<span class="go">range_proof.delta_prime: Point(0)</span>
+<span class="go">range_proof.alpha_hat: Point(0)</span>
+<span class="go">range_proof.tau_x: Scalar(4193251795eaf35243e68c9fef5dd7cafd3c34bcc0422c5c5b8f825c56767546)</span>
+<span class="go">value: 292125</span>
+<span class="go">script_pub_key: 6a000000000000000000000000000000000000000000000000000000</span>
+<span class="go">token_id: token=0, subid=18446744073709551615</span>
+<span class="go">spending_key: Point(0)</span>
+<span class="go">ephemeral_key: Point(0)</span>
+<span class="go">blinding_key: Point(0)</span>
+<span class="go">view_tag: 0</span>
+<span class="go">range_proof.A: 0</span>
+<span class="go">range_proof.B: 0</span>
+<span class="go">range_Proof.r_prime: Point(0)</span>
+<span class="go">range_proof.s_prime: Point(0)</span>
+<span class="go">range_proof.delta_prime: Point(0)</span>
+<span class="go">range_proof.alpha_hat: Point(0)</span>
+<span class="go">range_proof.tau_x: Scalar(0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ser_tx</span> <span class="o">=</span> <span class="n">tx</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">tx</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">ser_tx</span><span class="p">)</span>
+<span class="go">Tx(&lt;swig object of type &#39;unsigned char *&#39; at 0x102529080&gt;)</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Tx.deserialize">
+<em class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#blsct.Tx.deserialize" title="Link to this definition">¶</a></dt>
+<dd><p>Deserialize a transaction from a hexadecimal string.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Tx.generate">
+<em class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tx_ins</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tx_in.html#blsct.TxIn" title="blsct.tx_in.TxIn"><span class="pre">TxIn</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tx_outs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tx_out.html#blsct.TxOut" title="blsct.tx_out.TxOut"><span class="pre">TxOut</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#blsct.Tx.generate" title="Link to this definition">¶</a></dt>
+<dd><p>generate a confidential transaction from a list of inputs and outputs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Tx.get_tx_id">
+<span class="sig-name descname"><span class="pre">get_tx_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tx_id.html#blsct.TxId" title="blsct.tx_id.TxId"><span class="pre">TxId</span></a></span></span><a class="headerlink" href="#blsct.Tx.get_tx_id" title="Link to this definition">¶</a></dt>
+<dd><p>Get the transaction ID.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Tx.get_tx_ins">
+<span class="sig-name descname"><span class="pre">get_tx_ins</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tx_in.html#blsct.TxIn" title="blsct.tx_in.TxIn"><span class="pre">TxIn</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#blsct.Tx.get_tx_ins" title="Link to this definition">¶</a></dt>
+<dd><p>Get the transaction inputs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Tx.get_tx_outs">
+<span class="sig-name descname"><span class="pre">get_tx_outs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tx_out.html#blsct.TxOut" title="blsct.tx_out.TxOut"><span class="pre">TxOut</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#blsct.Tx.get_tx_outs" title="Link to this definition">¶</a></dt>
+<dd><p>Get the transaction outputs.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Tx.serialize">
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#blsct.Tx.serialize" title="Link to this definition">¶</a></dt>
+<dd><p>Serialize the transaction to a hexadecimal string.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Tx</a><ul>
+<li><a class="reference internal" href="#blsct.Tx"><code class="docutils literal notranslate"><span class="pre">Tx</span></code></a><ul>
+<li><a class="reference internal" href="#blsct.Tx.deserialize"><code class="docutils literal notranslate"><span class="pre">Tx.deserialize()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.Tx.generate"><code class="docutils literal notranslate"><span class="pre">Tx.generate()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.Tx.get_tx_id"><code class="docutils literal notranslate"><span class="pre">Tx.get_tx_id()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.Tx.get_tx_ins"><code class="docutils literal notranslate"><span class="pre">Tx.get_tx_ins()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.Tx.get_tx_outs"><code class="docutils literal notranslate"><span class="pre">Tx.get_tx_outs()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.Tx.serialize"><code class="docutils literal notranslate"><span class="pre">Tx.serialize()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="token_key.html"
+                          title="previous chapter">TokenKey</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="tx_id.html"
+                          title="next chapter">TxId</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/tx.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="tx_id.html" title="TxId"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="token_key.html" title="TokenKey"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">navio_blsct  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="classes.html" >Classes</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Tx</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, The Navio Developers.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
+    </div>
+  </body>
+</html>
