@@ -7,7 +7,7 @@ class ViewKey(ScalarBasedKey):
 
   >>> from blsct import ViewKey
   >>> ViewKey()
-  <blsct.keys.child_key_desc.tx_key_desc.view_key.ViewKey object at 0x101028ad0>  # doctest: +SKIP
+  ViewKey(5548101f70cb3fd721299c7364a036e65bba2a878c28f691f7c2ea3c7e8baeae)  # doctest: +SKIP
   """
   pass
 

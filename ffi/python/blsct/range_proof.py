@@ -11,7 +11,6 @@ class RangeProof(ManagedObj):
   Represents a (possibly aggregated) range proof for one or more confidential transaction amounts.
 
   >>> from blsct import AmountRecoveryReq, AmountRecoveryRes, Point, RangeProof, TokenId
-  ...
   >>> nonce = Point()
   >>> token_id = TokenId()
   >>> rp = RangeProof.build([456], nonce, 'navcoin', token_id)

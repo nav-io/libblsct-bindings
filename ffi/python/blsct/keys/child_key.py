@@ -12,15 +12,15 @@ class ChildKey(ScalarBasedKey):
 
   >>> from blsct import ChildKey, Scalar
   >>> ChildKey()
-  <blsct.keys.child_key.ChildKey object at 0x101028ad0>  # doctest: +SKIP
+  ChildKey(3b45fa12345e2d095b5bc0ac0e01edcbb975963897bb5e64b3f9da77b31954d)  # doctest: +SKIP
   >>> s = Scalar()
   >>> k = ChildKey.from_scalar(s)
   >>> k.to_blinding_key()
-  <blsct.keys.child_key_desc.blinding_key.BlindingKey object at 0x10109c7d0>  # doctest: +SKIP
+  BlindingKey(6f4500aab9afcddd48b3e4863529037ec5803b88d36df8c73e231244f5601784)  # doctest: +SKIP
   >>> k.to_token_key()
-  <blsct.keys.child_key_desc.token_key.TokenKey object at 0x10109c550>  # doctest: +SKIP
+  TokenKey(672df4f7131c165a9eecf079c45364ff07562fc614b9692daecb58ea6fe54b32)  # doctest: +SKIP
   >>> k.to_tx_key()
-  <blsct.keys.child_key_desc.tx_key.TxKey object at 0x10109c190>  # doctest: +SKIP
+  TxKey(3d454890fefe84506a44e6400f38991e884c3d5884cc2b6bed0e41fc62f0d168)  # doctest: +SKIP
   """
   @staticmethod
   def from_scalar(seed: Scalar) -> Self:

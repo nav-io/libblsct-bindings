@@ -15,7 +15,7 @@ class PrivSpendingKey(ScalarBasedKey):
 
   >>> from blsct import PrivSpendingKey
   >>> PrivSpendingKey()
-  <blsct.keys.priv_spending_key.PrivSpendingKey object at 0x101028ad0>  # doctest: +SKIP
+  PrivSpendingKey(b75c8edb30507818cb0d4211dd57b09830e1395da700d9b4b43ac360329a908)  # doctest: +SKIP
   """
   @staticmethod
   def generate(

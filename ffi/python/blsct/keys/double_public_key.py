@@ -12,7 +12,7 @@ class DoublePublicKey(ManagedObj):
 
   >>> from blsct import DoublePublicKey
   >>> DoublePublicKey()
-  <blsct.keys.double_public_key.DoublePublicKey object at 0x10102a660>  # doctest: +SKIP
+  DoublePublicKey(<Swig Object of type 'void *' at 0x1011cb960>)  # doctest: +SKIP
   """
   def __init__(self, obj=None):
     super().__init__(obj)

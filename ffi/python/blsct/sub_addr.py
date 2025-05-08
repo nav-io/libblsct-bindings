@@ -16,10 +16,10 @@ class SubAddr(ManagedObj):
   >>> spending_pub_key = PublicKey()
   >>> sub_addr_id = SubAddrId.generate(123, 456)
   >>> SubAddr.generate(view_key, spending_pub_key, sub_addr_id)
-  <blsct.sub_addr.SubAddr object at 0x100fc2900>  # doctest: +SKIP
+  SubAddr(<Swig Object of type 'BlsctSubAddr *' at 0x101738e40>)  # doctest: +SKIP
   >>> dpk = DoublePublicKey()
   >>> SubAddr.from_double_public_key(dpk)
-  <blsct.sub_addr.SubAddr object at 0x101050410>  # doctest: +SKIP
+  SubAddr(<Swig Object of type 'void *' at 0x101152760>)  # doctest: +SKIP
   """
   @staticmethod
   def generate(

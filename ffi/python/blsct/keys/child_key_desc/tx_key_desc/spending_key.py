@@ -7,7 +7,7 @@ class SpendingKey(ScalarBasedKey):
 
   >>> from blsct import SpendingKey
   >>> SpendingKey()
-  <blsct.keys.child_key_desc.tx_key_desc.spending_key.SpendingKey object at 0x10102a660>  # doctest: +SKIP
+  SpendingKey(4d8016e4f5fa09486b0562179a36c4acd9a90d71cdfc98dce0ae2f13fa08a7f1)  # doctest: +SKIP
   """
   pass
  

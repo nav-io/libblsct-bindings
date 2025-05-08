@@ -12,9 +12,9 @@ class Address():
   >>> dpk = DoublePublicKey()
   >>> addr = Address.encode(dpk, AddressEncoding.Bech32M)
   >>> addr
-  'nv14u7r0xx4n3gca6tm5glcqj54vd9zu8lcj4evscrpv9ujyst4hx9r4d9rtq2r3pmvvn0r05pfs7q6lqh50fp2x0fgt2sa54cc624wplty3qvmgtralvdcujgw6258zffxyn9eex6lvrk9nezguwgztr6xqyn7w6j5wc'
+  'nv14u7r0xx4n3gca6tm5glcqj54vd9zu8lcj4evscrpv9ujyst4hx9r4d9rtq2r3pmvvn0r05pfs7q6lqh50fp2x0fgt2sa54cc624wplty3qvmgtralvdcujgw6258zffxyn9eex6lvrk9nezguwgztr6xqyn7w6j5wc'  # doctest: +SKIP
   >>> Address.decode(addr)
-  <blsct.keys.double_public_key.DoublePublicKey object at 0x101cfc410>
+  DoublePublicKey(<Swig Object of type 'void *' at 0x1005e17d0>)  # doctest: +SKIP
    """
   @staticmethod
   def encode(dpk: DoublePublicKey, encoding: AddressEncoding):

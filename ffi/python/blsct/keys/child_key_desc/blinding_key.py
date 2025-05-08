@@ -8,7 +8,7 @@ class BlindingKey(ScalarBasedKey):
 
   >>> from blsct import BlindingKey
   >>> BlindingKey()
-  <blsct.keys.child_key_desc.blinding_key.BlindingKey object at 0x10102a660>  # doctest: +SKIP
+  BlindingKey(117d9c8a5cd6d8c7415655a2c4fed9264f4c8493bdf9e1ec201aea2b2459b085)  # doctest: +SKIP
   """
   pass
  

@@ -11,13 +11,13 @@ class HashId(ManagedObj):
 
   >>> from blsct import ChildKey, HashId, PublicKey, ViewKey
   >>> HashId()
-  <blsct.hash_id.HashId object at 0x1050bcad0>  # doctest: +SKIP
+  HashId(23f95dc276b53d83b4f3d85b50cce9649240da0f)  # doctest: +SKIP
   >>> blinding_pub_key = PublicKey()
   >>> spending_pub_key = PublicKey()
   >>> view_key = ChildKey().to_tx_key().to_view_key()
   >>> hash_id = HashId.generate(blinding_pub_key, spending_pub_key, view_key)
   >>> hash_id.to_hex()
-  '81fe3aefff3e90dcd9862aad1527dc034e5045d4'
+  '81fe3aefff3e90dcd9862aad1527dc034e5045d4'  # doctest: +SKIP
   """
   @staticmethod
   def generate(
