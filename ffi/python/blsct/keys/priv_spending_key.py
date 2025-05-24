@@ -1,11 +1,11 @@
 from .. import blsct
-from .scalar_based_key import ScalarBasedKey
+from ..scalar import Scalar
 from .child_key_desc.tx_key_desc.view_key import ViewKey
 from .child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .public_key import PublicKey
 from typing import Self, Type
 
-class PrivSpendingKey(ScalarBasedKey):
+class PrivSpendingKey(Scalar):
   """
   Represents a private spending key. A private spending key is a Scalar and introduces no new functionality; it serves purely as a semantic alias.
 

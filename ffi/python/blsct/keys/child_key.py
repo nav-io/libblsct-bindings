@@ -1,12 +1,11 @@
 from .. import blsct
 from ..scalar import Scalar
-from .scalar_based_key import ScalarBasedKey
 from .child_key_desc.blinding_key import BlindingKey
 from .child_key_desc.token_key import TokenKey
 from .child_key_desc.tx_key import TxKey
-from typing import override, Type, Self
+from typing import Type, Self
 
-class ChildKey(ScalarBasedKey):
+class ChildKey(Scalar):
   """
   Represents a child key. A child key is a Scalar and introduces no new functionality; it serves purely as a semantic alias. BlindingKey, TokenKey and TxKey are exclusively derived from a ChildKey.
 

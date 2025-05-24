@@ -1,6 +1,6 @@
-from ...scalar_based_key import ScalarBasedKey
+from ....scalar import Scalar
 
-class SpendingKey(ScalarBasedKey):
+class SpendingKey(Scalar):
   """
   Represents a spending key. A spending key is a Scalar and introduces no new functionality; it serves purely as a semantic alias.
 

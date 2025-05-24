@@ -40,7 +40,7 @@ def test_scalar():
   assert(s2 == s2), "The same scalar should be equal"
 
   s3 = Scalar.deserialize(s1.serialize())
-  assert(s1 == s3), "Deserializing serialized value should produce the original value"
+  assert(s1 == s3), "Deserializing serialized Scalar should produce the original Scalar"
 
 def test_point():
   p1 = Point.random()
@@ -51,8 +51,8 @@ def test_point():
   assert(p1 == p1), "The same Point should be equal"
   assert(p2 == p2), "The same Point should be equal"
 
-  p3 = Scalar.deserialize(p1.serialize())
-  assert(p1 == p3), "Deserializing serialized value should produce the original value"
+  p3 = Point.deserialize(p1.serialize())
+  assert(p1 == p3), "Deserializing serialized Point should produce the original Point"
 
   p4 = Point.base()
   assert p4.is_valid(), "Base Point should be valid"
@@ -105,7 +105,7 @@ def test_token_id():
   assert(token_id_3.subid() == 456)
 
 def test_range_proof():
-  nonce1 = Point.random()
+  nonce1 = Point()
   token_id_1 = TokenId()
 
   rp1 = RangeProof.build([456], nonce1, 'navcoin', token_id_1)
@@ -157,7 +157,7 @@ def test_sig_gen_verify():
   assert(is_sig_valid == True)
 
 def test_key_derivation():
-  seed = Scalar.random()
+  seed = Scalar()
   print(f"Seed: {seed}")
 
   child_key = ChildKey.from_scalar(seed)
@@ -178,7 +178,7 @@ def test_key_derivation():
   spending_key = tx_key.to_spending_key()
   print(f"SpendingKey: {spending_key.serialize()}")
 
-  blinding_pub_key = PublicKey.from_scalar(blinding_key.to_scalar())
+  blinding_pub_key = PublicKey.from_scalar(blinding_key)
   print(f"blinding_pub_key: {blinding_pub_key}")
 
   account = 123
@@ -196,7 +196,7 @@ def test_key_derivation():
   view_tag = ViewTag.generate(blinding_pub_key, view_key)
   print(f"view_tag: {view_tag}")
 
-  spending_pub_key = PublicKey.from_scalar(spending_key.to_scalar())
+  spending_pub_key = PublicKey.from_scalar(spending_key)
   print(f"spending_pub_key: {spending_pub_key}")
 
   hash_id = HashId.generate(
@@ -216,7 +216,7 @@ def test_key_derivation():
   print(f"sub_addr: {sub_addr}")
 
   dpk = DoublePublicKey.from_keys_and_acct_addr(
-    view_key.to_scalar(),
+    view_key,
     spending_pub_key,
     account,
     address,
@@ -254,7 +254,6 @@ def test_tx():
   token_id = TokenId()
   out_index = 0
   out_point = OutPoint.generate(tx_id, out_index)
-
   tx_in = TxIn.generate(
     in_amount,
     gamma,

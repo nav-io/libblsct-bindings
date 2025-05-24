@@ -1,6 +1,6 @@
-from ...scalar_based_key import ScalarBasedKey
+from ....scalar import Scalar
 
-class ViewKey(ScalarBasedKey):
+class ViewKey(Scalar):
   """
   Represents a view key. A view key is a Scalar and introduces no new functionality; it serves purely as a semantic alias.
 

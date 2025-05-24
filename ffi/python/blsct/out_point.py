@@ -17,7 +17,7 @@ class OutPoint(ManagedObj):
   @classmethod
   def generate(cls: Type[Self], tx_id: TxId, out_index: int) -> Self:
     """Generate an outpoint from a transaction ID and output index."""
-    rv = blsct.gen_out_point(tx_id.to_hex(), out_index)
+    rv = blsct.gen_out_point(tx_id.serialize(), out_index)
     inst = cls(rv.value)
     blsct.free_obj(rv)
     return inst
