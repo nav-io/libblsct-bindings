@@ -1,10 +1,14 @@
-import blsct
+from __future__ import annotations
+from . import blsct
 from .amount_recovery_req import AmountRecoveryReq
 from .amount_recovery_res import AmountRecoveryRes
 from .managed_obj import ManagedObj
 from .point import Point
 from .token_id import TokenId
-from typing import Any, Self, override
+from typing import Any, Optional, override, Self, Type, TYPE_CHECKING
+
+if TYPE_CHECKING:
+  from .range_proof import RangeProof
 
 class RangeProof(ManagedObj):
   """
@@ -28,12 +32,13 @@ class RangeProof(ManagedObj):
     """Get the size of the range proof object."""
     return self.obj_size
 
-  @staticmethod
+  @classmethod
   def build(
+    cls: Type[Self],
     amounts: list[int],
     nonce: Point,
     message: str,
-    token_id: TokenId = None,
+    token_id: Optional[TokenId] = None,
   ) -> Self:
     """Build a range proof from a list of amounts, nonce, message and optional token ID."""
     vec = blsct.create_uint64_vec()
@@ -50,32 +55,38 @@ class RangeProof(ManagedObj):
       token_id.value(),
     )
     blsct.free_uint64_vec(vec)
-    
-    if rv.result != 0:
-      blsct.free_obj(rv)
-      raise RuntimeError(f"Building range proof failed: {rv.result}")
 
-    rp = RangeProof(rv.value)
+    rv_result = int(rv.result)
+
+    if rv_result != 0:
+      blsct.free_obj(rv)
+      raise RuntimeError(f"Building range proof failed. Error code = {rv_result}")
+
+    rp = cls(rv.value)
     rp.set_size(rv.value_size)
     blsct.free_obj(rv)
  
     return rp
 
-  def verify_proofs(proofs: list[Self]) -> bool:
+  @staticmethod
+  def verify_proofs(proofs: list["RangeProof"]) -> bool:
     """Verify a list of range proofs."""
     vec = blsct.create_range_proof_vec()
     for proof in proofs:
       blsct.add_range_proof_to_vec(vec, proof.obj_size, proof.value())
     
     rv = blsct.verify_range_proofs(vec)
-    if rv.result != 0:
+    rv_result = int(rv.result)
+
+    if rv_result != 0:
       blsct.free_obj(rv)
-      raise RuntimeError(f"Verifying range proofs failed: {rv.result}")
+      raise RuntimeError(f"Verifying range proofs failed. Error code = {rv_result}")
 
     blsct.free_range_proof_vec(vec)
 
     return rv.value != 0
 
+  @staticmethod
   def recover_amounts(reqs: list[AmountRecoveryReq]) -> list[AmountRecoveryRes]:
     """
     Recover the amount from each given single-amount range proof. The results may include failures.
@@ -93,9 +104,10 @@ class RangeProof(ManagedObj):
     rv = blsct.recover_amount(req_vec)
     blsct.free_amount_recovery_req_vec(req_vec)
 
-    if rv.result != 0:
+    rv_result = int(rv.result)
+    if rv_result != 0:
       blsct.free_amounts_ret_val(rv)
-      raise RuntimeError(f"Recovering amount failed: {rv.result}")
+      raise RuntimeError(f"Recovering amount failed. Error code = {rv_result}")
  
     res = []
     size = blsct.get_amount_recovery_result_size(rv.value)

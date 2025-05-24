@@ -379,11 +379,13 @@ export BlsctRetVal* gen_scalar(const uint64_t n);
 export BlsctRetVal* gen_random_scalar();
 export uint64_t scalar_to_uint64(BlsctScalar* blsct_scalar);
 export const char* scalar_to_hex(const BlsctScalar* blsct_scalar);
+export BlsctRetVal* hex_to_scalar(const char* hex);
 
 // point
 export BlsctRetVal* gen_base_point();
 export BlsctRetVal* gen_random_point();
 export const char* point_to_hex(const BlsctPoint* blsct_point);
+export BlsctRetVal* hex_to_point(const char* hex);
 
 // public key
 export BlsctRetVal* gen_random_public_key();

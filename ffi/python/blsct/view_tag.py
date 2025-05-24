@@ -1,9 +1,8 @@
-import blsct
+from . import blsct
 from .keys.child_key_desc.tx_key_desc.view_key import ViewKey
 from .keys.public_key import PublicKey
-from .managed_obj import ManagedObj
 from .scalar import Scalar
-from typing import Any, Self, override
+from typing import Any, Self, Type
 
 class ViewTag():
   """
@@ -18,8 +17,9 @@ class ViewTag():
   12212  # doctest: +SKIP
   """
 
-  @staticmethod
+  @classmethod
   def generate(
+    cls: Type[Self],
     blinding_pub_key: PublicKey,
     view_key: ViewKey
   ) -> Self:
@@ -36,12 +36,8 @@ class ViewTag():
   def __repr__(self):
     return self.__str__()
 
-  @override
-  def value(self):
-    return blsct.cast_to_view_tag(self.obj)
-
   @classmethod
-  def default_obj(cls) -> Any:
+  def default_obj(cls: Type[Self]) -> Any:
     blinding_pub_key = PublicKey()
     view_key = Scalar.random()
 

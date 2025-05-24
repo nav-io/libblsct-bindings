@@ -1,8 +1,8 @@
-import blsct
+from . import blsct
 from .managed_obj import ManagedObj
 from .keys.public_key import PublicKey
 from .scalar import Scalar
-from typing import Any, Self, override
+from typing import Any, override, Self, Type
 
 class Signature(ManagedObj):
   """
@@ -15,11 +15,11 @@ class Signature(ManagedObj):
   >>> sig.verify('navio', pk)
   True
   """
-  @staticmethod
-  def generate(priv_key: Scalar, msg: str) -> Self:
+  @classmethod
+  def generate(cls: Type[Self], priv_key: Scalar, msg: str) -> Self:
     """Generate a signature using a private key and a message."""
     sig = blsct.sign_message(priv_key.value(), msg)
-    return Signature(sig)
+    return cls(sig)
 
   def verify(self, msg: str, pub_key: PublicKey) -> bool:
     """Verify a signature using the public key corresponding to the private key that signed the transaction."""
@@ -29,7 +29,8 @@ class Signature(ManagedObj):
   def value(self) -> Any:
     return blsct.cast_to_signature(self.obj)
 
+  @classmethod
   @override
-  def default_obj(self) -> Self:
+  def default_obj(cls: Type[Self]) -> Self:
     raise NotImplementedError(f"Cannot create a Signature without required parameters.")
 

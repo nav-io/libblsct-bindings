@@ -1,4 +1,4 @@
-import blsct
+from . import blsct
 from .address_encoding import AddressEncoding
 from .keys.double_public_key import DoublePublicKey
 
@@ -30,9 +30,11 @@ class Address():
 
     dpk = blsct.cast_to_dpk(dpk.obj)
     rv = blsct.encode_address(dpk, blsct_encoding)
-    if rv.result != 0:
+    rv_result = int(rv.result)
+
+    if rv_result != 0:
       blsct.free_obj(rv)
-      raise ValueError(f"Failed to encode address: {rv.result}")
+      raise ValueError(f"Failed to encode address. Error code = {rv_result}")
 
     enc_addr = blsct.as_string(rv.value)
     blsct.free_obj(rv)
@@ -43,9 +45,11 @@ class Address():
     """Decode an address string to a DoublePublicKey"""
 
     rv = blsct.decode_address(addr)
-    if rv.result != 0:
+    rv_result = int(rv.result)
+
+    if rv_result != 0:
       blsct.free_obj(rv)
-      raise ValueError(f"Failed to decode address: {rv.result}")
+      raise ValueError(f"Failed to decode address. Error code = {rv_result}")
 
     # move rv.value (blsct_dpk) to DoublePublicKey
     dpk = DoublePublicKey.from_obj(rv.value)

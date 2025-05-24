@@ -1,13 +1,12 @@
-import blsct
+from . import blsct
 from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .managed_obj import ManagedObj
-from .out_point import OutPoint
 from .point import Point
 from .scalar import Scalar
 from .script import Script
 from .sub_addr import SubAddr
 from .token_id import TokenId
-from typing import Any, Self, Optional, Literal, override
+from typing import Any, Optional, Literal, override, Self, Type
 
 TxOutputType = Literal["Normal", "StakedCommitment"]
 
@@ -27,8 +26,9 @@ class TxOut(ManagedObj):
   >>> TxOut.generate(sub_addr, amount, memo)
   TxOut(<Swig Object of type 'void *' at 0x1015fa760>)  # doctest: +SKIP
   """
-  @staticmethod
+  @classmethod
   def generate(
+    cls: Type[Self],
     sub_addr: SubAddr,
     amount: int,
     memo: str,
@@ -47,11 +47,12 @@ class TxOut(ManagedObj):
       blsct.Normal if output_type == "Normal" else blsct.StakedCommitment,
       min_stake
     )
-    if rv.result != 0:
+    rv_result = int(rv.result)
+    if rv_result != 0:
       blsct.free_obj(rv)
-      raise ValueError(f"Failed to build TxOut")
+      raise ValueError(f"Failed to build TxOut. Error code = {rv_result}")
 
-    obj = TxOut(rv.value)
+    obj = cls(rv.value)
     blsct.free_obj(rv)
     return obj
 

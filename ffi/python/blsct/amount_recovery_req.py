@@ -1,5 +1,9 @@
 from __future__ import annotations
 from .point import Point
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .range_proof import RangeProof
 
 class AmountRecoveryReq:
   """

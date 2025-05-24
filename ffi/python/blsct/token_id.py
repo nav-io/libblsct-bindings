@@ -1,6 +1,6 @@
-import blsct
+from . import blsct
 from .managed_obj import ManagedObj
-from typing import Any, Self, override
+from typing import Any, override, Self, Type
 
 class TokenId(ManagedObj):
   """
@@ -17,19 +17,23 @@ class TokenId(ManagedObj):
   >>> token_id.subid()
   456
   """
-  @staticmethod
-  def from_token(token: int) -> Self:
+  @classmethod
+  def from_token(cls: Type[Self], token: int) -> Self:
     """Generate a token ID from a given token."""
     rv = blsct.gen_token_id(token);
-    token_id = TokenId(rv.value)
+    token_id = cls(rv.value)
     blsct.free_obj(rv)
     return token_id
  
-  @staticmethod
-  def from_token_and_subid(token: int, subid: int) -> Self:
+  @classmethod
+  def from_token_and_subid(
+    cls: Type[Self],
+    token: int,
+    subid: int,
+  ) -> Self:
     """Generate a token ID from a given token and subid."""
     rv = blsct.gen_token_id_with_subid(token, subid) 
-    token_id = TokenId(rv.value)
+    token_id = cls(rv.value)
     blsct.free_obj(rv)
     return token_id
 

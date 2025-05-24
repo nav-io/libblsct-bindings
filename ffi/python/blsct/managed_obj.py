@@ -1,6 +1,8 @@
-import blsct
+from . import blsct
 from abc import ABC, abstractmethod
-from typing import Any, Self
+from typing import Any, Type, Self
+from .serializable import Serializable
+from .pretty_printable import PrettyPrintable
 
 class ManagedObj(ABC):
   def __init__(self, obj=None):
@@ -12,7 +14,7 @@ class ManagedObj(ABC):
     pass
 
   @classmethod
-  def default_obj(cls) -> Any:
+  def default_obj(cls: Type[Self]) -> Self:
     name = cls.__name__
     raise NotImplementedError(f"{name}.default_obj()")
 
@@ -31,7 +33,7 @@ class ManagedObj(ABC):
     self._managed = True
     return self
 
-  def __exit__(self, exc_type, exc_value, traceback):
+  def __exit__(self, *_):
     if self.obj is not None and self._managed is True:
       blsct.free_obj(self.obj)
       self.obj = None
@@ -39,8 +41,10 @@ class ManagedObj(ABC):
 
   def __str__(self):
     name = self.__class__.__name__
-    if hasattr(self, "to_hex"):
-      return f"{name}({self.to_hex()})"
+    if isinstance(self, PrettyPrintable):
+      return f"{name}('{self.pretty_print()}')"
+    if isinstance(self, Serializable):
+      return f"{name}({self.serialize()})"
     else:
       return f"{name}({self.obj})"
 

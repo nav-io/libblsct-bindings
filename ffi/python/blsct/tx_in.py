@@ -1,11 +1,11 @@
-import blsct
+from . import blsct
 from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .managed_obj import ManagedObj
 from .out_point import OutPoint
 from .script import Script
 from .token_id import TokenId
 from .tx_id import TxId
-from typing import Any, Self, override
+from typing import Any, override, Self, Type
 
 class TxIn(ManagedObj):
   """
@@ -31,8 +31,9 @@ class TxIn(ManagedObj):
   >>> tx_in.get_script_witness()
   Script(ffffffffffffffff1b585a44e980f30b16ef75db34f7a6d56fe7cee4)  # doctest: +SKIP
   """
-  @staticmethod
+  @classmethod
   def generate(
+    cls: Type[Self],
     amount: int,
     gamma: int,
     spending_key: SpendingKey,
@@ -49,11 +50,12 @@ class TxIn(ManagedObj):
       out_point.value(),
       rbf
     )
-    if rv.result != 0:
+    rv_result = int(rv.result)
+    if rv_result != 0:
       blsct.free_obj(rv)
-      raise ValueError(f"Failed to build TxIn")
+      raise ValueError(f"Failed to build TxIn. Error code = {rv_result}")
 
-    obj = TxIn(rv.value)
+    obj = cls(rv.value)
     blsct.free_obj(rv)
     return obj
 

@@ -1,4 +1,4 @@
-import blsct
+from . import blsct
 from .managed_obj import ManagedObj
 from typing import Any, Self, override
 
