@@ -1,6 +1,6 @@
-from ..scalar_based_key import ScalarBasedKey
+from ...scalar import Scalar
 
-class TokenKey(ScalarBasedKey):
+class TokenKey(Scalar):
   """
   Represents a token key. A token key is a Scalar and introduces no new functionality; it serves purely as a semantic alias.
 

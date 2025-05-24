@@ -82,8 +82,9 @@ class PublicKey(ManagedObj, Serializable, PrettyPrintable):
   @override
   def default_obj(cls) -> Any:
     rv = blsct.gen_random_public_key()
+    obj = rv.value
     blsct.free_obj(rv)
-    return rv.value
+    return obj
 
   @override
   def serialize(self) -> str:

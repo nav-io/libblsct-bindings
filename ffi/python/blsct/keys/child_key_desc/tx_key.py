@@ -1,9 +1,9 @@
 from ... import blsct
-from ..scalar_based_key import ScalarBasedKey
+from ...scalar import Scalar
 from .tx_key_desc.spending_key import SpendingKey
 from .tx_key_desc.view_key import ViewKey
 
-class TxKey(ScalarBasedKey):
+class TxKey(Scalar):
   """
   Represents a tx key. A tx key is a Scalar and introduces no new functionality; it serves purely as a semantic alias. Both SpendingKey and ViewKey are exclusively derived from a TxKey.
 

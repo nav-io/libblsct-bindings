@@ -55,6 +55,8 @@ class Scalar(ManagedObj, Serializable, PrettyPrintable):
   @classmethod
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the scalar from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
     rv = blsct.hex_to_scalar(hex)
     rv_result = int(rv.result)
     if rv_result != 0:
@@ -97,7 +99,7 @@ class Scalar(ManagedObj, Serializable, PrettyPrintable):
   @classmethod
   def default_obj(cls) -> Any:
     rv = blsct.gen_random_scalar()
-    value = rv.value
+    obj = rv.value
     blsct.free_obj(rv)
-    return value
+    return obj
 

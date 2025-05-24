@@ -69,7 +69,9 @@ class Point(ManagedObj, Serializable, PrettyPrintable):
   @classmethod
   def default_obj(cls) -> Any:
     rv = blsct.gen_base_point()
-    return rv.value 
+    obj = rv.value
+    blsct.free_obj(rv)
+    return obj 
  
   def pretty_print(self) -> str:
     """Convert the point to a string representation"""

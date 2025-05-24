@@ -1,6 +1,6 @@
-from ..scalar_based_key import ScalarBasedKey
+from ...scalar import Scalar
 
-class BlindingKey(ScalarBasedKey):
+class BlindingKey(Scalar):
   """
   Represents a blinding key. A blinding key is a Scalar and introduces no new functionality; it serves purely as a semantic alias.
 

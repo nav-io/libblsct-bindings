@@ -52,5 +52,7 @@ class TokenId(ManagedObj):
   @classmethod
   def default_obj(cls) -> Any:
     rv = blsct.gen_default_token_id()
-    return rv.value
+    obj = rv.value
+    blsct.free_obj(rv)
+    return obj
 
