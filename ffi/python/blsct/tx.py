@@ -1,12 +1,13 @@
-import blsct
+from . import blsct
 from .managed_obj import ManagedObj
+from .serializable import Serializable
 from .tx_id import TxId
 from .tx_in import TxIn
 from .tx_out import TxOut
-from typing import Any, Self, override
+from typing import Any, override, Self, Type
 
 # stores serialized tx represented as uint8_t*
-class Tx(ManagedObj):
+class Tx(ManagedObj, Serializable):
   """
   Represents a confidential transaction.
 
@@ -59,12 +60,12 @@ class Tx(ManagedObj):
   value: 0  # doctest: +SKIP
   script_pub_key: 51000000000000000000000000000000000000000000000000000000  # doctest: +SKIP
   token_id: token=0, subid=18446744073709551615  # doctest: +SKIP
-  spending_key: Point(1 43c0386c950f8298bd2a6416dfb2696f08e155a76227f789eff0a78d8a7d0c1926b8b5de97818bff168917e8dec199d 170cdcb9cfc862168dfbfc52dea568ef38b2bdd424e17a7e5ebf72205c7e1c6a9783ee5e2719a77d684f1e3d1ee90cd)  # doctest: +SKIP
-  ephemeral_key: Point(1 dbb54183f593cbb325c258a2f506feda30938d7ac5135e70fd695f596a8401a965c79b1d86c99bd935a9bdf7d0f7d63 19c3fb04fb219dedd2d0b328127edfc32de671874ed37db578f8c35a20215245abced2f511dd613a3a6bec06c892c43)  # doctest: +SKIP
-  blinding_key: Point(1 11bfe37be891928ac997a4713ed23b20a4754c9acc59a223141637b31b6b478e1e5e3566ae2f57098199bdfaa2e0347a 5a88b4430f2e6bb3e066e97448e5246494e4057f7162dbabdee67018c56e5d46e88c91f1279662a5466b0cb09d557f)  # doctest: +SKIP
+  spending_key: Point(1 43c0386c...)  # doctest: +SKIP
+  ephemeral_key: Point(1 dbb5418...)  # doctest: +SKIP
+  blinding_key: Point(1 11bfe3...)  # doctest: +SKIP
   view_tag: 43421  # doctest: +SKIP
-  range_proof.A: 1 d1a9ece6622f7e9b1e4538ebadf8586054507823a8bf6752e30ac808963da12abcd0658351691197de6f0b1631723bf 72ed6a826f0c81bd803f55c64aed35b3dee639ef5f9023d73184ca05cc27f87b67374b1ead95dedb28ed6133e97c42  # doctest: +SKIP
-  range_proof.B: 1 7f5c8c20c84286b59554aa4baeba056f97b69a4deb79bb646461bb6b69109a7888d6c28f457f95859e3cd14de30eea7 b22e8d359cdf4e9aa66579f94017aba1a4fcd146364f7555a5c97c5df33eb61583a9882469edd30555be5f67ea05ad  # doctest: +SKIP
+  range_proof.A: 1 d1a9ec...# doctest: +SKIP
+  range_proof.B: 1 7f5c8c...# doctest: +SKIP
   range_Proof.r_prime: Point(0)  # doctest: +SKIP
   range_proof.s_prime: Point(0)  # doctest: +SKIP
   range_proof.delta_prime: Point(0)  # doctest: +SKIP
@@ -73,12 +74,12 @@ class Tx(ManagedObj):
   value: 0  # doctest: +SKIP
   script_pub_key: 51000000000000000000000000000000000000000000000000000000  # doctest: +SKIP
   token_id: token=0, subid=18446744073709551615  # doctest: +SKIP
-  spending_key: Point(1 187232c232f64c69aabdcc972fa53ee6348070dd95485d87e83381c51bf3390342473c27308293d2abe5f43660e38e5d 4768f24b50c7865c795231319d5347dbf60e5bbb3e317ef421d31a1893ef917647865fd4d12fdb8794f9a011b61cf7)  # doctest: +SKIP
-  ephemeral_key: Point(1 f307fb2f34626f0da7af6bba99616eb3156d298ecbbda78551dbdb50a1e5fcdc171970ed07df01bcedacb4b56d606da be1c4985d574bca1a46f49e181144428e8ab22e2d33ada48720d6c307c97d1abc49a6a624b0db33f215766af2458d5)  # doctest: +SKIP
+  spending_key: Point(1 187232...)  # doctest: +SKIP
+  ephemeral_key: Point(1 f307fb...)  # doctest: +SKIP
   blinding_key: Point(0)  # doctest: +SKIP
   view_tag: 21881  # doctest: +SKIP
-  range_proof.A: 1 731fba528d2461adc510c2cea6538cb4c31869448ee04f83665aa24a83c6a79aff088893d908ad7df4236e8c10a7ed1 7f2fd4146dc6cf5e25f1e7334d364cf2463505e2c772e66ba7ecfcd7970ff8d38a7e3fa943adaacebeb336a9d21b76  # doctest: +SKIP
-  range_proof.B: 1 af830e83f6438cc9bdcc52be4d43f09b330f849b6c61a825d003748716ef59b51904dc482f65ce6609bc90ed06ccb90 17c2b3479186582f7e831c2b62b2f2adadb38bd76f7a87ab6da34f2639d267d1567c6d24f2a67ae991291261abe3416  # doctest: +SKIP
+  range_proof.A: 1 731fba...# doctest: +SKIP
+  range_proof.B: 1 af830e...# doctest: +SKIP
   range_Proof.r_prime: Point(0)  # doctest: +SKIP
   range_proof.s_prime: Point(0)  # doctest: +SKIP
   range_proof.delta_prime: Point(0)  # doctest: +SKIP
@@ -102,8 +103,14 @@ class Tx(ManagedObj):
   >>> tx.deserialize(ser_tx)
   Tx(<swig object of type 'unsigned char *' at 0x102529080>)  # doctest: +SKIP
   """
-  @staticmethod
+
+  def __init__(self, obj: Any, obj_size: int):
+    self.obj_size = obj_size
+    super().__init__(obj)
+
+  @classmethod
   def generate(
+    cls: Type[Self],
     tx_ins: list[TxIn],
     tx_outs: list[TxOut]
   ) -> Self:
@@ -118,22 +125,22 @@ class Tx(ManagedObj):
       blsct.add_tx_out_to_vec(tx_out_vec, tx_out.value())
 
     rv = blsct.build_tx(tx_in_vec, tx_out_vec)
+    rv_result = int(rv.result)
 
-    if rv.result == blsct.BLSCT_IN_AMOUNT_ERROR:
+    if rv_result == blsct.BLSCT_IN_AMOUNT_ERROR:
       blsct.free_obj(rv)
       raise ValueError(f"Failed to build transaction. tx_ins[{rv.in_amount_err_index}] has an invalid amount")
 
 
-    if rv.result == blsct.BLSCT_OUT_AMOUNT_ERROR:
+    if rv_result == blsct.BLSCT_OUT_AMOUNT_ERROR:
       blsct.free_obj(rv)
       raise ValueError(f"Failed to build transaciton. tx_outs[{rv.out_amount_err_index}] has an invalid amount")
 
-    if rv.result != 0:
+    if rv_result != 0:
       blsct.free_obj(rv)
-      raise valueerror(f"building tx failed: {rv.result}")
+      raise ValueError(f"building tx failed. Error code = {rv_result}")
 
-    obj = Tx(rv.ser_tx)
-    obj.obj_size = rv.ser_tx_size
+    obj = cls(rv.ser_tx, rv.ser_tx_size)
     blsct.free_obj(rv)
     return obj
 
@@ -142,7 +149,7 @@ class Tx(ManagedObj):
     tmp_tx = blsct.deserialize_tx(self.value(), self.obj_size)
     tx_id_hex = blsct.get_tx_id(tmp_tx)
     blsct.free_obj(tmp_tx)
-    return TxId.from_hex(tx_id_hex)
+    return TxId.deserialize(tx_id_hex)
 
   def get_tx_ins(self) -> list[TxIn]:
     """Get the transaction inputs."""
@@ -180,6 +187,7 @@ class Tx(ManagedObj):
 
     return tx_outs
 
+  @override
   def serialize(self) -> str:
     """Serialize the transaction to a hexadecimal string."""
     return blsct.to_hex(
@@ -188,11 +196,12 @@ class Tx(ManagedObj):
     )
 
   @classmethod
-  def deserialize(cls, hex: str) -> Self:
+  @override
+  def deserialize(cls: Type[Self], hex: str) -> Self:
     """Deserialize a transaction from a hexadecimal string."""
     obj = blsct.hex_to_malloced_buf(hex)
-    inst = cls(obj) 
-    inst.obj_size = int(len(hex) / 2)
+    obj_size = int(len(hex) / 2)
+    inst = cls(obj, obj_size) 
     return inst
 
   @override
@@ -201,6 +210,7 @@ class Tx(ManagedObj):
     return blsct.cast_to_uint8_t_ptr(self.obj)
 
   @classmethod
+  @override
   def default_obj(cls) -> Any:
     raise NotImplementedError("Cannot create a Tx without required parameters.")
 

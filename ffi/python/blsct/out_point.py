@@ -1,7 +1,7 @@
-import blsct
+from . import blsct
 from .managed_obj import ManagedObj
 from .tx_id import TxId
-from typing import Any, Self, override
+from typing import Any, override, Self, Type
 
 class OutPoint(ManagedObj):
   """
@@ -14,11 +14,11 @@ class OutPoint(ManagedObj):
   >>> OutPoint.generate(tx_id, out_index)
   OutPoint(<Swig Object of type 'void *' at 0x105b071b0>)  # doctest: +SKIP
   """
-  @staticmethod
-  def generate(tx_id: TxId, out_index: int) -> Self:
+  @classmethod
+  def generate(cls: Type[Self], tx_id: TxId, out_index: int) -> Self:
     """Generate an outpoint from a transaction ID and output index."""
     rv = blsct.gen_out_point(tx_id.to_hex(), out_index)
-    inst = OutPoint(rv.value)
+    inst = cls(rv.value)
     blsct.free_obj(rv)
     return inst
 

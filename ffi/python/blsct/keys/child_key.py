@@ -1,10 +1,10 @@
-import blsct
+from .. import blsct
 from ..scalar import Scalar
 from .scalar_based_key import ScalarBasedKey
 from .child_key_desc.blinding_key import BlindingKey
 from .child_key_desc.token_key import TokenKey
 from .child_key_desc.tx_key import TxKey
-from typing import Any, Self, override
+from typing import override, Type, Self
 
 class ChildKey(ScalarBasedKey):
   """
@@ -22,11 +22,14 @@ class ChildKey(ScalarBasedKey):
   >>> k.to_tx_key()
   TxKey(3d454890fefe84506a44e6400f38991e884c3d5884cc2b6bed0e41fc62f0d168)  # doctest: +SKIP
   """
-  @staticmethod
-  def from_scalar(seed: Scalar) -> Self:
+  @classmethod
+  def from_scalar(
+    cls: Type[Self],
+    seed: Scalar,
+  ) -> Self:
     """create a child key from a scalar"""
     obj = blsct.from_seed_to_child_key(seed.value())
-    return ChildKey(obj)
+    return cls(obj)
 
   def to_blinding_key(self) -> BlindingKey:
     """derive a blinding key from the child key"""

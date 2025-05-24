@@ -1,11 +1,7 @@
-import blsct
-import sys
-
 from blsct import (
   Address,
   AddressEncoding,
   AmountRecoveryReq,
-  AmountRecoveryRes,
   BlindingKey,
   ChildKey,
   DoublePublicKey,
@@ -34,35 +30,44 @@ from blsct import (
 import secrets
 
 def test_scalar():
-  s = Scalar()
-  print(s)
-  print(f"Scalar({s.to_hex()})")
+  s1 = Scalar.random()
+  print(s1)
+  print(f"Scalar({s1.serialize()})")
 
-  with Scalar(1) as one:
-    print(one)
+  s2 = Scalar.random()
+  assert(s1 != s2), "Random scalars should not be equal"
+  assert(s1 == s1), "The same scalar should be equal"
+  assert(s2 == s2), "The same scalar should be equal"
+
+  s3 = Scalar.deserialize(s1.serialize())
+  assert(s1 == s3), "Deserializing serialized value should produce the original value"
 
 def test_point():
-  print("Point class:", Point)
-  print("Defined in module:", Point.__module__)
-  print("Module file:", sys.modules[Point.__module__].__file__)
-  pt = Point()
-  print(pt.to_hex())
-  print(pt)
-  assert pt.is_valid(), "default Point should be valid"
+  p1 = Point.random()
+  print(p1)
 
-  with Point.base() as pt2:
-    print(pt2)
-    assert pt.to_hex() == pt2.to_hex(), "Point() should return the base point"
+  p2 = Point.random()
+  assert(p1 != p2), "Random Points should not be equal"
+  assert(p1 == p1), "The same Point should be equal"
+  assert(p2 == p2), "The same Point should be equal"
 
-  with Point.random() as pt:
-    print(pt)
+  p3 = Scalar.deserialize(p1.serialize())
+  assert(p1 == p3), "Deserializing serialized value should produce the original value"
+
+  p4 = Point.base()
+  assert p4.is_valid(), "Base Point should be valid"
 
 def test_public_key():
-  pk = PublicKey()
-  print(pk)
+  pk1 = PublicKey.random()
+  print(pk1)
 
-  with PublicKey.random() as pk:
-    print(pk)
+  pk2 = PublicKey.random()
+  assert(pk1 != pk2), "Random PublicKey should not be equal"
+  assert(pk1 == pk1), "The same PublicKey should be equal"
+  assert(pk2 == pk2), "The same PublicKey should be equal"
+
+  pk3 = PublicKey.deserialize(pk1.serialize())
+  assert(pk1 == pk3), "Deserializing serialized value should produce the original value"
 
 def test_double_public_key():
   pk1 = PublicKey()
@@ -156,24 +161,24 @@ def test_key_derivation():
   print(f"Seed: {seed}")
 
   child_key = ChildKey.from_scalar(seed)
-  print(f"ChildKey: {child_key.to_hex()}")
+  print(f"ChildKey: {child_key.serialize()}")
 
   blinding_key = child_key.to_blinding_key()
-  print(f"BlindingKey: {blinding_key.to_hex()}")
+  print(f"BlindingKey: {blinding_key.serialize()}")
 
   token_key = child_key.to_token_key()
-  print(f"TokenKey: {token_key.to_hex()}")
+  print(f"TokenKey: {token_key.serialize()}")
 
   tx_key = child_key.to_tx_key()
-  print(f"TxKey: {tx_key.to_hex()}")
+  print(f"TxKey: {tx_key.serialize()}")
 
   view_key = tx_key.to_view_key()
-  print(f"ViewKey: {view_key.to_hex()}")
+  print(f"ViewKey: {view_key.serialize()}")
 
   spending_key = tx_key.to_spending_key()
-  print(f"SpendingKey: {spending_key.to_hex()}")
+  print(f"SpendingKey: {spending_key.serialize()}")
 
-  blinding_pub_key = PublicKey.from_scalar(blinding_key)
+  blinding_pub_key = PublicKey.from_scalar(blinding_key.to_scalar())
   print(f"blinding_pub_key: {blinding_pub_key}")
 
   account = 123
@@ -186,12 +191,12 @@ def test_key_derivation():
     account,
     address,
   )
-  print(f"priv_spending_key: {priv_spending_key.to_hex()}")
+  print(f"priv_spending_key: {priv_spending_key.serialize()}")
 
   view_tag = ViewTag.generate(blinding_pub_key, view_key)
   print(f"view_tag: {view_tag}")
 
-  spending_pub_key = PublicKey.from_scalar(spending_key)
+  spending_pub_key = PublicKey.from_scalar(spending_key.to_scalar())
   print(f"spending_pub_key: {spending_pub_key}")
 
   hash_id = HashId.generate(
@@ -211,7 +216,7 @@ def test_key_derivation():
   print(f"sub_addr: {sub_addr}")
 
   dpk = DoublePublicKey.from_keys_and_acct_addr(
-    view_key,
+    view_key.to_scalar(),
     spending_pub_key,
     account,
     address,
@@ -241,11 +246,11 @@ def test_tx():
   out_amount = out_amount
 
   # tx in
-  tx_id = TxId.from_hex(secrets.token_hex(32))
+  tx_id = TxId.deserialize(secrets.token_hex(32))
   print(f"tx_id: {tx_id}")
 
   gamma = 100
-  spending_key = Scalar(12)
+  spending_key = SpendingKey(12)
   token_id = TokenId()
   out_index = 0
   out_point = OutPoint.generate(tx_id, out_index)
@@ -311,8 +316,8 @@ def test_tx():
     print(f"blinding_key: {tx_out.get_blinding_key()}")
     print(f"view_tag: {tx_out.get_view_tag()}")
 
-    print(f"range_proof.A: {tx_out.get_range_proof_A().to_hex()}")
-    print(f"range_proof.B: {tx_out.get_range_proof_B().to_hex()}")
+    print(f"range_proof.A: {tx_out.get_range_proof_A().serialize()}")
+    print(f"range_proof.B: {tx_out.get_range_proof_B().serialize()}")
     print(f"range_Proof.r_prime: {tx_out.get_range_proof_r_prime()}")
     print(f"range_proof.s_prime: {tx_out.get_range_proof_s_prime()}")
     print(f"range_proof.delta_prime: {tx_out.get_range_proof_delta_prime()}")

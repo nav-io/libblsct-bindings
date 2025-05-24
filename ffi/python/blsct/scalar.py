@@ -1,10 +1,12 @@
-import blsct
+from . import blsct
 from .managed_obj import ManagedObj
-from typing import Any, Optional, override, Self
+from .serializable import Serializable
+from .pretty_printable import PrettyPrintable
+from typing import Any, Optional, override, Self 
 
-class Scalar(ManagedObj):
+class Scalar(ManagedObj, Serializable, PrettyPrintable):
   """
-  Represents an element of the finite field :math:`\mathbb{F}_r`, where :math:`r` is the order of the generator point of the BLS12-381 G1 group.
+  Represents an element of the finite field :math:`\\mathbb{F}_r`, where :math:`r` is the order of the generator point of the BLS12-381 G1 group.
 
   A wrapper of MclScalar_ in navio-core.
 
@@ -25,8 +27,17 @@ class Scalar(ManagedObj):
   '5e6efdcf00ce467de29a970adf3a09f8c93e51dc7f1405bbe9dffeeabf952fbe'
   >>> Scalar.zero().to_hex()
   '0'
+  >>> c = Scalar(0x1234567890)
+  >>> c
+  Scalar(1234567890)
+  >>> Scalar.deserialize(c.serialize())
+  Scalar(1234567890)
+  >>> a == b
+  False
+  >>> a == a
+  True
   """
-  def __init__(self, value: Optional[int] = None):
+  def __init__(self, value: Optional[Any] = None):
     if isinstance(value, int):
       rv = blsct.gen_scalar(value)
       super().__init__(rv.value)
@@ -37,25 +48,47 @@ class Scalar(ManagedObj):
     else:
       raise ValueError(f"Scalar can only be instantiated with int, but got '{type(value).__name__}'")
 
-  @staticmethod
-  def random() -> Self:
+  def serialize(self) -> str:
+    """Serialize the scalar to a hexadecimal string"""
+    return blsct.scalar_to_hex(self.value())
+    
+  @classmethod
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the scalar from a hexadecimal string"""
+    rv = blsct.hex_to_scalar(hex)
+    rv_result = int(rv.result)
+    if rv_result != 0:
+      blsct.free_obj(rv)
+      raise RuntimeError(f"Deserializaiton failed. Error code = {rv_result}")  # pragma: no co
+    return cls.from_obj(rv.value)
+
+  @classmethod
+  def random(cls) -> Self:
     """Generate a random scalar"""
     rv = blsct.gen_random_scalar()
-    scalar = Scalar(rv.value)
+    scalar = cls(rv.value)
     blsct.free_obj(rv)
     return scalar
-
-  def to_hex(self) -> str:
-    """Convert the scalar to a hexadecimal string"""
-    return blsct.scalar_to_hex(self.value())
 
   def to_int(self) -> int:
     """Convert the scalar to an integer"""
     return  blsct.scalar_to_uint64(self.value())
 
-  def zero() -> Self:
+  def pretty_print(self) -> str:
+    """Convert the scalar to a string representation"""
+    return blsct.scalar_to_str(self.value())
+
+  @override
+  def __eq__(self, other: object) -> bool:
+    if isinstance(other, Scalar):
+      return bool(blsct.is_scalar_equal(self.value(), other.value()))
+    else:
+      return False
+
+  @classmethod
+  def zero(cls) -> Self:
     """Return a zero scalar"""
-    return Scalar(0)
+    return cls(0)
 
   @override
   def value(self) -> Any:

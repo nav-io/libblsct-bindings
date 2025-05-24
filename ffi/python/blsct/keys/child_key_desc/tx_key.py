@@ -1,8 +1,7 @@
-import blsct
+from ... import blsct
 from ..scalar_based_key import ScalarBasedKey
 from .tx_key_desc.spending_key import SpendingKey
 from .tx_key_desc.view_key import ViewKey
-from typing import Any
 
 class TxKey(ScalarBasedKey):
   """

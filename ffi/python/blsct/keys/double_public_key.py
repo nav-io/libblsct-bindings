@@ -1,8 +1,8 @@
-import blsct
+from .. import blsct
 from ..managed_obj import ManagedObj
 from .public_key import PublicKey
 from ..scalar import Scalar
-from typing import Self, override
+from typing import override, Self, Type
 
 class DoublePublicKey(ManagedObj):
   """
@@ -17,16 +17,21 @@ class DoublePublicKey(ManagedObj):
   def __init__(self, obj=None):
     super().__init__(obj)
 
-  @staticmethod
-  def from_public_keys(pk1: PublicKey, pk2: PublicKey) -> Self:
+  @classmethod
+  def from_public_keys(
+    cls: Type[Self],
+    pk1: PublicKey,
+    pk2: PublicKey,
+  ) -> Self:
     """Create a DoublePublicKey from two PublicKeys."""
     rv = blsct.gen_double_pub_key(pk1.value(), pk2.value())
-    dpk = DoublePublicKey(rv.value)
+    dpk = cls(rv.value)
     blsct.free_obj(rv)
     return dpk
 
-  @staticmethod
+  @classmethod
   def from_keys_and_acct_addr(
+    cls: Type[Self],
     view_key: Scalar,
     spending_pub_key: PublicKey,
     account: int,
@@ -39,16 +44,18 @@ class DoublePublicKey(ManagedObj):
       account,
       address
     )
-    return DoublePublicKey(obj) 
+    return cls(obj) 
 
   @override
   def value(self):
     return blsct.cast_to_dpk(self.obj)
 
   @override
-  def default_obj(self) -> Self:
+  @classmethod
+  def default_obj(cls: Type[Self]) -> Self:
     pk1 = PublicKey()
     pk2 = PublicKey()
     tmp = DoublePublicKey.from_public_keys(pk1, pk2)
     obj = tmp.move()
     return obj
+

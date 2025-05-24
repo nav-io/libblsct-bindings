@@ -1,11 +1,11 @@
-import blsct
+from . import blsct
 from .managed_obj import ManagedObj
 from .scalar import Scalar
 from .keys.child_key_desc.tx_key_desc.view_key import ViewKey
 from .keys.double_public_key import DoublePublicKey
 from .keys.public_key import PublicKey
 from .sub_addr_id import SubAddrId
-from typing import Any, Self, override
+from typing import Any, override, Self, Type
 
 class SubAddr(ManagedObj):
   """
@@ -21,8 +21,9 @@ class SubAddr(ManagedObj):
   >>> SubAddr.from_double_public_key(dpk)
   SubAddr(<Swig Object of type 'void *' at 0x101152760>)  # doctest: +SKIP
   """
-  @staticmethod
+  @classmethod
   def generate(
+    cls: Type[Self],
     view_key: ViewKey,
     spending_pub_key: PublicKey,
     sub_addr_id: SubAddrId,
@@ -33,13 +34,16 @@ class SubAddr(ManagedObj):
       spending_pub_key.value(),
       sub_addr_id.value(),
     )
-    return SubAddr(obj)
+    return cls(obj)
 
-  @staticmethod
-  def from_double_public_key(dpk: DoublePublicKey) -> Self:
+  @classmethod
+  def from_double_public_key(
+      cls: Type[Self],
+      dpk: DoublePublicKey,
+    ) -> Self:
     """Derive a sub-address from a DoublePublicKey"""
     rv = blsct.dpk_to_sub_addr(dpk.value())
-    inst = SubAddr(rv.value)
+    inst = cls(rv.value)
     blsct.free_obj(rv)
     return inst
 
@@ -47,7 +51,8 @@ class SubAddr(ManagedObj):
   def value(self) -> Any:
     return blsct.cast_to_sub_addr(self.obj)
 
+  @classmethod
   @override
-  def default_obj(self) -> Self:
+  def default_obj(cls: Type[Self]) -> Self:
     raise NotImplementedError(f"Cannot create a SubAddr without required parameters.")
 

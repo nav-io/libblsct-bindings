@@ -49,17 +49,22 @@ python -c "import blsct"
 
 1. Install the package
 
+- Install `venv`, `build` and `setuptools`
 ```bash
 python3 -m venv venv
-source venv/bin/activate
 pip install build setuptools
-python -m build
-pip install dist/*.whl
 ```
 
-1. Move to a directory that is not `ffi/python` in order to avoid for your test script to use sources under `ffi/python` as the pacakge. Files under the directory don't contain c++ libraries and other required files.
+- Build the package
+```bash
+source venv/bin/activate
+python -m build
+pip install --force-reinstall dist/*.whl
+```
 
-1. Run your test script
+1. cd to the parent directory so that your test script won't use sources under `ffi/python`
+
+1. Test that the installation was successful
 
 ```bash
 python -c 'import blsct'

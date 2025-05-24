@@ -1,9 +1,8 @@
-import blsct
+from . import blsct
 from .keys.public_key import PublicKey
 from .keys.child_key_desc.tx_key_desc.view_key import ViewKey
 from .managed_obj import ManagedObj
-from .scalar import Scalar
-from typing import Any, Self, override
+from typing import Any, override, Self, Type
 
 class HashId(ManagedObj):
   """
@@ -19,8 +18,9 @@ class HashId(ManagedObj):
   >>> hash_id.to_hex()
   '81fe3aefff3e90dcd9862aad1527dc034e5045d4'  # doctest: +SKIP
   """
-  @staticmethod
+  @classmethod
   def generate(
+    cls: Type[Self],
     blinding_pub_key: PublicKey,
     spending_pub_key: PublicKey,
     view_key: ViewKey
@@ -31,7 +31,7 @@ class HashId(ManagedObj):
       spending_pub_key.value(),
       view_key.value()
     )
-    return HashId(obj)
+    return cls(obj)
 
   def to_hex(self) -> str:
     return blsct.get_key_id_hex(self.value())

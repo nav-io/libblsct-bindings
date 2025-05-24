@@ -1,8 +1,9 @@
-import blsct
+from . import blsct
 from .managed_obj import ManagedObj
-from typing import Any, Self, override
+from .serializable import Serializable
+from typing import Any, override, Type, Self
 
-class TxId(ManagedObj):
+class TxId(ManagedObj, Serializable):
   """
   Represents the transaction ID of a confidential transaction.
 
@@ -13,23 +14,30 @@ class TxId(ManagedObj):
   >>> tx_id.to_hex()
   'f60b407e98916361594ecd53d7bed716fb901570815c323244da8d4189833df3'  # doctest: +SKIP
   """
-  def to_hex(self) -> str:
-    """Convert the TxId to a hexadecimal string."""
+  @override
+  def serialize(self) -> str:
+    """Serialize the TxId object to a hexadecimal string."""
     buf = blsct.cast_to_uint8_t_ptr(self.value())
     return blsct.to_hex(buf, blsct.TX_ID_SIZE)
 
-  def from_hex(hex) -> Any:
+  @classmethod
+  @override
+  def deserialize(
+    cls: Type[Self],
+    hex: str,
+  ) -> Self:
     """Create a TxId from a hexadecimal string."""
     if len(hex) != blsct.TX_ID_SIZE * 2:
       raise ValueError(f"Invlid TxId hex length. Expected {blsct.TX_ID_SIZE * 2}, but got {len(hex)}.")
     obj = blsct.hex_to_malloced_buf(hex) 
-    return TxId(obj)
+    return cls(obj)
 
   @override
   def value(self):
     return blsct.cast_to_uint8_t_ptr(self.obj)
 
   @classmethod
-  def default_obj(cls) -> Any:
+  @override
+  def default_obj(cls: Type[Self]) -> Any:
     raise NotImplementedError("Cannot create a TxId without required parameters.")
 

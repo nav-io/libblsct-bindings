@@ -1,13 +1,9 @@
-import blsct
-from ..scalar import Scalar
+from .. import blsct
 from .scalar_based_key import ScalarBasedKey
-from .child_key_desc.blinding_key import BlindingKey
-from .child_key_desc.token_key import TokenKey
-from .child_key_desc.tx_key import TxKey
 from .child_key_desc.tx_key_desc.view_key import ViewKey
 from .child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .public_key import PublicKey
-from typing import Any, Self
+from typing import Self, Type
 
 class PrivSpendingKey(ScalarBasedKey):
   """
@@ -17,8 +13,9 @@ class PrivSpendingKey(ScalarBasedKey):
   >>> PrivSpendingKey()
   PrivSpendingKey(b75c8edb30507818cb0d4211dd57b09830e1395da700d9b4b43ac360329a908)  # doctest: +SKIP
   """
-  @staticmethod
+  @classmethod
   def generate(
+    cls: Type[Self],
     blinding_pub_key: PublicKey,
     view_key: ViewKey,
     spending_key: SpendingKey,
@@ -32,5 +29,5 @@ class PrivSpendingKey(ScalarBasedKey):
       account,
       address
     )
-    return PrivSpendingKey(blsct_psk)
+    return cls(blsct_psk)
 
