@@ -1,6 +1,7 @@
 from . import blsct
 from .managed_obj import ManagedObj
 from .serializable import Serializable
+from .scalar import Scalar
 from .pretty_printable import PrettyPrintable
 from typing import Any, override, Self, Type
 
@@ -24,6 +25,8 @@ class Point(ManagedObj, Serializable, PrettyPrintable):
   True
   >>> Point.random().serialize()
   '1 124c3c9dc6eb46cf8bcddc64559c05717d49730c9e474230dfd75e76c7ac07f954bfcf60432a9175d1eb0d54e502301b 2cbaf...'  # doctest: +SKIP
+  >>> Point.deserialize(Point().serialize())
+  '1 124c3c9dc6eb46cf8bcddc64559c05717d49730c9e474230dfd75e76c7ac07f954bfcf60432a9175d1eb0d54e502301b 2cbaf...'  # doctest: +SKIP
   """
 
   @classmethod
@@ -41,6 +44,11 @@ class Point(ManagedObj, Serializable, PrettyPrintable):
     point = cls.from_obj(rv.value)
     blsct.free_obj(rv)
     return point
+
+  @classmethod
+  def from_scalar(cls: Type[Self], scalar: Scalar) -> Self:
+    obj = blsct.point_from_scalar(scalar.value())
+    return cls.from_obj(obj)
 
   def is_valid(self) -> bool:
     """Check if the point is valid"""
