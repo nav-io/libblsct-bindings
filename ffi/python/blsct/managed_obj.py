@@ -6,7 +6,6 @@ from .pretty_printable import PrettyPrintable
 
 class ManagedObj(ABC):
   def __init__(self, obj=None):
-    print(f"ManagedObj.__init__({obj})")
     self.obj = self.default_obj() if obj is None else obj
     self._managed = False
 

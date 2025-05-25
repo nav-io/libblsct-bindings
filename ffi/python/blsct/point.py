@@ -68,7 +68,7 @@ class Point(ManagedObj, Serializable, PrettyPrintable):
 
   @classmethod
   def default_obj(cls) -> Any:
-    rv = blsct.gen_base_point()
+    rv = blsct.gen_random_point()
     obj = rv.value
     blsct.free_obj(rv)
     return obj 
