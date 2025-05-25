@@ -388,6 +388,7 @@ export const char* point_to_hex(const BlsctPoint* blsct_point);
 export BlsctRetVal* hex_to_point(const char* hex);
 export int is_point_equal(const BlsctPoint* a, const BlsctPoint* b);
 export const char* point_to_str(const BlsctPoint* blsct_point);
+export BlsctPoint* point_from_scalar(const BlsctScalar* blsct_scalar);
 
 // public key
 export BlsctRetVal* gen_random_public_key();

@@ -27,18 +27,22 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Install navio_blsct and pytest
+      - name: Install Python dependencies
         run: |
-          pip install navio_blsct
-          pip install pytest
+          pip install setuptools build pytest
 
-      - name: Checkout tests only
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
         with:
-          sparse-checkout: |
-            ffi/python/tests
+          clean: true
+
+      - name: Build and install the package
+        run: |
+          cd ffi/python
+          python -m build
+          pip install dist/*.whl
 
       - name: Run tests
         run: |
           cd ffi/python
           pytest tests
+

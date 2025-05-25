@@ -16,6 +16,8 @@ brew install swig
 sudo apt-get install swig
 ```
 
+1. cd to `ffi/python` directory
+
 1. Create a virtual environment
 
 ```bash
@@ -40,6 +42,7 @@ python -m build
 
 ```bash
 pip install dist/*.whl
+cd ..
 python -c "import blsct"
 ```
 
