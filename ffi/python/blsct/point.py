@@ -27,8 +27,9 @@ class Point(ManagedObj, Serializable, PrettyPrintable):
   '1 124c3c9dc6eb46cf8bcddc64559c05717d49730c9e474230dfd75e76c7ac07f954bfcf60432a9175d1eb0d54e502301b 2cbaf...'  # doctest: +SKIP
   >>> Point.deserialize(Point().serialize())
   '1 124c3c9dc6eb46cf8bcddc64559c05717d49730c9e474230dfd75e76c7ac07f954bfcf60432a9175d1eb0d54e502301b 2cbaf...'  # doctest: +SKIP
+  >>> Point.from_scalar(Scalar())
+  '1 124c3c9dc6eb46cf8bcddc64559c05717d49730c9e474230dfd75e76c7ac07f954bfcf60432a9175d1eb0d54e502301b 2cbaf...'  # doctest: +SKIP
   """
-
   @classmethod
   def random(cls: Type[Self]) -> Self:
     """Generate a random point"""
