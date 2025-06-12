@@ -50,14 +50,14 @@ class Scalar(ManagedObj, Serializable, PrettyPrintable):
 
   def serialize(self) -> str:
     """Serialize the scalar to a hexadecimal string"""
-    return blsct.scalar_to_hex(self.value())
+    return blsct.serialize_scalar(self.value())
     
   @classmethod
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the scalar from a hexadecimal string"""
     if len(hex) % 2 != 0:
       hex = f"0{hex}"
-    rv = blsct.hex_to_scalar(hex)
+    rv = blsct.deserialize_scalar(hex)
     rv_result = int(rv.result)
     if rv_result != 0:
       blsct.free_obj(rv)

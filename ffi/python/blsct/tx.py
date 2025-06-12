@@ -104,105 +104,121 @@ class Tx(ManagedObj, Serializable):
   Tx(<swig object of type 'unsigned char *' at 0x102529080>)  # doctest: +SKIP
   """
 
-  def __init__(self, obj: Any, obj_size: int):
-    self.obj_size = obj_size
-    super().__init__(obj)
-
-  @classmethod
-  def generate(
-    cls: Type[Self],
-    tx_ins: list[TxIn],
-    tx_outs: list[TxOut]
-  ) -> Self:
-    """generate a confidential transaction from a list of inputs and outputs."""
-
-    tx_in_vec = blsct.create_tx_in_vec()
+  def __init__(self, tx_ins: list[TxIn], tx_outs: list[TxOut]):
+    self.tx_ins = []
     for tx_in in tx_ins:
+      self.tx_ins.append(tx_in.clone())
+
+    self.tx_outs = []
+    for tx_out in tx_outs:
+      self.tx_outs.append(tx_out.clone())
+
+    def free_tx_ins_outs():
+      for tx_in in self.tx_ins:
+        blsct.free_obj(tx_in.value())
+
+      for tx_out in self.tx_outs:
+        blsct.free_obj(tx_out.value())
+
+    # create vector object and add tx_ins to it
+    tx_in_vec = blsct.create_tx_in_vec()
+    for tx_in in self.tx_ins:
       blsct.add_tx_in_to_vec(tx_in_vec, tx_in.value())
 
+    # create vector object and add tx_outs to it
     tx_out_vec = blsct.create_tx_out_vec()
-    for tx_out in tx_outs:
+    for tx_out in self.tx_outs:
       blsct.add_tx_out_to_vec(tx_out_vec, tx_out.value())
 
     rv = blsct.build_tx(tx_in_vec, tx_out_vec)
     rv_result = int(rv.result)
 
+    # free the temporary vector objects
+    blsct.free_obj(tx_in_vec)
+    blsct.free_obj(tx_out_vec)
+
     if rv_result == blsct.BLSCT_IN_AMOUNT_ERROR:
       blsct.free_obj(rv)
+      free_tx_ins_outs()
       raise ValueError(f"Failed to build transaction. tx_ins[{rv.in_amount_err_index}] has an invalid amount")
-
 
     if rv_result == blsct.BLSCT_OUT_AMOUNT_ERROR:
       blsct.free_obj(rv)
+      free_tx_ins_outs()
       raise ValueError(f"Failed to build transaciton. tx_outs[{rv.out_amount_err_index}] has an invalid amount")
 
     if rv_result != 0:
+      free_tx_ins_outs()
       blsct.free_obj(rv)
       raise ValueError(f"building tx failed. Error code = {rv_result}")
 
-    obj = cls(rv.ser_tx, rv.ser_tx_size)
+    obj = rv.ser_tx # rv.ser_tx is a byte array*
+    obj_size = rv.ser_tx_size # rv.ser_tx_size is the byte array size
     blsct.free_obj(rv)
-    return obj
+
+    self.obj_size = obj_size
+    super().__init__(obj)
+
+  def get_CMutableTransaction(self) -> Any:
+    """Get the underlying CMutableTransaction object."""
+    return blsct.ser_tx_to_CMutableTransaction(self.value(), self.obj_size)
 
   def get_tx_id(self) -> TxId:
     """Get the transaction ID."""
-    tmp_tx = blsct.deserialize_tx(self.value(), self.obj_size)
-    tx_id_hex = blsct.get_tx_id(tmp_tx)
-    blsct.free_obj(tmp_tx)
+    tx = self.get_CMutableTransaction()
+    tx_id_hex = blsct.get_tx_id(tx)
+    blsct.free_obj(tx)
+
     return TxId.deserialize(tx_id_hex)
 
   def get_tx_ins(self) -> list[TxIn]:
     """Get the transaction inputs."""
-    # returns cmutabletransaction*
-    blsct_tx = blsct.deserialize_tx(self.value(), self.obj_size)
+    tx = self.get_CMutableTransaction()
 
-    blsct_tx_ins = blsct.get_tx_ins(blsct_tx)
-    tx_ins_size = blsct.get_tx_ins_size(blsct_tx_ins)
+    tx_ins = blsct.get_tx_ins(tx)
+    num_tx_ins = blsct.get_tx_in_count(tx)
 
     tx_ins = []
-    for i in range(tx_ins_size):
-      rv = blsct.get_tx_in(blsct_tx_ins, i)
-      tx_in = TxIn(rv.value)
-      tx_ins.append(tx_in)
-      blsct.free_obj(rv)
-    blsct.free_obj(blsct_tx)
+    for i in range(num_tx_ins):
+      tx_in_obj = blsct.get_tx_in(tx_ins, i)
+      tx_ins.append(TxIn.from_obj(tx_in_obj))
 
     return tx_ins
 
   def get_tx_outs(self) -> list[TxOut]:
     """Get the transaction outputs."""
-    # returns cmutabletransaction*
-    blsct_tx = blsct.deserialize_tx(self.value(), self.obj_size)
+    tx = self.get_CMutableTransaction()
 
-    blsct_tx_outs = blsct.get_tx_outs(blsct_tx)
-    tx_outs_size = blsct.get_tx_outs_size(blsct_tx_outs)
+    tx_outs = blsct.get_tx_outs(tx)
+    num_tx_outs = blsct.get_tx_out_count(tx)
 
     tx_outs = []
-    for i in range(tx_outs_size):
-      rv = blsct.get_tx_out(blsct_tx_outs, i)
-      tx_out = TxOut(rv.value)
-      tx_outs.append(tx_out)
-      blsct.free_obj(rv)
-    blsct.free_obj(blsct_tx)
+    for i in range(num_tx_outs):
+      tx_out_obj = blsct.get_tx_out(tx_outs, i)
+      tx_outs.append(TxOut.from_obj(tx_out_obj))
 
     return tx_outs
 
   @override
   def serialize(self) -> str:
     """Serialize the transaction to a hexadecimal string."""
-    return blsct.to_hex(
-      blsct.cast_to_uint8_t_ptr(self.value()),
-      self.obj_size
-    )
+    return blsct.to_hex(self.value(), self.obj_size)
 
   @classmethod
   @override
   def deserialize(cls: Type[Self], hex: str) -> Self:
     """Deserialize a transaction from a hexadecimal string."""
-    obj = blsct.hex_to_malloced_buf(hex)
-    obj_size = int(len(hex) / 2)
-    inst = cls(obj, obj_size) 
-    return inst
+    assert len(hex) % 2 == 0
+    ser_tx_size = len(hex) // 2
+
+    ser_tx = blsct.hex_to_malloced_buf(hex)
+    if ser_tx is None:
+      raise ValueError("Failed to allocate memory for serialized transaction.")
+
+    obj = cls.from_obj(ser_tx)
+    obj.obj_size = ser_tx_size
+
+    return obj
 
   @override
   def value(self) -> Any:

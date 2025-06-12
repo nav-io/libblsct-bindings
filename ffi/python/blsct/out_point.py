@@ -1,11 +1,12 @@
 from . import blsct
 from .managed_obj import ManagedObj
+from .serializable import Serializable
 from .tx_id import TxId
 from typing import Any, override, Self, Type
 
-class OutPoint(ManagedObj):
+class OutPoint(ManagedObj, Serializable):
   """
-  Represents an outpoint of a confidential transaction.
+  Represents an outpoint of a confidential transaction. Also known as `COutPoint` on the C++ side.
 
   >>> from blsct import OutPoint, TxId, TX_ID_SIZE
   >>> import secrets
@@ -21,6 +22,16 @@ class OutPoint(ManagedObj):
     inst = cls(rv.value)
     blsct.free_obj(rv)
     return inst
+
+  def serialize(self) -> str:
+    """Serialize the OutPoint to a hexadecimal string"""
+    return blsct.serialize_out_point(self.value())
+
+  @classmethod
+  @override
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the OutPoint from a hexadecimal string"""
+    return blsct.deserialize_out_point(hex)
 
   @override
   def value(self) -> Any:

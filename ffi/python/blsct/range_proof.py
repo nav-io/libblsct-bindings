@@ -4,13 +4,15 @@ from .amount_recovery_req import AmountRecoveryReq
 from .amount_recovery_res import AmountRecoveryRes
 from .managed_obj import ManagedObj
 from .point import Point
+from .scalar import Scalar
+from .serializable import Serializable
 from .token_id import TokenId
 from typing import Any, Optional, override, Self, Type, TYPE_CHECKING
 
 if TYPE_CHECKING:
   from .range_proof import RangeProof
 
-class RangeProof(ManagedObj):
+class RangeProof(ManagedObj, Serializable):
   """
   Represents a (possibly aggregated) range proof for one or more confidential transaction amounts.
 
@@ -94,7 +96,7 @@ class RangeProof(ManagedObj):
     req_vec = blsct.create_amount_recovery_req_vec()
 
     for req in reqs:
-      blsct_req = blsct.gen_recover_amount_req(
+      blsct_req = blsct.gen_amount_recovery_req(
         req.range_proof.value(),
         req.range_proof.get_size(),
         req.nonce.value(),
@@ -127,7 +129,58 @@ class RangeProof(ManagedObj):
     blsct.free_amounts_ret_val(rv)
     return res
 
+  def get_A(self) -> Point:
+    """Get the range proof element A."""
+    obj = blsct.get_range_proof_A(self.value())
+    return Point.from_obj(obj)
+
+  def get_A_wip(self) -> Point:
+    """Get the range proof element A_wip."""
+    obj = blsct.get_range_proof_A_wip(self.value())
+    return Point.from_obj(obj)
+
+  def get_B(self) -> Point:
+    """Get the range proof element B."""
+    obj = blsct.get_range_proof_B(self.value())
+    return Point(obj)
+
+  def get_r_prime(self) -> Scalar:
+    """Get the range proof element r_prime."""
+    obj = blsct.get_range_proof_r_prime(self.value())
+    return Scalar(obj)
+
+  def get_s_prime(self) -> Scalar:
+    """Get the range proof element s_prime."""
+    obj = blsct.get_range_proof_s_prime(self.value())
+    return Scalar(obj)
+
+  def get_delta_prime(self) -> Scalar:
+    """Get the range proof element delta_prime."""
+    obj = blsct.get_range_proof_delta_prime(self.value())
+    return Scalar(obj)
+
+  def get_alpha_hat(self) -> Scalar:
+    """Get the range proof element alpha hat."""
+    obj = blsct.get_range_proof_alpha_hat(self.value())
+    return Scalar(obj)
+
+  def get_tau_x(self) -> Scalar:
+    """Get the range proof element tau_x."""
+    obj = blsct.get_range_proof_tau_x(self.value())
+    return Scalar(obj)
+
   @override
   def value(self) -> Any:
     return blsct.cast_to_range_proof(self.obj)
 
+  def serialize(self) -> str:
+    """Serialize the RangeProof to a hexadecimal string"""
+    return blsct.serialize_range_proof(self.value(), self.obj_size)
+
+  @classmethod
+  @override
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the RangeProof from a hexadecimal string"""
+    assert len(hex) % 2 == 0, "Expected the hex to have an even length"
+    obj_size = len(hex) // 2
+    return blsct.deserialize_range_proof(hex, obj_size);

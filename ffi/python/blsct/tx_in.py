@@ -3,11 +3,23 @@ from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .managed_obj import ManagedObj
 from .out_point import OutPoint
 from .script import Script
+from .serializable import Serializable
+from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .token_id import TokenId
 from .tx_id import TxId
-from typing import Any, override, Self, Type
+from typing import Any, override, Self, TypedDict
 
-class TxIn(ManagedObj):
+type hex_str = str
+
+class SerTxIn(TypedDict):
+  amount: int
+  gamma: int
+  ser_spending_key: hex_str
+  ser_token_id: hex_str
+  ser_out_point: hex_str
+  rbf: bool
+
+class TxIn(ManagedObj, Serializable):
   """
   Represents a transaction input in a confidential transaction.
   
@@ -31,17 +43,16 @@ class TxIn(ManagedObj):
   >>> tx_in.get_script_witness()
   Script(ffffffffffffffff1b585a44e980f30b16ef75db34f7a6d56fe7cee4)  # doctest: +SKIP
   """
-  @classmethod
-  def generate(
-    cls: Type[Self],
+
+  def __init__(
+    self,
     amount: int,
     gamma: int,
     spending_key: SpendingKey,
     token_id: TokenId,
     out_point: OutPoint,
-    rbf: bool = False,
-  ) -> Self:
-    """Generate a transaction input for a confidential transaction."""
+    rbf: bool
+  ):
     rv = blsct.build_tx_in(
       amount,
       gamma,
@@ -55,14 +66,14 @@ class TxIn(ManagedObj):
       blsct.free_obj(rv)
       raise ValueError(f"Failed to build TxIn. Error code = {rv_result}")
 
-    obj = cls(rv.value)
+    obj = rv.value
     blsct.free_obj(rv)
-    return obj
+    super().__init__(obj)
 
   def get_prev_out_hash(self) -> TxId:
     """Get the transaction ID of the previous output being spent."""
-    tx_id = blsct.get_tx_in_prev_out_hash(self.value())
-    return TxId(tx_id)
+    obj = blsct.get_tx_in_prev_out_hash(self.value())
+    return TxId.from_obj(obj)
 
   def get_prev_out_n(self) -> int:
     """Get the output index of the previous output being spent."""
@@ -70,8 +81,8 @@ class TxIn(ManagedObj):
 
   def get_script_sig(self) -> Script:
     """Get the scriptSig used to unlock the previous output."""
-    script_sig = blsct.get_tx_in_script_sig(self.value())
-    return Script(script_sig)
+    obj = blsct.get_tx_in_script_sig(self.value())
+    return Script.from_obj(obj)
 
   def get_sequence(self) -> int:
     """Get the sequence field of the transaction input."""
@@ -79,8 +90,8 @@ class TxIn(ManagedObj):
 
   def get_script_witness(self) -> Script:
     """Get the scriptWitness for the transaction input."""
-    script_witness = blsct.get_tx_in_script_witness(self.value())
-    return Script(script_witness)
+    obj = blsct.get_tx_in_script_witness(self.value())
+    return Script.from_obj(obj)
 
   @override
   def value(self) -> Any:
@@ -89,4 +100,22 @@ class TxIn(ManagedObj):
   @classmethod
   def default_obj(cls) -> Any:
     raise NotImplementedError("Cannot create a TxIn without required parameters.")
+
+  def serialize(self) -> str:
+    """Serialize the TxIn to a hexadecimal string"""
+    return blsct.serialize_tx_in(self.value())
+
+  @classmethod
+  @override
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the TxIn from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
+    rv = blsct.deserialize_tx_in(hex)
+    rv_result = int(rv.result)
+
+    if rv_result != 0:
+      blsct.free_obj(rv)
+      raise RuntimeError(f"Deserializaiton failed. Error code = {rv_result}")  # pragma: no co
+    return cls.from_obj(rv.value)
 

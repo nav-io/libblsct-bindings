@@ -58,13 +58,13 @@ class Point(ManagedObj, Serializable, PrettyPrintable):
   @override
   def serialize(self) -> str:
     """Serialize the point to a hexadecimal string"""
-    return blsct.point_to_hex(self.value())
+    return blsct.serialize_point(self.value())
 
   @classmethod
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the point from a hexadecimal string"""
-    rv = blsct.hex_to_point(hex)
+    rv = blsct.deserialize_point(hex)
     rv_result = int(rv.result)
     if rv_result != 0:
       blsct.free_obj(rv)

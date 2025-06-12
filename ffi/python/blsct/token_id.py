@@ -1,8 +1,9 @@
 from . import blsct
 from .managed_obj import ManagedObj
+from .serializable import Serializable
 from typing import Any, override, Self, Type
 
-class TokenId(ManagedObj):
+class TokenId(ManagedObj, Serializable):
   """
   Represents a token ID. A token ID consists of two parameters: token and subid, both of which are optional. When omitted, default values are used instead of random values.
 
@@ -55,4 +56,15 @@ class TokenId(ManagedObj):
     obj = rv.value
     blsct.free_obj(rv)
     return obj
+
+  def serialize(self) -> str:
+    """Serialize the TokenId to a hexadecimal string"""
+    return blsct.serialize_token_id(self.value())
+
+  @classmethod
+  @override
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the TokenId from a hexadecimal string"""
+    obj = blsct.deserialize_token_id(hex)
+    return cls.from_obj(obj)
 

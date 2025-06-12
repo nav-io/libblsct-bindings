@@ -4,9 +4,9 @@ from .keys.public_key import PublicKey
 from .scalar import Scalar
 from typing import Any, Self, Type
 
-class ViewTag():
+class ViewTag:
   """
-  Represents a view tag derived from a blinding public key and a view key.
+  Represents a view tag derived from a blinding public key and a view key. The view tag is a 64-bit unsigned integer.
 
   >>> from blsct import ChildKey, PublicKey, TxKey, ViewTag
   >>> ViewTag()

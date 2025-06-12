@@ -23,10 +23,8 @@ class Address():
     blsct_encoding = None
     if encoding == AddressEncoding.Bech32:
       blsct_encoding = blsct.Bech32
-    elif encoding == AddressEncoding.Bech32M:
+    else: # encoding == AddressEncoding.Bech32M:
       blsct_encoding = blsct.Bech32M
-    else:
-      raise ValueError(f"Unknown encoding: {encoding}")
 
     dpk = blsct.cast_to_dpk(dpk.obj)
     rv = blsct.encode_address(dpk, blsct_encoding)
@@ -56,3 +54,4 @@ class Address():
     blsct.free_obj(rv)
 
     return dpk
+

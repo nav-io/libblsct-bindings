@@ -1,16 +1,28 @@
 from . import blsct
 from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
+from .keys.child_key_desc.blinding_key import BlindingKey
 from .managed_obj import ManagedObj
 from .point import Point
-from .scalar import Scalar
+from .range_proof import RangeProof
 from .script import Script
+from .serializable import Serializable
 from .sub_addr import SubAddr
 from .token_id import TokenId
-from typing import Any, Optional, Literal, override, Self, Type
+from typing import Any, Optional, Literal, override, Self, TypedDict, cast
+
+type hex_str = str
 
 TxOutputType = Literal["Normal", "StakedCommitment"]
 
-class TxOut(ManagedObj):
+class SerTxOut(TypedDict):
+  ser_sub_addr: hex_str
+  amount: int
+  memo: str
+  ser_token_id: hex_str
+  output_type: TxOutputType
+  min_stake: int
+
+class TxOut(ManagedObj, Serializable):
   """
   Represents a transaction output in a confidential transaction.
 
@@ -26,17 +38,15 @@ class TxOut(ManagedObj):
   >>> TxOut.generate(sub_addr, amount, memo)
   TxOut(<Swig Object of type 'void *' at 0x1015fa760>)  # doctest: +SKIP
   """
-  @classmethod
-  def generate(
-    cls: Type[Self],
+  def __init__(
+    self,
     sub_addr: SubAddr,
     amount: int,
     memo: str,
     token_id: Optional[TokenId] = None,
     output_type: TxOutputType = 'Normal',
     min_stake: int = 0,
-  ) -> Self:
-    """Generate a transaction output for a confidential transaction."""
+  ):
     token_id = TokenId() if token_id is None else token_id
 
     rv = blsct.build_tx_out(
@@ -52,9 +62,9 @@ class TxOut(ManagedObj):
       blsct.free_obj(rv)
       raise ValueError(f"Failed to build TxOut. Error code = {rv_result}")
 
-    obj = cls(rv.value)
+    obj = rv.value
     blsct.free_obj(rv)
-    return obj
+    super().__init__(obj)
 
   def get_value(self) -> int:
     """Get the value of the transaction output."""
@@ -63,66 +73,41 @@ class TxOut(ManagedObj):
   def get_script_pub_key(self) -> Script:
     """Get the scriptPubKey of the transaction output."""
     obj = blsct.get_tx_out_script_pubkey(self.value())
-    return Script(obj)
+    return Script.from_obj(obj)
 
-  def get_spending_key(self) -> Point:
+  def get_token_id(self) -> TokenId:
+    """Get the scriptPubKey of the transaction output."""
+    obj = blsct.get_tx_out_token_id(self.value())
+    return TokenId.from_obj(obj)
+
+  # blsct data
+  def get_spending_key(self) -> SpendingKey:
     """Get the spending key of the transaction output."""
     obj = blsct.get_tx_out_spending_key(self.value())
-    return Point(obj)
+    return SpendingKey.from_obj(obj)
 
+  # blsct data
   def get_ephemeral_key(self) -> Point:
     """Get the ephemeral key of the transaction output."""
     obj = blsct.get_tx_out_ephemeral_key(self.value())
-    return Point(obj)
+    return Point.from_obj(obj)
 
-  def get_blinding_key(self) -> Point:
+  # blsct data
+  def get_blinding_key(self) -> BlindingKey:
     """Get the blinding key of the transaction output."""
     obj = blsct.get_tx_out_blinding_key(self.value())
-    return Point(obj)
+    return BlindingKey.from_obj(obj)
 
+  # blsct data
+  def get_range_proof(self) -> RangeProof:
+    """Get the scriptPubKey of the transaction output."""
+    obj = blsct.get_tx_out_range_proof(self.value())
+    return RangeProof.from_obj(obj)
+
+  # blsct data
   def get_view_tag(self) -> int:
     """Get the view tag of the transaction output."""
     return blsct.get_tx_out_view_tag(self.value())
-
-  def get_range_proof_A(self) -> Point:
-    """Get the range proof element A associated with the transaction output."""
-    obj = blsct.get_tx_out_range_proof_A(self.value())
-    return Point(obj)
-
-  def get_range_proof_B(self) -> Point:
-    """Get the range proof element B associated with the transaction output."""
-    obj = blsct.get_tx_out_range_proof_B(self.value())
-    return Point(obj)
-
-  def get_range_proof_r_prime(self) -> Scalar:
-    """Get the range proof element r associated with the transaction output."""
-    obj = blsct.get_tx_out_range_proof_r_prime(self.value())
-    return Scalar(obj)
-
-  def get_range_proof_s_prime(self) -> Scalar:
-    """Get the range proof element s' associated with the transaction output."""
-    obj = blsct.get_tx_out_range_proof_s_prime(self.value())
-    return Scalar(obj)
-
-  def get_range_proof_delta_prime(self) -> Scalar:
-    """Get the range proof element delta' associated with the transaction output."""
-    obj = blsct.get_tx_out_range_proof_delta_prime(self.value())
-    return Scalar(obj)
-
-  def get_range_proof_alpha_hat(self) -> Scalar:
-    """Get the range proof element alpha hat associated with the transaction output."""
-    obj = blsct.get_tx_out_range_proof_alpha_hat(self.value())
-    return Scalar(obj)
-
-  def get_range_proof_tau_x(self) -> Scalar:
-    """Get the range proof element tau x associated with the transaction output."""
-    obj = blsct.get_tx_out_range_proof_tau_x(self.value())
-    return Scalar(obj)
-
-  def get_token_id(self) -> TokenId:
-    """Get the token ID of the transaction output."""
-    obj = blsct.get_tx_out_token_id(self.value())
-    return TokenId(obj)
 
   @override
   def value(self) -> Any:
@@ -131,4 +116,22 @@ class TxOut(ManagedObj):
   @classmethod
   def default_obj(cls) -> Any:
     raise NotImplementedError("Cannot create a TxOut without required parameters.")
+
+  def serialize(self) -> str:
+    """Serialize the TxOut to a hexadecimal string"""
+    return blsct.serialize_tx_out(self.value())
+
+  @classmethod
+  @override
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the TxOut from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
+    rv = blsct.deserialize_tx_out(hex)
+    rv_result = int(rv.result)
+
+    if rv_result != 0:
+      blsct.free_obj(rv)
+      raise RuntimeError(f"Deserializaiton failed. Error code = {rv_result}")  # pragma: no co
+    return cls.from_obj(rv.value)
 

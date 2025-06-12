@@ -1,8 +1,9 @@
 from . import blsct
 from .managed_obj import ManagedObj
+from .serializable import Serializable
 from typing import Any, override, Self, Type
 
-class SubAddrId(ManagedObj):
+class SubAddrId(ManagedObj, Serializable):
   """
   Represents a sub-address ID.
 
@@ -28,4 +29,14 @@ class SubAddrId(ManagedObj):
   @override
   def default_obj(cls: Type[Self]) -> Self:
     raise NotImplementedError(f"Cannot create a SubAddrId without required parameters.")
+
+  def serialize(self) -> str:
+    """Serialize the SubAddrId to a hexadecimal string"""
+    raise NotImplementedError()
+
+  @classmethod
+  @override
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the SubAddrId from a hexadecimal string"""
+    raise NotImplementedError()
 

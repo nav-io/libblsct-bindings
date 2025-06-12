@@ -2,9 +2,10 @@ from . import blsct
 from .managed_obj import ManagedObj
 from .keys.public_key import PublicKey
 from .scalar import Scalar
+from .serializable import Serializable
 from typing import Any, override, Self, Type
 
-class Signature(ManagedObj):
+class Signature(ManagedObj, Serializable):
   """
   Represents the signature of a transaction.
 
@@ -34,3 +35,12 @@ class Signature(ManagedObj):
   def default_obj(cls: Type[Self]) -> Self:
     raise NotImplementedError(f"Cannot create a Signature without required parameters.")
 
+  def serialize(self) -> str:
+    """Serialize the Signature to a hexadecimal string"""
+    return blsct.serialize_signature(self.value())
+
+  @classmethod
+  @override
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the Signature from a hexadecimal string"""
+    return blsct.deserialize_signature(hex)

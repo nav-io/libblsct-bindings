@@ -1,10 +1,12 @@
 from . import blsct
 from .managed_obj import ManagedObj
+from .serializable import Serializable
 from typing import Any, Self, override
 
-class Script(ManagedObj):
+class Script(ManagedObj, Serializable):
   """
-  Represents a script, which may be a scriptPubKey, scriptSig, or scriptWitness.
+  Represents a script, which may be a scriptPubKey, scriptSig, or scriptWitness. Also known as `CScript` on the C++ side.
+
 
   A :class:`Script` appears as an attribute of :class:`TxOut` (scriptPubKey) or :class:`TxIn` (scriptSig and scriptWitness), and is not meant to be instantiated directly.
   """
@@ -22,3 +24,12 @@ class Script(ManagedObj):
   def default_obj(cls) -> Any:
     raise NotImplementedError("Cannot directly instantiate create a Script without required parameters.")
 
+  def serialize(self) -> str:
+    """Serialize the Script to a hexadecimal string"""
+    return blsct.serialize_script(self.value())
+
+  @classmethod
+  @override
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the Script from a hexadecimal string"""
+    return blsct.deserialize_script(hex)

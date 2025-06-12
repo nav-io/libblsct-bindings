@@ -2,9 +2,10 @@ from .. import blsct
 from ..managed_obj import ManagedObj
 from .public_key import PublicKey
 from ..scalar import Scalar
+from ..serializable import Serializable
 from typing import override, Self, Type
 
-class DoublePublicKey(ManagedObj):
+class DoublePublicKey(ManagedObj, Serializable):
   """
   The unique source from which an address is derived.
 
@@ -45,6 +46,18 @@ class DoublePublicKey(ManagedObj):
       address
     )
     return cls(obj) 
+
+  @override
+  def serialize(self) -> str:
+    """Serialize the DoublePublicKey to a hexadecimal string"""
+    return blsct.serialize_dpk(self.value())
+
+  @classmethod
+  @override
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the DoublePublicKey from a hexadecimal string"""
+    obj = blsct.deserialize_dpk(hex)
+    return cls.from_obj(obj)
 
   @override
   def value(self):

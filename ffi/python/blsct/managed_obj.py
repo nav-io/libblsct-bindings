@@ -2,7 +2,6 @@ from . import blsct
 from abc import ABC, abstractmethod
 from typing import Any, Type, Self
 from .serializable import Serializable
-from .pretty_printable import PrettyPrintable
 
 class ManagedObj(ABC):
   def __init__(self, obj=None):
@@ -41,8 +40,6 @@ class ManagedObj(ABC):
 
   def __str__(self):
     name = self.__class__.__name__
-    if isinstance(self, PrettyPrintable):
-      return f"{name}('{self.pretty_print()}')"
     if isinstance(self, Serializable):
       return f"{name}({self.serialize()})"
     else:

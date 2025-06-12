@@ -4,10 +4,11 @@ from .scalar import Scalar
 from .keys.child_key_desc.tx_key_desc.view_key import ViewKey
 from .keys.double_public_key import DoublePublicKey
 from .keys.public_key import PublicKey
+from .serializable import Serializable
 from .sub_addr_id import SubAddrId
 from typing import Any, override, Self, Type
 
-class SubAddr(ManagedObj):
+class SubAddr(ManagedObj, Serializable):
   """
   Represents a sub-address.
 
@@ -55,4 +56,27 @@ class SubAddr(ManagedObj):
   @override
   def default_obj(cls: Type[Self]) -> Self:
     raise NotImplementedError(f"Cannot create a SubAddr without required parameters.")
+
+  def serialize(self) -> str:
+    """Serialize the SubAddr to a hexadecimal string"""
+    return blsct.serialize_sub_addr(self.value())
+
+  @classmethod
+  @override
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the SubAddr from a hexadecimal string"""
+    return blsct.deserialize_sub_addr(hex)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
