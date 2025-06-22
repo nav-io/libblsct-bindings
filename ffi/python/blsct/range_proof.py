@@ -1,6 +1,5 @@
 from __future__ import annotations
 from . import blsct
-from .amount_recovery_req import AmountRecoveryReq
 from .amount_recovery_res import AmountRecoveryRes
 from .managed_obj import ManagedObj
 from .point import Point
@@ -11,6 +10,7 @@ from typing import Any, Optional, override, Self, Type, TYPE_CHECKING
 
 if TYPE_CHECKING:
   from .range_proof import RangeProof
+  from .amount_recovery_req import AmountRecoveryReq
 
 class RangeProof(ManagedObj, Serializable):
   """

@@ -2,11 +2,11 @@ import typing
 
 if not typing.TYPE_CHECKING:
   try:
-    from .blsct import *
-
-    import blsct.blsct as swig_blsct
-    swig_blsct.init()
-    del swig_blsct
+    import blsct.blsct as x
+    if not getattr(x, "_initialized", False):
+      x.init()
+      x._initialized = True
+      del x
 
   except ImportError:
     pass

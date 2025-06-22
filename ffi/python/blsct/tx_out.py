@@ -24,10 +24,7 @@ class SerTxOut(TypedDict):
 
 class TxOut(ManagedObj, Serializable):
   """
-  Represents a transaction output in a confidential transaction.
-
-  A standalone :class:`TxOut` object contains placeholder values.
-  Refer to :class:`Tx` for examples of how its fields are populated in a full transaction.
+  Represents a transaction output used to construct a CTxOut in a confidential transaction.
 
   >>> from blsct import ChildKey, DoublePublicKey, PublicKey, SubAddr, SubAddrId, TxOut
   >>> view_key = ChildKey().to_tx_key().to_view_key()
@@ -63,51 +60,41 @@ class TxOut(ManagedObj, Serializable):
       raise ValueError(f"Failed to build TxOut. Error code = {rv_result}")
 
     obj = rv.value
+    obj_size = rv.value_size
     blsct.free_obj(rv)
+
     super().__init__(obj)
+    self.obj_size = obj_size
 
-  def get_value(self) -> int:
-    """Get the value of the transaction output."""
-    return blsct.get_tx_out_value(self.value())
+  def get_destination(self) -> SubAddr:
+    """Get the destination of the transaction output."""
+    obj = self.value().sub_addr
+    x = SubAddr.from_obj(obj)
+    x._managed = False
+    return x
 
-  def get_script_pub_key(self) -> Script:
-    """Get the scriptPubKey of the transaction output."""
-    obj = blsct.get_tx_out_script_pubkey(self.value())
-    return Script.from_obj(obj)
+  def get_amount(self) -> int:
+    """Get the amount of the transaction output."""
+    return self.value().amount
+
+  def get_memo(self) -> str:
+    """Get the memo of the transaction output."""
+    return self.value().memo
 
   def get_token_id(self) -> TokenId:
-    """Get the scriptPubKey of the transaction output."""
-    obj = blsct.get_tx_out_token_id(self.value())
-    return TokenId.from_obj(obj)
+    """Get the token ID of the transaction output."""
+    obj = self.value().token_id
+    x = TokenId.from_obj(obj)
+    x._managed = False
+    return x
 
-  # blsct data
-  def get_spending_key(self) -> SpendingKey:
-    """Get the spending key of the transaction output."""
-    obj = blsct.get_tx_out_spending_key(self.value())
-    return SpendingKey.from_obj(obj)
+  def get_output_type(self) -> TxOutputType:
+    """Get the output type of the transaction output."""
+    return self.value().output_type
 
-  # blsct data
-  def get_ephemeral_key(self) -> Point:
-    """Get the ephemeral key of the transaction output."""
-    obj = blsct.get_tx_out_ephemeral_key(self.value())
-    return Point.from_obj(obj)
-
-  # blsct data
-  def get_blinding_key(self) -> BlindingKey:
-    """Get the blinding key of the transaction output."""
-    obj = blsct.get_tx_out_blinding_key(self.value())
-    return BlindingKey.from_obj(obj)
-
-  # blsct data
-  def get_range_proof(self) -> RangeProof:
-    """Get the scriptPubKey of the transaction output."""
-    obj = blsct.get_tx_out_range_proof(self.value())
-    return RangeProof.from_obj(obj)
-
-  # blsct data
-  def get_view_tag(self) -> int:
-    """Get the view tag of the transaction output."""
-    return blsct.get_tx_out_view_tag(self.value())
+  def get_min_stake(self) -> int:
+    """Get the min stake of the transaction output."""
+    return self.value().min_stake
 
   @override
   def value(self) -> Any:
@@ -119,7 +106,7 @@ class TxOut(ManagedObj, Serializable):
 
   def serialize(self) -> str:
     """Serialize the TxOut to a hexadecimal string"""
-    return blsct.serialize_tx_out(self.value())
+    return blsct.to_hex(self.value(), self.obj_size)
 
   @classmethod
   @override
@@ -127,11 +114,6 @@ class TxOut(ManagedObj, Serializable):
     """Deserialize the TxOut from a hexadecimal string"""
     if len(hex) % 2 != 0:
       hex = f"0{hex}"
-    rv = blsct.deserialize_tx_out(hex)
-    rv_result = int(rv.result)
-
-    if rv_result != 0:
-      blsct.free_obj(rv)
-      raise RuntimeError(f"Deserializaiton failed. Error code = {rv_result}")  # pragma: no co
-    return cls.from_obj(rv.value)
+    obj = blsct.hex_to_malloced_buf(hex)
+    return cls.from_obj(obj)
 

@@ -2,11 +2,9 @@ from . import blsct
 from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .managed_obj import ManagedObj
 from .out_point import OutPoint
-from .script import Script
 from .serializable import Serializable
 from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .token_id import TokenId
-from .tx_id import TxId
 from typing import Any, override, Self, TypedDict
 
 type hex_str = str
@@ -21,7 +19,7 @@ class SerTxIn(TypedDict):
 
 class TxIn(ManagedObj, Serializable):
   """
-  Represents a transaction input in a confidential transaction.
+  Represents a transaction input used to construct CTxIn in a confidential transaction.
   
   >>> from blsct import OutPoint, SpendingKey, TokenId, TxId, TxIn, TX_ID_SIZE
   >>> import secrets
@@ -67,31 +65,41 @@ class TxIn(ManagedObj, Serializable):
       raise ValueError(f"Failed to build TxIn. Error code = {rv_result}")
 
     obj = rv.value
+    obj_size = rv.value_size
     blsct.free_obj(rv)
+
     super().__init__(obj)
+    self.obj_size = obj_size
 
-  def get_prev_out_hash(self) -> TxId:
-    """Get the transaction ID of the previous output being spent."""
-    obj = blsct.get_tx_in_prev_out_hash(self.value())
-    return TxId.from_obj(obj)
+  def get_amount(self) -> int:
+    """Get the amount of the transaction input."""
+    return self.value().amount # TODO confirm this works
 
-  def get_prev_out_n(self) -> int:
-    """Get the output index of the previous output being spent."""
-    return blsct.get_tx_in_prev_out_n(self.value())
+  def get_gamma(self) -> int:
+    """Get the gamma value of the transaction input."""
+    return self.value().gamma # TODO confirm this works
 
-  def get_script_sig(self) -> Script:
-    """Get the scriptSig used to unlock the previous output."""
-    obj = blsct.get_tx_in_script_sig(self.value())
-    return Script.from_obj(obj)
+  def get_spending_key(self) -> SpendingKey:
+    """Get the spending key of the transaction input."""
+    obj = SpendingKey.from_obj(self.value().spending_key)
+    obj._managed = False
+    return obj
 
-  def get_sequence(self) -> int:
-    """Get the sequence field of the transaction input."""
-    return blsct.get_tx_in_sequence(self.value())
+  def get_token_id(self) -> TokenId:
+    """Get the token ID of the transaction input."""
+    obj = TokenId.from_obj(self.value().token_id)
+    obj._managed = False # TODO confirm this works
+    return obj
 
-  def get_script_witness(self) -> Script:
-    """Get the scriptWitness for the transaction input."""
-    obj = blsct.get_tx_in_script_witness(self.value())
-    return Script.from_obj(obj)
+  def get_out_point(self) -> OutPoint:
+    """Get the out point of the transaction input."""
+    obj = OutPoint.from_obj(self.value().out_point) # TODO confirm this works
+    obj._managed = False
+    return OutPoint.from_obj(obj)
+
+  def get_rbf(self) -> bool:
+    """Get the replace-by-fee flag of the transaction input."""
+    return self.value().rbf # TODO confirm this works
 
   @override
   def value(self) -> Any:
@@ -103,7 +111,7 @@ class TxIn(ManagedObj, Serializable):
 
   def serialize(self) -> str:
     """Serialize the TxIn to a hexadecimal string"""
-    return blsct.serialize_tx_in(self.value())
+    return blsct.to_hex(self.value(), self.obj_size)
 
   @classmethod
   @override
@@ -111,11 +119,6 @@ class TxIn(ManagedObj, Serializable):
     """Deserialize the TxIn from a hexadecimal string"""
     if len(hex) % 2 != 0:
       hex = f"0{hex}"
-    rv = blsct.deserialize_tx_in(hex)
-    rv_result = int(rv.result)
-
-    if rv_result != 0:
-      blsct.free_obj(rv)
-      raise RuntimeError(f"Deserializaiton failed. Error code = {rv_result}")  # pragma: no co
-    return cls.from_obj(rv.value)
+    obj = blsct.hex_to_malloced_buf(hex)
+    return cls.from_obj(obj)
 

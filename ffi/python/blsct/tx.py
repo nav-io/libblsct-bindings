@@ -1,4 +1,6 @@
 from . import blsct
+from .ctx_in import CTxIn
+from .ctx_out import CTxOut
 from .managed_obj import ManagedObj
 from .serializable import Serializable
 from .tx_id import TxId
@@ -9,7 +11,7 @@ from typing import Any, override, Self, Type
 # stores serialized tx represented as uint8_t*
 class Tx(ManagedObj, Serializable):
   """
-  Represents a confidential transaction.
+  Represents a confidential transaction. Also known as `CMutableTransaction` on the C++ side.
 
   >>> from blsct import ChildKey, DoublePublicKey, OutPoint, PublicKey, SpendingKey, SubAddr, SubAddrId, TokenId, TX_ID_SIZE, Tx, TxId, TxIn, TxOut
   >>> import secrets
@@ -159,45 +161,45 @@ class Tx(ManagedObj, Serializable):
     self.obj_size = obj_size
     super().__init__(obj)
 
-  def get_CMutableTransaction(self) -> Any:
+  def _get_CMutableTransaction(self) -> Any:
     """Get the underlying CMutableTransaction object."""
     return blsct.ser_tx_to_CMutableTransaction(self.value(), self.obj_size)
 
   def get_tx_id(self) -> TxId:
     """Get the transaction ID."""
-    tx = self.get_CMutableTransaction()
-    tx_id_hex = blsct.get_tx_id(tx)
-    blsct.free_obj(tx)
+    ctx = self._get_CMutableTransaction()
+    tx_id_hex = blsct.get_tx_id(ctx)
+    blsct.free_obj(ctx)
 
     return TxId.deserialize(tx_id_hex)
 
-  def get_tx_ins(self) -> list[TxIn]:
-    """Get the transaction inputs."""
-    tx = self.get_CMutableTransaction()
+  def get_tx_ins(self) -> list[CTxIn]:
+    """Get the list of CTxIns generated from TxIns given to the constructor."""
+    ctx = self._get_CMutableTransaction()
 
-    tx_ins = blsct.get_tx_ins(tx)
-    num_tx_ins = blsct.get_tx_in_count(tx)
+    ctx_ins = blsct.get_tx_ins(ctx)
+    num_ctx_ins = blsct.get_tx_in_count(ctx)
 
-    tx_ins = []
-    for i in range(num_tx_ins):
-      tx_in_obj = blsct.get_tx_in(tx_ins, i)
-      tx_ins.append(TxIn.from_obj(tx_in_obj))
+    ctx_ins = []
+    for i in range(num_ctx_ins):
+      ctx_in_obj = blsct.get_tx_in(ctx_ins, i)
+      ctx_ins.append(CTxIn.from_obj(ctx_in_obj))
 
-    return tx_ins
+    return ctx_ins
 
-  def get_tx_outs(self) -> list[TxOut]:
-    """Get the transaction outputs."""
-    tx = self.get_CMutableTransaction()
+  def get_tx_outs(self) -> list[CTxOut]:
+    """Get the list of CTxOuts generated from TxOuts given to the constructor."""
+    ctx = self._get_CMutableTransaction()
 
-    tx_outs = blsct.get_tx_outs(tx)
-    num_tx_outs = blsct.get_tx_out_count(tx)
+    ctx_outs = blsct.get_tx_outs(ctx)
+    num_ctx_outs = blsct.get_tx_out_count(ctx)
 
-    tx_outs = []
-    for i in range(num_tx_outs):
-      tx_out_obj = blsct.get_tx_out(tx_outs, i)
-      tx_outs.append(TxOut.from_obj(tx_out_obj))
+    ctx_outs = []
+    for i in range(num_ctx_outs):
+      ctx_out_obj = blsct.get_tx_out(ctx_outs, i)
+      ctx_outs.append(TxOut.from_obj(ctx_out_obj))
 
-    return tx_outs
+    return ctx_outs
 
   @override
   def serialize(self) -> str:
