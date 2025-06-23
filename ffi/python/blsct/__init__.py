@@ -40,3 +40,10 @@ from .tx_in import TxIn
 from .tx_out import TxOut
 from .view_tag import ViewTag
 
+# inject the swig module constants, functions and etc into the current namespace 
+import blsct.blsct as blsct_swig
+
+for name in dir(blsct_swig):
+  if not name.startswith("_") and name not in globals():
+    globals()[name] = getattr(blsct_swig, name)
+
