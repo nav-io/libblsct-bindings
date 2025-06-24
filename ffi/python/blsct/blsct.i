@@ -82,8 +82,16 @@ if (p == nullptr) { \
     return static_cast<CMutableTransaction*>(x);
   }
 
+  BlsctTxIn* cast_to_tx_in(void* x) {
+    return static_cast<BlsctTxIn*>(x);
+  }
+
   CTxIn* cast_to_ctx_in(void* x) {
     return static_cast<CTxIn*>(x);
+  }
+
+  BlsctTxOut* cast_to_tx_out(void* x) {
+    return static_cast<BlsctTxOut*>(x);
   }
 
   CTxOut* cast_to_ctx_out(void* x) {
@@ -484,27 +492,43 @@ export BlsctAmountsRetVal* recover_amount(
 
 // out point
 export BlsctRetVal* gen_out_point(
-    const char* tx_id_c_str,
+    const char* ctx_id_c_str,
     const uint32_t n
 );
 
 export const char* serialize_out_point(const BlsctOutPoint* blsct_out_point);
 export BlsctRetVal* deserialize_out_point(const char* hex);
 
-// tx related
+// tx in
 export BlsctRetVal* build_tx_in(
     const uint64_t amount,
     const uint64_t gamma,
     const BlsctScalar* spendingKey,
     const BlsctTokenId* tokenId,
     const BlsctOutPoint* outPoint,
+    const bool staked_commitment,
     const bool rbf
 );
+
+export uint64_t get_tx_in_amount(const BlsctTxIn* tx_in);
+export uint64_t get_tx_in_gamma(const BlsctTxIn* tx_in);
+export const BlsctScalar* get_tx_in_spending_key(const BlsctTxIn* tx_in);
+export const BlsctTokenId* get_tx_in_token_id(const BlsctTxIn* tx_in);
+export const BlsctOutPoint* get_tx_in_out_point(const BlsctTxIn* tx_in);
+export bool get_tx_in_staked_commitment(const BlsctTxIn* tx_in);
+export bool get_tx_in_rbf(const BlsctTxIn* tx_in);
+
+export const BlsctTxId* get_ctx_in_prev_out_hash(const CTxIn* ctx_in);
+export uint32_t get_ctx_in_prev_out_n(const CTxIn* ctx_in);
+export const BlsctScript* get_ctx_in_script_sig(const CTxIn* ctx_in);
+export uint32_t get_ctx_in_sequence(const CTxIn* ctx_in);
+export const BlsctScript* get_ctx_in_script_witness(const CTxIn* ctx_in);
 
 export BlsctRetVal* dpk_to_sub_addr(
     const void* blsct_dpk
 );
 
+// tx out
 export BlsctRetVal* build_tx_out(
     const BlsctSubAddr* blsct_dest,
     const uint64_t amount,
@@ -514,6 +538,24 @@ export BlsctRetVal* build_tx_out(
     const uint64_t min_stake
 );
 
+export const BlsctSubAddr* get_tx_out_destination(const BlsctTxOut* tx_out);
+export uint64_t get_tx_out_amount(const BlsctTxOut* tx_out);
+export const char* get_tx_out_memo(const BlsctTxOut* tx_out);
+export const BlsctTokenId* get_tx_out_token_id(const BlsctTxOut* tx_out);
+export TxOutputType get_tx_out_output_type(const BlsctTxOut* tx_out);
+export uint64_t get_tx_out_min_stake(const BlsctTxOut* tx_out);
+
+export uint64_t get_ctx_out_value(const CTxOut* ctx_out);
+export const BlsctScript* get_ctx_out_script_pubkey(const CTxOut* ctx_out);
+export const BlsctTokenId* get_ctx_out_token_id(const CTxOut* ctx_out);
+export const BlsctPoint* get_ctx_out_spending_key(const CTxOut* ctx_out);
+export const BlsctPoint* get_ctx_out_ephemeral_key(const CTxOut* ctx_out);
+export const BlsctPoint* get_ctx_out_blinding_key(const CTxOut* ctx_out);
+export const BlsctRangeProof* get_ctx_out_range_proof(const CTxOut* ctx_out);
+
+export uint16_t get_ctx_out_view_tag(const CTxOut* ctx_out);
+
+// tx
 export BlsctTxRetVal* build_ctx(
     const void* void_tx_ins,
     const void* void_tx_outs
@@ -537,34 +579,6 @@ export const std::vector<CTxOut>* get_ctx_outs(const CMutableTransaction* ctx);
 export size_t get_ctx_out_count(const std::vector<CTxOut>* ctx_outs);
 
 export const BlsctRetVal* get_ctx_out(const std::vector<CTxOut>* ctx_outs, const size_t i);
-
-// tx in
-export const BlsctTxId* get_ctx_in_prev_out_hash(const CTxIn* ctx_in);
-
-export uint32_t get_ctx_in_prev_out_n(const CTxIn* ctx_in);
-
-export const BlsctScript* get_ctx_in_script_sig(const CTxIn* ctx_in);
-
-export uint32_t get_ctx_in_sequence(const CTxIn* ctx_in);
-
-export const BlsctScript* get_ctx_in_script_witness(const CTxIn* ctx_in);
-
-// tx out
-export uint64_t get_ctx_out_value(const CTxOut* ctx_out);
-
-export const BlsctScript* get_ctx_out_script_pubkey(const CTxOut* ctx_out);
-
-export const BlsctTokenId* get_ctx_out_token_id(const CTxOut* ctx_out);
-
-export const BlsctPoint* get_ctx_out_spending_key(const CTxOut* ctx_out);
-
-export const BlsctPoint* get_ctx_out_ephemeral_key(const CTxOut* ctx_out);
-
-export const BlsctPoint* get_ctx_out_blinding_key(const CTxOut* ctx_out);
-
-export const BlsctRangeProof* get_ctx_out_range_proof(const CTxOut* ctx_out);
-
-export uint16_t get_ctx_out_view_tag(const CTxOut* ctx_out);
 
 export const BlsctSignature* sign_message(
     const BlsctScalar* blsct_priv_key,

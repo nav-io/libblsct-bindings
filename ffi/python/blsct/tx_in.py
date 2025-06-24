@@ -21,14 +21,14 @@ class TxIn(ManagedObj, Serializable):
   """
   Represents a transaction input used to construct CTxIn in a confidential transaction.
   
-  >>> from blsct import OutPoint, SpendingKey, TokenId, TxId, TxIn, TX_ID_SIZE
+  >>> from blsct import OutPoint, SpendingKey, TokenId, CtxId, TxIn, TX_ID_SIZE
   >>> import secrets
   >>> amount = 123
   >>> gamma = 100
   >>> spending_key = SpendingKey()
   >>> token_id = TokenId()
-  >>> tx_id = TxId.from_hex(secrets.token_hex(TX_ID_SIZE))
-  >>> out_point = OutPoint.generate(tx_id, 0)
+  >>> ctx_id = CtxId.deserialize(secrets.token_hex(TX_ID_SIZE))
+  >>> out_point = OutPoint.generate(ctx_id, 0)
   >>> tx_in = TxIn.generate(amount, gamma, spending_key, token_id, out_point)
   >>> tx_in.get_prev_out_hash()
   TxId(7b0000000000000064000000000000003ff98b71ff7189fb12d4b93704139753)  # doctest: +SKIP
@@ -49,7 +49,8 @@ class TxIn(ManagedObj, Serializable):
     spending_key: SpendingKey,
     token_id: TokenId,
     out_point: OutPoint,
-    rbf: bool
+    staked_commitment: bool = False,
+    rbf: bool = False,
   ):
     rv = blsct.build_tx_in(
       amount,
@@ -57,6 +58,7 @@ class TxIn(ManagedObj, Serializable):
       spending_key.value(),
       token_id.value(),
       out_point.value(),
+      staked_commitment,
       rbf
     )
     rv_result = int(rv.result)
@@ -73,33 +75,34 @@ class TxIn(ManagedObj, Serializable):
 
   def get_amount(self) -> int:
     """Get the amount of the transaction input."""
-    return self.value().amount # TODO confirm this works
+    return blsct.get_tx_in_amount(self.value())
 
   def get_gamma(self) -> int:
     """Get the gamma value of the transaction input."""
-    return self.value().gamma # TODO confirm this works
+    return blsct.get_tx_in_gamma(self.value())
 
   def get_spending_key(self) -> SpendingKey:
     """Get the spending key of the transaction input."""
-    obj = SpendingKey.from_obj(self.value().spending_key)
-    obj._managed = False
-    return obj
+    obj = blsct.get_tx_in_spending_key(self.value())
+    return SpendingKey.from_obj(obj)
 
   def get_token_id(self) -> TokenId:
     """Get the token ID of the transaction input."""
-    obj = TokenId.from_obj(self.value().token_id)
-    obj._managed = False # TODO confirm this works
-    return obj
+    obj = blsct.get_tx_in_token_id(self.value())
+    return TokenId.from_obj(obj)
 
   def get_out_point(self) -> OutPoint:
     """Get the out point of the transaction input."""
-    obj = OutPoint.from_obj(self.value().out_point) # TODO confirm this works
-    obj._managed = False
+    obj = blsct.get_tx_in_out_point(self.value())
     return OutPoint.from_obj(obj)
+
+  def get_staked_commitment(self) -> bool:
+    """Get the staked commitment flag of the transaction input."""
+    return blsct.get_tx_in_staked_commitment(self.value())
 
   def get_rbf(self) -> bool:
     """Get the replace-by-fee flag of the transaction input."""
-    return self.value().rbf # TODO confirm this works
+    return blsct.get_tx_in_rbf(self.value())
 
   @override
   def value(self) -> Any:

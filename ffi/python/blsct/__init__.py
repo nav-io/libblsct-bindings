@@ -34,8 +34,8 @@ from .signature import Signature
 from .sub_addr import SubAddr
 from .sub_addr_id import SubAddrId
 from .token_id import TokenId
-from .tx import Tx
-from .tx_id import TxId
+from .ctx import Ctx
+from .ctx_id import CtxId
 from .tx_in import TxIn
 from .tx_out import TxOut
 from .view_tag import ViewTag

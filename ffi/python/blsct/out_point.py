@@ -1,7 +1,7 @@
 from . import blsct
 from .managed_obj import ManagedObj
 from .serializable import Serializable
-from .tx_id import TxId
+from .ctx_id import CtxId
 from typing import Any, override, Self, Type
 
 class OutPoint(ManagedObj, Serializable):
@@ -16,9 +16,9 @@ class OutPoint(ManagedObj, Serializable):
   OutPoint(<Swig Object of type 'void *' at 0x105b071b0>)  # doctest: +SKIP
   """
   @classmethod
-  def generate(cls: Type[Self], tx_id: TxId, out_index: int) -> Self:
+  def generate(cls: Type[Self], ctx_id: CtxId, out_index: int) -> Self:
     """Generate an outpoint from a transaction ID and output index."""
-    rv = blsct.gen_out_point(tx_id.serialize(), out_index)
+    rv = blsct.gen_out_point(ctx_id.serialize(), out_index)
     inst = cls(rv.value)
     blsct.free_obj(rv)
     return inst

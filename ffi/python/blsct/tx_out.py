@@ -68,33 +68,29 @@ class TxOut(ManagedObj, Serializable):
 
   def get_destination(self) -> SubAddr:
     """Get the destination of the transaction output."""
-    obj = self.value().sub_addr
-    x = SubAddr.from_obj(obj)
-    x._managed = False
-    return x
+    obj = blsct.get_tx_out_destination(self.value())
+    return SubAddr.from_obj(obj)
 
   def get_amount(self) -> int:
     """Get the amount of the transaction output."""
-    return self.value().amount
+    return blsct.get_tx_out_amount(self.value())
 
   def get_memo(self) -> str:
     """Get the memo of the transaction output."""
-    return self.value().memo
+    return blsct.get_tx_out_memo(self.value())
 
   def get_token_id(self) -> TokenId:
     """Get the token ID of the transaction output."""
-    obj = self.value().token_id
-    x = TokenId.from_obj(obj)
-    x._managed = False
-    return x
+    obj = blsct.get_tx_out_token_id(self.value())
+    return TokenId.from_obj(obj)
 
   def get_output_type(self) -> TxOutputType:
     """Get the output type of the transaction output."""
-    return self.value().output_type
+    return blsct.get_tx_out_output_type(self.value())
 
   def get_min_stake(self) -> int:
     """Get the min stake of the transaction output."""
-    return self.value().min_stake
+    return blsct.get_tx_out_min_stake(self.value())
 
   @override
   def value(self) -> Any:

@@ -3,13 +3,13 @@ from .ctx_in import CTxIn
 from .ctx_out import CTxOut
 from .managed_obj import ManagedObj
 from .serializable import Serializable
-from .tx_id import TxId
+from .ctx_id import CtxId
 from .tx_in import TxIn
 from .tx_out import TxOut
 from typing import Any, override, Self, Type
 
 # stores serialized tx represented as uint8_t*
-class Tx(ManagedObj, Serializable):
+class Ctx(ManagedObj, Serializable):
   """
   Represents a confidential transaction. Also known as `CMutableTransaction` on the C++ side.
 
@@ -165,7 +165,7 @@ class Tx(ManagedObj, Serializable):
     """Get the underlying CMutableTransaction object."""
     return blsct.ser_tx_to_CMutableTransaction(self.value(), self.obj_size)
 
-  def get_tx_id(self) -> TxId:
+  def get_ctx_id(self) -> CtxId:
     """Get the transaction ID."""
     ctx = self._get_CMutableTransaction()
     tx_id_hex = blsct.get_tx_id(ctx)
