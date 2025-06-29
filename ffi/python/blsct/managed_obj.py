@@ -6,7 +6,8 @@ from .serializable import Serializable
 class ManagedObj(ABC):
   def __init__(self, obj=None):
     self.obj = self.default_obj() if obj is None else obj
-    self._managed = False
+    self.obj_size: int | None = None
+    self._managed: bool = False
 
   @abstractmethod
   def value(self):
@@ -55,3 +56,8 @@ class ManagedObj(ABC):
     inst._managed = False
     return inst
 
+  @classmethod
+  def from_obj_with_size(cls, obj, obj_size: int):
+    inst = cls.from_obj(obj)
+    inst.obj_size = obj_size
+    return inst

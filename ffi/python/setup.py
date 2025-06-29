@@ -9,6 +9,9 @@ from setuptools.command.build_ext import build_ext
 import shutil
 import subprocess
 
+# TODO: turn this on for production builds
+IS_PROD = False
+
 std_cpp = "-std=c++20"
 
 package_dir = os.path.abspath(os.path.dirname(__file__))
@@ -16,9 +19,14 @@ package_dir = os.path.abspath(os.path.dirname(__file__))
 blsct_dir = os.path.join(package_dir, "blsct")
 lib_dir = os.path.join(blsct_dir, "lib")
 
-#navio_core_repo = "https://github.com/nav-io/navio-core"
-navio_core_repo = "https://github.com/gogoex/navio-core"
+if IS_PROD:
+  navio_core_repo = "https://github.com/nav-io/navio-core"
+else:
+  navio_core_repo = "https://github.com/gogoex/navio-core"
+
 navio_core_dir = os.path.join(package_dir, "navio-core")
+depends_dir = Path(os.path.join(navio_core_dir, "depends"))
+depends_bak_dir = Path.home() / "depends"
 
 src_path = os.path.join(navio_core_dir, "src")
 bls_path = os.path.join(src_path, "bls")
@@ -34,43 +42,51 @@ libbls384_256_a = os.path.join(bls_lib_path, "libbls384_256.a")
 dot_a_files = [libblsct_a, libunivalue_blsct_a, libmcl_a, libbls384_256_a]
 
 class CustomBuildExt(build_ext):
-  def get_arch_path(self, depends_path: Path) -> Path:
+  def get_arch_path(self, depends_dir: Path) -> Path:
     arches = ["x86_64", "i686", "mips", "arm", "aarch64",
               "powerpc", "riscv32", "riscv64", "s390x"]
-    if not depends_path.is_dir():
+    if not depends_dir.is_dir():
       raise FileNotFoundError("Failed to read depends directory")
 
-    for entry in depends_path.iterdir():
+    for entry in depends_dir.iterdir():
       if any(entry.name.startswith(arch) for arch in arches) and entry.is_dir():
         return entry.resolve()
 
     raise FileNotFoundError("Arch dependency directory missing")
 
-  def clone_navio_core(self, num_cpus: str):
+  def clone_navio_core(self):
     if os.path.isdir(navio_core_dir):
       shutil.rmtree(navio_core_dir)
     subprocess.run([
       "git",
       "clone",
-      "--branch", "remove-libblsct-cpp",
+      "--branch", "remove-libblsct-cpp", # TODO: remove this
       "--depth", "1",
       navio_core_repo,
       navio_core_dir
     ], check=True)
 
   def build_libblsct(self, num_cpus: str):
-    depends_path = Path(os.path.join(navio_core_dir, "depends"))
+    # if there is a backup, use it
+    if os.path.isdir(depends_bak_dir):
+      print("Using backup of dependency directory...")
+      shutil.rmtree(depends_dir)
+      shutil.copytree(depends_bak_dir, depends_dir)
+    else:
+      print("Building dependendencies...")
+      # otherwise, build the dependencies
+      subprocess.run(
+        ["make", "-j", num_cpus],
+        cwd=depends_dir,
+        check=True,
+      )
+      shutil.copytree(depends_dir, depends_bak_dir)
+      print("Created backup of dependency directory")
 
-    # Build dependencies
-    subprocess.run(
-      ["make", "-j", num_cpus],
-      cwd=depends_path,
-      check=True,
-    )
 
     # Run autogen, configure, and make
     subprocess.run(["./autogen.sh"], cwd=navio_core_dir, check=True)
-    arch_path = self.get_arch_path(depends_path)
+    arch_path = self.get_arch_path(depends_dir)
 
     subprocess.run(
       ["./configure", f"--prefix={arch_path}", "--enable-build-libblsct-only"],
@@ -87,7 +103,7 @@ class CustomBuildExt(build_ext):
 
   def run(self):
     num_cpus = str(multiprocessing.cpu_count())
-    self.clone_navio_core(num_cpus)
+    self.clone_navio_core()
     self.build_libblsct(num_cpus)
     super().run()
 
@@ -140,7 +156,7 @@ swig_module = Extension(
     "blsct/blsct.i",
   ],
   include_dirs=[
-    python_include_dirs,
+    *python_include_dirs,
     os.path.join(navio_core_dir, "src"),
     os.path.join(navio_core_dir, "src/bls/include"),
     os.path.join(navio_core_dir, "src/bls/mcl/include"),

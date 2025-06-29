@@ -1,14 +1,9 @@
 from . import blsct
-from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
-from .keys.child_key_desc.blinding_key import BlindingKey
 from .managed_obj import ManagedObj
-from .point import Point
-from .range_proof import RangeProof
-from .script import Script
 from .serializable import Serializable
 from .sub_addr import SubAddr
 from .token_id import TokenId
-from typing import Any, Optional, Literal, override, Self, TypedDict, cast
+from typing import Any, Optional, Literal, override, Self, TypedDict
 
 type hex_str = str
 
@@ -25,15 +20,27 @@ class SerTxOut(TypedDict):
 class TxOut(ManagedObj, Serializable):
   """
   Represents a transaction output used to construct a CTxOut in a confidential transaction.
-
   >>> from blsct import ChildKey, DoublePublicKey, PublicKey, SubAddr, SubAddrId, TxOut
-  >>> view_key = ChildKey().to_tx_key().to_view_key()
-  >>> spending_pub_key = PublicKey()
   >>> sub_addr = SubAddr.from_double_public_key(DoublePublicKey())
   >>> amount = 789
   >>> memo = "apple"
-  >>> TxOut.generate(sub_addr, amount, memo)
-  TxOut(<Swig Object of type 'void *' at 0x1015fa760>)  # doctest: +SKIP
+  >>> tx_out = TxOut(sub_addr, amount, memo)
+  >>> tx_out
+  TxOut(a1256599ca030c476...)  # doctest: +SKIP
+  >>> tx_out.get_destination()
+  SubAddr(a1256599ca030c4...)  # doctest: +SKIP
+  >>> tx_out.get_amount()
+  789
+  >>> tx_out.get_memo()
+  'apple'
+  >>> tx_out.get_token_id()
+  TokenId(0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff)
+  >>> tx_out.get_min_stake()
+  0
+  >>> ser = tx_out.serialize()
+  >>> deser = TxOut.deserialize(ser)
+  >>> ser == deser.serialize()
+  True
   """
   def __init__(
     self,
@@ -102,7 +109,8 @@ class TxOut(ManagedObj, Serializable):
 
   def serialize(self) -> str:
     """Serialize the TxOut to a hexadecimal string"""
-    return blsct.to_hex(self.value(), self.obj_size)
+    buf = blsct.cast_to_uint8_t_ptr(self.value())
+    return blsct.to_hex(buf, self.obj_size)
 
   @classmethod
   @override
@@ -110,6 +118,6 @@ class TxOut(ManagedObj, Serializable):
     """Deserialize the TxOut from a hexadecimal string"""
     if len(hex) % 2 != 0:
       hex = f"0{hex}"
+    obj_size = len(hex) // 2
     obj = blsct.hex_to_malloced_buf(hex)
-    return cls.from_obj(obj)
-
+    return cls.from_obj_with_size(obj, obj_size)

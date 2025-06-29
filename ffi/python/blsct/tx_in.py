@@ -20,7 +20,7 @@ class SerTxIn(TypedDict):
 class TxIn(ManagedObj, Serializable):
   """
   Represents a transaction input used to construct CTxIn in a confidential transaction.
-  
+
   >>> from blsct import OutPoint, SpendingKey, TokenId, CtxId, TxIn, TX_ID_SIZE
   >>> import secrets
   >>> amount = 123
@@ -29,17 +29,26 @@ class TxIn(ManagedObj, Serializable):
   >>> token_id = TokenId()
   >>> ctx_id = CtxId.deserialize(secrets.token_hex(TX_ID_SIZE))
   >>> out_point = OutPoint.generate(ctx_id, 0)
-  >>> tx_in = TxIn.generate(amount, gamma, spending_key, token_id, out_point)
-  >>> tx_in.get_prev_out_hash()
-  TxId(7b0000000000000064000000000000003ff98b71ff7189fb12d4b93704139753)  # doctest: +SKIP
-  >>> tx_in.get_prev_out_n()
-  37194817  # doctest: +SKIP
-  >>> tx_in.get_script_sig()
-  Script(341a3e3e18b462d20000000000000000000000000000000000000000)  # doctest: +SKIP
-  >>> tx_in.get_sequence()
-  0  # doctest: +SKIP
-  >>> tx_in.get_script_witness()
-  Script(ffffffffffffffff1b585a44e980f30b16ef75db34f7a6d56fe7cee4)  # doctest: +SKIP
+  >>> tx_in = TxIn(amount, gamma, spending_key, token_id, out_point)
+  >>> tx_in.get_amount()
+  123
+  >>> tx_in.get_gamma()
+  100
+  >>> tx_in.get_spending_key()
+  SpendingKey(3a50bf783b31128e95bdcb54bfbf46a8fdf3f435de16a93c0c4e917eeb5fef2b)  # doctest: +SKIP
+
+  >>> tx_in.get_token_id()
+  TokenId(0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff)  # doctest: +SKIP
+  >>> tx_in.get_out_point()
+  OutPoint(3de94c8a07b9e38d1e22a6e0cceb7482aacaab934a0a573fc22aa334b13aaed600000000)  # doctest: +SKIP
+  >>> tx_in.get_staked_commitment()
+  False
+  >>> tx_in.get_rbf()
+  False
+  >>> ser = tx_in.serialize()
+  >>> deser = TxIn.deserialize(ser)
+  >>> ser == deser.serialize()
+  True
   """
 
   def __init__(
@@ -114,7 +123,8 @@ class TxIn(ManagedObj, Serializable):
 
   def serialize(self) -> str:
     """Serialize the TxIn to a hexadecimal string"""
-    return blsct.to_hex(self.value(), self.obj_size)
+    buf = blsct.cast_to_uint8_t_ptr(self.value())
+    return blsct.to_hex(buf, self.obj_size)
 
   @classmethod
   @override
@@ -122,6 +132,7 @@ class TxIn(ManagedObj, Serializable):
     """Deserialize the TxIn from a hexadecimal string"""
     if len(hex) % 2 != 0:
       hex = f"0{hex}"
+    obj_size = len(hex) // 2
     obj = blsct.hex_to_malloced_buf(hex)
-    return cls.from_obj(obj)
+    return cls.from_obj_with_size(obj, obj_size)
 

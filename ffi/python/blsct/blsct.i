@@ -82,16 +82,8 @@ if (p == nullptr) { \
     return static_cast<CMutableTransaction*>(x);
   }
 
-  BlsctTxIn* cast_to_tx_in(void* x) {
-    return static_cast<BlsctTxIn*>(x);
-  }
-
   CTxIn* cast_to_ctx_in(void* x) {
     return static_cast<CTxIn*>(x);
-  }
-
-  BlsctTxOut* cast_to_tx_out(void* x) {
-    return static_cast<BlsctTxOut*>(x);
   }
 
   CTxOut* cast_to_ctx_out(void* x) {
