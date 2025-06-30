@@ -8,13 +8,12 @@ class ViewTag:
   """
   Represents a view tag derived from a blinding public key and a view key. The view tag is a 64-bit unsigned integer.
 
-  >>> from blsct import ChildKey, PublicKey, TxKey, ViewTag
-  >>> ViewTag()
-  ViewTag(0x102cb0c20)  # doctest: +SKIP
+  >>> from blsct import ChildKey, PublicKey, Scalar, TxKey, ViewTag
   >>> blinding_pub_key = PublicKey()
-  >>> view_key = ChildKey().to_tx_key().to_view_key()
-  >>> ViewTag.generate(blinding_pub_key, view_key)
-  12212  # doctest: +SKIP
+  >>> seed = Scalar()
+  >>> view_key = ChildKey(seed).to_tx_key().to_view_key()
+  >>> ViewTag(blinding_pub_key, view_key)
+  ViewTag(61568) # doctest: +SKIP
   """
   def __init__(
     self,

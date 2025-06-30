@@ -16,15 +16,35 @@ class RangeProof(ManagedObj, Serializable):
   """
   Represents a (possibly aggregated) range proof for one or more confidential transaction amounts.
 
-  >>> from blsct import AmountRecoveryReq, AmountRecoveryRes, Point, RangeProof, TokenId
-  >>> nonce = Point()
-  >>> token_id = TokenId()
-  >>> rp = RangeProof.build([456], nonce, 'navcoin', token_id)
-  >>> RangeProof.verify_proofs([rp])
-  True
-  >>> req = AmountRecoveryReq(rp, nonce)
-  >>> res = RangeProof.recover_amounts([req])
-  0: AmtRecoveryRes(is_succ=True, amount=456, message='navcoin')
+>>> from blsct import AmountRecoveryReq, AmountRecoveryRes, Point, RangeProof, TokenId
+>>> nonce = Point()
+>>> token_id = TokenId()
+>>> rp = RangeProof([456], nonce, 'navio', token_id)
+>>> RangeProof.verify_proofs([rp])
+True
+>>> req = AmountRecoveryReq(rp, nonce)
+>>> res = RangeProof.recover_amounts([req])
+0: AmtRecoveryRes(is_succ=True, amount=456, message='navio')
+>>> rp.get_A()
+Point(a2fb420771db27ad...) # doctest: +SKIP
+>>> rp.get_A_wip()
+Point(a110e82e7ce9db7b...) # doctest: +SKIP
+>>> rp.get_B()
+Point(b20c77bdcf884cc9...) # doctest: +SKIP
+>>> rp.get_r_prime()
+Scalar(2edf3c0ca70d395fda7c809776a3328824a5fc29bd6261afd7e03e9ab952a31b) # doctest: +SKIP
+>>> rp.get_s_prime()
+Scalar(17fe26b25aeb9e2a24dcb257d308f27e57ab4fe6b852bead0259b8e0e4b9abe7) # doctest: +SKIP
+>>> rp.get_delta_prime()
+Scalar(1bc93e6b42fb582f51ba0cd51d64ca2b85cebd15cb8a5c84a1df16f0c6b13cea) # doctest: +SKIP
+>>> rp.get_alpha_hat()
+Scalar(1c1eaca43fbaf1ec5f1304ec56d0e29e639a5189a61a7bd752e1d449702c463b) # doctest: +SKIP
+>>> rp.get_tau_x()
+Scalar(5e07a8b9254fab11399f42d5695c9bfe3d00bc6478c5a480442cfac6567ef2ee) # doctest: +SKIP
+>>> ser = rp.serialize()
+>>> deser = RangeProof.deserialize(ser)
+>>> ser == deser.serialize()
+True
   """
   def __init__(
     self,
@@ -168,7 +188,17 @@ class RangeProof(ManagedObj, Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the RangeProof from a hexadecimal string"""
-    assert len(hex) % 2 == 0, "Expected the hex to have an even length"
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
     obj_size = len(hex) // 2
-    return blsct.deserialize_range_proof(hex, obj_size);
+    rv =  blsct.deserialize_range_proof(hex, obj_size);
+    rv_result = int(rv.result)
+    if rv_result != 0:
+      blsct.free_obj(rv)
+      raise ValueError(f"Failed to deserialize RangeProof. Error code = {rv_result}")
+
+    obj = rv.value
+    obj_size = rv.value_size
+    blsct.free_obj(rv)
+    return cls.from_obj_with_size(obj, obj_size)
 

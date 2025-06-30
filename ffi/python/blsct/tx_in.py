@@ -20,7 +20,6 @@ class SerTxIn(TypedDict):
 class TxIn(ManagedObj, Serializable):
   """
   Represents a transaction input used to construct CTxIn in a confidential transaction.
-
   >>> from blsct import OutPoint, SpendingKey, TokenId, CtxId, TxIn, CTX_ID_SIZE
   >>> import secrets
   >>> amount = 123
@@ -28,19 +27,18 @@ class TxIn(ManagedObj, Serializable):
   >>> spending_key = SpendingKey()
   >>> token_id = TokenId()
   >>> ctx_id = CtxId.deserialize(secrets.token_hex(CTX_ID_SIZE))
-  >>> out_point = OutPoint.generate(ctx_id, 0)
+  >>> out_point = OutPoint(ctx_id, 0)
   >>> tx_in = TxIn(amount, gamma, spending_key, token_id, out_point)
   >>> tx_in.get_amount()
   123
   >>> tx_in.get_gamma()
   100
   >>> tx_in.get_spending_key()
-  SpendingKey(3a50bf783b31128e95bdcb54bfbf46a8fdf3f435de16a93c0c4e917eeb5fef2b)  # doctest: +SKIP
-
+  SpendingKey(36bcc5eac63182e190c574fb911c17970bee152f667ad47cb9119b84e0541f79) # doctest: +SKIP
   >>> tx_in.get_token_id()
-  TokenId(0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff)  # doctest: +SKIP
+  TokenId(0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff) # doctest: +SKIP
   >>> tx_in.get_out_point()
-  OutPoint(3de94c8a07b9e38d1e22a6e0cceb7482aacaab934a0a573fc22aa334b13aaed600000000)  # doctest: +SKIP
+  OutPoint(31f41784d028c886a886f6c2c323ef011ab948ceb7edacd92b1662b6189655bc00000000) # doctest: +SKIP
   >>> tx_in.get_staked_commitment()
   False
   >>> tx_in.get_rbf()

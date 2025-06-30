@@ -32,6 +32,8 @@ class AmountRecoveryReq(Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the AmountRecoveryReq from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
     hex_len = len(hex)
     nonce_hex_len = blsct.POINT_SIZE * 2
     

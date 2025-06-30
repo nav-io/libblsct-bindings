@@ -83,7 +83,6 @@ class CustomBuildExt(build_ext):
       shutil.copytree(depends_dir, depends_bak_dir)
       print("Created backup of dependency directory")
 
-
     # Run autogen, configure, and make
     subprocess.run(["./autogen.sh"], cwd=navio_core_dir, check=True)
     arch_path = self.get_arch_path(depends_dir)

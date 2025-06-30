@@ -12,8 +12,12 @@ class OutPoint(ManagedObj, Serializable):
   >>> import secrets
   >>> ctx_id = CtxId.deserialize(secrets.token_hex(CTX_ID_SIZE))
   >>> out_index = 0
-  >>> OutPoint(ctx_id, out_index)
-  OutPoint(<Swig Object of type 'void *' at 0x105b071b0>)  # doctest: +SKIP
+  >>> out_point = OutPoint(ctx_id, out_index)
+  >>> out_point
+  OutPoint(ae8f9ba6eaef62fbd4b0215cda24e231...) # doctest: +SKIP
+  >>> ser = out_point.serialize()
+  >>> ser == OutPoint.deserialize(ser).serialize()
+  True
   """
   def __init__(self, ctx_id: CtxId, out_index: int):
     rv = blsct.gen_out_point(ctx_id.serialize(), out_index)
@@ -29,8 +33,9 @@ class OutPoint(ManagedObj, Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the OutPoint from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
     rv = blsct.deserialize_out_point(hex)
-
     rv_result = int(rv.result)
     if rv_result != 0:
       blsct.free_obj(rv)

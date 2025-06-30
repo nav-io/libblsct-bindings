@@ -19,8 +19,6 @@ class DoublePublicKey(ManagedObj, Serializable):
   >>> DoublePublicKey.from_public_keys(pk1, pk2)
   DoublePublicKey(8284d61a300241dcbe...) # doctest: +SKIP
   >>> vk = ViewKey()
-  >>> DoublePublicKey.from_keys_and_acct_addr(vk, PublicKey(), 1, 2)
-  DoublePublicKey(a552454d25e6f02b68f...) # doctest: +SKIP
   >>> spending_pk = PublicKey()
   >>> DoublePublicKey.from_keys_and_acct_addr(vk, spending_pk, 1, 2)
   DoublePublicKey(8eb6d5f160935d06a1a...) # doctest: +SKIP
@@ -71,6 +69,8 @@ class DoublePublicKey(ManagedObj, Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the DoublePublicKey from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
     rv = blsct.deserialize_dpk(hex)
     rv_result = int(rv.result)
     if rv_result != 0:

@@ -13,7 +13,7 @@ class Ctx(ManagedObj, Serializable):
   """
   Represents a confidential transaction. Also known as `CMutableTransaction` on the C++ side.
 
-from blsct import ChildKey, DoublePublicKey, OutPoint, PublicKey, SpendingKey, SubAddr, SubAddrId, TokenId, CTX_ID_SIZE, Ctx, CtxId, TxIn, TxOut
+  >>> from blsct import ChildKey, DoublePublicKey, OutPoint, PublicKey, SpendingKey, SubAddr, SubAddrId, TokenId, CTX_ID_SIZE, Ctx, CtxId, TxIn, TxOut
   >>> import secrets
   >>> num_tx_in = 1
   >>> num_tx_out = 1

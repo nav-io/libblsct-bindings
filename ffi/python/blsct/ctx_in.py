@@ -2,9 +2,10 @@ from . import blsct
 from .managed_obj import ManagedObj
 from .script import Script
 from .ctx_id import CtxId
-from typing import Any, override
+from .serializable import Serializable
+from typing import Any, override, Self, Type
 
-class CTxIn(ManagedObj):
+class CTxIn(ManagedObj, Serializable):
   """
   Represents a transaction input in a constructed confidential transaction. Also known as `CTxIn` on the C++ side.
   This class provides access to the CTxIn object but does not own the `CTxIn` object.
@@ -46,4 +47,23 @@ class CTxIn(ManagedObj):
   @classmethod
   def default_obj(cls) -> Any:
     raise NotImplementedError("CTxIn should not be directly instantiated.")
+
+  @override
+  def serialize(self) -> str:
+    """Serialize the CtxId object to a hexadecimal string."""
+    buf = blsct.cast_to_uint8_t_ptr(self.value())
+    return blsct.to_hex(buf, self.obj_size)
+
+  @classmethod
+  @override
+  def deserialize(
+    cls: Type[Self],
+    hex: str,
+  ) -> Self:
+    """Create a CTxId from a hexadecimal string."""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
+    obj_size = len(hex) // 2
+    obj = blsct.hex_to_malloced_buf(hex)
+    return cls.from_obj_with_size(obj, obj_size)
 

@@ -12,9 +12,12 @@ class Signature(ManagedObj, Serializable):
   >>> from blsct import PublicKey, Scalar, Signature
   >>> sk = Scalar()
   >>> pk = PublicKey.from_scalar(sk)
-  >>> sig = Signature.generate(sk, 'navio')
+  >>> sig = Signature(sk, 'navio')
   >>> sig.verify('navio', pk)
-  True
+  >>> ser = sig.serialize()
+  >>> deser = Signature.deserialize(ser)
+  >>> ser == deser.serialize()
+  >>> True
   """
   def __init__(self, priv_key: Scalar, msg: str):
     obj = blsct.sign_message(priv_key.value(), msg)
@@ -41,6 +44,8 @@ class Signature(ManagedObj, Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the Signature from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
     rv = blsct.deserialize_signature(hex)
     rv_result = int(rv.result)
     if rv_result != 0:

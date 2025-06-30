@@ -20,21 +20,20 @@ class SerTxOut(TypedDict):
 class TxOut(ManagedObj, Serializable):
   """
   Represents a transaction output used to construct a CTxOut in a confidential transaction.
+
   >>> from blsct import ChildKey, DoublePublicKey, PublicKey, SubAddr, SubAddrId, TxOut
   >>> sub_addr = SubAddr.from_double_public_key(DoublePublicKey())
   >>> amount = 789
   >>> memo = "apple"
   >>> tx_out = TxOut(sub_addr, amount, memo)
-  >>> tx_out
-  TxOut(a1256599ca030c476...)  # doctest: +SKIP
   >>> tx_out.get_destination()
-  SubAddr(a1256599ca030c4...)  # doctest: +SKIP
+  SubAddr(827cc8283b488e5...) # doctest: +SKIP
   >>> tx_out.get_amount()
   789
   >>> tx_out.get_memo()
   'apple'
   >>> tx_out.get_token_id()
-  TokenId(000000000000000000000000000...) # doctest: +SKIP
+  TokenId(0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff)
   >>> tx_out.get_min_stake()
   0
   >>> ser = tx_out.serialize()

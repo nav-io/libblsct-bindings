@@ -38,6 +38,8 @@ class AmountRecoveryRes(Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the AmountRecoveryRes from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
     obj_dict = pickle.loads(bytes.fromhex(hex))
     return cls(
         is_succ=obj_dict["is_succ"],

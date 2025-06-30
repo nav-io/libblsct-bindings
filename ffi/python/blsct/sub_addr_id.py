@@ -8,8 +8,13 @@ class SubAddrId(ManagedObj, Serializable):
   Represents a sub-address ID.
 
   >>> from blsct import SubAddrId
-  >>> SubAddrId.generate(123, 456)
-  SubAddrId(<Swig Object of type 'BlsctSubAddrId *' at 0x1017194d0>)
+  >>> x = SubAddrId(123, 456)
+  >>> x
+  SubAddrId(7b00000000000000c801000000000000)
+  >>> ser = x.serialize()
+  >>> deser = SubAddrId.deserialize(ser)
+  >>> ser == deser.serialize()
+  True
   """
   def __init__(
     self,
@@ -18,7 +23,7 @@ class SubAddrId(ManagedObj, Serializable):
   ):
     """Generate a sub-address ID from an account and an address"""
     obj = blsct.gen_sub_addr_id(account, address);
-    super.__init__(obj)
+    super().__init__(obj)
 
   @override
   def value(self) -> Any:
@@ -37,6 +42,8 @@ class SubAddrId(ManagedObj, Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the SubAddrId from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
     rv = blsct.deserialize_sub_addr_id(hex);
     rv_result = int(rv.result)
     if rv_result != 0:

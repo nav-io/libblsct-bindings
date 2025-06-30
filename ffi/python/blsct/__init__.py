@@ -15,6 +15,10 @@ from .address import Address
 from .address_encoding import AddressEncoding
 from .amount_recovery_req import AmountRecoveryReq
 from .amount_recovery_res import AmountRecoveryRes
+from .ctx import Ctx
+from .ctx_id import CtxId
+from .ctx_in import CTxIn
+from .ctx_out import CTxOut
 from .hash_id import HashId
 from .keys.child_key import ChildKey
 from .keys.child_key_desc.blinding_key import BlindingKey
@@ -34,8 +38,6 @@ from .signature import Signature
 from .sub_addr import SubAddr
 from .sub_addr_id import SubAddrId
 from .token_id import TokenId
-from .ctx import Ctx
-from .ctx_id import CtxId
 from .tx_in import TxIn
 from .tx_out import TxOut
 from .view_tag import ViewTag

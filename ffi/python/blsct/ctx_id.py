@@ -32,8 +32,10 @@ class CtxId(ManagedObj, Serializable):
     hex: str,
   ) -> Self:
     """Create a TxId from a hexadecimal string."""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
     if len(hex) != blsct.CTX_ID_SIZE * 2:
-      raise ValueError(f"Invlid TxId hex length. Expected {blsct.CTX_ID_SIZE * 2}, but got {len(hex)}.")
+      raise ValueError(f"Invalid TxId hex length. Expected {blsct.CTX_ID_SIZE * 2}, but got {len(hex)}.")
     obj = blsct.hex_to_malloced_buf(hex) 
     return cls(obj)
 

@@ -15,26 +15,25 @@ class Scalar(ManagedObj, Serializable, PrettyPrintable):
   Instantiating a Scalar without a parameter is equivalent to calling Scalar.random().
 
   >>> from blsct import Scalar
-  >>> a = Scalar(123)
-  >>> a.to_int()
-  123
-  >>> a.to_hex()
-  '7b'
-  >>> b = Scalar.random()
-  >>> b.to_hex()  # doctest: +SKIP
-  '2afe6b2a5222bf5768ddbdbe3e5ea71e964d5312a2761a165395ad231b710edd'
-  >>> Scalar().to_hex()
-  '5e6efdcf00ce467de29a970adf3a09f8c93e51dc7f1405bbe9dffeeabf952fbe'
-  >>> Scalar.zero().to_hex()
-  '0'
-  >>> c = Scalar(0x1234567890)
-  >>> c
-  Scalar(1234567890)
-  >>> Scalar.deserialize(c.serialize())
-  Scalar(1234567890)
+  >>> Scalar()
+  Scalar(5131bedc360ef599553bc6f020c251183ae8504b7b4fe0991e1e5864cc4e422) # doctest: +SKIP
+  >>> Scalar(123)
+  Scalar(7b)
+  >>> Scalar.zero()
+  Scalar(0)
+  >>> Scalar.random()
+  Scalar(693a3c156e22d2305c30e4297e3f974201a081e0910f7303ebc5f36f00161c43) # doctest: +SKIP
+  >>> a = Scalar()
+  >>> b = Scalar()
+  >>> a == a
+  True
   >>> a == b
   False
-  >>> a == a
+  >>> a.to_int()
+  5339113002865401837 # doctest: +SKIP
+  >>> ser = a.serialize()
+  >>> deser = Scalar.deserialize(ser)
+  >>> ser == deser.serialize()
   True
   """
   def __init__(self, value: Any = None):
@@ -47,24 +46,6 @@ class Scalar(ManagedObj, Serializable, PrettyPrintable):
       super().__init__(value)
     else:
       raise ValueError(f"Scalar can only be instantiated with int, but got '{type(value).__name__}'")
-
-  def serialize(self) -> str:
-    """Serialize the scalar to a hexadecimal string"""
-    return blsct.serialize_scalar(self.value())
-    
-  @classmethod
-  def deserialize(cls, hex: str) -> Self:
-    """Deserialize the scalar from a hexadecimal string"""
-    if len(hex) % 2 != 0:
-      hex = f"0{hex}"
-    rv = blsct.deserialize_scalar(hex)
-    rv_result = int(rv.result)
-    if rv_result != 0:
-      blsct.free_obj(rv)
-      raise RuntimeError(f"Deserializaiton failed. Error code = {rv_result}")  # pragma: no co
-    obj = rv.value
-    blsct.free_obj(rv)
-    return cls.from_obj(obj)
 
   @classmethod
   def random(cls) -> Self:
@@ -104,4 +85,22 @@ class Scalar(ManagedObj, Serializable, PrettyPrintable):
     obj = rv.value
     blsct.free_obj(rv)
     return obj
+
+  def serialize(self) -> str:
+    """Serialize the scalar to a hexadecimal string"""
+    return blsct.serialize_scalar(self.value())
+    
+  @classmethod
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the scalar from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
+    rv = blsct.deserialize_scalar(hex)
+    rv_result = int(rv.result)
+    if rv_result != 0:
+      blsct.free_obj(rv)
+      raise RuntimeError(f"Deserializaiton failed. Error code = {rv_result}")  # pragma: no co
+    obj = rv.value
+    blsct.free_obj(rv)
+    return cls.from_obj(obj)
 

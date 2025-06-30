@@ -12,15 +12,19 @@ class SubAddr(ManagedObj, Serializable):
   """
   Represents a sub-address.
 
-  >>> from blsct import ChildKey, DoublePublicKey, PublicKey, SubAddr, SubAddrId
-  >>> view_key = ChildKey().to_tx_key().to_view_key()
+  >>> from blsct import ChildKey, DoublePublicKey, PublicKey, Scalar, SubAddr, SubAddrId
+  >>> seed = Scalar()
+  >>> view_key = ChildKey(seed).to_tx_key().to_view_key()
   >>> spending_pub_key = PublicKey()
-  >>> sub_addr_id = SubAddrId.generate(123, 456)
-  >>> SubAddr.generate(view_key, spending_pub_key, sub_addr_id)
-  SubAddr(<Swig Object of type 'BlsctSubAddr *' at 0x101738e40>)  # doctest: +SKIP
+  >>> sub_addr_id = SubAddrId(123, 456)
+  >>> SubAddr(view_key, spending_pub_key, sub_addr_id)
+  SubAddr(840cda7e5bc189f2b9a3e88a27182e387ac84c5cc3...) # doctest: +SKIP
   >>> dpk = DoublePublicKey()
-  >>> SubAddr.from_double_public_key(dpk)
-  SubAddr(<Swig Object of type 'void *' at 0x101152760>)  # doctest: +SKIP
+  >>> x = SubAddr.from_double_public_key(dpk)
+  >>> ser = x.serialize()
+  >>> deser = SubAddr.deserialize(ser)
+  >>> ser == deser.serialize()
+  True
   """
   def __init__(
     self,
@@ -63,6 +67,8 @@ class SubAddr(ManagedObj, Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the SubAddr from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
     rv = blsct.deserialize_sub_addr(hex)
 
     rv_result = int(rv.result)

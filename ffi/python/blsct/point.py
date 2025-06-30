@@ -14,21 +14,28 @@ class Point(ManagedObj, Serializable, PrettyPrintable):
 
   Instantiating a Point object without a parameter returns the base point of the BLS12-381 G1 curve.
 
-  >>> from blsct import Point
-  >>> a = Point()
-  >>> a.serialize()
-  '1 124c3c9dc6eb46cf8bcddc64559c05717d49730c9e474230dfd75e76c7ac07f954bfcf60432a9175d1eb0d54e502301b 2cbaf...'  # doctest: +SKIP
-  >>> b = Point.base_point()
-  >>> a.serialize() == b.serialize()
+  >>> from blsct import Point, Scalar
+  >>> Point()
+  Point(a4eb0bfafd459d032737596...) # doctest: +SKIP
+  >>> Point.random()
+  Point(b45f2b49f894ec369133766...) # doctest: +SKIP
+  >>> Point.base()
+  Point(97f1d3a73197d7942695638...) # doctest: +SKIP
+  >>> s = Scalar()
+  >>> Point.from_scalar(s)
+  Point(b83378b6c0b2cb416dc7391...) # doctest: +SKIP
+  >>> p = Point()
+  >>> p.is_valid()
   True
-  >>> a.is_valid()
+  >>> q = Point()
+  >>> p == p
   True
-  >>> Point.random().serialize()
-  '1 124c3c9dc6eb46cf8bcddc64559c05717d49730c9e474230dfd75e76c7ac07f954bfcf60432a9175d1eb0d54e502301b 2cbaf...'  # doctest: +SKIP
-  >>> Point.deserialize(Point().serialize())
-  '1 124c3c9dc6eb46cf8bcddc64559c05717d49730c9e474230dfd75e76c7ac07f954bfcf60432a9175d1eb0d54e502301b 2cbaf...'  # doctest: +SKIP
-  >>> Point.from_scalar(Scalar())
-  '1 124c3c9dc6eb46cf8bcddc64559c05717d49730c9e474230dfd75e76c7ac07f954bfcf60432a9175d1eb0d54e502301b 2cbaf...'  # doctest: +SKIP
+  >>> p == q
+  False
+  >>> ser = p.serialize()
+  >>> deser = Point.deserialize(ser)
+  >>> ser == deser.serialize()
+  True
   """
   def __init__(self, obj: Any = None):
     super().__init__(obj)
@@ -67,6 +74,8 @@ class Point(ManagedObj, Serializable, PrettyPrintable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the point from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
     rv = blsct.deserialize_point(hex)
     rv_result = int(rv.result)
     if rv_result != 0:

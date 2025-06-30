@@ -41,6 +41,8 @@ class HashId(ManagedObj, Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the HashId from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
     rv = blsct.deserialize_key_id(hex)
     rv_result = int(rv.result)
     if rv_result != 0:

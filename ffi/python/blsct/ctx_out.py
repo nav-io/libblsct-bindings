@@ -1,13 +1,12 @@
 from . import blsct
 from .ctx_out_blsct_data import CTxOutBlsctData
-from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
-from .keys.child_key_desc.blinding_key import BlindingKey
 from .managed_obj import ManagedObj
 from .script import Script
+from .serializable import Serializable
 from .token_id import TokenId
-from typing import Any, override
+from typing import Any, override, Self, Type
 
-class CTxOut(ManagedObj):
+class CTxOut(ManagedObj, Serializable):
   """
   Represents a transaction output in a constructed confidential transaction. Also known as `CTxOut` on the C++ side.
   This class provides access to the `CTxOut` object, but does not own the `CTxOut` object.

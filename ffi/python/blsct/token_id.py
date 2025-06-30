@@ -9,14 +9,18 @@ class TokenId(ManagedObj, Serializable):
 
   >>> from blsct import TokenId
   >>> TokenId()
-  TokenId(<Swig Object of type 'void *' at 0x101738e10>)  # doctest: +SKIP
+  TokenId(000000000000000...0000000ffffffffffffffff) # doctest: +SKIP
   >>> TokenId.from_token(123)
-  TokenId(<Swig Object of type 'void *' at 0x10063ced0>)  # doctest: +SKIP
+  TokenId(7b0000000000000...0000000ffffffffffffffff) # doctest: +SKIP
   >>> token_id = TokenId.from_token_and_subid(123, 456)
   >>> token_id.token()
   123
   >>> token_id.subid()
   456
+  >>> ser = token_id.serialize()
+  >>> deser = TokenId.deserialize(ser)
+  >>> ser == deser.serialize()
+  True
   """
   def __init__(self, obj: Any = None):
     super().__init__(obj)
@@ -68,6 +72,8 @@ class TokenId(ManagedObj, Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the TokenId from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
     rv = blsct.deserialize_token_id(hex)
     rv_result = int(rv.result)
     if rv_result != 0:
