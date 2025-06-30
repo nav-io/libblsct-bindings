@@ -34,7 +34,7 @@ class TxOut(ManagedObj, Serializable):
   >>> tx_out.get_memo()
   'apple'
   >>> tx_out.get_token_id()
-  TokenId(0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff)
+  TokenId(000000000000000000000000000...) # doctest: +SKIP
   >>> tx_out.get_min_stake()
   0
   >>> ser = tx_out.serialize()

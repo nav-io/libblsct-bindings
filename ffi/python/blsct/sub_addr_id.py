@@ -31,11 +31,19 @@ class SubAddrId(ManagedObj, Serializable):
 
   def serialize(self) -> str:
     """Serialize the SubAddrId to a hexadecimal string"""
-    raise NotImplementedError()
+    return blsct.serialize_sub_addr_id(self.value())
 
   @classmethod
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the SubAddrId from a hexadecimal string"""
-    raise NotImplementedError()
+    rv = blsct.deserialize_sub_addr_id(hex);
+    rv_result = int(rv.result)
+    if rv_result != 0:
+      blsct.free_obj(rv)
+      raise ValueError(f"Failed to deserialize SubAddrId. Error code = {rv_result}")
+
+    obj = rv.value
+    blsct.free_obj(rv)
+    return cls.from_obj(obj) 
 
