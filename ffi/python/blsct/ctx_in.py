@@ -6,12 +6,15 @@ from typing import Any, override
 
 class CTxIn(ManagedObj):
   """
-  Represents a transaction input in a constructed confidential transaction. Also known as `CTxIn` on the C++ side. This class provides access to the CTxIn object but does not own it.
+  Represents a transaction input in a constructed confidential transaction. Also known as `CTxIn` on the C++ side.
+  This class provides access to the CTxIn object but does not own the `CTxIn` object.
+
+  For code examples, see the `ctx.py` class documentation.
   """
 
-  def __init__(self, obj: Any):
-    self._managed = False
+  def __init__(self, obj: Any = None):
     super().__init__(obj)
+    self._borrowed = True
 
   def get_prev_out_hash(self) -> CtxId:
     """Get the transaction ID of the previous output being spent."""

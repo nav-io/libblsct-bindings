@@ -14,28 +14,32 @@ class PublicKey(ManagedObj, Serializable, PrettyPrintable):
   >>> from blsct import Point, PublicKey, Scalar, ViewKey
   >>> s = Scalar.random()
   >>> PublicKey.from_scalar(s)
-  PublicKey(<Swig Object of type 'BlsctPubKey *' at 0x100a52d60>)  # doctest: +SKIP 
+  PublicKey(a4a04797481bd531f9cb56...) # doctest: +SKIP
   >>> p = Point.random()
   >>> PublicKey.from_point(p)
-  PublicKey(<Swig Object of type 'BlsctPubKey *' at 0x100a52d60>)  # doctest: +SKIP 
-  >>> PublicKey.random()
-  PublicKey(<Swig Object of type 'void *' at 0x100af72a0>)  # doctest: +SKIP
+  PublicKey(b09a14601bee3102a6db45...) # doctest: +SKIP
   >>> pk = PublicKey.random()
   >>> pk.pretty_print()
-  '1 ef5c80c516...  $ doctest +SKIP
+  '1 70896870760eba69c20a1f0d740855a91560a...' # doctest: +SKIP
   >>> vk = ViewKey()
   >>> PublicKey.generate_nonce(pk, vk)
-  PublicKey(<Swig Object of type 'BlsctPubKey *' at 0x10120fba0>)  # doctest: +SKIP
-  >>> PublcKey.random().get_point()
-  Point(1 e0e85458a6a7a...)  # doctest: +SKIP
+  PublicKey(91458dc61b63095b1d5f13...) # doctest: +SKIP
+  >>> pk.get_point()
+  Point(a70896870760eba69c20a1f0d7...) # doctest: +SKIP
+  f9420ac559ebc)
   >>> pk2 = PublicKey.random()
   >>> pk == pk2
   False
   >>> pk == pk
   True
-  >>> pk.deserialize(pk.serialize())
-  PublicKey('1 16ddc1d...29dc3da')
+  >>> ser = pk.serialize()
+  >>> deser = PublicKey.deserialize(ser)
+  >>> ser == deser.serialize()
+  True
   """
+  def __init__(self, obj: Any = None):
+    super().__init__(obj)
+
   def get_point(self) -> Point:
     """Return the underlying point of the public key."""
     blsct_point = blsct.get_public_key_point(self.value())

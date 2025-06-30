@@ -18,6 +18,9 @@ class TokenId(ManagedObj, Serializable):
   >>> token_id.subid()
   456
   """
+  def __init__(self, obj: Any = None):
+    super().__init__(obj)
+
   @classmethod
   def from_token(cls: Type[Self], token: int) -> Self:
     """Generate a token ID from a given token."""
@@ -65,6 +68,13 @@ class TokenId(ManagedObj, Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the TokenId from a hexadecimal string"""
-    obj = blsct.deserialize_token_id(hex)
-    return cls.from_obj(obj)
+    rv = blsct.deserialize_token_id(hex)
+    rv_result = int(rv.result)
+    if rv_result != 0:
+      blsct.free_obj(rv)
+      raise ValueError(f"Failed to deserialize TokenId. Error code = {rv_result}")
+
+    obj = rv.value
+    blsct.free_obj(rv)
+    return cls.from_obj(obj) 
 

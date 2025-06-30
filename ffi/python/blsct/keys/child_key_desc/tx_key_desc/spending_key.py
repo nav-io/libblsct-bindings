@@ -1,4 +1,5 @@
 from ....scalar import Scalar
+from typing import Any
 
 class SpendingKey(Scalar):
   """
@@ -6,7 +7,8 @@ class SpendingKey(Scalar):
 
   >>> from blsct import SpendingKey
   >>> SpendingKey()
-  SpendingKey(4d8016e4f5fa09486b0562179a36c4acd9a90d71cdfc98dce0ae2f13fa08a7f1)  # doctest: +SKIP
+  SpendingKey(b62a0f6b61bdb1780312a2e659c978b9400b8fca429d807d449edd94ebd6a30)  # doctest: +SKIP
   """
-  pass
+  def __init__(self, obj: Any = None):
+    super().__init__(obj)
  

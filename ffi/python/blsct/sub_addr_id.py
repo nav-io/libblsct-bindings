@@ -11,15 +11,14 @@ class SubAddrId(ManagedObj, Serializable):
   >>> SubAddrId.generate(123, 456)
   SubAddrId(<Swig Object of type 'BlsctSubAddrId *' at 0x1017194d0>)
   """
-  @classmethod
-  def generate(
-    cls: type[Self],
+  def __init__(
+    self,
     account: int,
     address: int
-  ) -> Self:
+  ):
     """Generate a sub-address ID from an account and an address"""
     obj = blsct.gen_sub_addr_id(account, address);
-    return cls(obj)
+    super.__init__(obj)
 
   @override
   def value(self) -> Any:

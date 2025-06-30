@@ -6,7 +6,7 @@ from .point import Point
 from .scalar import Scalar
 from .serializable import Serializable
 from .token_id import TokenId
-from typing import Any, Optional, override, Self, Type, TYPE_CHECKING
+from typing import Any, Optional, override, Self, TYPE_CHECKING
 
 if TYPE_CHECKING:
   from .range_proof import RangeProof
@@ -26,23 +26,13 @@ class RangeProof(ManagedObj, Serializable):
   >>> res = RangeProof.recover_amounts([req])
   0: AmtRecoveryRes(is_succ=True, amount=456, message='navcoin')
   """
-  def set_size(self, obj_size: int):
-    """Set the size of the range proof object."""
-    self.obj_size = obj_size
-
-  def get_size(self) -> int:
-    """Get the size of the range proof object."""
-    return self.obj_size
-
-  @classmethod
-  def build(
-    cls: Type[Self],
+  def __init__(
+    self,
     amounts: list[int],
     nonce: Point,
     message: str,
     token_id: Optional[TokenId] = None,
-  ) -> Self:
-    """Build a range proof from a list of amounts, nonce, message and optional token ID."""
+  ):
     vec = blsct.create_uint64_vec()
     for amount in amounts:
       blsct.add_to_uint64_vec(vec, amount)
@@ -59,16 +49,13 @@ class RangeProof(ManagedObj, Serializable):
     blsct.free_uint64_vec(vec)
 
     rv_result = int(rv.result)
-
     if rv_result != 0:
       blsct.free_obj(rv)
       raise RuntimeError(f"Building range proof failed. Error code = {rv_result}")
 
-    rp = cls(rv.value)
-    rp.set_size(rv.value_size)
+    super().__init__(rv.value)
+    self.obj_size = rv.value_size
     blsct.free_obj(rv)
- 
-    return rp
 
   @staticmethod
   def verify_proofs(proofs: list["RangeProof"]) -> bool:
@@ -98,7 +85,7 @@ class RangeProof(ManagedObj, Serializable):
     for req in reqs:
       blsct_req = blsct.gen_amount_recovery_req(
         req.range_proof.value(),
-        req.range_proof.get_size(),
+        req.range_proof.obj_size,
         req.nonce.value(),
       )
       blsct.add_to_amount_recovery_req_vec(req_vec, blsct_req)
@@ -131,42 +118,42 @@ class RangeProof(ManagedObj, Serializable):
 
   def get_A(self) -> Point:
     """Get the range proof element A."""
-    obj = blsct.get_range_proof_A(self.value())
+    obj = blsct.get_range_proof_A(self.value(), self.obj_size)
     return Point.from_obj(obj)
 
   def get_A_wip(self) -> Point:
     """Get the range proof element A_wip."""
-    obj = blsct.get_range_proof_A_wip(self.value())
+    obj = blsct.get_range_proof_A_wip(self.value(), self.obj_size)
     return Point.from_obj(obj)
 
   def get_B(self) -> Point:
     """Get the range proof element B."""
-    obj = blsct.get_range_proof_B(self.value())
+    obj = blsct.get_range_proof_B(self.value(), self.obj_size)
     return Point(obj)
 
   def get_r_prime(self) -> Scalar:
     """Get the range proof element r_prime."""
-    obj = blsct.get_range_proof_r_prime(self.value())
+    obj = blsct.get_range_proof_r_prime(self.value(), self.obj_size)
     return Scalar(obj)
 
   def get_s_prime(self) -> Scalar:
     """Get the range proof element s_prime."""
-    obj = blsct.get_range_proof_s_prime(self.value())
+    obj = blsct.get_range_proof_s_prime(self.value(), self.obj_size)
     return Scalar(obj)
 
   def get_delta_prime(self) -> Scalar:
     """Get the range proof element delta_prime."""
-    obj = blsct.get_range_proof_delta_prime(self.value())
+    obj = blsct.get_range_proof_delta_prime(self.value(), self.obj_size)
     return Scalar(obj)
 
   def get_alpha_hat(self) -> Scalar:
     """Get the range proof element alpha hat."""
-    obj = blsct.get_range_proof_alpha_hat(self.value())
+    obj = blsct.get_range_proof_alpha_hat(self.value(), self.obj_size)
     return Scalar(obj)
 
   def get_tau_x(self) -> Scalar:
     """Get the range proof element tau_x."""
-    obj = blsct.get_range_proof_tau_x(self.value())
+    obj = blsct.get_range_proof_tau_x(self.value(), self.obj_size)
     return Scalar(obj)
 
   @override
@@ -184,3 +171,4 @@ class RangeProof(ManagedObj, Serializable):
     assert len(hex) % 2 == 0, "Expected the hex to have an even length"
     obj_size = len(hex) // 2
     return blsct.deserialize_range_proof(hex, obj_size);
+

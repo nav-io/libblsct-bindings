@@ -22,20 +22,18 @@ class SubAddr(ManagedObj, Serializable):
   >>> SubAddr.from_double_public_key(dpk)
   SubAddr(<Swig Object of type 'void *' at 0x101152760>)  # doctest: +SKIP
   """
-  @classmethod
-  def generate(
-    cls: Type[Self],
+  def __init__(
+    self,
     view_key: ViewKey,
     spending_pub_key: PublicKey,
     sub_addr_id: SubAddrId,
-  ) -> Self:
-    """Derive a sub-address from a view key, a spending public key, and a sub-address ID"""
+  ):
     obj = blsct.derive_sub_address(
       view_key.value(),
       spending_pub_key.value(),
       sub_addr_id.value(),
     )
-    return cls(obj)
+    super().__init__(obj)
 
   @classmethod
   def from_double_public_key(
@@ -44,7 +42,7 @@ class SubAddr(ManagedObj, Serializable):
     ) -> Self:
     """Derive a sub-address from a DoublePublicKey"""
     rv = blsct.dpk_to_sub_addr(dpk.value())
-    inst = cls(rv.value)
+    inst = cls.from_obj(rv.value)
     blsct.free_obj(rv)
     return inst
 
@@ -65,8 +63,16 @@ class SubAddr(ManagedObj, Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the SubAddr from a hexadecimal string"""
-    return blsct.deserialize_sub_addr(hex)
+    rv = blsct.deserialize_sub_addr(hex)
 
+    rv_result = int(rv.result)
+    if rv_result != 0:
+      blsct.free_obj(rv)
+      raise ValueError(f"Failed to deserialize SubAddr. Error code = {rv_result}")
+
+    obj = rv.value
+    blsct.free_obj(rv)
+    return cls.from_obj(obj) 
 
 
 

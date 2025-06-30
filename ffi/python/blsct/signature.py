@@ -16,11 +16,9 @@ class Signature(ManagedObj, Serializable):
   >>> sig.verify('navio', pk)
   True
   """
-  @classmethod
-  def generate(cls: Type[Self], priv_key: Scalar, msg: str) -> Self:
-    """Generate a signature using a private key and a message."""
-    sig = blsct.sign_message(priv_key.value(), msg)
-    return cls(sig)
+  def __init__(self, priv_key: Scalar, msg: str):
+    obj = blsct.sign_message(priv_key.value(), msg)
+    super().__init__(obj)
 
   def verify(self, msg: str, pub_key: PublicKey) -> bool:
     """Verify a signature using the public key corresponding to the private key that signed the transaction."""
@@ -43,4 +41,12 @@ class Signature(ManagedObj, Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the Signature from a hexadecimal string"""
-    return blsct.deserialize_signature(hex)
+    rv = blsct.deserialize_signature(hex)
+    rv_result = int(rv.result)
+    if rv_result != 0:
+      blsct.free_obj(rv)
+      raise ValueError(f"Failed to deserialize Signature. Error code = {rv_result}")
+
+    obj = rv.value
+    blsct.free_obj(rv)
+    return cls.from_obj(obj) 

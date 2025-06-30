@@ -1,4 +1,5 @@
 from ...scalar import Scalar
+from typing import Any
 
 class BlindingKey(Scalar):
   """
@@ -6,7 +7,9 @@ class BlindingKey(Scalar):
 
   >>> from blsct import BlindingKey
   >>> BlindingKey()
-  BlindingKey(117d9c8a5cd6d8c7415655a2c4fed9264f4c8493bdf9e1ec201aea2b2459b085)  # doctest: +SKIP
+  BlindingKey(2b55c4ecbf4abdc2f6c9a4890b2b91f650d10fd73a146157e016cb8314edad75)  # doctest: +SKIP
   """
-  pass
+  def __init__(self, obj: Any = None):
+    super().__init__(obj)
+
  

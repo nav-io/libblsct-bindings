@@ -16,22 +16,20 @@ class ViewTag:
   >>> ViewTag.generate(blinding_pub_key, view_key)
   12212  # doctest: +SKIP
   """
-
-  @classmethod
-  def generate(
-    cls: Type[Self],
+  def __init__(
+    self,
     blinding_pub_key: PublicKey,
     view_key: ViewKey
-  ) -> Self:
-    """Generate a view tag from blinding public key and view key"""
-    return blsct.calc_view_tag(
+  ):
+    value = blsct.calc_view_tag(
       blinding_pub_key.value(),
       view_key.value()
     )
+    self.value = value
 
   def __str__(self):
     name = self.__class__.__name__
-    return f"{name}({hex(id(self))})"
+    return f"{name}({self.value})"
 
   def __repr__(self):
     return self.__str__()
@@ -39,10 +37,6 @@ class ViewTag:
   @classmethod
   def default_obj(cls: Type[Self]) -> Any:
     blinding_pub_key = PublicKey()
-    view_key = Scalar.random()
-
-    return blsct.calc_view_tag(
-      blinding_pub_key.value(),
-      view_key.value()
-    )
+    view_key = ViewKey()
+    return cls(blinding_pub_key, view_key)
 

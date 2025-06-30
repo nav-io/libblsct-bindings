@@ -1,4 +1,5 @@
 from ....scalar import Scalar
+from typing import Any
 
 class ViewKey(Scalar):
   """
@@ -6,7 +7,8 @@ class ViewKey(Scalar):
 
   >>> from blsct import ViewKey
   >>> ViewKey()
-  ViewKey(5548101f70cb3fd721299c7364a036e65bba2a878c28f691f7c2ea3c7e8baeae)  # doctest: +SKIP
+  ViewKey(36827248acf0d00c8eaf139bfb86a92e7915fd40281e3a1f4e82c554b9ea5edb) # doctest: +SKIP
   """
-  pass
+  def __init__(self, obj: Any = None):
+    super().__init__(obj)
 

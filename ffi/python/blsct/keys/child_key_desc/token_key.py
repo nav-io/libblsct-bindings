@@ -1,4 +1,5 @@
 from ...scalar import Scalar
+from typing import Any
 
 class TokenKey(Scalar):
   """
@@ -6,8 +7,9 @@ class TokenKey(Scalar):
 
   >>> from blsct import TokenKey
   >>> TokenKey()
-  TokenKey(56f28fc7efdd5d40c325fa73b1c00d7fcb6ac1c5bf7a579d781037f571a30307)  # doctest: +SKIP
+  TokenKey(444fcf29a7063c776439edd39cbd23dff6e5b1470423ffb3cc478084792aa555)  # doctest: +SKIP
   """
-  pass
+  def __init__(self, obj: Any = None):
+    super().__init__(obj)
  
 

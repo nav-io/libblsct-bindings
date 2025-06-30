@@ -10,15 +10,12 @@ class Script(ManagedObj, Serializable):
 
   A :class:`Script` appears as an attribute of :class:`TxOut` (scriptPubKey) or :class:`TxIn` (scriptSig and scriptWitness), and is not meant to be instantiated directly.
   """
-
-  def to_hex(self) -> str:
-    """Convert the script to a hexadecimal string."""
-    buf = blsct.cast_to_uint8_t_ptr(self.value())
-    return blsct.to_hex(buf, blsct.SCRIPT_SIZE)
+  def __init__(self, obj: Any = None):
+    super().__init__(obj)
 
   @override
   def value(self):
-    return blsct.cast_to_uint8_t_ptr(self.obj)
+    return blsct.cast_to_script(self.obj)
 
   @classmethod
   def default_obj(cls) -> Any:
@@ -32,4 +29,12 @@ class Script(ManagedObj, Serializable):
   @override
   def deserialize(cls, hex: str) -> Self:
     """Deserialize the Script from a hexadecimal string"""
-    return blsct.deserialize_script(hex)
+    rv = blsct.deserialize_script(hex)
+    rv_result = int(rv.result)
+    if rv_result != 0:
+      blsct.free_obj(rv)
+      raise ValueError(f"Failed to deserialize OutPoint. Error code = {rv_result}")
+
+    obj = rv.value
+    blsct.free_obj(rv)
+    return cls.from_obj(obj) 

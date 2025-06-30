@@ -7,18 +7,23 @@ class CtxId(ManagedObj, Serializable):
   """
   Represents the transaction ID of a CMutableTransaction
 
-  >>> from blsct import CTxId, TX_ID_SIZE
+  >>> from blsct import CtxId, CTX_ID_SIZE
   >>> import secrets
-  >>> hex = secrets.token_hex(TX_ID_SIZE)
-  >>> tx_id = CTxId.deserialize(hex)
-  >>> tx_id.to_hex()
-  'f60b407e98916361594ecd53d7bed716fb901570815c323244da8d4189833df3'  # doctest: +SKIP
+  >>> hex = secrets.token_hex(CTX_ID_SIZE)
+  >>> ctx_id = CtxId.deserialize(hex)
+  >>> ctx_id.serialize()
+  'ec7b726c443d3ebb7fb8704fe039a6df993a8a4552ab88c3463627ccd947f334'
+  >>> ctx_id.serialize() == hex
+  True
   """
+  def __init__(self, obj: Any = None):
+    super().__init__(obj)
+
   @override
   def serialize(self) -> str:
     """Serialize the CtxId object to a hexadecimal string."""
     buf = blsct.cast_to_uint8_t_ptr(self.value())
-    return blsct.to_hex(buf, blsct.TX_ID_SIZE)
+    return blsct.to_hex(buf, blsct.CTX_ID_SIZE)
 
   @classmethod
   @override
@@ -27,8 +32,8 @@ class CtxId(ManagedObj, Serializable):
     hex: str,
   ) -> Self:
     """Create a TxId from a hexadecimal string."""
-    if len(hex) != blsct.TX_ID_SIZE * 2:
-      raise ValueError(f"Invlid TxId hex length. Expected {blsct.TX_ID_SIZE * 2}, but got {len(hex)}.")
+    if len(hex) != blsct.CTX_ID_SIZE * 2:
+      raise ValueError(f"Invlid TxId hex length. Expected {blsct.CTX_ID_SIZE * 2}, but got {len(hex)}.")
     obj = blsct.hex_to_malloced_buf(hex) 
     return cls(obj)
 

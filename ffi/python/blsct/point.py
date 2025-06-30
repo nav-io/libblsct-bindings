@@ -30,6 +30,9 @@ class Point(ManagedObj, Serializable, PrettyPrintable):
   >>> Point.from_scalar(Scalar())
   '1 124c3c9dc6eb46cf8bcddc64559c05717d49730c9e474230dfd75e76c7ac07f954bfcf60432a9175d1eb0d54e502301b 2cbaf...'  # doctest: +SKIP
   """
+  def __init__(self, obj: Any = None):
+    super().__init__(obj)
+
   @classmethod
   def random(cls: Type[Self]) -> Self:
     """Generate a random point"""
@@ -69,7 +72,10 @@ class Point(ManagedObj, Serializable, PrettyPrintable):
     if rv_result != 0:
       blsct.free_obj(rv)
       raise RuntimeError(f"Deserializaiton failed. Error code = {rv_result}")  # pragma: no co
-    return cls.from_obj(rv.value)
+
+    obj = rv.value
+    blsct.free_obj(rv)
+    return cls.from_obj(obj)
 
   @override
   def value(self) -> Any:

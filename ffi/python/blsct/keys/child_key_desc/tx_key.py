@@ -2,6 +2,7 @@ from ... import blsct
 from ...scalar import Scalar
 from .tx_key_desc.spending_key import SpendingKey
 from .tx_key_desc.view_key import ViewKey
+from typing import Any
 
 class TxKey(Scalar):
   """
@@ -10,10 +11,13 @@ class TxKey(Scalar):
   >>> from blsct import TxKey
   >>> k = TxKey()
   >>> k.to_spending_key()
-  SpendingKey(5a3d7d4b7e50866f179a4041d5f1cd4e30c28367eb588f227ca41f4418e3087e)  # doctest: +SKIP
+  SpendingKey(63c64ea2d7cb5765fae960e1e1b985709e9d46e8c848086e35e53bfb75038421) # doctest: +SKIP
   >>> k.to_view_key()
-  ViewKey(39fe0f1ec3d1704e1cf4261e0b827cb903800ba60e43bd706e44b749e53d8c0f)  # doctest: +SKIP
+  ViewKey(3f8b181966e7ffddc9312f6a57884f367989d7a24c96e9daca651c6b224fde9d) # doctest: +SKIP
   """
+  def __init__(self, obj: Any = None):
+    super().__init__(obj)
+
   def to_spending_key(self) -> SpendingKey:
     """derive a spending key from the tx key"""
     obj = blsct.from_tx_key_to_spending_key(self.value())

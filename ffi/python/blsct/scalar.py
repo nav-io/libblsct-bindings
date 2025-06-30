@@ -2,7 +2,7 @@ from . import blsct
 from .managed_obj import ManagedObj
 from .serializable import Serializable
 from .pretty_printable import PrettyPrintable
-from typing import Any, Optional, override, Self 
+from typing import Any, override, Self 
 
 class Scalar(ManagedObj, Serializable, PrettyPrintable):
   """
@@ -37,7 +37,7 @@ class Scalar(ManagedObj, Serializable, PrettyPrintable):
   >>> a == a
   True
   """
-  def __init__(self, value: Optional[Any] = None):
+  def __init__(self, value: Any = None):
     if isinstance(value, int):
       rv = blsct.gen_scalar(value)
       super().__init__(rv.value)
@@ -62,7 +62,9 @@ class Scalar(ManagedObj, Serializable, PrettyPrintable):
     if rv_result != 0:
       blsct.free_obj(rv)
       raise RuntimeError(f"Deserializaiton failed. Error code = {rv_result}")  # pragma: no co
-    return cls.from_obj(rv.value)
+    obj = rv.value
+    blsct.free_obj(rv)
+    return cls.from_obj(obj)
 
   @classmethod
   def random(cls) -> Self:

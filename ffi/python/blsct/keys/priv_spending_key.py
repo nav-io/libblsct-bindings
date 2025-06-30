@@ -3,25 +3,26 @@ from ..scalar import Scalar
 from .child_key_desc.tx_key_desc.view_key import ViewKey
 from .child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .public_key import PublicKey
-from typing import Self, Type
 
 class PrivSpendingKey(Scalar):
   """
   Represents a private spending key. A private spending key is a Scalar and introduces no new functionality; it serves purely as a semantic alias.
 
-  >>> from blsct import PrivSpendingKey
-  >>> PrivSpendingKey()
-  PrivSpendingKey(b75c8edb30507818cb0d4211dd57b09830e1395da700d9b4b43ac360329a908)  # doctest: +SKIP
+  >>> from blsct import PrivSpendingKey, PublicKey, ViewKey, SpendingKey
+  >>> pk = PublicKey()
+  >>> vk = ViewKey()
+  >>> sk = SpendingKey()
+  >>> PrivSpendingKey(pk, vk, sk, 1, 2)
+  PrivSpendingKey(1a38fdaf2544f9ecb9ad4370f0d5bf310cf9f9722842b5a6cccb30714651ab9a) # doctest: +SKIP
   """
-  @classmethod
-  def generate(
-    cls: Type[Self],
+  def __init__(
+    self,
     blinding_pub_key: PublicKey,
     view_key: ViewKey,
     spending_key: SpendingKey,
     account: int,
     address: int
-  ) -> Self:
+  ):
     blsct_psk = blsct.calc_priv_spending_key(
       blinding_pub_key.value(),
       view_key.value(),
@@ -29,5 +30,5 @@ class PrivSpendingKey(Scalar):
       account,
       address
     )
-    return cls(blsct_psk)
+    super().__init__(blsct_psk)
 

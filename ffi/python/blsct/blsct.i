@@ -11,7 +11,7 @@
 %constant size_t SCRIPT_SIZE = SCRIPT_SIZE;
 %constant size_t SIGNATURE_SIZE = SIGNATURE_SIZE;
 %constant size_t SUB_ADDR_ID_SIZE = SUB_ADDR_ID_SIZE;
-%constant size_t TX_ID_SIZE = TX_ID_SIZE;
+%constant size_t CTX_ID_SIZE = CTX_ID_SIZE;
 %constant size_t BLSCT_IN_AMOUNT_ERROR = BLSCT_IN_AMOUNT_ERROR;
 %constant size_t BLSCT_OUT_AMOUNT_ERROR = BLSCT_OUT_AMOUNT_ERROR;
 
@@ -104,6 +104,10 @@ if (p == nullptr) { \
 
   CScript* cast_to_cscript(void* x) {
     return static_cast<CScript*>(x);
+  }
+
+  BlsctScript* cast_to_script(void* x) {
+    return static_cast<BlsctScript*>(x);
   }
 
   BlsctAmountRecoveryReq* cast_to_amount_recovery_req(void* x) {
@@ -367,11 +371,11 @@ typedef struct {
 
 typedef struct {
   BLSCT_RESULT result;
-  uint8_t* ser_tx;
-  size_t ser_tx_size;
+  uint8_t* ser_ctx;
+  size_t ser_ctx_size;
   size_t in_amount_err_index;
   size_t out_amount_err_index;
-} BlsctTxRetVal;
+} BlsctCtxRetVal;
 
 export void init();
 export bool set_chain(enum Chain chain);
@@ -460,7 +464,7 @@ export BlsctRetVal* deserialize_range_proof(
     const char* hex,
     const size_t obj_size
 );
-export const BlsctPoint* get_range_proof_A(const BlsctRangeProof* blsct_range_proof, const size_t range_proofsize);
+export const BlsctPoint* get_range_proof_A(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
 export const BlsctPoint* get_range_proof_A_wip(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
 export const BlsctPoint* get_range_proof_B(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
 
@@ -510,7 +514,7 @@ export const BlsctOutPoint* get_tx_in_out_point(const BlsctTxIn* tx_in);
 export bool get_tx_in_staked_commitment(const BlsctTxIn* tx_in);
 export bool get_tx_in_rbf(const BlsctTxIn* tx_in);
 
-export const BlsctTxId* get_ctx_in_prev_out_hash(const CTxIn* ctx_in);
+export const BlsctCtxId* get_ctx_in_prev_out_hash(const CTxIn* ctx_in);
 export uint32_t get_ctx_in_prev_out_n(const CTxIn* ctx_in);
 export const BlsctScript* get_ctx_in_script_sig(const CTxIn* ctx_in);
 export uint32_t get_ctx_in_sequence(const CTxIn* ctx_in);
@@ -539,32 +543,35 @@ export uint64_t get_tx_out_min_stake(const BlsctTxOut* tx_out);
 
 export uint64_t get_ctx_out_value(const CTxOut* ctx_out);
 export const BlsctScript* get_ctx_out_script_pubkey(const CTxOut* ctx_out);
-export const BlsctTokenId* get_ctx_out_token_id(const CTxOut* ctx_out);
+// tx out blsct data
 export const BlsctPoint* get_ctx_out_spending_key(const CTxOut* ctx_out);
 export const BlsctPoint* get_ctx_out_ephemeral_key(const CTxOut* ctx_out);
 export const BlsctPoint* get_ctx_out_blinding_key(const CTxOut* ctx_out);
-export const BlsctRangeProof* get_ctx_out_range_proof(const CTxOut* ctx_out);
-
+export const BlsctRetVal* get_ctx_out_range_proof(const CTxOut* ctx_out);
 export uint16_t get_ctx_out_view_tag(const CTxOut* ctx_out);
 
+// tx out
+export const BlsctTokenId* get_ctx_out_token_id(const CTxOut* ctx_out);
+export const BlsctRetVal* get_ctx_out_vector_predicate(const CTxOut* ctx_out);
+
 // tx
-export BlsctTxRetVal* build_ctx(
+export BlsctCtxRetVal* build_ctx(
     const void* void_tx_ins,
     const void* void_tx_outs
 );
 
 export const char* get_ctx_id(const CMutableTransaction* tx);
 
-export CMutableTransaction* ser_tx_to_CMutalbleTransaction(
-    const uint8_t* ser_tx,
-    const size_t ser_tx_size
+export CMutableTransaction* ser_ctx_to_CMutableTransaction(
+    const uint8_t* ser_ctx,
+    const size_t ser_ctx_size
 );
 
 export const std::vector<CTxIn>* get_ctx_ins(const CMutableTransaction* ctx);
 
 export size_t get_ctx_in_count(const std::vector<CTxIn>* ctx_ins);
 
-export const BlsctRetVal* get_ctx_in(const std::vector<CTxIn>* ctx_ins, const size_t i);
+export const BlsctRetVal*get_ctx_in(const std::vector<CTxIn>* ctx_ins, const size_t i);
 
 export const std::vector<CTxOut>* get_ctx_outs(const CMutableTransaction* ctx);
 

@@ -4,10 +4,14 @@ from typing import Any, Type, Self
 from .serializable import Serializable
 
 class ManagedObj(ABC):
-  def __init__(self, obj=None):
-    self.obj = self.default_obj() if obj is None else obj
+  def add_default_attrs(self):
     self.obj_size: int | None = None
     self._managed: bool = False
+    self._borrowed: bool = False
+
+  def __init__(self, obj=None):
+    self.obj = self.default_obj() if obj is None else obj
+    self.add_default_attrs()
 
   @abstractmethod
   def value(self):
@@ -26,7 +30,7 @@ class ManagedObj(ABC):
     return obj
 
   def __del__(self):
-    if self.obj is not None:
+    if self.obj is not None and self._borrowed is False:
       blsct.free_obj(self.obj)
 
   def __enter__(self):
@@ -34,7 +38,7 @@ class ManagedObj(ABC):
     return self
 
   def __exit__(self, *_):
-    if self.obj is not None and self._managed is True:
+    if self.obj is not None and self._managed is True and self._borrowed is False:
       blsct.free_obj(self.obj)
       self.obj = None
     return False
@@ -53,7 +57,7 @@ class ManagedObj(ABC):
   def from_obj(cls, obj):
     inst = cls.__new__(cls)
     inst.obj = obj
-    inst._managed = False
+    inst.add_default_attrs()
     return inst
 
   @classmethod
