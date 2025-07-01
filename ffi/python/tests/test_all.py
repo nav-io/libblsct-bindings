@@ -18,8 +18,8 @@ from blsct import (
   SubAddrId,
   TokenId,
   TokenKey,
-  Tx,
-  TxId,
+  Ctx,
+  CtxId,
   TxIn,
   TxOut,
   TxKey,
@@ -108,7 +108,7 @@ def test_range_proof():
   nonce1 = Point()
   token_id_1 = TokenId()
 
-  rp1 = RangeProof.build([456], nonce1, 'navcoin', token_id_1)
+  rp1 = RangeProof([456], nonce1, 'navcoin', token_id_1)
   assert(RangeProof.verify_proofs([rp1]) == True)
 
   req1 = AmountRecoveryReq(rp1, nonce1)
@@ -148,7 +148,7 @@ def test_range_proof():
 def test_sig_gen_verify():
   msg = "navio"
   priv_key = Scalar.random()
-  sig = Signature.generate(priv_key, msg)
+  sig = Signature(priv_key, msg)
   print(f"Signature {sig}")
 
   pub_key = PublicKey.from_scalar(priv_key)
@@ -160,7 +160,7 @@ def test_key_derivation():
   seed = Scalar()
   print(f"Seed: {seed}")
 
-  child_key = ChildKey.from_scalar(seed)
+  child_key = ChildKey(seed)
   print(f"ChildKey: {child_key.serialize()}")
 
   blinding_key = child_key.to_blinding_key()
@@ -184,7 +184,7 @@ def test_key_derivation():
   account = 123
   address = 456
 
-  priv_spending_key = PrivSpendingKey.generate(
+  priv_spending_key = PrivSpendingKey(
     blinding_pub_key,
     view_key,
     spending_key,
@@ -193,26 +193,26 @@ def test_key_derivation():
   )
   print(f"priv_spending_key: {priv_spending_key.serialize()}")
 
-  view_tag = ViewTag.generate(blinding_pub_key, view_key)
+  view_tag = ViewTag(blinding_pub_key, view_key)
   print(f"view_tag: {view_tag}")
 
   spending_pub_key = PublicKey.from_scalar(spending_key)
   print(f"spending_pub_key: {spending_pub_key}")
 
-  hash_id = HashId.generate(
+  hash_id = HashId(
     blinding_pub_key,
     spending_pub_key,
     view_key,
   )
-  print(f"hash_id: {hash_id.to_hex()}")
+  print(f"hash_id: {hash_id}")
 
   nonce = PublicKey.generate_nonce(blinding_pub_key, view_key)
   print(f"nonce: {nonce}")
 
-  sub_addr_id = SubAddrId.generate(account, address)
+  sub_addr_id = SubAddrId(account, address)
   print(f"sub_addr_id: {sub_addr_id}")
 
-  sub_addr = SubAddr.generate(view_key, spending_pub_key, sub_addr_id)
+  sub_addr = SubAddr(view_key, spending_pub_key, sub_addr_id)
   print(f"sub_addr: {sub_addr}")
 
   dpk = DoublePublicKey.from_keys_and_acct_addr(
@@ -229,12 +229,12 @@ def test_key_derivation():
   BlindingKey()
   TokenKey()
   TxKey()
-  ChildKey()
+  ChildKey(Scalar())
   DoublePublicKey()
-  PrivSpendingKey()
+  PrivSpendingKey(PublicKey(), ViewKey(), SpendingKey(), 1, 2)
   PublicKey()
   ViewKey()
-  ViewTag()
+  ViewTag(PublicKey(), ViewKey())
 
 def test_tx():
   num_tx_in = 1
@@ -246,21 +246,28 @@ def test_tx():
   out_amount = out_amount
 
   # tx in
-  tx_id = TxId.deserialize(secrets.token_hex(32))
-  print(f"tx_id: {tx_id}")
+  ctx_id = CtxId.deserialize(secrets.token_hex(32))
+  print(f"ctx_id: {ctx_id}")
 
   gamma = 100
   spending_key = SpendingKey(12)
   token_id = TokenId()
   out_index = 0
-  out_point = OutPoint.generate(tx_id, out_index)
-  tx_in = TxIn.generate(
+  out_point = OutPoint(ctx_id, out_index)
+  tx_in = TxIn(
     in_amount,
     gamma,
     spending_key,
     token_id,
     out_point,
   )
+  print(f"tx_in.amount: {tx_in.get_amount()}")
+  print(f"tx_in.gamma: {tx_in.get_gamma()}")
+  print(f"tx_in.spending_key: {tx_in.get_spending_key()}")
+  print(f"tx_in.token_id: {tx_in.get_token_id()}")
+  print(f"tx_in.out_point: {tx_in.get_out_point()}")
+  print(f"tx_in.staked_commitment: {tx_in.get_staked_commitment()}")
+  print(f"tx_in.rbf: {tx_in.get_rbf()}")
 
   # tx out
   pk1 = PublicKey()
@@ -268,58 +275,66 @@ def test_tx():
   dpk = DoublePublicKey.from_public_keys(pk1, pk2)
   sub_addr = SubAddr.from_double_public_key(dpk)
 
-  tx_out = TxOut.generate(
+  tx_out = TxOut(
     sub_addr,
     out_amount,
     'test-txout',
   )
+  print(f"tx_out.destination: {tx_out.get_destination()}")
+  print(f"tx_out.amount: {tx_out.get_amount()}")
+  print(f"tx_out.memo: {tx_out.get_memo()}")
+  print(f"tx_out.token_id: {tx_out.get_token_id()}")
+  print(f"tx_out.min_stake: {tx_out.get_min_stake()}")
 
   # tx
-  tx = Tx.generate(
+  ctx = Ctx(
     [tx_in],
     [tx_out],
   )
 
-  tx_hex = tx.serialize()
-  print(f"tx_hex: {tx_hex}")
+  ctx_hex = ctx.serialize()
+  print(f"ctx_hex: {ctx_hex}")
 
-  tx2 = Tx.deserialize(tx_hex)
-  tx2_hex = tx2.serialize()
-  assert(tx_hex == tx2_hex)
+  ctx2 = Ctx.deserialize(ctx_hex)
+  ctx2_hex = ctx2.serialize()
+  assert(ctx_hex == ctx2_hex)
 
-  deser_tx_id = tx2.get_tx_id()
-  print(f"tx_id (deser): {deser_tx_id}")
+  deser_ctx_id = ctx2.get_ctx_id()
+  print(f"ctx_id (deser): {deser_ctx_id}")
 
-  tx_ins = tx2.get_tx_ins()
-  print(f"# of txIns: {len(tx_ins)}")
+  ctx_ins = ctx2.get_ctx_ins()
+  print(f"# of ctx_ins: {len(ctx_ins)}")
 
-  tx_outs = tx2.get_tx_outs()
-  print(f"# of txOuts: {len(tx_outs)}")
+  ctx_outs = ctx2.get_ctx_outs()
+  print(f"# of ctx_outs: {len(ctx_outs)}")
 
-  print("<tx in>")
-  for tx_in in tx_ins: 
-    print(f"prev_out_hash: {tx_in.get_prev_out_hash()}")
-    print(f"prev_out_n: {tx_in.get_prev_out_n()}")
-    print(f"scipt_sig: {tx_in.get_script_sig().to_hex()}")
-    print(f"sequence: {tx_in.get_sequence()}")
-    print(f"scipt_witness: {tx_in.get_script_witness().to_hex()}")
+  print("<ctx in>")
+  for ctx_in in ctx_ins: 
+    print(f"prev_out_hash: {ctx_in.get_prev_out_hash()}")
+    print(f"prev_out_n: {ctx_in.get_prev_out_n()}")
+    print(f"scipt_sig: {ctx_in.get_script_sig()}")
+    print(f"sequence: {ctx_in.get_sequence()}")
+    print(f"scipt_witness: {ctx_in.get_script_witness()}")
 
-  print(f"<tx out>")
-  for tx_out in tx_outs:
-    print(f"value: {tx_out.get_value()}")
-    print(f"script_pub_key: {tx_out.get_script_pub_key().to_hex()}")
-    print(f"token_id: token={tx_out.get_token_id().token()}, subid={tx_out.get_token_id().subid()}")
+  print(f"<ctx out>")
+  for ctx_out in ctx_outs:
+    print(f"value: {ctx_out.get_value()}")
+    print(f"script_pub_key: {ctx_out.get_script_pub_key()}")
+    print(f"token_id: token={ctx_out.get_token_id().token()}, subid={ctx_out.get_token_id().subid()}")
 
-    print(f"spending_key: {tx_out.get_spending_key()}")
-    print(f"ephemeral_key: {tx_out.get_ephemeral_key()}")
-    print(f"blinding_key: {tx_out.get_blinding_key()}")
-    print(f"view_tag: {tx_out.get_view_tag()}")
+    blsct_data = ctx_out.blsct_data()
+    print(f"spending_key: {blsct_data.get_spending_key()}")
+    print(f"ephemeral_key: {blsct_data.get_ephemeral_key()}")
+    print(f"blinding_key: {blsct_data.get_blinding_key()}")
+    print(f"view_tag: {blsct_data.get_view_tag()}")
 
-    print(f"range_proof.A: {tx_out.get_range_proof_A().serialize()}")
-    print(f"range_proof.B: {tx_out.get_range_proof_B().serialize()}")
-    print(f"range_Proof.r_prime: {tx_out.get_range_proof_r_prime()}")
-    print(f"range_proof.s_prime: {tx_out.get_range_proof_s_prime()}")
-    print(f"range_proof.delta_prime: {tx_out.get_range_proof_delta_prime()}")
-    print(f"range_proof.alpha_hat: {tx_out.get_range_proof_alpha_hat()}")
-    print(f"range_proof.tau_x: {tx_out.get_range_proof_tau_x()}")
+    rp = blsct_data.get_range_proof()
+    print(f"range_proof.A: {rp.get_A().serialize()}")
+    print(f"range_proof.A: {rp.get_A_wip().serialize()}")
+    print(f"range_proof.B: {rp.get_B().serialize()}")
+    print(f"range_Proof.r_prime: {rp.get_r_prime()}")
+    print(f"range_proof.s_prime: {rp.get_s_prime()}")
+    print(f"range_proof.delta_prime: {rp.get_delta_prime()}")
+    print(f"range_proof.alpha_hat: {rp.get_alpha_hat()}")
+    print(f"range_proof.tau_x: {rp.get_tau_x()}")
 
