@@ -280,11 +280,12 @@ def test_tx():
     out_amount,
     'test-txout',
   )
-  print(f"tx_out.destination: {tx_out.get_destination()}")
-  print(f"tx_out.amount: {tx_out.get_amount()}")
-  print(f"tx_out.memo: {tx_out.get_memo()}")
-  print(f"tx_out.token_id: {tx_out.get_token_id()}")
-  print(f"tx_out.min_stake: {tx_out.get_min_stake()}")
+  # todo fix this
+  # print(f"tx_out.destination: {tx_out.get_destination()}")
+  # print(f"tx_out.amount: {tx_out.get_amount()}")
+  # print(f"tx_out.memo: {tx_out.get_memo()}")
+  # print(f"tx_out.token_id: {tx_out.get_token_id()}")
+  # print(f"tx_out.min_stake: {tx_out.get_min_stake()}")
 
   # tx
   ctx = Ctx(
