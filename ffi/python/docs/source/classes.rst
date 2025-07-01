@@ -8,6 +8,11 @@ Classes
    amount_recovery_res
    blinding_key
    child_key
+   ctx
+   ctx_id
+   ctx_in
+   ctx_out
+   ctx_out_blsct_data
    double_public_key
    hash_id
    out_point
@@ -23,8 +28,6 @@ Classes
    sub_addr_id
    token_id
    token_key
-   tx
-   tx_id
    tx_in
    tx_key
    tx_out

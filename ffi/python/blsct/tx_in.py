@@ -5,17 +5,7 @@ from .out_point import OutPoint
 from .serializable import Serializable
 from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .token_id import TokenId
-from typing import Any, override, Self, TypedDict
-
-type hex_str = str
-
-class SerTxIn(TypedDict):
-  amount: int
-  gamma: int
-  ser_spending_key: hex_str
-  ser_token_id: hex_str
-  ser_out_point: hex_str
-  rbf: bool
+from typing import Any, override, Self
 
 class TxIn(ManagedObj, Serializable):
   """
