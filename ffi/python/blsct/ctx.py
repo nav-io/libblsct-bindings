@@ -170,22 +170,15 @@ class Ctx(ManagedObj, Serializable):
     super().__init__(obj)
     self.obj_size = obj_size
 
-  def _get_CMutableTransaction(self) -> Any:
-    """Get the underlying CMutableTransaction object."""
-    return blsct.ser_ctx_to_CMutableTransaction(self.value(), self.obj_size)
-
   def get_ctx_id(self) -> CtxId:
     """Get the transaction ID."""
-    ctx = self._get_CMutableTransaction()
-    tx_id_hex = blsct.get_ctx_id(ctx)
-    blsct.free_obj(ctx)
+    tx_id_hex = blsct.get_ctx_id(self.value(), self.obj_size)
 
     return CtxId.deserialize(tx_id_hex)
 
   def get_ctx_ins(self) -> list[CTxIn]:
     """Get the list of CTxIns generated from TxIns."""
-    ctx_obj = self._get_CMutableTransaction()
-    ctx_ins = blsct.get_ctx_ins(ctx_obj)
+    ctx_ins = blsct.get_ctx_ins(self.value(), self.obj_size)
     num_ctx_ins = blsct.get_ctx_in_count(ctx_ins)
 
     xs = []
@@ -198,8 +191,7 @@ class Ctx(ManagedObj, Serializable):
 
   def get_ctx_outs(self) -> list[CTxOut]:
     """Get the list of CTxOuts generated from TxOuts."""
-    ctx_obj = self._get_CMutableTransaction()
-    ctx_outs = blsct.get_ctx_outs(ctx_obj)
+    ctx_outs = blsct.get_ctx_outs(self.value(), self.obj_size)
     num_ctx_outs = blsct.get_ctx_out_count(ctx_outs)
 
     xs = []

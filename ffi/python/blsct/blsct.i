@@ -78,10 +78,6 @@ if (p == nullptr) { \
     return static_cast<BlsctTokenId*>(x);
   }
 
-  CMutableTransaction* cast_to_ctx(void* x) {
-    return static_cast<CMutableTransaction*>(x);
-  }
-
   CTxIn* cast_to_ctx_in(void* x) {
     return static_cast<CTxIn*>(x);
   }
@@ -560,20 +556,24 @@ export BlsctCtxRetVal* build_ctx(
     const void* void_tx_outs
 );
 
-export const char* get_ctx_id(const CMutableTransaction* tx);
-
-export CMutableTransaction* ser_ctx_to_CMutableTransaction(
+export const char* get_ctx_id(
     const uint8_t* ser_ctx,
     const size_t ser_ctx_size
 );
 
-export const std::vector<CTxIn>* get_ctx_ins(const CMutableTransaction* ctx);
+export const std::vector<CTxIn>* get_ctx_ins(
+    const uint8_t* ser_ctx,
+    const size_t ser_ctx_size
+);
+
+export const std::vector<CTxOut>* get_ctx_outs(
+    const uint8_t* ser_ctx,
+    const size_t ser_ctx_size
+);
 
 export size_t get_ctx_in_count(const std::vector<CTxIn>* ctx_ins);
 
 export const BlsctRetVal*get_ctx_in(const std::vector<CTxIn>* ctx_ins, const size_t i);
-
-export const std::vector<CTxOut>* get_ctx_outs(const CMutableTransaction* ctx);
 
 export size_t get_ctx_out_count(const std::vector<CTxOut>* ctx_outs);
 
