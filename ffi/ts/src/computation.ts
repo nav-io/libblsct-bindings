@@ -216,7 +216,7 @@ export class Computation {
     spendingPubKey: PublicKey,
     viewKey: Scalar,
   ): KeyId => {
-    const hashId = blsct.calc_hash_id(
+    const hashId = blsct.calc_key_id(
       blindingPubKey.value(),
       spendingPubKey.value(),
       viewKey.value(),
@@ -333,7 +333,7 @@ export class Computation {
 
     for(const req of reqs) {
       console.log(`rangeProofSize: ${req.rangeProof.getSize()}`)
-      const blsct_req = blsct.gen_recover_amount_req(
+      const blsct_req = blsct.gen_amount_recovery_req(
         req.rangeProof.value(),
         req.rangeProof.getSize(),
         req.nonce.value(),
@@ -520,7 +520,7 @@ export class KeyId extends DisposableObj<KeyId> {
   }
 
   toHex = (): string => {
-    return blsct.get_key_id_hex(this.value())
+    return blsct.key_id_to_hex(this.value())
   }
 }
 

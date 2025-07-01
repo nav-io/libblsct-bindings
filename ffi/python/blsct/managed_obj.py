@@ -2,12 +2,16 @@ from . import blsct
 from abc import ABC, abstractmethod
 from typing import Any, Type, Self
 from .serializable import Serializable
-from .pretty_printable import PrettyPrintable
 
 class ManagedObj(ABC):
+  def add_default_attrs(self):
+    self.obj_size: int | None = None
+    self._managed: bool = False
+    self._borrowed: bool = False
+
   def __init__(self, obj=None):
     self.obj = self.default_obj() if obj is None else obj
-    self._managed = False
+    self.add_default_attrs()
 
   @abstractmethod
   def value(self):
@@ -26,7 +30,7 @@ class ManagedObj(ABC):
     return obj
 
   def __del__(self):
-    if self.obj is not None:
+    if self.obj is not None and self._borrowed is False:
       blsct.free_obj(self.obj)
 
   def __enter__(self):
@@ -34,15 +38,13 @@ class ManagedObj(ABC):
     return self
 
   def __exit__(self, *_):
-    if self.obj is not None and self._managed is True:
+    if self.obj is not None and self._managed is True and self._borrowed is False:
       blsct.free_obj(self.obj)
       self.obj = None
     return False
 
   def __str__(self):
     name = self.__class__.__name__
-    if isinstance(self, PrettyPrintable):
-      return f"{name}('{self.pretty_print()}')"
     if isinstance(self, Serializable):
       return f"{name}({self.serialize()})"
     else:
@@ -55,6 +57,11 @@ class ManagedObj(ABC):
   def from_obj(cls, obj):
     inst = cls.__new__(cls)
     inst.obj = obj
-    inst._managed = False
+    inst.add_default_attrs()
     return inst
 
+  @classmethod
+  def from_obj_with_size(cls, obj, obj_size: int):
+    inst = cls.from_obj(obj)
+    inst.obj_size = obj_size
+    return inst

@@ -46,26 +46,26 @@ cd ..
 python -c "import blsct"
 ```
 
-## Testing with locally installed package
+## Testing with locally installed navio-blsct package
 
 1. cd to `ffi/python` directory
 
-1. Install the package
+1. Install the navio-blsct package
 
-- Install `venv`, `build` and `setuptools`
+- Install `venv`, `build` and `setuptools` (first time only)
 ```bash
 python3 -m venv venv
 pip install build setuptools
 ```
 
-- Build the package
+- Build and install the navio-blsct package
 ```bash
 source venv/bin/activate
 python -m build
 pip install --force-reinstall dist/*.whl
 ```
 
-1. cd to the parent directory so that your test script won't use sources under `ffi/python`
+1. Move to the parent directory to avoid using the source codes under `ffi/python`
 
 1. Test that the installation was successful
 

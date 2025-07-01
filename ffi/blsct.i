@@ -433,7 +433,7 @@ export BlsctBoolRetVal* verify_range_proofs(
   const void* vp_range_proofs
 );
 
-export BlsctAmountRecoveryReq* gen_recover_amount_req(
+export BlsctAmountRecoveryReq* gen_amount_recovery_req(
     const void* vp_blsct_range_proof,
     const size_t range_proof_size,
     const void* vp_blsct_nonce
@@ -588,13 +588,14 @@ export uint64_t calc_view_tag(
     const BlsctScalar* view_key
 );
 
-export BlsctKeyId* calc_hash_id(
+// Key ID
+export BlsctKeyId* calc_key_id(
     const BlsctPubKey* blsct_blinding_pub_key,
     const BlsctPubKey* blsct_spending_pub_key,
     const BlsctScalar* blsct_view_key
 );
 
-export const char* get_key_id_hex(
+export const char* key_id_to_hex(
   const BlsctKeyId* blsct_key_id
 );
 

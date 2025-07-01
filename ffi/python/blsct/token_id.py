@@ -1,22 +1,30 @@
 from . import blsct
 from .managed_obj import ManagedObj
+from .serializable import Serializable
 from typing import Any, override, Self, Type
 
-class TokenId(ManagedObj):
+class TokenId(ManagedObj, Serializable):
   """
   Represents a token ID. A token ID consists of two parameters: token and subid, both of which are optional. When omitted, default values are used instead of random values.
 
   >>> from blsct import TokenId
   >>> TokenId()
-  TokenId(<Swig Object of type 'void *' at 0x101738e10>)  # doctest: +SKIP
+  TokenId(000000000000000...0000000ffffffffffffffff) # doctest: +SKIP
   >>> TokenId.from_token(123)
-  TokenId(<Swig Object of type 'void *' at 0x10063ced0>)  # doctest: +SKIP
+  TokenId(7b0000000000000...0000000ffffffffffffffff) # doctest: +SKIP
   >>> token_id = TokenId.from_token_and_subid(123, 456)
   >>> token_id.token()
   123
   >>> token_id.subid()
   456
+  >>> ser = token_id.serialize()
+  >>> deser = TokenId.deserialize(ser)
+  >>> ser == deser.serialize()
+  True
   """
+  def __init__(self, obj: Any = None):
+    super().__init__(obj)
+
   @classmethod
   def from_token(cls: Type[Self], token: int) -> Self:
     """Generate a token ID from a given token."""
@@ -55,4 +63,24 @@ class TokenId(ManagedObj):
     obj = rv.value
     blsct.free_obj(rv)
     return obj
+
+  def serialize(self) -> str:
+    """Serialize the TokenId to a hexadecimal string"""
+    return blsct.serialize_token_id(self.value())
+
+  @classmethod
+  @override
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the TokenId from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
+    rv = blsct.deserialize_token_id(hex)
+    rv_result = int(rv.result)
+    if rv_result != 0:
+      blsct.free_obj(rv)
+      raise ValueError(f"Failed to deserialize TokenId. Error code = {rv_result}")
+
+    obj = rv.value
+    blsct.free_obj(rv)
+    return cls.from_obj(obj) 
 

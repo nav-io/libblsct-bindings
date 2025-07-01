@@ -1,26 +1,49 @@
 from . import blsct
 from .managed_obj import ManagedObj
-from .tx_id import TxId
-from typing import Any, override, Self, Type
+from .serializable import Serializable
+from .ctx_id import CtxId
+from typing import Any, override, Self
 
-class OutPoint(ManagedObj):
+class OutPoint(ManagedObj, Serializable):
   """
-  Represents an outpoint of a confidential transaction.
+  Represents an outpoint of a confidential transaction. Also known as `COutPoint` on the C++ side.
 
-  >>> from blsct import OutPoint, TxId, TX_ID_SIZE
+  >>> from blsct import OutPoint, CtxId, CTX_ID_SIZE
   >>> import secrets
-  >>> tx_id = TxId.from_hex(secrets.token_hex(TX_ID_SIZE))
+  >>> ctx_id = CtxId.deserialize(secrets.token_hex(CTX_ID_SIZE))
   >>> out_index = 0
-  >>> OutPoint.generate(tx_id, out_index)
-  OutPoint(<Swig Object of type 'void *' at 0x105b071b0>)  # doctest: +SKIP
+  >>> out_point = OutPoint(ctx_id, out_index)
+  >>> out_point
+  OutPoint(ae8f9ba6eaef62fbd4b0215cda24e231...) # doctest: +SKIP
+  >>> ser = out_point.serialize()
+  >>> ser == OutPoint.deserialize(ser).serialize()
+  True
   """
-  @classmethod
-  def generate(cls: Type[Self], tx_id: TxId, out_index: int) -> Self:
-    """Generate an outpoint from a transaction ID and output index."""
-    rv = blsct.gen_out_point(tx_id.serialize(), out_index)
-    inst = cls(rv.value)
+  def __init__(self, ctx_id: CtxId, out_index: int):
+    rv = blsct.gen_out_point(ctx_id.serialize(), out_index)
+    obj = rv.value
     blsct.free_obj(rv)
-    return inst
+    super().__init__(obj)
+
+  def serialize(self) -> str:
+    """Serialize the OutPoint to a hexadecimal string"""
+    return blsct.serialize_out_point(self.value())
+
+  @classmethod
+  @override
+  def deserialize(cls, hex: str) -> Self:
+    """Deserialize the OutPoint from a hexadecimal string"""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
+    rv = blsct.deserialize_out_point(hex)
+    rv_result = int(rv.result)
+    if rv_result != 0:
+      blsct.free_obj(rv)
+      raise ValueError(f"Failed to deserialize OutPoint. Error code = {rv_result}")
+
+    obj = rv.value
+    blsct.free_obj(rv)
+    return cls.from_obj(obj) 
 
   @override
   def value(self) -> Any:

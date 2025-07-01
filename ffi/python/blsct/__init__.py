@@ -2,11 +2,11 @@ import typing
 
 if not typing.TYPE_CHECKING:
   try:
-    from .blsct import *
-
-    import blsct.blsct as swig_blsct
-    swig_blsct.init()
-    del swig_blsct
+    import blsct.blsct as x
+    if not getattr(x, "_initialized", False):
+      x.init()
+      x._initialized = True
+      del x
 
   except ImportError:
     pass
@@ -15,6 +15,10 @@ from .address import Address
 from .address_encoding import AddressEncoding
 from .amount_recovery_req import AmountRecoveryReq
 from .amount_recovery_res import AmountRecoveryRes
+from .ctx import Ctx
+from .ctx_id import CtxId
+from .ctx_in import CTxIn
+from .ctx_out import CTxOut
 from .hash_id import HashId
 from .keys.child_key import ChildKey
 from .keys.child_key_desc.blinding_key import BlindingKey
@@ -34,9 +38,14 @@ from .signature import Signature
 from .sub_addr import SubAddr
 from .sub_addr_id import SubAddrId
 from .token_id import TokenId
-from .tx import Tx
-from .tx_id import TxId
 from .tx_in import TxIn
 from .tx_out import TxOut
 from .view_tag import ViewTag
+
+# inject the swig module constants, functions and etc into the current namespace 
+import blsct.blsct as blsct_swig
+
+for name in dir(blsct_swig):
+  if not name.startswith("_") and name not in globals():
+    globals()[name] = getattr(blsct_swig, name)
 

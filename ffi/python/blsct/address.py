@@ -12,9 +12,10 @@ class Address():
   >>> dpk = DoublePublicKey()
   >>> addr = Address.encode(dpk, AddressEncoding.Bech32M)
   >>> addr
-  'nv14u7r0xx4n3gca6tm5glcqj54vd9zu8lcj4evscrpv9ujyst4hx9r4d9rtq2r3pmvvn0r05pfs7q6lqh50fp2x0fgt2sa54cc624wplty3qvmgtralvdcujgw6258zffxyn9eex6lvrk9nezguwgztr6xqyn7w6j5wc'  # doctest: +SKIP
-  >>> Address.decode(addr)
-  DoublePublicKey(<Swig Object of type 'void *' at 0x1005e17d0>)  # doctest: +SKIP
+  'nv15glx4094hlz7ltmjqp5cqa...'  # doctest: +SKIP
+  >>> dec_dpk = Address.decode(addr)
+  >>> dpk.serialize() == dec_dpk.serialize()
+  True
    """
   @staticmethod
   def encode(dpk: DoublePublicKey, encoding: AddressEncoding):
@@ -23,10 +24,8 @@ class Address():
     blsct_encoding = None
     if encoding == AddressEncoding.Bech32:
       blsct_encoding = blsct.Bech32
-    elif encoding == AddressEncoding.Bech32M:
+    else: # encoding == AddressEncoding.Bech32M:
       blsct_encoding = blsct.Bech32M
-    else:
-      raise ValueError(f"Unknown encoding: {encoding}")
 
     dpk = blsct.cast_to_dpk(dpk.obj)
     rv = blsct.encode_address(dpk, blsct_encoding)
@@ -56,3 +55,4 @@ class Address():
     blsct.free_obj(rv)
 
     return dpk
+
