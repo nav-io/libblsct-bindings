@@ -3,19 +3,9 @@ from .managed_obj import ManagedObj
 from .serializable import Serializable
 from .sub_addr import SubAddr
 from .token_id import TokenId
-from typing import Any, Optional, Literal, override, Self, TypedDict
-
-type hex_str = str
+from typing import Any, Optional, Literal, override, Self 
 
 TxOutputType = Literal["Normal", "StakedCommitment"]
-
-class SerTxOut(TypedDict):
-  ser_sub_addr: hex_str
-  amount: int
-  memo: str
-  ser_token_id: hex_str
-  output_type: TxOutputType
-  min_stake: int
 
 class TxOut(ManagedObj, Serializable):
   """

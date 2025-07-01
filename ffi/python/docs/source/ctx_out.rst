@@ -1,7 +1,7 @@
-Tx
-==
+CTxOut
+=====
 
-.. autoclass:: blsct.Tx
+.. autoclass:: blsct.CTxOut
    :members:
    :exclude-members: default_obj, value
 
