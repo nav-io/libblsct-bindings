@@ -537,18 +537,18 @@ export const BlsctTokenId* get_tx_out_token_id(const BlsctTxOut* tx_out);
 export TxOutputType get_tx_out_output_type(const BlsctTxOut* tx_out);
 export uint64_t get_tx_out_min_stake(const BlsctTxOut* tx_out);
 
+// ctx out
 export uint64_t get_ctx_out_value(const CTxOut* ctx_out);
 export const BlsctScript* get_ctx_out_script_pubkey(const CTxOut* ctx_out);
-// tx out blsct data
+export const BlsctTokenId* get_ctx_out_token_id(const CTxOut* ctx_out);
+export const BlsctRetVal* get_ctx_out_vector_predicate(const CTxOut* ctx_out);
+
+// ctx out blsct data
 export const BlsctPoint* get_ctx_out_spending_key(const CTxOut* ctx_out);
 export const BlsctPoint* get_ctx_out_ephemeral_key(const CTxOut* ctx_out);
 export const BlsctPoint* get_ctx_out_blinding_key(const CTxOut* ctx_out);
 export const BlsctRetVal* get_ctx_out_range_proof(const CTxOut* ctx_out);
 export uint16_t get_ctx_out_view_tag(const CTxOut* ctx_out);
-
-// tx out
-export const BlsctTokenId* get_ctx_out_token_id(const CTxOut* ctx_out);
-export const BlsctRetVal* get_ctx_out_vector_predicate(const CTxOut* ctx_out);
 
 // tx
 export BlsctCtxRetVal* build_ctx(
@@ -573,7 +573,7 @@ export const std::vector<CTxOut>* get_ctx_outs(
 
 export size_t get_ctx_in_count(const std::vector<CTxIn>* ctx_ins);
 
-export const BlsctRetVal*get_ctx_in(const std::vector<CTxIn>* ctx_ins, const size_t i);
+export const BlsctRetVal* get_ctx_in(const std::vector<CTxIn>* ctx_ins, const size_t i);
 
 export size_t get_ctx_out_count(const std::vector<CTxOut>* ctx_outs);
 
