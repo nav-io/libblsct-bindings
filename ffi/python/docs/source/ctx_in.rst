@@ -1,5 +1,5 @@
 CTxIn
-====
+=====
 
 .. autoclass:: blsct.CTxIn
    :members:
