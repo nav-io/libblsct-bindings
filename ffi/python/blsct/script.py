@@ -27,7 +27,7 @@ class Script(ManagedObj, Serializable):
   >>> tx_in = TxIn(in_amount, gamma, spending_key, token_id, out_point)
   >>> sub_addr = SubAddr.from_double_public_key(DoublePublicKey())
   >>> tx_out = TxOut(sub_addr, out_amount, 'navio')
-  >>> ctx = Ctx([tx_in], [tx_out])
+  >>> ctx = CTx([tx_in], [tx_out])
   >>> ctx_outs = ctx.get_ctx_outs()
   >>> script_pub_key = ctx_outs[0].get_script_pub_key()
   >>> ser = script_pub_key.serialize()
