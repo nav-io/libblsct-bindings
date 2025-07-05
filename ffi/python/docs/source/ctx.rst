@@ -1,7 +1,7 @@
-Ctx
+CTx
 ===
 
-.. autoclass:: blsct.Ctx
+.. autoclass:: blsct.CTx
    :members:
    :exclude-members: default_obj, value
 
