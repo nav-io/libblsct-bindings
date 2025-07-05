@@ -11,13 +11,13 @@ class TxIn(ManagedObj, Serializable):
   """
   Represents a transaction input used to construct CTxIn in a confidential transaction.
 
-  >>> from blsct import OutPoint, SpendingKey, TokenId, CtxId, TxIn, CTX_ID_SIZE
+  >>> from blsct import OutPoint, SpendingKey, TokenId, CTxId, TxIn, CTX_ID_SIZE
   >>> import secrets
   >>> amount = 123
   >>> gamma = 100
   >>> spending_key = SpendingKey()
   >>> token_id = TokenId()
-  >>> ctx_id = CtxId.deserialize(secrets.token_hex(CTX_ID_SIZE))
+  >>> ctx_id = CTxId.deserialize(secrets.token_hex(CTX_ID_SIZE))
   >>> out_point = OutPoint(ctx_id, 0)
   >>> tx_in = TxIn(amount, gamma, spending_key, token_id, out_point)
   >>> tx_in.get_amount()
