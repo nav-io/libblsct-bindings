@@ -1,5 +1,5 @@
 CTxOut
-=====
+======
 
 .. autoclass:: blsct.CTxOut
    :members:

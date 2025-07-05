@@ -15,8 +15,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
+      - name: Install system dependencies
+        run: |
+          if [[ $RUNNER_OS == 'Linux' ]]; then
+            sudo apt-get update && sudo apt-get install -y swig autoconf automake libtool pkg-config 
+          elif [[ $RUNNER_OS == 'macOS' ]]; then
+            brew install swig autoconf automake libtool pkg-config 
+          fi
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -25,7 +30,16 @@ jobs:
 
       - name: Install Python dependencies
         run: |
-          pip install sphinx ghp-import
+          pip install sphinx ghp-import setuptools build pytest
+
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Build and install the package
+        run: |
+          cd ffi/python
+          python -m build
+          pip install dist/*.whl
 
       - name: Build document
         run: |
