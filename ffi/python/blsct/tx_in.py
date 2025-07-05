@@ -10,6 +10,7 @@ from typing import Any, override, Self
 class TxIn(ManagedObj, Serializable):
   """
   Represents a transaction input used to construct CTxIn in a confidential transaction.
+
   >>> from blsct import OutPoint, SpendingKey, TokenId, CtxId, TxIn, CTX_ID_SIZE
   >>> import secrets
   >>> amount = 123
@@ -24,11 +25,11 @@ class TxIn(ManagedObj, Serializable):
   >>> tx_in.get_gamma()
   100
   >>> tx_in.get_spending_key()
-  SpendingKey(36bcc5eac63182e190c574fb911c17970bee152f667ad47cb9119b84e0541f79) # doctest: +SKIP
+  SpendingKey(36bcc5eac63182e19...) # doctest: +SKIP
   >>> tx_in.get_token_id()
-  TokenId(0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff) # doctest: +SKIP
+  TokenId(000000000000000000000...) # doctest: +SKIP
   >>> tx_in.get_out_point()
-  OutPoint(31f41784d028c886a886f6c2c323ef011ab948ceb7edacd92b1662b6189655bc00000000) # doctest: +SKIP
+  OutPoint(31f41784d028c886a886...) # doctest: +SKIP
   >>> tx_in.get_staked_commitment()
   False
   >>> tx_in.get_rbf()
