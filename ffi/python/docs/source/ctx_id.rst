@@ -1,5 +1,5 @@
-TxId
-====
+CtxId
+=====
 
 .. autoclass:: blsct.CtxId
    :members:
