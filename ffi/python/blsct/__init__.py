@@ -15,8 +15,8 @@ from .address import Address
 from .address_encoding import AddressEncoding
 from .amount_recovery_req import AmountRecoveryReq
 from .amount_recovery_res import AmountRecoveryRes
-from .ctx import Ctx
-from .ctx_id import CtxId
+from .ctx import CTx
+from .ctx_id import CTxId
 from .ctx_in import CTxIn
 from .ctx_out import CTxOut
 from .ctx_out_blsct_data import CTxOutBlsctData

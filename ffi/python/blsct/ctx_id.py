@@ -3,14 +3,14 @@ from .managed_obj import ManagedObj
 from .serializable import Serializable
 from typing import Any, override, Type, Self
 
-class CtxId(ManagedObj, Serializable):
+class CTxId(ManagedObj, Serializable):
   """
   Represents the transaction ID of a CMutableTransaction
 
-  >>> from blsct import CtxId, CTX_ID_SIZE
+  >>> from blsct import CTxId, CTX_ID_SIZE
   >>> import secrets
   >>> hex = secrets.token_hex(CTX_ID_SIZE)
-  >>> ctx_id = CtxId.deserialize(hex)
+  >>> ctx_id = CTxId.deserialize(hex)
   >>> ctx_id.serialize()
   'ec7b726c443d3ebb7fb8704fe039a6df993a8a4552ab88c3463627ccd947f334'
   >>> ctx_id.serialize() == hex
@@ -21,7 +21,7 @@ class CtxId(ManagedObj, Serializable):
 
   @override
   def serialize(self) -> str:
-    """Serialize the CtxId object to a hexadecimal string."""
+    """Serialize the CTxId object to a hexadecimal string."""
     buf = blsct.cast_to_uint8_t_ptr(self.value())
     return blsct.to_hex(buf, blsct.CTX_ID_SIZE)
 
@@ -46,5 +46,5 @@ class CtxId(ManagedObj, Serializable):
   @classmethod
   @override
   def default_obj(cls: Type[Self]) -> Any:
-    raise NotImplementedError("Cannot create a CtxId without required parameters.")
+    raise NotImplementedError("Cannot create a CTxId without required parameters.")
 

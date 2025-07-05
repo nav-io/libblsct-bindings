@@ -1,7 +1,7 @@
 from . import blsct
 from .managed_obj import ManagedObj
 from .script import Script
-from .ctx_id import CtxId
+from .ctx_id import CTxId
 from .serializable import Serializable
 from typing import Any, override, Self, Type
 
@@ -17,10 +17,10 @@ class CTxIn(ManagedObj, Serializable):
     super().__init__(obj)
     self._borrowed = True
 
-  def get_prev_out_hash(self) -> CtxId:
+  def get_prev_out_hash(self) -> CTxId:
     """Get the transaction ID of the previous output being spent."""
     obj = blsct.get_ctx_in_prev_out_hash(self.value())
-    return CtxId.from_obj(obj)
+    return CTxId.from_obj(obj)
 
   def get_prev_out_n(self) -> int:
     """Get the output index of the previous output being spent."""
@@ -50,7 +50,7 @@ class CTxIn(ManagedObj, Serializable):
 
   @override
   def serialize(self) -> str:
-    """Serialize the CtxId object to a hexadecimal string."""
+    """Serialize the CTxId object to a hexadecimal string."""
     buf = blsct.cast_to_uint8_t_ptr(self.value())
     return blsct.to_hex(buf, self.obj_size)
 

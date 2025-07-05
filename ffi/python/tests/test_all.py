@@ -18,8 +18,8 @@ from blsct import (
   SubAddrId,
   TokenId,
   TokenKey,
-  Ctx,
-  CtxId,
+  CTx,
+  CTxId,
   TxIn,
   TxOut,
   TxKey,
@@ -246,7 +246,7 @@ def test_tx():
   out_amount = out_amount
 
   # tx in
-  ctx_id = CtxId.deserialize(secrets.token_hex(32))
+  ctx_id = CTxId.deserialize(secrets.token_hex(32))
   print(f"ctx_id: {ctx_id}")
 
   gamma = 100
@@ -287,7 +287,7 @@ def test_tx():
   print(f"tx_out.min_stake: {tx_out.get_min_stake()}")
 
   # tx
-  ctx = Ctx(
+  ctx = CTx(
     [tx_in],
     [tx_out],
   )
@@ -295,7 +295,7 @@ def test_tx():
   ctx_hex = ctx.serialize()
   print(f"ctx_hex: {ctx_hex}")
 
-  ctx2 = Ctx.deserialize(ctx_hex)
+  ctx2 = CTx.deserialize(ctx_hex)
   ctx2_hex = ctx2.serialize()
   assert(ctx_hex == ctx2_hex)
 

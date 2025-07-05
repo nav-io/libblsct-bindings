@@ -1,7 +1,7 @@
-CtxId
+CTxId
 =====
 
-.. autoclass:: blsct.CtxId
+.. autoclass:: blsct.CTxId
    :members:
    :exclude-members: default_obj, value
 

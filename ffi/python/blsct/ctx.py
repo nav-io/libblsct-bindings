@@ -3,17 +3,17 @@ from .ctx_in import CTxIn
 from .ctx_out import CTxOut
 from .managed_obj import ManagedObj
 from .serializable import Serializable
-from .ctx_id import CtxId
+from .ctx_id import CTxId
 from .tx_in import TxIn
 from .tx_out import TxOut
 from typing import Any, override, Self, Type
 
 # stores serialized tx represented as uint8_t*
-class Ctx(ManagedObj, Serializable):
+class CTx(ManagedObj, Serializable):
   """
   Represents a confidential transaction. Also known as `CMutableTransaction` on the C++ side.
 
-  >>> from blsct import ChildKey, DoublePublicKey, OutPoint, PublicKey, SpendingKey, SubAddr, SubAddrId, TokenId, CTX_ID_SIZE, Ctx, CtxId, TxIn, TxOut
+  >>> from blsct import ChildKey, DoublePublicKey, OutPoint, PublicKey, SpendingKey, SubAddr, SubAddrId, TokenId, CTX_ID_SIZE, CTx, CTxId, TxIn, TxOut
   >>> import secrets
   >>> num_tx_in = 1
   >>> num_tx_out = 1
@@ -21,7 +21,7 @@ class Ctx(ManagedObj, Serializable):
   >>> fee = (num_tx_in + num_tx_out) * default_fee
   >>> out_amount = 10000
   >>> in_amount = fee + out_amount
-  >>> ctx_id = CtxId.deserialize(secrets.token_hex(32))
+  >>> ctx_id = CTxId.deserialize(secrets.token_hex(32))
   >>> out_index = 0
   >>> out_point = OutPoint(ctx_id, out_index)
   >>> gamma = 100
@@ -30,7 +30,7 @@ class Ctx(ManagedObj, Serializable):
   >>> tx_in = TxIn(in_amount, gamma, spending_key, token_id, out_point)
   >>> sub_addr = SubAddr.from_double_public_key(DoublePublicKey())
   >>> tx_out = TxOut(sub_addr, out_amount, 'navio')
-  >>> ctx = Ctx([tx_in], [tx_out])
+  >>> ctx = CTx([tx_in], [tx_out])
   >>> for ctx_in in ctx.get_ctx_ins(): 
   ...   print(f"prev_out_hash: {ctx_in.get_prev_out_hash()}")
   ...   print(f"prev_out_n: {ctx_in.get_prev_out_n()}")
@@ -38,7 +38,7 @@ class Ctx(ManagedObj, Serializable):
   ...   print(f"sequence: {ctx_in.get_sequence()}")
   ...   print(f"script_witness: {ctx_in.get_script_witness()}")
   ...
-  prev_out_hash: CtxId(9194a7eaafe70c6f623eef4740c934f569b8a7f0a246ce4377c34a5bb9a6f126)
+  prev_out_hash: CTxId(9194a7eaafe70c6f623eef4740c934f569b8a7f0a246ce4377c34a5bb9a6f126)
   prev_out_n: 0
   script_sig: Script(0000000000008f676000000000006b67400000000000726720000000)
   sequence: 4294967295
@@ -111,7 +111,7 @@ class Ctx(ManagedObj, Serializable):
   token_id: token=0, subid=18446744073709551615 # doctest: +SKIP
   vector_predicate: 03b8d499d518e3b451b71cfab4d84bf885f46252aed7dc6d9dddc743cd3c996b5f0518596d5292a02980426512f7a31555 # doctest: +SKIP
   >>> ser = ctx.serialize()
-  >>> deser = Ctx.deserialize(ser)
+  >>> deser = CTx.deserialize(ser)
   >>> ser == deser.serialize()
   True
   """
@@ -170,11 +170,11 @@ class Ctx(ManagedObj, Serializable):
     super().__init__(obj)
     self.obj_size = obj_size
 
-  def get_ctx_id(self) -> CtxId:
+  def get_ctx_id(self) -> CTxId:
     """Get the transaction ID."""
     tx_id_hex = blsct.get_ctx_id(self.value(), self.obj_size)
 
-    return CtxId.deserialize(tx_id_hex)
+    return CTxId.deserialize(tx_id_hex)
 
   def get_ctx_ins(self) -> list[CTxIn]:
     """Get the list of CTxIns generated from TxIns."""
