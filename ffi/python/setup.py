@@ -10,7 +10,7 @@ import shutil
 import subprocess
 
 # TODO: turn this on for production builds
-IS_PROD = False
+IS_PROD = True
 
 std_cpp = "-std=c++20"
 
