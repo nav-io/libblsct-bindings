@@ -12,7 +12,7 @@ ref_body=$(grep -v '^#include' "$ref")
 
 for f in "${FILES[@]:1}"; do # from the second element onward
 	if [[ ! -f "$f" ]]; then
-		echo "❌ Expected blsct.i file is missing: $f"
+		echo "❌ Expected blsct.i file is missing: $f, pwd=$(pwd), ls=$(ls -l)"
 		exit 1
 	fi
 	echo "Checking consistency of $f against $ref..."
