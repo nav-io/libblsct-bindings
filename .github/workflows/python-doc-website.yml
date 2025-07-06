@@ -3,6 +3,8 @@ name: 'Python: build doc website'
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     paths:
       - 'ffi/python/docs/source/**'
       - 'ffi/python/blsct/**'
