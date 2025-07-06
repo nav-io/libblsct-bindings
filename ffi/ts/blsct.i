@@ -3,7 +3,7 @@
 %{
 #include "../../navio-core/src/blsct/external_api/bldct.h"
 %}
-# test
+
 %constant size_t DOUBLE_PUBLIC_KEY_SIZE = DOUBLE_PUBLIC_KEY_SIZE;
 %constant size_t KEY_ID_SIZE = KEY_ID_SIZE;
 %constant size_t POINT_SIZE = POINT_SIZE;
