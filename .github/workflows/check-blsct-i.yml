@@ -14,7 +14,7 @@ on:
       - 'ffi/ts/blsct.i'
 
 jobs:
-  test:
+  check-blsct-i-consistency:
     runs-on: ubuntu-24.04
 
     steps:
