@@ -3,6 +3,8 @@ name: 'Python: run unit tests'
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     paths:
       - 'ffi/python/**'
       - '!.pytest_cache/**'

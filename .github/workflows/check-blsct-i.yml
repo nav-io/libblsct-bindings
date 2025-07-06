@@ -3,18 +3,19 @@ name: 'Common: Check if all the blsct.i files are identical'
 on:
   workflow_dispatch:
   push:
+    branches:
+      - main
     paths:
-      - 'ffi/python/**'
-      - '!.pytest_cache/**'
-      - '!dist/**'
-      - '!docs/**'
-      - '!navio-core/**'
-      - '!navio_blsct.egg-info/**'
-      - '!venv/**'
+      - 'ffi/python/blsct/blsct.i'
+      - 'ffi/ts/blsct.i'
+  pull_request:
+    paths:
+      - 'ffi/python/blsct/blsct.i'
+      - 'ffi/ts/blsct.i'
 
 jobs:
   test:
-    runs-on: ubunt-24.04
+    runs-on: ubuntu-24.04
 
     steps:
       - uses: actions/checkout@v3
