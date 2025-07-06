@@ -23,6 +23,7 @@ if IS_PROD:
   navio_core_repo = "https://github.com/nav-io/navio-core"
 else:
   navio_core_repo = "https://github.com/gogoex/navio-core"
+  navio_core_branch = "development-branch-name"
 
 navio_core_dir = os.path.join(package_dir, "navio-core")
 depends_dir = Path(os.path.join(navio_core_dir, "depends"))
@@ -57,14 +58,13 @@ class CustomBuildExt(build_ext):
   def clone_navio_core(self):
     if os.path.isdir(navio_core_dir):
       shutil.rmtree(navio_core_dir)
-    subprocess.run([
-      "git",
-      "clone",
-      "--branch", "remove-libblsct-cpp", # TODO: remove this
-      "--depth", "1",
-      navio_core_repo,
-      navio_core_dir
-    ], check=True)
+
+    cmd = ["git", "clone", "--depth", "1"]
+    if not IS_PROD:
+      cmd += ["--branch", navio_core_branch]
+    cmd += [navio_core_repo, navio_core_dir]
+
+    subprocess.run(cmd, check=True)
 
   def build_libblsct(self, num_cpus: str):
     # if there is a backup, use it
