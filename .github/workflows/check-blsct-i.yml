@@ -1,0 +1,27 @@
+name: 'Common: Check if all the blsct.i files are identical'
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ffi/python/**'
+      - '!.pytest_cache/**'
+      - '!dist/**'
+      - '!docs/**'
+      - '!navio-core/**'
+      - '!navio_blsct.egg-info/**'
+      - '!venv/**'
+
+jobs:
+  test:
+    runs-on: ubunt-24.04
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          clean: true
+
+      - name: Run consistency check
+        run: |
+          ./script/check-blsct-i-consistency
+
