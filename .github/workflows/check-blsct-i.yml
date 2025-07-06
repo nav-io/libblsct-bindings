@@ -1,4 +1,4 @@
-name: 'Common: Check if all the blsct.i files are identical'
+name: 'Common: Check blsct.i cosiscency'
 
 on:
   workflow_dispatch:
