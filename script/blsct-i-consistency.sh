@@ -6,7 +6,7 @@ FILES=(
   "./ffi/python/blsct/blsct.i"
   "./ffi/ts/blsct.i"
 )
-# test
+
 ref="${FILES[0]}"
 ref_body=$(grep -v '^#include' "$ref")
 
@@ -21,9 +21,7 @@ for f in "${FILES[@]:1}"; do # from the second element onward
 	file_body=$(grep -v '^#include' "$f")
 
   if ! diff_out=$(diff -u <(echo "$ref_body") <(echo "$file_body")); then
-    echo "❌ Inconsistency detected between:"
-    echo "- $ref"
-    echo "- $f"
+    echo "❌ Inconsistency detected between $ref and $f"
     echo
     echo "$diff_out"
     exit 1
