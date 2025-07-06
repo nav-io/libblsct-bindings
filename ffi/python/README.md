@@ -1,4 +1,6 @@
-# Python binding
+# Navio BLS Confidential Transaction Library
+
+Python bindings for the `libblsct` library used by the [Navio](https://nav.io/) blockchain to construct confidential transactions based on the BLS12-381 curve.
 
 ## Requirements
 - Python 3.12 or 3.13
@@ -10,6 +12,5 @@
 pip install navio_blsct
 ```
 
-## Usage
-
-Refer to the [documentation page](https://nav-io.github.io/libblsct-bindings/index.html)
+## Documentation
+Full API reference and usage examples are available in the [official documentation](https://nav-io.github.io/libblsct-bindings/index.html)
