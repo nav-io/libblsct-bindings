@@ -147,14 +147,27 @@ const buildLibBlsct = (cfg, numCpus, depArchDir) => {
   }
 }
 
+const buildSwigWrapper = (cfg) => {
+  console.log('Building swig wrapper...')
+  const res = spawnSync(
+    'swig', ['-c++', '-javascript', '-node', 'blsct.i'],
+    { cwd: cfg.blsctDir }
+  )
+  if (res.status !== 0) {
+    throw new Error(`Failed to build swig wrapper: ${JSON.stringify(res)}`)
+  }
+}
+
 const main = () => {
   const cfg = getCfg(IS_PROD)
 
   //gitCloneNavioCore(cfg)
 
-  const numCpus = os.cpus().length
-  depArchDir = buildDepends(cfg, numCpus)
-  buildLibBlsct(cfg, numCpus, depArchDir)
+  // const numCpus = os.cpus().length
+  // depArchDir = buildDepends(cfg, numCpus)
+  // buildLibBlsct(cfg, numCpus, depArchDir)
+
+  buildSwigWrapper(cfg)
 }
 
 main()

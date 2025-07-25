@@ -1,4 +1,4 @@
-*_wrap.c*
+blsct_wrap.cxx
 *.so
 !Makefile
 build/
