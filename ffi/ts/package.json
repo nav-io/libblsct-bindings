@@ -1,14 +1,12 @@
 {
-  "name": "blsct-api",
+  "name": "navio-blsct",
   "version": "1.0.0",
   "scripts": {
-    "build": "tsc"
+    "build": "node scripts/build.js"
   },
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
-    "typescript": "^5.6.3"
   },
   "devDependencies": {
-    "@types/node": "^22.7.7"
   }
 }

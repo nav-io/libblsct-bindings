@@ -1,6 +1,6 @@
 # libblsct-bindings
 
-`libblsct-bindings` exposes functionality from [navio-core](https://github.com/nav-io/navio-core) to support the construction of confidential transactions and the derivation of necessary keys for external use.
+`libblsct-bindings` exposes functionality from [navio-core](https://github.com/nav-io/navio-core) to support the construction of confidential transactions and the derivation of necessary keys.
 
 ## Supported languages
 - [Python](https://github.com/nav-io/libblsct-bindings/blob/main/ffi/python/README.md)
