@@ -8,7 +8,7 @@ const IS_PROD = false
 
 const getCfg = (isProd) => {
   baseDir = path.resolve(__dirname, '..')
-  blsctDir = path.join(baseDir, 'blsct')
+  swigDir = path.join(baseDir, 'swig')
   libDir = path.join(baseDir, 'lib')
   navioCoreDir = path.join(baseDir, 'navio-core')
   dependsDir = path.join(navioCoreDir, 'depends')
@@ -27,7 +27,7 @@ const getCfg = (isProd) => {
     path.join(mclLibPath, "libmcl.a"),
   ]
   return {
-    blsctDir,
+    swigDir,
     libDir,
     stdCpp: '-std=c++20',
     navioCoreRepo: isProd ? 'https://github.com/nav-io/navio-core' : 'https://github.com/gogoex/navio-core',
@@ -151,7 +151,7 @@ const buildSwigWrapper = (cfg) => {
   console.log('Building swig wrapper...')
   const res = spawnSync(
     'swig', ['-c++', '-javascript', '-node', 'blsct.i'],
-    { cwd: cfg.blsctDir }
+    { cwd: cfg.swigDir }
   )
   if (res.status !== 0) {
     throw new Error(`Failed to build swig wrapper: ${JSON.stringify(res)}`)

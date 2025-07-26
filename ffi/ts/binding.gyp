@@ -14,7 +14,7 @@
         'libmcl.a',
       ],
       'sources': [
-        './blsct/blsct_wrap.cxx',
+        './swig/blsct_wrap.cxx',
       ],
       'cflags_cc': ['-std=c++20', '-fPIC', '-fexceptions'],
       'xcode_settings': {
