@@ -142,7 +142,7 @@ const buildLibBlsct = (cfg, numCpus, depArchDir) => {
   // copy .a files to the lib dir
   for (const libFile of cfg.libFiles) {
     const dest = path.join(cfg.libDir, path.basename(libFile))
-    console.log(`Copying ${libFile}...`)
+    console.log(`Copying ${libFile} to ${dest}...`)
     fs.copyFileSync(libFile, dest)
   }
 }
