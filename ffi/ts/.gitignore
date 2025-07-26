@@ -1,5 +1,5 @@
 blsct_wrap.cxx
-*.a
+lib*.a
 build/
 core
 depends/
