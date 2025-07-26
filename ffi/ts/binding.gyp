@@ -22,7 +22,7 @@
         'OTHER_CFLAGS': ['-std=c++20 -fexceptios'],
         'OTHER_CPLUSPLUSFLAGS': ['-std=c++20', '-fexceptions'],
 			  'OTHER_LDFLAGS': [
-          '-L<(module_root_dir)/lib',
+          '-L./lib',
         ],
 			  'OTHER_LDFLAGS!': [
         ],
