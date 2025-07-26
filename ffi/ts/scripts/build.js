@@ -167,6 +167,16 @@ const main = () => {
   depArchDir = buildDepends(cfg, numCpus)
   buildLibBlsct(cfg, numCpus, depArchDir)
 
+  if (!fs.existsSync(cfg.libDir)) {
+    console.log(`❌ Directory ${cfg.libDir} does not exist.`);
+  } else {
+    const files = fs.readdirSync(cfg.libDir);
+    console.log(`📂 Files in ${cfg.libDir}:`);
+    for (const file of files) {
+      console.log(`  - ${file}`);
+    }
+  }
+
   buildSwigWrapper(cfg)
 }
 
