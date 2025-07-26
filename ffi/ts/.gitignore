@@ -4,5 +4,6 @@ build/
 core
 depends/
 dist/
+lib/
 node_modules/
 navio-core/

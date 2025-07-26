@@ -105,7 +105,7 @@ const buildDepends = (cfg, numCpus) => {
 }
 
 const buildLibBlsct = (cfg, numCpus, depArchDir) => {
-  // run autoge.sh
+  // run autogen.sh
   console.log('Running autogen.sh...')
   const autogenRes = spawnSync('./autogen.sh', [], { cwd: cfg.navioCoreDir })
   if (autogenRes.status !== 0) {
@@ -137,7 +137,7 @@ const buildLibBlsct = (cfg, numCpus, depArchDir) => {
   if (fs.existsSync(cfg.libDir)) {
     fs.rmSync(cfg.libDir, { recursive: true, force: true })
   }
-  fs.mkdirSync(cfg.libDir)
+  fs.mkdirSync(cfg.libDir, { recursive: true })
 
   // copy .a files to the lib dir
   for (const libFile of cfg.libFiles) {
