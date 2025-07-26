@@ -1,8 +1,10 @@
-*_wrap.c*
-*.so
-!Makefile
+blsct_wrap.cxx
+*.a
 build/
-dist/
-node_modules/
 core
-
+depends/
+dist/
+lib/
+node_modules/
+navio-core/
+swig/
