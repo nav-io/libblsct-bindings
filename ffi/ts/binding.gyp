@@ -7,7 +7,7 @@
          '<(module_root_dir)/navio-core/src/bls/mcl/include',
          '<(module_root_dir)/navio-core/src',
       ],
-      'sgources': [
+      'sources': [
         './swig/blsct_wrap.cxx',
       ],
       'link_settings': {
