@@ -7,7 +7,7 @@
          '<(module_root_dir)/navio-core/src/bls/mcl/include',
          '<(module_root_dir)/navio-core/src',
       ],
-      'sources': [
+      'sgources': [
         './swig/blsct_wrap.cxx',
       ],
       'link_settings': {
@@ -15,10 +15,10 @@
           '<(module_root_dir)/lib'
         ],
         'libraries': [
-          'blsct',
-          'univalue_blsct',
-          'bls384_256',
-          'mcl'
+          '-lblsct',
+          '-lunivalue_blsct',
+          '-lbls384_256',
+          '-lmcl'
         ]
       },
       'cflags_cc': ['-std=c++20', '-fPIC', '-fexceptions'],
