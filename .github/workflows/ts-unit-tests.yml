@@ -26,20 +26,20 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 'lts'
+          node-version: '22'
 
       - uses: actions/checkout@v4
         with:
           clean: true
 
-      - name: Build blsct.node and install TypeScript dependencies
+      - name: Build blsct.node
         run: |
           cd ffi/ts
           npm run build
-          npm install
 
       - name: Run tests
         run: |
           cd ffi/ts
+          npm install
           npx jest
 

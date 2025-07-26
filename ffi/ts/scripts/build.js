@@ -4,7 +4,7 @@ const path = require('path')
 const { spawnSync } = require('child_process')
 
 // TODO: turn this on for production builds
-const IS_PROD = false
+const IS_PROD = true
 
 const getCfg = (isProd) => {
   baseDir = path.resolve(__dirname, '..')
@@ -142,7 +142,7 @@ const buildLibBlsct = (cfg, numCpus, depArchDir) => {
   // copy .a files to the lib dir
   for (const libFile of cfg.libFiles) {
     const dest = path.join(cfg.libDir, path.basename(libFile))
-    console.log(`Copying ${libFile}...`)
+    console.log(`Copying ${libFile} to ${dest}...`)
     fs.copyFileSync(libFile, dest)
   }
 }
@@ -161,11 +161,21 @@ const buildSwigWrapper = (cfg) => {
 const main = () => {
   const cfg = getCfg(IS_PROD)
 
-  //gitCloneNavioCore(cfg)
+  gitCloneNavioCore(cfg)
 
-  // const numCpus = os.cpus().length
-  // depArchDir = buildDepends(cfg, numCpus)
-  // buildLibBlsct(cfg, numCpus, depArchDir)
+  const numCpus = os.cpus().length
+  depArchDir = buildDepends(cfg, numCpus)
+  buildLibBlsct(cfg, numCpus, depArchDir)
+
+  if (!fs.existsSync(cfg.libDir)) {
+    console.log(`❌ Directory ${cfg.libDir} does not exist.`);
+  } else {
+    const files = fs.readdirSync(cfg.libDir);
+    console.log(`📂 Files in ${cfg.libDir}:`);
+    for (const file of files) {
+      console.log(`  - ${file}`);
+    }
+  }
 
   buildSwigWrapper(cfg)
 }
