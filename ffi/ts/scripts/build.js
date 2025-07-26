@@ -4,7 +4,7 @@ const path = require('path')
 const { spawnSync } = require('child_process')
 
 // TODO: turn this on for production builds
-const IS_PROD = false
+const IS_PROD = true
 
 const getCfg = (isProd) => {
   baseDir = path.resolve(__dirname, '..')
@@ -161,11 +161,11 @@ const buildSwigWrapper = (cfg) => {
 const main = () => {
   const cfg = getCfg(IS_PROD)
 
-  //gitCloneNavioCore(cfg)
+  gitCloneNavioCore(cfg)
 
-  // const numCpus = os.cpus().length
-  // depArchDir = buildDepends(cfg, numCpus)
-  // buildLibBlsct(cfg, numCpus, depArchDir)
+  const numCpus = os.cpus().length
+  depArchDir = buildDepends(cfg, numCpus)
+  buildLibBlsct(cfg, numCpus, depArchDir)
 
   buildSwigWrapper(cfg)
 }
