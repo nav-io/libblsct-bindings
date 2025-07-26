@@ -149,12 +149,6 @@ const buildLibBlsct = (cfg, numCpus, depArchDir) => {
 
 const buildSwigWrapper = (cfg) => {
   console.log('Building swig wrapper...')
-
-  console.log('cwd:', cfg.swigDir)
-  const targetFile = path.join(cfg.swigDir, 'blsct.i')
-  console.log('Looking for:', targetFile)
-  console.log('Exists?', fs.existsSync(targetFile))
-
   const res = spawnSync(
     'swig', ['-c++', '-javascript', '-node', 'blsct.i'],
     { cwd: cfg.swigDir }

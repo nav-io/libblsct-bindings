@@ -32,14 +32,14 @@ jobs:
         with:
           clean: true
 
-      - name: Build blsct.node and install TypeScript dependencies
+      - name: Build blsct.node
         run: |
           cd ffi/ts
           npm run build
-          npm install
 
       - name: Run tests
         run: |
           cd ffi/ts
+          npm install
           npx jest
 
