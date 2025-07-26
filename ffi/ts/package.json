@@ -2,7 +2,7 @@
   "name": "navio-blsct",
   "version": "1.0.0",
   "scripts": {
-    "build": "node scripts/build.js && node-gyp configure build",
+    "build": "node scripts/build.js && node-gyp configure build --silly",
     "test": "node src/test.js"
   },
   "license": "MIT",
