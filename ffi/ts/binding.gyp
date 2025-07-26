@@ -16,6 +16,9 @@
       'sources': [
         './swig/blsct_wrap.cxx',
       ],
+      'ldflags': [
+        '-L<(module_root_dir)/lib',
+      ],
       'cflags_cc': ['-std=c++20', '-fPIC', '-fexceptions'],
       'xcode_settings': {
         'CLANG_CXX_LANGUAGE_STANDARD': 'c++20 -fexceptions',
