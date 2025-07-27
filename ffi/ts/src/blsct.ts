@@ -1,13 +1,30 @@
 const blsct = require('../build/Release/blsct.node')
 
+if (!blsct._initialized) {
+  blsct.init()
+  blsct._initialized = true
+}
+
 export const freeObj = (obj: any): void => {
   if (obj !== null && obj !== undefined) {
     blsct.free_obj(obj)
   }
 }
 
+// admin
 export const init = (): void => {
   blsct.init()
+}
+
+export const runGc = async (): Promise<void> => {
+  if (typeof global.gc === 'function') {
+    ;(global as any).gc()
+    await new Promise(r =>
+      setImmediate(r)
+    )
+  } else {
+    console.warn('Garbage collection is not exposed. Run Node.js with --expose-gc to expose it.')
+  }
 }
 
 // scalar
