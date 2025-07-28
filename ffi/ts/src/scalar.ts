@@ -12,21 +12,21 @@ import {
 import { ManagedObj } from './managedObj'
 
 export class Scalar extends ManagedObj {
-  constructor(value?: number) {
-    if (typeof value === 'object') {
-      super(value)
-    }
-    else if (
-      typeof value === 'number' ||
-      value === undefined || value === null
+  constructor(obj?: any) {
+    if (typeof obj === 'object') {
+      super(obj)
+    } else if (
+      typeof obj === 'number' ||
+      obj === undefined ||
+      obj === null
     ) {
-      if (value === undefined || value === null) {
-        value = 0
+      if (obj === undefined || obj === null) {
+        obj = 0
       }
-      const rv = genScalar(value)
+      const rv = genScalar(obj)
       super(rv.value)
     } else {
-      throw new TypeError(`Scalar constructor received value of unexpected type ${typeof value}`)
+      throw new TypeError(`Scalar constructor received value of unexpected type ${typeof obj}`)
     }
   }
 
@@ -53,23 +53,11 @@ export class Scalar extends ManagedObj {
     return serializeScalar(this.value())
   }
 
-  static override deserialize<T extends ManagedObj>(
-    this: new (obj: any) => T,
+  static deserialize(
+    this: new (obj: any) => Scalar,
     hex: string
-  ): T {
-    if (hex.length % 2 != 0) {
-      hex = `0${hex}`
-    }
-    const rv = deserializeScalar(hex)
-    console.log(`rv's result type id ${typeof rv.result}`)
-    if (rv.result != 0) {
-      freeObj(rv)
-      throw new Error(`Deserializaiton failed. Error code = ${rv.result}`)
-    }
-    const obj = rv.value
-    freeObj(rv)
-
-    return new this(obj)
+  ): Scalar {
+    return Scalar._deserialize(hex, deserializeScalar)
   }
 }
 
