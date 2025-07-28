@@ -2,6 +2,10 @@ import { DoublePublicKey } from '../../keys/doublePublicKey'
 import { PublicKey } from '../../keys/publicKey'
 import { ChildKey } from '../../keys/childKey'
 
+test('random', () => {
+  DoublePublicKey.random()
+})
+
 test('fromPublicKeys', () => {
   const pk1 = PublicKey.random()
   const pk2 = PublicKey.random()

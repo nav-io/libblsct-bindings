@@ -23,6 +23,14 @@ export class DoublePublicKey extends ManagedObj {
     }
   }
 
+  // TODO add equals, getPk1 and getPk2 methods in libblsct
+
+  static random(): DoublePublicKey {
+    const pk1 = PublicKey.random()
+    const pk2 = PublicKey.random()
+    return DoublePublicKey.fromPublicKeys(pk1, pk2)
+  }
+
   static fromPublicKeys(
     pk1: PublicKey,
     pk2: PublicKey,
@@ -64,14 +72,3 @@ export class DoublePublicKey extends ManagedObj {
   }
 }
 
-/*
-class DoublePublicKey(ManagedObj, Serializable):
-  @classmethod
-  def from_keys_and_acct_addr(
-    cls: Type[Self],
-    view_key: Scalar,
-    spending_pub_key: PublicKey,
-    account: int,
-    address: int
-  ) -> Self:
-*/

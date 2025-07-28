@@ -45,7 +45,7 @@ export abstract class ManagedObj {
     return obj  
   }
 
-  protected static fromObj<T extends ManagedObj>(
+  static fromObj<T extends ManagedObj>(
     this: new (obj: any) => T, 
     obj: any
   ): T {

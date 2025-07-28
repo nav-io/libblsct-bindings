@@ -5,11 +5,29 @@ if (!blsct._initialized) {
   blsct._initialized = true
 }
 
+export interface BlsctRetVal {
+  value: any
+  result: number
+}
+
 export const freeObj = (obj: any): void => {
   if (obj !== null && obj !== undefined) {
     blsct.free_obj(obj)
   }
 }
+
+// address
+export const decodeAddress = (addrStr: any): BlsctRetVal => {
+  return blsct.decode_address(addrStr)
+}
+export const encodeAddress = (
+  dpk: any,
+  encoding: number
+): BlsctRetVal => {
+  return blsct.encode_address(dpk, encoding)
+}
+export const Bech32 = blsct.Bech32
+export const Bech32M = blsct.Bech32M
 
 // child key
 export const fromSeedToChildKey = (seed: any): any => {
@@ -26,10 +44,10 @@ export const fromChildKeyToTxKey = (childKey: any): any => {
 }
 
 // double public key
-export const deserializeDpk = (hex: string): any => {
+export const deserializeDpk = (hex: string): BlsctRetVal => {
   return blsct.deserialize_dpk(hex)
 }
-export const genDoublePubKey = (pk1: any, pk2: any): any => {
+export const genDoublePubKey = (pk1: any, pk2: any): BlsctRetVal => {
   return blsct.gen_double_pub_key(pk1, pk2)
 }
 export const genDpkWithKeysAndSubAddrId = (
@@ -49,6 +67,21 @@ export const serializeDpk = (dpk: any): string => {
   return blsct.serialize_dpk(dpk)
 }
 
+// hash id
+export const calcKeyId = (
+  blindingPubKey: any,
+  spendingPubKey: any,
+  viewKey: any
+): any => {
+  return blsct.calc_key_id(blindingPubKey, spendingPubKey, viewKey)
+}
+export const deserializeKeyId = (hex: string): BlsctRetVal => {
+  return blsct.deserialize_key_id(hex)
+}
+export const serializeKeyId = (hashId: any): string => {
+  return blsct.serialize_key_id(hashId)
+}
+
 // memory management
 export const runGc = async (): Promise<void> => {
   if (typeof global.gc === 'function') {
@@ -61,34 +94,14 @@ export const runGc = async (): Promise<void> => {
   }
 }
 
-// scalar
-export const deserializeScalar = (hex: string): any => {
-  return blsct.deserialize_scalar(hex)
-}
-export const genRandomScalar = (): any => {
-  return blsct.gen_random_scalar()
-}
-export const genScalar = (value: number): any => {
-  return blsct.gen_scalar(value)
-}
-export const isScalarEqual = (a: any, b: any): boolean => {
-  return blsct.is_scalar_equal(a, b) !== 0
-}
-export const scalarToUint64 = (scalar: any): number => {
-  return blsct.scalar_to_uint64(scalar)
-}
-export const serializeScalar = (scalar: any): string => {
-  return blsct.serialize_scalar(scalar)
-}
-
 // point
-export const deserializePoint = (hex: string): any => {
+export const deserializePoint = (hex: string): BlsctRetVal => {
   return blsct.deserialize_point(hex)
 }
-export const genBasePoint = (): any => {
+export const genBasePoint = (): BlsctRetVal => {
   return blsct.gen_base_point()
 }
-export const genRandomPoint = (): any => {
+export const genRandomPoint = (): BlsctRetVal => {
   return blsct.gen_random_point()
 }
 export const isPointEqual = (a: any, b: any): boolean => {
@@ -128,7 +141,7 @@ export const calcPrivSpendingKey = (
 export const calcNonce = (blindingPubKey: any, viewKey: any): any => {
   return blsct.calc_nonce(blindingPubKey, viewKey)
 }
-export const genRandomPublicKey = (): any => {
+export const genRandomPublicKey = (): BlsctRetVal => {
   return blsct.gen_random_public_key()
 }
 export const getPublicKeyPoint = (obj: any): any => {
@@ -141,6 +154,49 @@ export const scalarToPubKey = (scalar: any): any => {
   return blsct.scalar_to_pub_key(scalar)
 }
 
+// scalar
+export const deserializeScalar = (hex: string): BlsctRetVal => {
+  return blsct.deserialize_scalar(hex)
+}
+export const genRandomScalar = (): BlsctRetVal => {
+  return blsct.gen_random_scalar()
+}
+export const genScalar = (value: number): BlsctRetVal => {
+  return blsct.gen_scalar(value)
+}
+export const isScalarEqual = (a: any, b: any): boolean => {
+  return blsct.is_scalar_equal(a, b) !== 0
+}
+export const scalarToUint64 = (scalar: any): number => {
+  return blsct.scalar_to_uint64(scalar)
+}
+export const serializeScalar = (scalar: any): string => {
+  return blsct.serialize_scalar(scalar)
+}
+
+// token id
+export const deserializeTokenId = (hex: string): BlsctRetVal => {
+  return blsct.deserialize_token_id(hex)
+}
+export const genTokenId = (token: number): BlsctRetVal => {
+  return blsct.gen_token_id(token)
+}
+export const genTokenIdWithSubid = (token: number, subid: number): BlsctRetVal => {
+  return blsct.gen_token_id_with_subid(token, subid)
+}
+export const genDefaultTokenId = (): BlsctRetVal => {
+  return blsct.gen_default_token_id()
+}
+export const getTokenIdSubid = (tokenId: any): number => {
+  return blsct.get_token_id_subid(tokenId)
+}
+export const getTokenIdToken = (tokenId: any): number => {
+  return blsct.get_token_id_token(tokenId)
+}
+export const serializeTokenId = (tokenId: any): string => {
+  return blsct.serialize_token_id(tokenId)
+}
+
 // tx key
 export const fromTxKeyToSpendingKey = (txKey: any): any => {
   return blsct.from_tx_key_to_spending_key(txKey)
@@ -150,11 +206,14 @@ export const fromTxKeyToViewKey = (txKey: any): any => {
 }
 
 // typecast
+export const asString = (obj: string): any => {
+  return blsct.as_string(obj)
+}
 export const castToDpk = (obj: any): any => {
   return blsct.cast_to_dpk(obj)
 }
-export const castToScalar = (obj: any): any => {
-  return blsct.cast_to_scalar(obj)
+export const castToKeyId = (obj: any): any => {
+  return blsct.cast_to_key_id(obj)
 }
 export const castToPoint = (obj: any): any => {
   return blsct.cast_to_point(obj)
@@ -162,4 +221,17 @@ export const castToPoint = (obj: any): any => {
 export const castToPubKey = (obj: any): any => {
   return blsct.cast_to_pub_key(obj)
 }
+export const castToScalar = (obj: any): any => {
+  return blsct.cast_to_scalar(obj)
+}
+export const castToTokenId = (obj: any): any => {
+  return blsct.cast_to_token_id(obj)
+}
 
+// view tag
+export const calcViewTag = (
+  blindingPubKey: any,
+  viewKey: any
+): any => {
+  return blsct.calc_view_tag(blindingPubKey, viewKey)
+}
