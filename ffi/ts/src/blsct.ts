@@ -5,15 +5,12 @@ if (!blsct._initialized) {
   blsct._initialized = true
 }
 
+export const CTX_ID_SIZE = blsct.CTX_ID_SIZE
+export const SCRIPT_SIZE = blsct.SCRIPT_SIZE
+
 export interface BlsctRetVal {
   value: any
   result: number
-}
-
-export const freeObj = (obj: any): void => {
-  if (obj !== null && obj !== undefined) {
-    blsct.free_obj(obj)
-  }
 }
 
 // address
@@ -41,6 +38,11 @@ export const fromChildKeyToTokenKey = (childKey: any): any => {
 }
 export const fromChildKeyToTxKey = (childKey: any): any => {
   return blsct.from_child_key_to_tx_key(childKey)
+}
+
+// ctx id
+export const serializeCTxId = (ctxId: any): string => {
+  return blsct.serialize_ctx_id(ctxId)
 }
 
 // double public key
@@ -82,7 +84,15 @@ export const serializeKeyId = (hashId: any): string => {
   return blsct.serialize_key_id(hashId)
 }
 
-// memory management
+// misc
+export const freeObj = (obj: any): void => {
+  if (obj !== null && obj !== undefined) {
+    blsct.free_obj(obj)
+  }
+}
+export const hexToMallocedBuf = (hex: string): any => {
+  return blsct.hex_to_malloced_buf(hex)
+}
 export const runGc = async (): Promise<void> => {
   if (typeof global.gc === 'function') {
     ;(global as any).gc()
@@ -92,6 +102,20 @@ export const runGc = async (): Promise<void> => {
   } else {
     console.warn('Garbage collector is not exposed. Run Node.js with --expose-gc to expose it.')
   }
+}
+export const toHex = (buf: any, size: number): string => {
+  return blsct.to_hex(buf, size)
+}
+
+// out point
+export const deserializeOutPoint = (hex: string): BlsctRetVal => {
+  return blsct.deserialize_out_point(hex)
+}
+export const genOutPoint = (serCtxId: string, outIndex: number): any => {
+  return blsct.gen_out_point(serCtxId, outIndex)
+}
+export const serializeOutPoint = (outPoint: any): string => {
+  return blsct.serialize_out_point(outPoint)
 }
 
 // point
@@ -174,6 +198,71 @@ export const serializeScalar = (scalar: any): string => {
   return blsct.serialize_scalar(scalar)
 }
 
+// script
+export const deserializeScript = (hex: string): any => {
+  return blsct.deserialize_script(hex)
+}
+export const serializeScript = (script: any): string => {
+  return blsct.serialize_script(script)
+}
+
+// signature
+export const deserializeSignature = (hex: string): any => {
+  return blsct.deserialize_signature(hex)
+}
+export const serializeSignature = (script: any): string => {
+  return blsct.serialize_signature(script)
+}
+export const signMessage = (
+  privKey: any,
+  msg: string,
+): any => {
+  return blsct.sign_message(privKey, msg)
+}
+export const verifyMsgSig = (
+  pubKey: any,
+  msg: string,
+  signature: any,
+): boolean => {
+  return blsct.verify_msg_sig(pubKey, msg, signature)
+}
+
+// sub addr
+export const deriveSubAddress = (
+  viewKey: any,
+  spendingPubKey: any,
+  subAddrId: any, 
+): any => {
+  return blsct.derive_sub_address(
+    viewKey,
+    spendingPubKey,
+    subAddrId, 
+  )
+}
+export const deserializeSubAddr = (hex: string): any => {
+  return blsct.deserialize_sub_addr(hex)
+}
+export const dpkToSubAddr = (dpk: any): BlsctRetVal => {
+  return blsct.dpk_to_sub_addr(dpk)
+}
+export const serializeSubAddr = (subAddrId: any): string => {
+  return blsct.serialize_sub_addr(subAddrId)
+}
+
+// sub addr id
+export const deserializeSubAddrId = (hex: string): any => {
+  return blsct.deserialize_sub_addr_id(hex)
+}
+export const genSubAddrId = (
+  account: number,
+  address: number,
+): any => {
+  return blsct.gen_sub_addr_id(account, address)
+}
+export const serializeSubAddrId = (subAddrId: any): string => {
+  return blsct.serialize_sub_addr_id(subAddrId)
+}
+
 // token id
 export const deserializeTokenId = (hex: string): BlsctRetVal => {
   return blsct.deserialize_token_id(hex)
@@ -215,6 +304,9 @@ export const castToDpk = (obj: any): any => {
 export const castToKeyId = (obj: any): any => {
   return blsct.cast_to_key_id(obj)
 }
+export const castToOutPoint = (obj: any): any => {
+  return blsct.cast_to_out_point(obj)
+}
 export const castToPoint = (obj: any): any => {
   return blsct.cast_to_point(obj)
 }
@@ -224,8 +316,23 @@ export const castToPubKey = (obj: any): any => {
 export const castToScalar = (obj: any): any => {
   return blsct.cast_to_scalar(obj)
 }
+export const castToScript = (obj: any): any => {
+  return blsct.cast_to_script(obj)
+}
+export const castToSignature = (obj: any): any => {
+  return blsct.cast_to_signature(obj)
+}
+export const castToSubAddr = (obj: any): any => {
+  return blsct.cast_to_sub_addr(obj)
+}
+export const castToSubAddrId = (obj: any): any => {
+  return blsct.cast_to_sub_addr_id(obj)
+}
 export const castToTokenId = (obj: any): any => {
   return blsct.cast_to_token_id(obj)
+}
+export const castToUint8_tPtr = (obj: any): any => {
+  return blsct.cast_to_uint8_t_ptr(obj)
 }
 
 // view tag

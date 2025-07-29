@@ -1,7 +1,6 @@
 import {
   calcNonce,
   castToPubKey,
-  deserializePoint,
   freeObj,
   genRandomPublicKey,
   getPublicKeyPoint,
