@@ -11,6 +11,11 @@ export const CTX_ID_SIZE = blsct.CTX_ID_SIZE
 export const POINT_SIZE = blsct.POINT_SIZE
 export const SCRIPT_SIZE = blsct.SCRIPT_SIZE
 
+export enum TxOutputType {
+  Normal,
+  StakedCommitment,
+}
+
 export interface BlsctRetVal {
   value: any
   value_size: number,
@@ -485,6 +490,74 @@ export const getTxInRbf = (obj: any): boolean => {
   return blsct.get_tx_in_rbf(obj)
 }
 
+// tx out
+export const buildTxOut = (
+  subAddr: any,
+  amount: number,
+  memo: string,
+  tokenId: any,
+  outputType: TxOutputType,
+  minStake: number,
+): any => {
+  let blsctOutputType
+  switch (outputType) {
+    case TxOutputType.Normal:
+      blsctOutputType = blsct.Normal
+      break
+
+    case TxOutputType.StakedCommitment:
+      blsctOutputType = blsct.StakedCommitment
+      break
+
+    default:
+      throw new Error(`Unknown output type: ${outputType}`)
+  }
+
+  return blsct.build_tx_out(
+    subAddr,
+    amount,
+    memo,
+    tokenId,
+    blsctOutputType,
+    minStake,
+  )
+}
+
+export const getTxOutDestination = (obj: any): any => {
+  return blsct.get_tx_out_destination(obj)
+}
+
+export const getTxOutAmount = (obj: any): number => {
+  return blsct.get_tx_out_amount(obj)
+}
+
+export const getTxOutMemo = (obj: any): string => {
+  return blsct.get_tx_out_memo(obj)
+}
+
+export const getTxOutTokenId = (obj: any): any => {
+  return blsct.get_tx_out_token_id(obj)
+}
+
+export const getTxOutOutputType = (obj: any): TxOutputType => {
+  const x = blsct.get_tx_out_output_type(obj)
+
+  switch(x) {
+    case blsct.Normal:
+      return TxOutputType.Normal
+
+    case blsct.StakedCommitment:
+      return TxOutputType.StakedCommitment
+
+    default:
+      throw new Error(`Unknown TxOutputType ${x}`)
+  }
+}
+
+export const getTxOutMinStake = (obj: any): number => {
+  return blsct.get_tx_out_min_stake(obj)
+}
+
 // typecast
 export const asString = (obj: string): any => {
   return blsct.as_string(obj)
@@ -527,6 +600,9 @@ export const castToTokenId = (obj: any): any => {
 }
 export const castToTxIn = (obj: any): any => {
   return blsct.cast_to_tx_in(obj)
+}
+export const castToTxOut = (obj: any): any => {
+  return blsct.cast_to_tx_out(obj)
 }
 export const castToUint8_tPtr = (obj: any): any => {
   return blsct.cast_to_uint8_t_ptr(obj)
