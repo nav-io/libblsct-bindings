@@ -1,3 +1,5 @@
+import assert from 'node:assert'
+
 const blsct = require('../build/Release/blsct.node')
 
 if (!blsct._initialized) {
@@ -6,10 +8,22 @@ if (!blsct._initialized) {
 }
 
 export const CTX_ID_SIZE = blsct.CTX_ID_SIZE
+export const POINT_SIZE = blsct.POINT_SIZE
 export const SCRIPT_SIZE = blsct.SCRIPT_SIZE
 
 export interface BlsctRetVal {
   value: any
+  value_size: number,
+  result: number
+}
+
+export interface BlsctAmountsRetVal{
+  result: number
+  value: any
+}
+
+export interface BlsctBoolRetVal {
+  value: boolean,
   result: number
 }
 
@@ -178,6 +192,134 @@ export const scalarToPubKey = (scalar: any): any => {
   return blsct.scalar_to_pub_key(scalar)
 }
 
+// range proof
+export const addRangeProofToVec = (
+  rangeProofs: any,
+  numRangeProofs: number,
+  rangeProof: any,
+): void => {
+  blsct.add_range_proof_to_vec(
+    rangeProofs,
+    numRangeProofs,
+    rangeProof
+  )
+}
+export const addToAmountRecoveryReqVec = (
+  reqs: any[],
+  req: any,
+): void => {
+  blsct.add_to_amount_recovery_req_vec(reqs, req)
+}
+export const addToUint64Vec = (vec: any, n: number): void => {
+  blsct.add_to_uint64_vec(vec, n)
+}
+export const buildRangeProof = (
+  amounts: any,
+  nonce: any,
+  msg: any,
+  token_id: any,
+): BlsctRetVal => {
+  return blsct.build_range_proof(
+    amounts,
+    nonce,
+    msg,
+    token_id,
+  )
+}
+export const createAmountRecoveryReqVec = (): any => {
+  return blsct.create_amount_recovery_req_vec()
+}
+export const createRangeProofVec = (): any => {
+  return blsct.create_range_proof_vec()
+}
+export const createUint64Vec = (): any => {
+  return blsct.create_uint64_vec()
+}
+export const deserializeRangeProof = (hex: string): BlsctRetVal => {
+  assert(hex.length % 2 === 0)
+  const objSize = hex.length / 2
+  return blsct.deserialize_range_proof(hex, objSize)
+}
+export const freeAmountRecoveryReqVec = (reqs: any): void => {
+  blsct.free_amount_recovery_req_vec(reqs)
+}
+export const freeAmountsRetVal = (rv: BlsctAmountsRetVal): void => {
+  blsct.free_amounts_ret_val(rv)
+}
+export const freeRangeProofVec = (rangeProofs: any): void => {
+  blsct.free_range_proof_vec(rangeProofs)
+}
+export const freeUint64Vec = (vec: any): any => {
+  blsct.free_uint64_vec(vec)
+}
+export const genAmountRecoveryReq = (
+    rangeProof: any,
+    rangeProofSize: number,
+    nonce: any,
+): any => {
+  return blsct.gen_amount_recovery_req(
+    rangeProof,
+    rangeProofSize,
+    nonce,
+  )
+}
+export const getAmountRecoveryResultAmount = (
+  req: any,
+  i: number,
+): number => {
+  return blsct.get_amount_recovery_result_amount(req, i)
+}
+export const getAmountRecoveryResultIsSucc = (
+  req: any,
+  i: number,
+): boolean => {
+  return blsct.get_amount_recovery_result_is_succ(req, i)
+}
+export const getAmountRecoveryResultMsg = (
+  req: any,
+  i: number,
+): string => {
+  return blsct.get_amount_recovery_result_msg(req, i)
+}
+export const getAmountRecoveryResultSize = (
+  resVec: any,
+): number => {
+  return blsct.get_amount_recovery_result_size(resVec)
+}
+export const getRangeProof_A = (rangeProof: any, rangeProofSize: number): any => {
+  return blsct.get_range_proof_A(rangeProof, rangeProofSize)
+}
+export const getRangeProof_alpha_hat = (rangeProof: any, rangeProofSize: number): any => {
+  return blsct. get_range_proof_alpha_hat(rangeProof, rangeProofSize)
+}
+export const getRangeProof_A_wip = (rangeProof: any, rangeProofSize: number): any => {
+  return blsct.get_range_proof_A_wip(rangeProof, rangeProofSize)
+}
+export const getRangeProof_B = (rangeProof: any, rangeProofSize: number): any => {
+  return blsct.get_range_proof_B(rangeProof, rangeProofSize)
+}
+export const getRangeProof_delta_prime = (rangeProof: any, rangeProofSize: number): any => {
+  return blsct. get_range_proof_delta_prime(rangeProof, rangeProofSize)
+}
+export const getRangeProof_r_prime = (rangeProof: any, rangeProofSize: number): any => {
+  return blsct. get_range_proof_r_prime(rangeProof, rangeProofSize)
+}
+export const getRangeProof_s_prime = (rangeProof: any, rangeProofSize: number): any => {
+  return blsct. get_range_proof_s_prime(rangeProof, rangeProofSize)
+}
+export const getRangeProof_t_aux = (rangeProof: any, rangeProofSize: number): any => {
+  return blsct. get_range_proof_tau_x(rangeProof, rangeProofSize)
+}
+export const recoverAmount = (vec: any): BlsctAmountsRetVal => {
+  return blsct.recover_amount(vec)
+}
+export const serializeRangeProof = (rangeProof: any, rangeProofSize: number): string => {
+  return blsct.serialize_range_proof(rangeProof, rangeProofSize)
+}
+export const verifyRangeProofs = (rangeProofs: any[]): BlsctBoolRetVal => {
+  return blsct.verify_range_proofs(rangeProofs)
+}
+
 // scalar
 export const deserializeScalar = (hex: string): BlsctRetVal => {
   return blsct.deserialize_scalar(hex)
@@ -312,6 +454,9 @@ export const castToPoint = (obj: any): any => {
 }
 export const castToPubKey = (obj: any): any => {
   return blsct.cast_to_pub_key(obj)
+}
+export const castToRangeProof = (obj: any): any => {
+  return blsct.cast_to_range_proof(obj)
 }
 export const castToScalar = (obj: any): any => {
   return blsct.cast_to_scalar(obj)

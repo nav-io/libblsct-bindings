@@ -1,5 +1,9 @@
 import { TokenId } from '../tokenId'
 
+test('default', () => {
+  TokenId.default()
+})
+
 test('fromToken', () => {
   const x = TokenId.fromToken(12345)
   expect(x.getToken()).toBe(12345)
@@ -12,7 +16,7 @@ test('fromTokenAndSubid', () => {
 })
 
 test('serialize and deserialize', () => {
-  const a = new TokenId()
+  const a = TokenId.default()
   const hex = a.serialize()
   const b = TokenId.deserialize(hex)
   expect(a.equals(b)).toBe(true)

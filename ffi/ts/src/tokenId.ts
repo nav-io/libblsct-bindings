@@ -13,13 +13,13 @@ import {
 import { ManagedObj } from './managedObj'
 
 export class TokenId extends ManagedObj {
-  constructor(obj?: any) {
-    if (typeof obj === 'object') {
-      super(obj)
-    } else {
-      const rv = genDefaultTokenId()
-      super(rv.value)
-    }
+  constructor(obj: any) {
+    super(obj)
+  }
+
+  static default(): TokenId {
+    const rv = genDefaultTokenId()
+    return new TokenId(rv.value)
   }
 
   static fromToken(token: number): TokenId {

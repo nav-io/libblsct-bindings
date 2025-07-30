@@ -1,4 +1,7 @@
-import { freeObj } from './blsct'
+import {
+  BlsctRetVal,
+  freeObj,
+} from './blsct'
 import util from 'util'
 
 export type FinalizerInfo = {
@@ -17,8 +20,9 @@ const finalizer = new FinalizationRegistry(
 )
 
 export abstract class ManagedObj {
-  obj: any
-  fi: FinalizerInfo
+  protected obj: any
+  protected objSize: number
+  private fi: FinalizerInfo
 
   constructor(
     obj: any,
@@ -26,9 +30,14 @@ export abstract class ManagedObj {
     this.fi = { obj, cls: this.constructor.name }
     finalizer.register(this, this.fi, this)
     this.obj = obj
+    this.objSize = 0
   }
 
   abstract value(): any
+  
+  size(): number {
+    return this.objSize
+  }
 
   move(): any {
     if (this.obj === undefined) {
@@ -46,10 +55,20 @@ export abstract class ManagedObj {
   }
 
   static fromObj<T extends ManagedObj>(
-    this: new (obj: any) => T, 
+    this: new (obj: any, objSize?: number) => T, 
     obj: any
   ): T {
     return new this(obj)
+  }
+
+  static fromObjAndSize<T extends ManagedObj>(
+    this: new (obj: any) => T, 
+    obj: any,
+    objSize: number,
+  ): T {
+    const x = new this(obj)
+    x.objSize = objSize
+    return x
   }
 
   toString(): string {
@@ -67,7 +86,7 @@ export abstract class ManagedObj {
   protected static _deserialize<T extends ManagedObj>(
     this: new (obj: any) => T,
     hex: string,
-    deserializer: (hex: string) => { result: number; value: any }
+    deserializer: (hex: string) => BlsctRetVal
   ): T {
     if (hex.length % 2 !== 0) {
       hex = `0${hex}`
@@ -77,8 +96,9 @@ export abstract class ManagedObj {
       freeObj(rv)
       throw new Error(`Deserialization failed. Error code = ${rv.result}`)
     }
-    const obj = rv.value
+    const x = new this(rv.value)
+    x.objSize = rv.value_size
     freeObj(rv)
-    return new this(obj)
+    return x
   }
 }
