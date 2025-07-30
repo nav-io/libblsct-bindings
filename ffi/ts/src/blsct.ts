@@ -436,6 +436,55 @@ export const fromTxKeyToViewKey = (txKey: any): any => {
   return blsct.from_tx_key_to_view_key(txKey)
 }
 
+// tx in
+export const buildTxIn = (
+  amount: number,
+  gamma: number,
+  spendingKey: any,
+  tokenId: any,
+  outPoint: any,
+  isStakedCommitment: boolean,
+  isRbf: boolean,
+): any => {
+  return blsct.build_tx_in(
+    amount,
+    gamma,
+    spendingKey,
+    tokenId,
+    outPoint,
+    isStakedCommitment,
+    isRbf,
+  )
+}
+
+export const getTxInAmount = (obj: any): number => {
+  return blsct.get_tx_in_amount(obj)
+}
+
+export const getTxInGamma = (obj: any): number => {
+  return blsct.get_tx_in_gamma(obj)
+}
+
+export const getTxInSpendingKey = (obj: any): any => {
+  return blsct.get_tx_in_spending_key(obj)
+}
+
+export const getTxInTokenId = (obj: any): any => {
+  return blsct.get_tx_in_token_id(obj)
+}
+
+export const getTxInOutPoint = (obj: any): any => {
+  return blsct.get_tx_in_out_point(obj)
+}
+
+export const getTxInStakedCommitment = (obj: any): boolean => {
+  return blsct.get_tx_in_staked_commitment(obj)
+}
+
+export const getTxInRbf = (obj: any): boolean => {
+  return blsct.get_tx_in_rbf(obj)
+}
+
 // typecast
 export const asString = (obj: string): any => {
   return blsct.as_string(obj)
@@ -475,6 +524,9 @@ export const castToSubAddrId = (obj: any): any => {
 }
 export const castToTokenId = (obj: any): any => {
   return blsct.cast_to_token_id(obj)
+}
+export const castToTxIn = (obj: any): any => {
+  return blsct.cast_to_tx_in(obj)
 }
 export const castToUint8_tPtr = (obj: any): any => {
   return blsct.cast_to_uint8_t_ptr(obj)
