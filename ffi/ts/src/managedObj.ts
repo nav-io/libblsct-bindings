@@ -78,7 +78,7 @@ export abstract class ManagedObj {
   }
 
   toString(): string {
-    return `${this.constructor.name}(${this.obj})`
+    return `${this.constructor.name}(${JSON.stringify(this.obj)})`
   }
 
   [util.inspect.custom](): string {
