@@ -1,18 +1,16 @@
-# TypeScript binding
+# Navio BLS Confidential Transaction Library
+
+TypeScript bindings for the `libblsct` library used by the [Navio](https://nav.io/) blockchain to construct confidential transactions based on the BLS12-381 curve.
 
 ## Requirements
 - Node.js v14 or higher
 
-## Building the module
+## Installation
+Note that this step builds underlying library from the source code and takes a while.
 
 ```bash
-npm run build-blsct
+npm install navio-blsct
 ```
 
-## Misc info
-
-- Exposing GC
-```
-NODE_OPTIONS="--expose-gc"
-``` 
-
+## Documentation
+TO BE PROVIDED
