@@ -36,7 +36,6 @@ jobs:
         run: |
           cd ffi/ts
           npm install
-          npm run install
 
       - name: Run tests
         run: |

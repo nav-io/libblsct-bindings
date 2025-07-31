@@ -34,7 +34,6 @@ jobs:
         run: |
           cd ffi/ts
           npm install
-          npm run install
 
       - name: Publish to npm
         run: |
