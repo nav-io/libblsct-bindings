@@ -11,12 +11,13 @@ import { TokenKey } from './childKeyDesc/tokenKey'
 import { TxKey } from './childKeyDesc/txKey'
 
 export class ChildKey extends Scalar {
-  constructor(seed?: Scalar) {
-    if (seed === undefined || seed === null) {
-      seed = Scalar.random()
+  constructor(obj?: Scalar) {
+    if (obj === undefined || obj === null) {
+      super(obj)
+    } else {
+      const childKeyObj = fromSeedToChildKey(obj.value())
+      super(childKeyObj)
     }
-    const obj = fromSeedToChildKey(seed.value())
-    super(obj)
   }
 
   toBlindingKey(): BlindingKey {

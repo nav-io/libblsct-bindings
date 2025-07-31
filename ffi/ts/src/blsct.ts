@@ -10,6 +10,8 @@ if (!blsct._initialized) {
 export const CTX_ID_SIZE = blsct.CTX_ID_SIZE
 export const POINT_SIZE = blsct.POINT_SIZE
 export const SCRIPT_SIZE = blsct.SCRIPT_SIZE
+export const BLSCT_IN_AMOUNT_ERROR = blsct.BLSCT_IN_AMOUNT_ERROR
+export const BLSCT_OUT_AMOUNT_ERROR = blsct.BLSCT_OUT_AMOUNT_ERROR
 
 export enum TxOutputType {
   Normal,
@@ -18,7 +20,7 @@ export enum TxOutputType {
 
 export interface BlsctRetVal {
   value: any
-  value_size: number,
+  value_size: number
   result: number
 }
 
@@ -30,6 +32,14 @@ export interface BlsctAmountsRetVal{
 export interface BlsctBoolRetVal {
   value: boolean,
   result: number
+}
+
+export interface BlsctCtxRetVal {
+  result: number
+  ser_ctx: any
+  ser_ctx_size: number
+  in_amount_err_index: number
+  out_amount_err_index: number
 }
 
 // address
@@ -59,9 +69,113 @@ export const fromChildKeyToTxKey = (childKey: any): any => {
   return blsct.from_child_key_to_tx_key(childKey)
 }
 
+// ctx
+export const addTxInToVec = (vec: any, txIn: any): void => {
+  return blsct.add_tx_in_to_vec(vec, txIn)
+}
+
+export const addTxOutToVec = (vec: any, txOut: any): void => {
+  return blsct.add_tx_out_to_vec(vec, txOut)
+}
+
+export const buildCTx = (txIns: any, txOuts: any): BlsctCtxRetVal => {
+  return blsct.build_ctx(txIns, txOuts)
+}
+
+export const createTxInVec = (): any => {
+  return blsct.create_tx_in_vec()
+}
+
+export const createTxOutVec = (): any => {
+  return blsct.create_tx_out_vec()
+}
+
+export const getCTxId = (ctx: any, objSize: number): string => {
+  return blsct.get_ctx_id(ctx, objSize)
+}
+
+export const getCTxIn = (ctxIns: any, i: number): BlsctRetVal => {
+  return blsct.get_ctx_in(ctxIns, i)
+}
+
+export const getCTxInCount = (ctxIn: any): number => {
+  return blsct.get_ctx_in_count(ctxIn)
+}
+
+export const getCTxIns = (ctx: any, objSize: number): any => {
+  return blsct.get_ctx_ins(ctx, objSize)
+}
+
+export const getCTxOut = (ctxOuts: any, i: number): BlsctRetVal => {
+  return blsct.get_ctx_out(ctxOuts, i)
+}
+
+export const getCTxOutCount = (ctx: any): number => {
+  return blsct.get_ctx_out_count(ctx)
+}
+
+export const getCTxOuts = (ctx: any, objSize: number): any => {
+  return blsct.get_ctx_outs(ctx, objSize)
+}
+
 // ctx id
 export const serializeCTxId = (ctxId: any): string => {
   return blsct.serialize_ctx_id(ctxId)
+}
+
+// ctx in
+export const getCTxInPrevOutHash = (obj: any): any => {
+  return blsct.get_ctx_in_prev_out_hash(obj)
+}
+export const getCTxInPrevOutN = (obj: any): number => {
+  return blsct.get_ctx_in_prev_out_n(obj)
+}
+export const getCTxInScriptSig = (obj: any): any => {
+  return blsct.get_ctx_in_script_sig(obj)
+}
+export const getCTxInSequence = (obj: any): number => {
+  return blsct.get_ctx_in_sequence(obj)
+}
+export const getCTxInScriptWitness = (obj: any): any => {
+  return blsct.get_ctx_in_script_witness(obj)
+}
+
+// ctx out
+export const getCTxOutValue = (obj: any): number => {
+  return blsct.get_ctx_out_value(obj)
+}
+
+export const getCTxOutScriptPubkey = (obj: any): any => {
+  return blsct.get_ctx_out_script_pubkey(obj)
+}
+
+export const getCTxOutTokenId = (obj: any): any => {
+  return blsct.get_ctx_out_token_id(obj)
+}
+
+export const getCTxOutVectorPredicate = (obj: any): BlsctRetVal => {
+  return blsct.get_ctx_out_vector_predicate(obj)
+}
+
+// ctx out blsct data
+export const getCTxOutBlindingKey = (obj: any): any => {
+  return blsct.get_ctx_out_blinding_key(obj)
+}
+
+export const getCTxOutEphemeralKey = (obj: any): any => {
+  return blsct.get_ctx_out_ephemeral_key(obj)
+}
+
+export const getCTxOutSpendingKey = (obj: any): any => {
+  return blsct.get_ctx_out_spending_key(obj)
+}
+
+export const getCTxOutRangeProof = (obj: any): BlsctRetVal => {
+  return blsct.get_ctx_out_range_proof(obj)
+}
+
+export const getCTxOutViewTag = (obj: any): number => {
+  return blsct.get_ctx_out_view_tag(obj)
 }
 
 // double public key
@@ -561,6 +675,12 @@ export const getTxOutMinStake = (obj: any): number => {
 // typecast
 export const asString = (obj: string): any => {
   return blsct.as_string(obj)
+}
+export const castToCTxIn = (obj: any): any => {
+  return blsct.cast_to_ctx_in(obj)
+}
+export const castToCTxOut = (obj: any): any => {
+  return blsct.cast_to_ctx_out(obj)
 }
 export const castToDpk = (obj: any): any => {
   return blsct.cast_to_dpk(obj)

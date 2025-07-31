@@ -82,6 +82,11 @@ export class TxOut extends ManagedObj {
     return getTxOutMinStake(this.value())
   }
 
+  clone(): TxOut {
+    const ser = this.serialize()
+    return TxOut.deserialize(ser)
+  }
+
   override serialize(): string {
     const buf = castToUint8_tPtr(this.value())
     return toHex(buf, this.size())

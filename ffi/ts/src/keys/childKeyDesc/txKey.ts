@@ -8,7 +8,7 @@ import { SpendingKey } from './txKeyDesc/spendingKey'
 import { ViewKey } from './txKeyDesc/viewKey'
 
 export class TxKey extends Scalar {
-  constructor(obj: any) {
+  constructor(obj?: any) {
     super(obj)
   }
 

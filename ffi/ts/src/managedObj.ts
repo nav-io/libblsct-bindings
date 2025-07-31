@@ -7,12 +7,12 @@ import util from 'util'
 export type FinalizerInfo = {
   cls: string,
   obj: any,
+  isBorrow: boolean,
 }
 
 const finalizer = new FinalizationRegistry(
   (fi: FinalizerInfo) => {
-    if (fi.obj) {
-      //console.log(`Finalizer called: ${JSON.stringify(fi)}`)
+    if (fi.obj && !fi.isBorrow) {
       freeObj(fi.obj)
       fi.obj = undefined
     }
@@ -22,13 +22,19 @@ const finalizer = new FinalizationRegistry(
 export abstract class ManagedObj {
   protected obj: any
   protected objSize: number
-  private fi: FinalizerInfo
+  protected fi: FinalizerInfo
 
   constructor(
     obj: any,
   ) {
-    this.fi = { obj, cls: this.constructor.name }
-    finalizer.register(this, this.fi, this)
+    this.fi = {
+      obj,
+      cls: this.constructor.name,
+      isBorrow: false,
+    }
+    if (obj !== undefined) {
+      finalizer.register(this, this.fi, this)
+    }
     this.obj = obj
     this.objSize = 0
   }

@@ -1,7 +1,7 @@
 import { Scalar } from '../../../scalar'
 
 export class ViewKey extends Scalar {
-  constructor(obj: any) {
+  constructor(obj?: any) {
     super(obj)
   }
 }

@@ -87,6 +87,11 @@ export class TxIn extends ManagedObj {
     return getTxInRbf(this.value())
   }
 
+  clone(): TxIn {
+    const ser = this.serialize()
+    return TxIn.deserialize(ser)
+  }
+
   override serialize(): string {
     const buf = castToUint8_tPtr(this.value())
     return toHex(buf, this.size())

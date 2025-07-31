@@ -9,13 +9,11 @@ from typing import Any, override, Self, Type
 class CTxOut(ManagedObj, Serializable):
   """
   Represents a transaction output in a constructed confidential transaction. Also known as `CTxOut` on the C++ side.
-  This class provides access to the `CTxOut` object, but does not own the `CTxOut` object.
 
   For code examples, see the `ctx.py` class documentation.
   """
   def __init__(self, obj: Any = None):
     super().__init__(obj)
-    self._borrowed = True
 
   def get_value(self) -> int:
     """Get the value of the transaction output."""
@@ -61,4 +59,23 @@ class CTxOut(ManagedObj, Serializable):
   @classmethod
   def default_obj(cls) -> Any:
     raise NotImplementedError("CTxOut should not be directly instantiated.")
+
+  @override
+  def serialize(self) -> str:
+    """Serialize the CTxOut object to a hexadecimal string."""
+    buf = blsct.cast_to_uint8_t_ptr(self.value())
+    return blsct.to_hex(buf, self.obj_size)
+
+  @classmethod
+  @override
+  def deserialize(
+    cls: Type[Self],
+    hex: str,
+  ) -> Self:
+    """Create a CTxOut from a hexadecimal string."""
+    if len(hex) % 2 != 0:
+      hex = f"0{hex}"
+    obj_size = len(hex) // 2
+    obj = blsct.hex_to_malloced_buf(hex)
+    return cls.from_obj_with_size(obj, obj_size)
 

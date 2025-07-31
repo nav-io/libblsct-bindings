@@ -15,16 +15,13 @@ export class Scalar extends ManagedObj {
   constructor(obj?: any) {
     if (typeof obj === 'object') {
       super(obj)
-    } else if (
-      typeof obj === 'number' ||
-      obj === undefined ||
-      obj === null
-    ) {
-      if (obj === undefined || obj === null) {
-        obj = 0
-      }
+    } else if (typeof obj === 'number') {
       const rv = genScalar(obj)
       super(rv.value)
+    } else if (obj === undefined || obj === null) {
+      const rv = genRandomScalar()
+      super(rv.value)
+      freeObj(rv)
     } else {
       throw new TypeError(`Scalar constructor received value of unexpected type ${typeof obj}`)
     }

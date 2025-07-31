@@ -272,11 +272,11 @@ if (p == nullptr) { \
 
   // functions to retrieve attrs of amount recovery result 
   size_t get_amount_recovery_result_size(
-    void* vp_amt_recovery_req_vec
+    void* vp_amt_recovery_res_vec
   ) {
-    if (vp_amt_recovery_req_vec == nullptr) {
+    if (vp_amt_recovery_res_vec == nullptr) {
     }
-    auto vec = static_cast<std::vector<BlsctAmountRecoveryResult>*>(vp_amt_recovery_req_vec);
+    auto vec = static_cast<std::vector<BlsctAmountRecoveryResult>*>(vp_amt_recovery_res_vec);
     
     return vec->size();
   }

@@ -187,6 +187,7 @@ class CTx(ManagedObj, Serializable):
       x = CTxIn.from_obj(rv.value)
       xs.append(x)
 
+    blsct.free_obj(ctx_ins)
     return xs
 
   def get_ctx_outs(self) -> list[CTxOut]:
@@ -199,6 +200,8 @@ class CTx(ManagedObj, Serializable):
       rv = blsct.get_ctx_out(ctx_outs, i)
       x = CTxOut.from_obj(rv.value)
       xs.append(x)
+
+    blsct.free_obj(ctx_outs)
     return xs
 
   @override
