@@ -86,7 +86,7 @@ export abstract class ManagedObj {
   }
 
   serialize(): string {
-    throw new Error('Not implemented')
+    return 'NOT IMPLEMENTED'
   }
 
   protected static _deserialize<T extends ManagedObj>(
