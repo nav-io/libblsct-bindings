@@ -2,10 +2,12 @@
   "name": "navio-blsct",
   "version": "1.0.0",
   "scripts": {
-    "build-blsct": "node scripts/build.js && node-gyp configure build",
-    "test": "tsc && NODE_OPTIONS='--expose-gc' jest"
+    "install": "node scripts/build.js && node-gyp configure build && tsc",
+    "test": "tsc && node_options='--expose-gc' jest"
   },
   "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "jest": "^30.0.5",
