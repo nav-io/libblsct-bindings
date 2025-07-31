@@ -16,5 +16,6 @@
   "dependencies": {
     "@types/node": "^24.1.0",
     "typescript": "^5.8.3"
-  }
+  },
+  "keywords": ["navio", "blsct", "TypeScript", "JavaScript", "ffi", "c++", "bindings"]
 }

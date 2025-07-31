@@ -9,7 +9,7 @@ TypeScript bindings for the `libblsct` library used by the [Navio](https://nav.i
   - on macOS: `brew install swig autoconf automake libtool pkg-config`
 
 ## Installation
-Note that this step builds underlying library from the source code and takes a while.
+This step builds the underlying C++ libraries from source and typically takes a few minutes or longer, depending on the machine.
 
 ```bash
 npm install navio-blsct
