@@ -33,3 +33,5 @@ export * from './keys/childKeyDesc/txKey'
 export * from './keys/childKeyDesc/txKeyDesc/spendingKey'
 export * from './keys/childKeyDesc/txKeyDesc/viewKey'
 
+export * from './blsct'
+
