@@ -111,7 +111,7 @@ export class CTx extends ManagedObj {
     const xs: CTxIn[] = []
     for (let i=0; i<numCtxIns; ++i) {
       const rv = getCTxIn(ctxIns, i)
-      const x = CTxIn.fromObj(rv.value)
+      const x = CTxIn.fromObjAndSize(rv.value, rv.value_size)
       xs.push(x)
     }
 
@@ -126,7 +126,7 @@ export class CTx extends ManagedObj {
     const xs: CTxOut[] = []
     for (let i=0; i<numCtxOuts; ++i) {
       const rv = getCTxOut(ctxOuts, i)
-      const x = CTxOut.fromObj(rv.value)
+      const x = CTxOut.fromObjAndSize(rv.value, rv.value_size)
       xs.push(x)
     }
 

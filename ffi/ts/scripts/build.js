@@ -39,30 +39,51 @@ const getCfg = (isProd) => {
   }
 }
 
-const gitCloneNavioCore = (cfg) => {
-  const fs = require('fs')
-  const { spawnSync } = require('child_process')
-  const path = require('path')
-
-  // Remove existing directory
-  if (fs.existsSync(cfg.navioCoreDir)) {
-    fs.rmSync(cfg.navioCoreDir, { recursive: true, force: true })
-    console.log(`Removed exisitng navio-core dir`)
+const detectPkgManager = () => {
+  const exists = (cmd) => {
+    const res = spawnSync('which', [cmd])
+    return res.status === 0
+  }
+  if (exists('apt-get')) {
+    return 'apt-get'
+  } else if (exists('yum')) {
+    return 'dnf'
   } else {
-    console.log(`No existing navio-core dir found`)
+    return undefined
   }
+}
 
-  const cmd = ['git', 'clone', '--depth', '1']
-  if (cfg.navioCoreBranch !== "") {
-    cmd.push('--branch', cfg.navioCoreBranch)
-  }
-  cmd.push(cfg.navioCoreRepo, 'navio-core')
+const installSystemDeps = () => {
+  const platform = os.platform()
+  console.log(`Platform: ${platform}`)
 
-  const res = spawnSync(cmd[0], cmd.slice(1))
-  if (res.status !== 0) {
-    throw new Error(`Failed to git clone navio-core ${JSON.stringify(res)}`)
+  if (platform === 'darwin') {
+    console.log('Installing system dependencies w/ brew...')
+    spawnSync('brew', ['install', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config'])
+
+  } else if (platform === 'linux') {
+    const pm = detectPkgManager()
+
+    if (pm !== undefined) {
+      console.log(`Installing system dependencies w/ ${pm}...`)
+
+      if (pm === 'apt-get') {
+        spawnSync('sudo', ['apt-get', 'update', '-y'])
+        spawnSync('sudo', ['apt-get', 'install', '-y', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config', 'build-essential'])
+
+      } else if (pm === 'dnf') {
+        spawnSync('sudo', ['dnf', 'update', '-y'])
+        spawnSync('sudo', ['dnf', 'install', '-y', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config', 'gcc-c++', 'make'])
+
+      } else {
+        // should not be reached
+      }
+    } else {
+      console.log('No supported package manager found')
+    }
+  } else {
+    console.log(`Unsupported platform: ${platform}`)
   }
-  console.log(`Cloned navio-core`)
 }
 
 const getDepArchDir = (dependsDir) => {
@@ -85,6 +106,31 @@ const getDepArchDir = (dependsDir) => {
     }
   }
   throw new Error(`Failed to find dependency arch dir in ${dependsDir}`)
+}
+
+const gitCloneNavioCore = (cfg) => {
+  const fs = require('fs')
+  const { spawnSync } = require('child_process')
+
+  // Remove existing directory
+  if (fs.existsSync(cfg.navioCoreDir)) {
+    fs.rmSync(cfg.navioCoreDir, { recursive: true, force: true })
+    console.log(`Removed exisitng navio-core dir`)
+  } else {
+    console.log(`No existing navio-core dir found`)
+  }
+
+  const cmd = ['git', 'clone', '--depth', '1']
+  if (cfg.navioCoreBranch !== "") {
+    cmd.push('--branch', cfg.navioCoreBranch)
+  }
+  cmd.push(cfg.navioCoreRepo, 'navio-core')
+
+  const res = spawnSync(cmd[0], cmd.slice(1))
+  if (res.status !== 0) {
+    throw new Error(`Failed to git clone navio-core ${JSON.stringify(res)}`)
+  }
+  console.log(`Cloned navio-core`)
 }
 
 const buildDepends = (cfg, numCpus) => {
@@ -160,23 +206,12 @@ const buildSwigWrapper = (cfg) => {
 
 const main = () => {
   const cfg = getCfg(IS_PROD)
-
-  gitCloneNavioCore(cfg)
-
   const numCpus = os.cpus().length
+
+  installSystemDeps()
+  gitCloneNavioCore(cfg)
   depArchDir = buildDepends(cfg, numCpus)
   buildLibBlsct(cfg, numCpus, depArchDir)
-
-  if (!fs.existsSync(cfg.libDir)) {
-    console.log(`❌ Directory ${cfg.libDir} does not exist.`);
-  } else {
-    const files = fs.readdirSync(cfg.libDir);
-    console.log(`📂 Files in ${cfg.libDir}:`);
-    for (const file of files) {
-      console.log(`  - ${file}`);
-    }
-  }
-
   buildSwigWrapper(cfg)
 }
 
