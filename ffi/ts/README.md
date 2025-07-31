@@ -4,9 +4,7 @@ TypeScript bindings for the `libblsct` library used by the [Navio](https://nav.i
 
 ## Requirements
 - Node.js v14 or higher
-- swig, autoconf, automake, libtool, pkg-config e.g.
-  - on Ubuntu: `sudo apt-get install swig autoconf automake libtool pkg-config`
-  - on macOS: `brew install swig autoconf automake libtool pkg-config`
+- g++, make, swig, autoconf, automake, libtool and pkg-config to build underlying C++ libraries
 
 ## Installation
 Installation requires building the underlying C++ libraries from source and typically takes a few minutes or longer, depending on the machine.
