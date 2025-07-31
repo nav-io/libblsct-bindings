@@ -1,8 +1,0 @@
-*_wrap.c*
-*.so
-!Makefile
-build/
-dist/
-node_modules/
-core
-
