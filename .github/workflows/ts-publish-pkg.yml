@@ -8,7 +8,6 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-24.04", "macos-15"]
-        python-version: ["3.12", "3.13"]
 
     runs-on: ${{ matrix.os }}
 
@@ -38,7 +37,9 @@ jobs:
           npm run install
 
       - name: Publish to npm
-        run: npm publish --access public
+        run: |
+          cd ffi/ts
+          npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
