@@ -35,11 +35,11 @@ jobs:
       - name: Build blsct.node
         run: |
           cd ffi/ts
-          npm run build
+          npm install
+          npm run install
 
       - name: Run tests
         run: |
           cd ffi/ts
-          npm install
           npx jest
 
