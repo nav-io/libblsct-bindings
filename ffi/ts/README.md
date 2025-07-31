@@ -3,9 +3,16 @@
 ## Requirements
 - Node.js v14 or higher
 
-## Installation
+## Building the module
 
 ```bash
-npm run build
+npm run build-blsct
 ```
+
+## Misc info
+
+- Exposing GC
+```
+NODE_OPTIONS="--expose-gc"
+``` 
 

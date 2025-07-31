@@ -8,14 +8,12 @@ from typing import Any, override, Self, Type
 class CTxIn(ManagedObj, Serializable):
   """
   Represents a transaction input in a constructed confidential transaction. Also known as `CTxIn` on the C++ side.
-  This class provides access to the CTxIn object but does not own the `CTxIn` object.
 
   For code examples, see the `ctx.py` class documentation.
   """
 
   def __init__(self, obj: Any = None):
     super().__init__(obj)
-    self._borrowed = True
 
   def get_prev_out_hash(self) -> CTxId:
     """Get the transaction ID of the previous output being spent."""
@@ -50,7 +48,7 @@ class CTxIn(ManagedObj, Serializable):
 
   @override
   def serialize(self) -> str:
-    """Serialize the CTxId object to a hexadecimal string."""
+    """Serialize the CTxIn object to a hexadecimal string."""
     buf = blsct.cast_to_uint8_t_ptr(self.value())
     return blsct.to_hex(buf, self.obj_size)
 
@@ -60,7 +58,7 @@ class CTxIn(ManagedObj, Serializable):
     cls: Type[Self],
     hex: str,
   ) -> Self:
-    """Create a CTxId from a hexadecimal string."""
+    """Create a CTxIn from a hexadecimal string."""
     if len(hex) % 2 != 0:
       hex = f"0{hex}"
     obj_size = len(hex) // 2

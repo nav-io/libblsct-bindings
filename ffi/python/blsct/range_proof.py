@@ -130,7 +130,6 @@ True
         amount,
         message,
       )
-      print(f"{i}: {x}")
       res.append(x)
     
     blsct.free_amounts_ret_val(rv)

@@ -2,8 +2,8 @@
   "name": "navio-blsct",
   "version": "1.0.0",
   "scripts": {
-    "build": "node scripts/build.js && node-gyp configure build --silly",
-    "test": "node src/test.js"
+    "build-blsct": "node scripts/build.js && node-gyp configure build",
+    "test": "tsc && NODE_OPTIONS='--expose-gc' jest"
   },
   "license": "MIT",
   "devDependencies": {
