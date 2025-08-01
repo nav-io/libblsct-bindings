@@ -1,7 +1,0 @@
-[submodule "swig"]
-	path = swig
-	url = https://github.com/swig/swig.git
-	branch = master
-[submodule "navio-core"]
-	path = navio-core
-	url = https://github.com/nav-io/navio-core.git
