@@ -39,6 +39,17 @@ const getCfg = (isProd) => {
   }
 }
 
+const exec = (cmd) => {
+  const isRoot = process.getuid && process.getuid() === 0
+  if (!isRoot) {
+    cmd = ['sudo', ...cmd]
+  }
+  const res = spawnSync(cmd[0], cmd.slice(1), { stdio: 'inherit' })
+  if (res.status !== 0) {
+    throw new Error(`Failed to execute ${cmd.join(' ')}: ${JSON.stringify(res)}`)
+  }
+}
+
 const detectPkgManager = () => {
   const exists = (cmd) => {
     const res = spawnSync('which', [cmd])
@@ -59,7 +70,7 @@ const installSystemDeps = () => {
 
   if (platform === 'darwin') {
     console.log('Installing system dependencies w/ brew...')
-    spawnSync('brew', ['install', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config'])
+    spawnSync('brew', ['install', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config', 'git'])
 
   } else if (platform === 'linux') {
     const pm = detectPkgManager()
@@ -68,12 +79,12 @@ const installSystemDeps = () => {
       console.log(`Installing system dependencies w/ ${pm}...`)
 
       if (pm === 'apt-get') {
-        spawnSync('sudo', ['apt-get', 'update', '-y'])
-        spawnSync('sudo', ['apt-get', 'install', '-y', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config', 'build-essential'])
+        exec(['apt-get', 'update'])
+        exec(['apt-get', 'install', '-y', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config', 'git', 'build-essential'])
 
       } else if (pm === 'dnf') {
-        spawnSync('sudo', ['dnf', 'update', '-y'])
-        spawnSync('sudo', ['dnf', 'install', '-y', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config', 'gcc-c++', 'make'])
+        exec(['dnf', 'update'])
+        exec(['dnf', 'install', '-y', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config', 'git', 'gcc-c++', 'make'])
 
       } else {
         // should not be reached
@@ -109,9 +120,6 @@ const getDepArchDir = (dependsDir) => {
 }
 
 const gitCloneNavioCore = (cfg) => {
-  const fs = require('fs')
-  const { spawnSync } = require('child_process')
-
   // Remove existing directory
   if (fs.existsSync(cfg.navioCoreDir)) {
     fs.rmSync(cfg.navioCoreDir, { recursive: true, force: true })
