@@ -46,7 +46,7 @@ const detectPkgManager = () => {
   }
   if (exists('apt-get')) {
     return 'apt-get'
-  } else if (exists('yum')) {
+  } else if (exists('dnf')) {
     return 'dnf'
   } else {
     return undefined
