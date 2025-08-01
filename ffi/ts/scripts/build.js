@@ -52,7 +52,8 @@ const exec = (cmd) => {
 
 const detectPkgManager = () => {
   const exists = (cmd) => {
-    const res = spawnSync('which', [cmd])
+    cmd = ['-v', ...cmd]
+    const res = spawnSync('command', [cmd])
     return res.status === 0
   }
   if (exists('apt-get')) {
@@ -80,11 +81,11 @@ const installSystemDeps = () => {
 
       if (pm === 'apt-get') {
         exec(['apt-get', 'update'])
-        exec(['apt-get', 'install', '-y', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config', 'git', 'build-essential'])
+        exec(['apt-get', 'install', '-y', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config', 'git', 'python3', 'build-essential'])
 
       } else if (pm === 'dnf') {
-        exec(['dnf', 'update'])
-        exec(['dnf', 'install', '-y', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config', 'git', 'gcc-c++', 'make'])
+        exec(['dnf', 'update', '-y'])
+        exec(['dnf', 'install', '-y', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config', 'git', 'python', 'gcc-c++', 'make'])
 
       } else {
         // should not be reached
