@@ -52,7 +52,7 @@ const exec = (cmd) => {
 
 const detectPkgManager = () => {
   const exists = (cmd) => {
-    const res = spawnSync('command', ['-v', cmd])
+    const res = spawnSync('which', [cmd])
     return res.status === 0
   }
   if (exists('apt-get')) {
