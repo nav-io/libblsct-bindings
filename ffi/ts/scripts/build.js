@@ -52,14 +52,11 @@ const exec = (cmd) => {
 
 const detectPkgManager = () => {
   const exists = (cmd) => {
-    cmd = ['-v', ...cmd]
-    const res = spawnSync('command', [cmd])
+    const res = spawnSync('command', ['-v', cmd])
     return res.status === 0
   }
   if (exists('apt-get')) {
     return 'apt-get'
-  } else if (exists('dnf')) {
-    return 'dnf'
   } else {
     return undefined
   }
@@ -82,10 +79,6 @@ const installSystemDeps = () => {
       if (pm === 'apt-get') {
         exec(['apt-get', 'update'])
         exec(['apt-get', 'install', '-y', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config', 'git', 'python3', 'build-essential'])
-
-      } else if (pm === 'dnf') {
-        exec(['dnf', 'update', '-y'])
-        exec(['dnf', 'install', '-y', 'swig', 'autoconf', 'automake', 'libtool', 'pkg-config', 'git', 'python', 'gcc-c++', 'make'])
 
       } else {
         // should not be reached
