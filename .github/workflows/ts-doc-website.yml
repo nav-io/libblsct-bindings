@@ -1,0 +1,45 @@
+name: 'TypeScript: Build doc website'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'ffi/ts/docs/**'
+      - '.github/workflows/ts-doc-website.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: |
+          cd ffi/ts
+          npm ci
+
+      - name: Generate TypeDoc documentation
+        run: |
+          cd ffi/ts
+          npx typedoc
+
+      - name: Deploy TypeDoc site
+        run: |
+          cd ffi/ts
+          npx ghp-import -n -f -b ts-doc docs
+          git push --force origin ts-doc
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

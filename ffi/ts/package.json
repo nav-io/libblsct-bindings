@@ -11,11 +11,20 @@
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "jest": "^30.0.5",
-    "ts-jest": "^29.4.0"
+    "ts-jest": "^29.4.0",
+    "typedoc": "^0.28.9"
   },
   "dependencies": {
     "@types/node": "^24.1.0",
     "typescript": "^5.8.3"
   },
-  "keywords": ["navio", "blsct", "TypeScript", "JavaScript", "ffi", "c++", "bindings"]
+  "keywords": [
+    "navio",
+    "blsct",
+    "TypeScript",
+    "JavaScript",
+    "ffi",
+    "c++",
+    "bindings"
+  ]
 }
