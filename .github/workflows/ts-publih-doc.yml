@@ -28,7 +28,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd ffi/ts
-          npm ci
+          npm install --ignore-scripts
 
       - name: Generate TypeDoc documentation
         run: |
