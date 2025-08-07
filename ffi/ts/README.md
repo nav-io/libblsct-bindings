@@ -14,4 +14,5 @@ npm install navio-blsct
 ```
 
 ## Documentation
-TO BE PROVIDED
+Full API reference and usage examples are available in the [documentation](https://nav-io.github.io/libblsct-bindings/ts/)
+
