@@ -1,4 +1,4 @@
-name: 'Python: Build doc website'
+name: 'Python: Publish doc website'
 
 on:
   workflow_dispatch:
@@ -48,11 +48,12 @@ jobs:
           cd ffi/python/docs
           make html
 
-      - name: Deploy document
-        run: |
-          cd ffi/python/docs
-          ghp-import -n -f -b python-doc build/html
-          git push --force origin python-doc 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Deploy Python docs to /python
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ffi/python/docs/build/html
+          publish_branch: gh-pages
+          destination_dir: python
+          keep_files: true
 
