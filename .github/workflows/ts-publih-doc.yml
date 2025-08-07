@@ -36,10 +36,9 @@ jobs:
           npx typedoc
 
       - name: Deploy TypeDoc site
-        run: |
-          cd ffi/ts
-          npx ghp-import -n -f -b ts-doc docs
-          git push --force origin ts-doc
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ffi/ts/docs
+          publish_branch: ts-doc
 
