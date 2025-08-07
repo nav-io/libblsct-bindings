@@ -1,4 +1,4 @@
-name: 'TypeScript: Build doc website'
+name: 'TypeScript: Publish doc website'
 
 on:
   workflow_dispatch:
@@ -35,10 +35,11 @@ jobs:
           cd ffi/ts
           npx typedoc
 
-      - name: Deploy TypeDoc site
+      - name: Deploy TypeScript docs to /ts
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ffi/ts/docs
-          publish_branch: ts-doc
-
+          publish_branch: gh-pages
+          destination_dir: ts
+          keep_files: true
