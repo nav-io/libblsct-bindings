@@ -13,4 +13,4 @@ pip install navio_blsct
 ```
 
 ## Documentation
-Full API reference and usage examples are available in the [official documentation](https://nav-io.github.io/libblsct-bindings/index.html)
+Full API reference and usage examples are available in the [documentation](https://nav-io.github.io/libblsct-bindings/python/)
