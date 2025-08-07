@@ -8,7 +8,8 @@
   - [Documentation](https://nav-io.github.io/libblsct-bindings/)
 - [TypeScript/JavaScript](https://github.com/nav-io/libblsct-bindings/blob/main/ffi/ts/README.md)
   - [Package (npm)](https://www.npmjs.com/package/navio-blsct)
-  - Documentation (TBP)
+  - [Documentation](https://nav-io.github.io/libblsct-bindings/ts/)
+
 ## Languages to be supported
 - [C](https://github.com/nav-io/libblsct-bindings/blob/main/ffi/c/README.md)
 - [Rust](https://github.com/nav-io/libblsct-bindings/blob/main/ffi/rust/README.md)
