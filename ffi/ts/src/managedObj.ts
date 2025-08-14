@@ -24,6 +24,9 @@ export abstract class ManagedObj {
   protected objSize: number
   protected fi: FinalizerInfo
 
+  /** Constructs a new instance of the class using the C++ object.
+   * @param obj - The C++ object to use for the new instance.
+   */
   constructor(
     obj: any,
   ) {
@@ -39,12 +42,22 @@ export abstract class ManagedObj {
     this.objSize = 0
   }
 
+  /** Returnsthe underlying C++ object.
+   * @returns The underlying C++ object.
+   */
   abstract value(): any
   
+  /** Returns the size of the underlying C++ object.
+   * @returns The size of the underlying C++ object in bytes.
+   */
   size(): number {
     return this.objSize
   }
 
+  /** Returns the underlying C++ object,
+   * transferring ownership from this instance to the caller.
+   * @returns The underlying object of the instance.
+   */
   move(): any {
     if (this.obj === undefined) {
       throw new Error('Obj has already been moved')
@@ -60,6 +73,11 @@ export abstract class ManagedObj {
     return obj  
   }
 
+  /** Constucts a new instance using the provided object.
+   *
+   * @param obj - The object to use for the new instance.
+   * @return A new instance of the class.
+   */
   static fromObj<T extends ManagedObj>(
     this: new (obj: any, objSize?: number) => T, 
     obj: any
@@ -67,6 +85,12 @@ export abstract class ManagedObj {
     return new this(obj)
   }
 
+  /** Constructs a new instance using the provided object and size.
+   *
+   * @param obj - The object to use for the new instance.
+   * @param objSize - The size of the object.
+   * @return A new instance of the class.
+   */
   static fromObjAndSize<T extends ManagedObj>(
     this: new (obj: any) => T, 
     obj: any,
@@ -77,18 +101,26 @@ export abstract class ManagedObj {
     return x
   }
 
+  /** Returns a string representation of the instance.
+   * @returns A string representation of the instance.
+   */
   toString(): string {
     return `${this.constructor.name}(${this.serialize()})`
   }
 
+  /** @hidden */
   [util.inspect.custom](): string {
     return this.toString()
   }
 
+  /** Serializes the instance to a hexadecimal string.
+   * @returns A hexadecimal string representation of the instance.
+   */
   serialize(): string {
     return 'NOT IMPLEMENTED'
   }
 
+  /** @hidden */
   protected static _deserialize<T extends ManagedObj>(
     this: new (obj: any) => T,
     hex: string,
