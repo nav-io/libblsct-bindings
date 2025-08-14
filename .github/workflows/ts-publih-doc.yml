@@ -33,7 +33,7 @@ jobs:
       - name: Generate TypeDoc documentation
         run: |
           cd ffi/ts
-          npx typedoc
+          npm run docs
 
       - name: Deploy TypeScript docs to /ts
         uses: peaceiris/actions-gh-pages@v3

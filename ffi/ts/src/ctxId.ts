@@ -7,6 +7,19 @@ import {
 
 import { ManagedObj } from './managedObj'
 
+/** Represents the transaction ID of a CMutableTransaction
+ *
+ * Examples:
+ * ```ts
+ * const { CTxId, CTX_ID_SIZE } = require('navio-blsct')
+ * const { randomBytes } = require('crypto')
+ * const cTxIdHex = randomBytes(CTX_ID_SIZE).toString('hex')
+ * const cTxId = CTxId.deserialize(cTxIdHex)
+ * const ser = cTxId.serialize() 
+ * const deser = CTxId.deserialize(ser)
+ * ser === deser.serialize() // true
+ * ```
+ */
 export class CTxId extends ManagedObj {
   constructor(obj: any) {
     super(obj)
@@ -21,6 +34,11 @@ export class CTxId extends ManagedObj {
     return toHex(buf, CTX_ID_SIZE)
   }
 
+  /** Deserializes a `CTxId` from its hexadecimal representation.
+   *
+   * * @param hex - The hexadecimal string to deserialize.
+   * * @returns A new `CTxId` instance.
+   */
   static deserialize(
     this: new (obj: any) => CTxId,
     hex: string
