@@ -53,7 +53,7 @@ export class Address {
     const rv = encodeAddress(dpk, blsctEncoding)
     if (rv.result !== 0) {
       freeObj(rv)
-      throw new Error(`Failed to encode address. Error code = ${rv.result} (${typeof rv.result}))`)
+      throw new Error(`Failed to encode address. Error code = ${rv.result}`)
     }
     const encAddr = rv.value
     freeObj(rv)
@@ -72,7 +72,7 @@ export class Address {
     const rv = decodeAddress(addrCStr)
     if (rv.result !== 0) {
       freeObj(rv)
-      throw new Error(`Failed to decode address. Error code = ${rv.result} (${typeof rv.result}))`)
+      throw new Error(`Failed to decode '${addrStr}' to DoublePublicKey. Error code = ${rv.result}`)
     }
     const addrDpk = DoublePublicKey.fromObj(rv.value)
     freeObj(rv)
