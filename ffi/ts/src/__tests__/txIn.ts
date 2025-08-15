@@ -58,12 +58,12 @@ test('getOutPoint', () => {
 
 test('getIsStakedCommitment', () => {
   const x = genTxIn()
-  x.getIsStakedCommitment()
+  x.getStakedCommitment()
 })
 
 test('getIsRbf', () => {
   const x = genTxIn()
-  x.getIsRbf()
+  x.getRbf()
 })
 
 test('serialize and deserialize', () => {

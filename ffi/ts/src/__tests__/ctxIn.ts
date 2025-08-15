@@ -19,7 +19,7 @@ test('getPrevOutN', () => {
 
 test('getScriptSig', () => {
   const x = genCTxIn()
-  x.getScriptsig()
+  x.getScriptSig()
 })
 
 test('getSequence', () => {
