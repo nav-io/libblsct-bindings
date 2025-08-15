@@ -70,6 +70,7 @@ export class Address {
   static decode(addrStr: string): DoublePublicKey {
     const addrCStr = asString(addrStr)
     const rv = decodeAddress(addrCStr)
+    console.log('decode result:', rv.result, typeof rv.result);
     if (rv.result !== 0) {
       freeObj(rv)
       throw new Error(`Failed to decode address. Error code = ${rv.result}`)
