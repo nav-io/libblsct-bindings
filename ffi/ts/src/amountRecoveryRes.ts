@@ -1,8 +1,16 @@
+/** The result of recovering a single amount from a non-aggregated range proof.
+ * Refer to `RangeProof` for a usage example.
+ */
 export class AmountRecoveryRes {
   isSucc: boolean
   amount: number
   msg: string
 
+  /** Constructs a new `AmountRecoveryRes` instance.
+   * @param isSucc - Indicates whether the recovery was successful.
+   * @param amount - The recovered amount.
+   * @param msg - The recovered message.
+   */
   constructor(
     isSucc: boolean,
     amount: number,
@@ -13,6 +21,9 @@ export class AmountRecoveryRes {
     this.msg = msg
   }
 
+  /** Returns a string representation of the `AmountRecoveryRes`.
+   * @returns a string representation of the `AmountRecoveryRes`.
+   */
   toString(): string {
     return `${this.constructor.name}(${this.isSucc}, ${this.amount}, ${this.msg})`
   }
@@ -23,6 +34,10 @@ export class AmountRecoveryRes {
     return buf.toString('hex')
   }
 
+  /** Deserializes a hexadecimal string into an `AmountRecoveryRes` instance.
+   * @param hex - The hexadecimal string to deserialize.
+   * @returns An instance of `AmountRecoveryRes`.
+   */
   deserialize(hex: string): AmountRecoveryRes {
     let obj: any
     try {
