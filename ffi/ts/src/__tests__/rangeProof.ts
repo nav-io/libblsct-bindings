@@ -22,7 +22,7 @@ test('generate', () => {
 
 test('verifyProofs', () => {
   const rp = genRangeProof()
-  const res = rp.verifyProofs([rp])
+  const res = RangeProof.verifyProofs([rp])
   expect(res).toBe(true)
 })
 
