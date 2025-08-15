@@ -5,10 +5,17 @@ import {
 import { Point } from './point'
 import { RangeProof } from './rangeProof'
 
+/** A request for recovering a single amount from a non-aggregated range proof.
+ * Refer to `RangeProof` for a usage example.
+ */
 export class AmountRecoveryReq {
   rangeProof: RangeProof
   nonce: Point
 
+  /** Constructs a new `AmountRecoveryReq` instance.
+   * @param rangeProof - The range proof to recover the amount from.
+   * @param nonce - The nonce used to generate the range proof.
+   */
   constructor(
     rangeProof: RangeProof,
     nonce: Point,
@@ -17,6 +24,9 @@ export class AmountRecoveryReq {
     this.nonce = nonce
   }
 
+  /** Returns a string representation of the `AmountRecoveryReq`.
+   * @returns a string representation of the `AmountRecoveryReq`.
+   */
   toString(): string {
     return `${this.constructor.name}(${this.rangeProof}, ${this.nonce})`
   }
@@ -27,6 +37,10 @@ export class AmountRecoveryReq {
     return `${serRangeProof}${serNonce}`
   }
 
+  /** Deserializes a hexadecimal string into an `AmountRecoveryReq` instance.
+   * @param hex - The hexadecimal string to deserialize.
+   * @returns An instance of `AmountRecoveryReq`.
+   */
   static deserialize(
     hex: string
   ): AmountRecoveryReq {

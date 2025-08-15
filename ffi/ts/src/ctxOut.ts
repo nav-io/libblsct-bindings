@@ -15,6 +15,10 @@ import { TokenId } from './tokenId'
 import { CTxOutBlsctData } from './ctxOutBlsctData'
 import { Script } from './script'
 
+/** Represents a transaction output in a constructed confidential transaction. Also known as `CTxOut` on the C++ side.
+ *
+ * For code examples, see the `ctx.py` class documentation.
+ */
 export class CTxOut extends ManagedObj {
   blsctDataCache?: CTxOutBlsctData
 
@@ -26,15 +30,24 @@ export class CTxOut extends ManagedObj {
     return castToCTxOut(this.obj)
   }
 
+  /** Returns the value of the transaction output.
+   * * @returns The value of the output.
+   */
   getValue(): number {
     return getCTxOutValue(this.value())
   }
 
+  /** Returns the `scriptPubKey' of the transaction output.
+   * * @returns The `scriptPubKey` of the output.
+   */
   getScriptPubKey(): Script {
     const obj = getCTxOutScriptPubkey(this.value())
     return Script.fromObj(obj)
   }
 
+  /** Returns the `CTxOutBlsctData` object associated with the transaction output.
+   * @returns The `CTxOutBlsctData` object.
+   */
   blsctData(): CTxOutBlsctData {
     if (this.blsctDataCache !== undefined) {
       return this.blsctDataCache
@@ -44,11 +57,17 @@ export class CTxOut extends ManagedObj {
     return x
   }
 
+  /** Returns the token ID associated with the transaction output.
+   * @returns The token ID of the output.
+   */
   getTokenId(): TokenId {
     const obj = getCTxOutTokenId(this.value())
     return TokenId.fromObj(obj)
   }
 
+  /** Returns the vector predicate of the transaction output.
+   * * @returns The vector predicate as a hexadecimal string.
+   */
   getVectorPredicate(): string {
     const rv = getCTxOutVectorPredicate(this.value())
     if (rv.result != 0) {
@@ -70,6 +89,10 @@ export class CTxOut extends ManagedObj {
     return toHex(buf, this.size())
   }
 
+  /** Deserializes a `CTxOut` from its hexadecimal representation.
+   * @param hex - The hexadecimal string to deserialize.
+   * @returns A new `CTxOut` instance. w
+   */
   static deserialize(
     this: new (obj: any) => CTxOut,
     hex: string
@@ -82,6 +105,5 @@ export class CTxOut extends ManagedObj {
     x.objSize = hex.length / 2 
     return x
   }
-
 }
 
