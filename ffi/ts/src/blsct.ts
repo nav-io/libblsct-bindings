@@ -43,7 +43,7 @@ export interface BlsctCtxRetVal {
 }
 
 // address
-export const decodeAddress = (addrStr: any): BlsctRetVal => {
+export const decodeAddress = (addrStr: string): BlsctRetVal => {
   return blsct.decode_address(addrStr)
 }
 export const encodeAddress = (
@@ -238,6 +238,9 @@ export const runGc = async (): Promise<void> => {
 }
 export const toHex = (buf: any, size: number): string => {
   return blsct.to_hex(buf, size)
+}
+export const getValueAsCStr = (rv: BlsctRetVal): string => {
+  return blsct.as_string(rv.value)
 }
 
 // out point
