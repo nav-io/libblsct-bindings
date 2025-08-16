@@ -55,7 +55,9 @@ export class Address {
       freeObj(rv)
       throw new Error(`Failed to encode address. Error code = ${rv.result}`)
     }
-    const encAddr = rv.value
+    const encAddr = Buffer.isBuffer(rv.value)
+      ? rv.value.toString('utf8')
+      : String(rv.value)
     freeObj(rv)
 
     return encAddr
