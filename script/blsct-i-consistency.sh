@@ -3,8 +3,8 @@
 set -euo pipefail
 
 FILES=(
+  "./ffi/ts/swig/blsct.i"
   "./ffi/python/blsct/blsct.i"
-  "./ffi/ts/blsct.i"
 )
 
 ref="${FILES[0]}"
