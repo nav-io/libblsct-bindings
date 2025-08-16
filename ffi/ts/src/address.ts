@@ -6,6 +6,7 @@ import {
   decodeAddress,
   encodeAddress,
   freeObj,
+  getValueAsCStr,
 } from './blsct'
 
 import { DoublePublicKey } from './keys/doublePublicKey'
@@ -55,12 +56,10 @@ export class Address {
       freeObj(rv)
       throw new Error(`Failed to encode address. Error code = ${rv.result}`)
     }
-    const encAddr = Buffer.isBuffer(rv.value)
-      ? rv.value.toString('utf8')
-      : String(rv.value)
+    const addrCStr = getValueAsCStr(rv);
     freeObj(rv)
 
-    return encAddr
+    return addrCStr;
   }
 
   /** Decode an address string to a `DoublePublicKey`.
@@ -70,12 +69,10 @@ export class Address {
    * @throws Error if the decoding fails.
    */
   static decode(addrStr: string): DoublePublicKey {
-    console.log(`Decoding address: '${addrStr}' '${JSON.stringify(addrStr)}'`)
-    const addrCStr = asString(addrStr)
-    const rv = decodeAddress(addrCStr)
+    const rv = decodeAddress(addrStr)
     if (rv.result !== 0) {
       freeObj(rv)
-      throw new Error(`Failed to decode '${addrStr}' to DoublePublicKey. Error code = ${rv.result}`)
+      throw new Error(`Failed to decode '${addrStr}' to DoublePublicKey. Error code = ${rv.result} ${typeof rv.result}`)
     }
     const addrDpk = DoublePublicKey.fromObj(rv.value)
     freeObj(rv)

@@ -4,7 +4,7 @@ const path = require('path')
 const { spawnSync } = require('child_process')
 
 // TODO: turn this on for production builds
-const IS_PROD = true
+const IS_PROD = false
 
 const getCfg = (isProd) => {
   baseDir = path.resolve(__dirname, '..')
@@ -31,7 +31,7 @@ const getCfg = (isProd) => {
     libDir,
     stdCpp: '-std=c++20',
     navioCoreRepo: isProd ? 'https://github.com/nav-io/navio-core' : 'https://github.com/gogoex/navio-core',
-    navioCoreBranch: isProd ? '' : '', // 'development-branch-name'
+    navioCoreBranch: isProd ? '' : 'fix-address-encdec', // 'development-branch-name'
     navioCoreDir,
     dependsDir,
     dependsBakDir,
@@ -125,6 +125,7 @@ const gitCloneNavioCore = (cfg) => {
   const cmd = ['git', 'clone', '--depth', '1']
   if (cfg.navioCoreBranch !== "") {
     cmd.push('--branch', cfg.navioCoreBranch)
+    console.log(`Using navio-core branch ${cfg.navioCoreBranch}...`)
   }
   cmd.push(cfg.navioCoreRepo, 'navio-core')
 
