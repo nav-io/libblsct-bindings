@@ -125,7 +125,7 @@ const gitCloneNavioCore = (cfg) => {
   const cmd = ['git', 'clone', '--depth', '1']
   if (cfg.navioCoreBranch !== "") {
     cmd.push('--branch', cfg.navioCoreBranch)
-    console.log(`Using navio-core branch ${cfg.navioCoreBranch}...`)
+    console.log(`Using navio-core ${cfg.navioCoreBranch} branch...`)
   }
   cmd.push(cfg.navioCoreRepo, 'navio-core')
 

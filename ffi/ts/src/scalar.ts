@@ -39,6 +39,7 @@ export class Scalar extends ManagedObj {
     } else if (typeof obj === 'number') {
       const rv = genScalar(obj)
       super(rv.value)
+      freeObj(rv)
     } else if (obj === undefined || obj === null) {
       const rv = genRandomScalar()
       super(rv.value)

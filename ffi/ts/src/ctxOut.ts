@@ -71,8 +71,9 @@ export class CTxOut extends ManagedObj {
   getVectorPredicate(): string {
     const rv = getCTxOutVectorPredicate(this.value())
     if (rv.result != 0) {
+      const msg = `Failed to get vector predicate. Error code = ${rv.result}`
       freeObj(rv)
-      throw new Error(`Failed to get vector predicate. Error code = ${rv.result}`)
+      throw new Error(msg)
     }
     if (rv.value_size !== 0) {
       freeObj(rv)

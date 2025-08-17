@@ -328,6 +328,11 @@ if (p == nullptr) { \
     return buf;
   }
 
+  const char* get_value_as_cstr(
+    BlsctRetVal* blsct_ret_val
+  ) {
+    return static_cast<const char*>(blsct_ret_val->value);
+  }
 %}
 
 %include "stdint.i"
