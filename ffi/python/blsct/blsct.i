@@ -328,6 +328,12 @@ if (p == nullptr) { \
     return buf;
   }
 
+  uint8_t get_result(
+    BlsctRetVal* blsct_ret_val
+  ) {
+    return static_cast<uint8_t>(blsct_ret_val->result);
+  }
+
   const char* get_value_as_cstr(
     BlsctRetVal* blsct_ret_val
   ) {

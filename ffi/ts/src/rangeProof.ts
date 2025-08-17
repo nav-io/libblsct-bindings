@@ -99,9 +99,9 @@ export class RangeProof extends ManagedObj {
     freeUint64Vec(vec)
 
     if (rv.result !== 0) {
+      const msg = `Building range proof failed. Error code = ${rv.result}`
       freeObj(rv)
-      console.log(`exception 1`)
-      throw new Error(`Building range proof failed. Error code = ${rv.result}`)
+      throw new Error(msg)
     }
     const x = RangeProof.fromObjAndSize(
       rv.value,
@@ -123,8 +123,9 @@ export class RangeProof extends ManagedObj {
     
     const rv = verifyRangeProofs(vec)
     if (rv.result !== 0) {
+      const msg = `Verifying range proofs failed. Error code = ${rv.result}`
       freeObj(rv)
-      throw new Error(`Verifying range proofs failed. Error code = ${rv.result}`)
+      throw new Error(msg)
     }
     freeRangeProofVec(vec)
     return rv.value
@@ -150,8 +151,9 @@ export class RangeProof extends ManagedObj {
     freeAmountRecoveryReqVec(reqVec)
 
     if (rv.result !== 0) {
+      const msg = `Recovering amount failed. Error code = ${rv.result}`
       freeAmountsRetVal(rv)
-      throw new Error(`Recovering amount failed. Error code = ${rv.result}`)
+      throw new Error(msg)
     } 
 
     let results: AmountRecoveryRes[] = []

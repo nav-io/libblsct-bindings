@@ -1,5 +1,4 @@
 import {
-  asString,
   Bech32,
   Bech32M,
   castToDpk,
@@ -53,8 +52,9 @@ export class Address {
     const dpk = castToDpk(addrDpk.value())
     const rv = encodeAddress(dpk, blsctEncoding)
     if (rv.result !== 0) {
+      const msg = `Failed to encode address. Error code = ${rv.result}`
       freeObj(rv)
-      throw new Error(`Failed to encode address. Error code = ${rv.result}`)
+      throw new Error(msg)
     }
     const addrCStr = getValueAsCStr(rv);
     freeObj(rv)
@@ -71,8 +71,9 @@ export class Address {
   static decode(addrStr: string): DoublePublicKey {
     const rv = decodeAddress(addrStr)
     if (rv.result !== 0) {
+      const msg = `Failed to decode address. Error code = ${rv.result}`
       freeObj(rv)
-      throw new Error(`Failed to decode '${addrStr}' to DoublePublicKey. Error code = ${rv.result} ${typeof rv.result}`)
+      throw new Error(msg)
     }
     const addrDpk = DoublePublicKey.fromObj(rv.value)
     freeObj(rv)

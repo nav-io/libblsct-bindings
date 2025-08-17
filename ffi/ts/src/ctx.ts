@@ -185,20 +185,23 @@ export class CTx extends ManagedObj {
     freeObj(txOutVec)
 
     if (rv.result === BLSCT_IN_AMOUNT_ERROR) {
+      const msg = `Failed to build transaction. txIns[${rv.in_amount_err_index}] has an invalid amount`
       freeObj(rv)
       freeTxInsOuts()
-      throw new Error(`Failed to build transaction. txIns[${rv.in_amount_err_index}] has an invalid amount`)
+      throw new Error(msg)
     }
     if (rv.result === BLSCT_OUT_AMOUNT_ERROR) {
+      const msg = `Failed to build transaciton. tx_outs[${rv.out_amount_err_index}] has an invalid amount`
       freeObj(rv)
       freeTxInsOuts()
-      throw new Error(`Failed to build transaciton. tx_outs[${rv.out_amount_err_index}] has an invalid amount`)
+      throw new Error(msg)
     }
 
     if (rv.result !== 0) {
       freeTxInsOuts()
+      const msg = `building tx failed. Error code = ${rv.result}`
       freeObj(rv)
-      throw new Error(`building tx failed. Error code = ${rv.result}`)
+      throw new Error(msg)
     }
 
     const obj = rv.ser_ctx // rv.ser_ctx is a byte array

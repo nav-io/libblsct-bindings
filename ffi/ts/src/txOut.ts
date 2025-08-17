@@ -72,8 +72,9 @@ export class TxOut extends ManagedObj {
       minStake,
     )
     if (rv.result !== 0) {
+      const msg = `Failed to build TxOut. Error code = ${rv.result}`
       freeObj(rv)
-      throw new Error(`Failed to build TxOut. Error code = ${rv.result}`)
+      throw new Error(msg)
     }
     const x = new TxOut(rv.value)
     x.objSize = rv.value_size

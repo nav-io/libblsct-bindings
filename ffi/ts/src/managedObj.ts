@@ -131,8 +131,9 @@ export abstract class ManagedObj {
     }
     const rv = deserializer(hex)
     if (rv.result !== 0) {
+      const msg = `Deserialization failed. Error code = ${rv.result}`
       freeObj(rv)
-      throw new Error(`Deserialization failed. Error code = ${rv.result}`)
+      throw new Error(msg)
     }
     const x = new this(rv.value)
     x.objSize = rv.value_size

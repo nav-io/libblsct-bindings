@@ -738,3 +738,4 @@ export const calcViewTag = (
 ): any => {
   return blsct.calc_view_tag(blindingPubKey, viewKey)
 }
+
