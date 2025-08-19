@@ -10,7 +10,7 @@ import shutil
 import subprocess
 
 # TODO: turn this on for production builds
-IS_PROD = False
+IS_PROD = True
 
 std_cpp = "-std=c++20"
 
@@ -23,7 +23,7 @@ if IS_PROD:
   navio_core_repo = "https://github.com/nav-io/navio-core"
 else:
   navio_core_repo = "https://github.com/gogoex/navio-core"
-  navio_core_branch = "fix-address-encdec"
+  navio_core_branch = ""
 
 navio_core_dir = os.path.join(package_dir, "navio-core")
 depends_dir = Path(os.path.join(navio_core_dir, "depends"))
