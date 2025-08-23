@@ -61,9 +61,9 @@ test('get_alpha_hat', () => {
   rp.get_alpha_hat()
 })
 
-test('get_t_aux', () => {
+test('get_tau_x', () => {
   const rp = genRangeProof()
-  rp.get_t_aux()
+  rp.get_tau_x()
 })
 
 test('serialize and deserialize', () => {
