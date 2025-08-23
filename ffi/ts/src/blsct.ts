@@ -412,7 +412,7 @@ export const getRangeProof_A = (rangeProof: any, rangeProofSize: number): any =>
   return blsct.get_range_proof_A(rangeProof, rangeProofSize)
 }
 export const getRangeProof_alpha_hat = (rangeProof: any, rangeProofSize: number): any => {
-  return blsct. get_range_proof_alpha_hat(rangeProof, rangeProofSize)
+  return blsct.get_range_proof_alpha_hat(rangeProof, rangeProofSize)
 }
 export const getRangeProof_A_wip = (rangeProof: any, rangeProofSize: number): any => {
   return blsct.get_range_proof_A_wip(rangeProof, rangeProofSize)
@@ -421,16 +421,16 @@ export const getRangeProof_B = (rangeProof: any, rangeProofSize: number): any =>
   return blsct.get_range_proof_B(rangeProof, rangeProofSize)
 }
 export const getRangeProof_delta_prime = (rangeProof: any, rangeProofSize: number): any => {
-  return blsct. get_range_proof_delta_prime(rangeProof, rangeProofSize)
+  return blsct.get_range_proof_delta_prime(rangeProof, rangeProofSize)
 }
 export const getRangeProof_r_prime = (rangeProof: any, rangeProofSize: number): any => {
-  return blsct. get_range_proof_r_prime(rangeProof, rangeProofSize)
+  return blsct.get_range_proof_r_prime(rangeProof, rangeProofSize)
 }
 export const getRangeProof_s_prime = (rangeProof: any, rangeProofSize: number): any => {
-  return blsct. get_range_proof_s_prime(rangeProof, rangeProofSize)
+  return blsct.get_range_proof_s_prime(rangeProof, rangeProofSize)
 }
-export const getRangeProof_t_aux = (rangeProof: any, rangeProofSize: number): any => {
-  return blsct. get_range_proof_tau_x(rangeProof, rangeProofSize)
+export const getRangeProof_tau_x = (rangeProof: any, rangeProofSize: number): any => {
+  return blsct.get_range_proof_tau_x(rangeProof, rangeProofSize)
 }
 export const recoverAmount = (vec: any): BlsctAmountsRetVal => {
   return blsct.recover_amount(vec)
