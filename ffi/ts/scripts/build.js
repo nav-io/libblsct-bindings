@@ -126,12 +126,14 @@ const gitCloneNavioCore = (cfg) => {
   if (cfg.navioCoreBranch !== "") {
     cmd.push('--branch', cfg.navioCoreBranch)
     console.log(`Using navio-core ${cfg.navioCoreBranch} branch...`)
+  } else {
+    console.log(`Using navio-core master branch...`)
   }
   cmd.push(cfg.navioCoreRepo, 'navio-core')
 
   const res = spawnSync(cmd[0], cmd.slice(1))
   if (res.status !== 0) {
-    throw new Error(`Failed to git clone navio-core ${JSON.stringify(res)}`)
+    throw new Error(`${cmd.join(' ')} failed: ${JSON.stringify(res)}`)
   }
   console.log(`Cloned navio-core`)
 }

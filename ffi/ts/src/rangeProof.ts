@@ -25,7 +25,7 @@ import {
   getRangeProof_delta_prime,
   getRangeProof_r_prime,
   getRangeProof_s_prime,
-  getRangeProof_t_aux,
+  getRangeProof_tau_x,
   recoverAmount,
   serializeRangeProof,
   verifyRangeProofs,
@@ -250,11 +250,11 @@ export class RangeProof extends ManagedObj {
     return Scalar.fromObj(obj)
   }
 
-  /** Returns the t_aux scalar of the range proof.
+  /** Returns the tau_x scalar of the range proof.
    * @returns A `Scalar` object representing the t_aux scalar.
    */
-  get_t_aux(): Scalar {
-    const obj = getRangeProof_t_aux(this.value(), this.size())
+  get_tau_x(): Scalar {
+    const obj = getRangeProof_tau_x(this.value(), this.size())
     return Scalar.fromObj(obj)
   }
 }
