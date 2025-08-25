@@ -92,13 +92,13 @@ const installSystemDeps = () => {
 }
 
 const getDepArchDir = (dependsDir) => {
+  if (!fs.existsSync(dependsDir)) {
+    throw new Error(`${dependsDir} not found`)
+  }
   const arches = [
     'x86_64', 'i686', 'mips', 'arm', 'aarch64',
     'powerpc', 'riscv32', 'riscv64', 's390x'
   ]
-  if (!fs.existsSync(dependsDir)) {
-    throw new Error(`${dependsDir} not found`)
-  }
 
   const files = fs.readdirSync(dependsDir, { withFileTypes: true })
   for (const file of files) {
