@@ -9,7 +9,10 @@ readme = "README.md"
 categories = ["cryptography::cryptocurrencies", "api-bindings"]
 keywords = ["navio", "privacy", "confidential", "transaction"]
 
+[dependencies]
+
 [build-dependencies]
 cc = "1.2.12"
 git2 = "0.20"
 num_cpus = "1.16"
+

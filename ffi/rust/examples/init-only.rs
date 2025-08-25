@@ -1,7 +1,7 @@
-use navio_blsct::blsct;
+use navio_blsct::common::init;
 
 pub fn main() {
-  blsct::init();
+  init();
   println!("Initialized libblsct");
 }
 
