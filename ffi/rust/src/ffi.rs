@@ -38,6 +38,8 @@ pub fn gen_base_point() -> *mut BlsctRetVal;
 pub fn gen_random_point() -> *mut BlsctRetVal;
 pub fn deserialize_point(hex: *const c_char) -> *mut BlsctRetVal;
 pub fn is_point_equal(a: *const BlsctPoint, b: *const BlsctPoint) -> c_int;
+pub fn is_valid_point(blsct_point: *const BlsctPoint) -> c_int;
+pub fn point_from_scalar(scalar: *const BlsctScalar) -> *mut BlsctPoint;
 pub fn serialize_point(blsct_point: *const BlsctPoint) -> *const c_char;
 
 }

@@ -7,18 +7,25 @@ use crate::ffi::{
   gen_base_point,
   gen_random_point,
   is_point_equal,
+  is_valid_point,
+  point_from_scalar,
   serialize_point,
 };
-use crate::macros::impl_from_retval;
+use crate::macros::{
+  impl_display,
+  impl_from_retval,
+  impl_value,
+};
 use crate::scalar::Scalar;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Point {
-  obj: BlsctObj<Point>,
+  obj: BlsctObj<Point, BlsctPoint>,
 }
 
 impl_from_retval!(Point);
+impl_display!(Point);
 
 impl Point {
   pub fn base() -> Result<Self, &'static str> {
@@ -29,23 +36,27 @@ impl Point {
     Self::from_retval(unsafe { gen_random_point() })
   }
 
-  pub fn is_valid(&self) -> boolean {
-    return is_valid_point(self.obj)
+  pub fn is_valid(&self) -> bool {
+    let b = unsafe { is_valid_point(self.obj.as_ptr()) };
+    return b != 0;
   }
+
+  impl_value!(Point, BlsctPoint);
 }
 
-impl From<Scalar> for Point {
-  fn from(scalar: &Scalar) -> Point {
-    let obj = point_from_scalar(scalar.obj);
+impl From<BlsctObj<Point, BlsctPoint>> for Point {
+  fn from(obj: BlsctObj<Point, BlsctPoint>) -> Point {
     Point { obj }
   }
 }
 
-  override toString(): string {
-    const s = pointToStr(this.value())
-    return `Point(${s})`
+impl From<&Scalar> for Point {
+  fn from(scalar: &Scalar) -> Point {
+    let blsct_scalar = unsafe { point_from_scalar(scalar.value()) };
+    let obj = BlsctObj::from_blsct_obj(blsct_scalar);
+    obj.into()
   }
-
+}
 
 impl BlsctSerde for Point {
   unsafe fn serialize(ptr: *const u8) -> *const i8 {
@@ -76,6 +87,10 @@ mod tests {
   #[test]
   fn test_base() {
     init();
+
+    let a = Point::base().unwrap();
+    let b = Point::base().unwrap();
+    assert!(a == b);
   }
 
   #[test]
@@ -98,6 +113,22 @@ mod tests {
         prev = x;
       }
     }
+  }
+
+  #[test]
+  fn test_is_valid() {
+    init();
+
+    let x = Point::base().unwrap();
+    assert!(x.is_valid());
+  }
+
+  #[test]
+  fn test_from_scalar() {
+    init();
+
+    let scalar = Scalar::new(123).unwrap();
+    let _ = Point::from(&scalar);
   }
 
   #[test]

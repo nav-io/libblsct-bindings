@@ -21,13 +21,14 @@ use std::{
 use std::ptr::NonNull;
 
 #[derive(Debug)]
-pub struct BlsctObj<T: BlsctSerde> {
+pub struct BlsctObj<T: BlsctSerde, U> {
   ptr: NonNull<u8>,
-  _size: usize,
-  _x: std::marker::PhantomData<*mut T>
+  size: usize,
+  _t: std::marker::PhantomData<*mut T>,
+  _u: std::marker::PhantomData<fn() -> U>,
 }
 
-impl<T: BlsctSerde> fmt::Display for BlsctObj<T> {
+impl<T: BlsctSerde, U> fmt::Display for BlsctObj<T, U> {
   fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
     let bytes = bincode::serialize(self).map_err(|_| fmt::Error)?;
     let hex = hex::encode(bytes);
@@ -35,7 +36,7 @@ impl<T: BlsctSerde> fmt::Display for BlsctObj<T> {
   }
 }
 
-impl<T: BlsctSerde> BlsctObj<T> {
+impl<T: BlsctSerde, U> BlsctObj<T, U> {
   pub fn from_retval(rv: *mut BlsctRetVal) -> Result<Self, &'static str> {
     // check if allocating memory for BlsctRetVal is failed
     if rv.is_null() {
@@ -58,22 +59,35 @@ impl<T: BlsctSerde> BlsctObj<T> {
 
     Ok(Self {
       ptr,
-      _size: value_size,
-      _x: std::marker::PhantomData,
+      size: value_size,
+      _t: std::marker::PhantomData,
+      _u: std::marker::PhantomData,
     })
   }
 
-  //#[inline] pub fn len(&self) -> usize { self.size }
+  pub fn from_blsct_obj(blsct_obj: *mut U) -> Self {
+    let ptr = NonNull::new(blsct_obj as *mut u8).unwrap();
+    let size = std::mem::size_of::<U>();
 
-  #[inline] pub fn as_ptr(&self) -> *const u8 {
-    self.ptr.as_ptr() as *const u8
+    Self {
+      ptr,
+      size,
+      _t: std::marker::PhantomData,
+      _u: std::marker::PhantomData,
+    }
+  }
+
+  #[inline] pub fn _len(&self) -> usize { self.size }
+
+  #[inline] pub fn as_ptr(&self) -> *const U {
+    self.ptr.as_ptr() as *const U
   }
 }
 
-impl<T: BlsctSerde> Serialize for BlsctObj<T> {
+impl<T: BlsctSerde, U> Serialize for BlsctObj<T, U> {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
   where S: Serializer {
-    let c_hex = unsafe { T::serialize(self.as_ptr()) };
+    let c_hex = unsafe { T::serialize(self.as_ptr() as *const u8) };
     let hex = unsafe { CStr::from_ptr(c_hex) }
       .to_str()
       .map_err(|e| SerError::custom(format!("Converting C-Str to String failed: {:?}", e)))?
@@ -85,19 +99,19 @@ impl<T: BlsctSerde> Serialize for BlsctObj<T> {
   }
 }
 
-impl<'de, T: BlsctSerde> Deserialize<'de> for BlsctObj<T> {
+impl<'de, T: BlsctSerde, U> Deserialize<'de> for BlsctObj<T, U> {
   fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
   where D: Deserializer<'de> {
     let hex: String = Deserialize::deserialize(deserializer)?;
     let c_hex = CString::new(hex).unwrap();
     let rv = unsafe { T::deserialize(c_hex.as_ptr()) };
 
-    Ok(BlsctObj::<T>::from_retval(rv)
+    Ok(BlsctObj::<T, U>::from_retval(rv)
       .map_err(|e| DeError::custom(format!("Deserialization failed: {:?}", e)))?)
   }
 }
 
-impl<T: BlsctSerde> Drop for BlsctObj<T> {
+impl<T: BlsctSerde, U> Drop for BlsctObj<T, U> {
   fn drop(&mut self) {
     unsafe {
       free_obj(self.ptr.as_ptr() as *mut c_void);

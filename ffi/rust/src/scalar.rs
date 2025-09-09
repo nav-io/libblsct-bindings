@@ -13,13 +13,13 @@ use crate::ffi::{
 use crate::macros::{
   impl_display,
   impl_from_retval,
+  impl_value,
 };
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Scalar {
-  obj: BlsctObj<Scalar>,
+  obj: BlsctObj<Scalar, BlsctScalar>,
 }
 
 impl_from_retval!(Scalar);
@@ -33,6 +33,8 @@ impl Scalar {
   pub fn random() -> Result<Self, &'static str> {
     Self::from_retval(unsafe { gen_random_scalar() })
   }
+
+  impl_value!(Scalar, BlsctScalar);
 }
 
 impl BlsctSerde for Scalar {
@@ -131,6 +133,18 @@ mod tests {
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<Scalar>(&hex).unwrap();
     assert!(a == b);
+  }
+
+  #[test]
+  fn test_display() {
+    use regex::Regex;
+    init();
+
+    let x = Scalar::random().unwrap();
+    let s = format!("{}", x);
+
+    let re = Regex::new(r"^Scalar\([0-9a-fA-F]+\)$").unwrap();
+    assert!(re.is_match(&s));
   }
 }
 
