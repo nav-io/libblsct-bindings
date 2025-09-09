@@ -67,6 +67,7 @@ impl BlsctSerde for Point {
     deserialize_point(hex)
   }
 }
+
 impl PartialEq for Point {
   fn eq(&self, other: &Self) -> bool {
     unsafe { is_point_equal(
