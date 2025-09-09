@@ -11,4 +11,15 @@ macro_rules! impl_from_retval {
   };
 }
 
+macro_rules! impl_display {
+  ($type:ident) => {
+    impl Display for $type {
+      fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}({})", stringify!($type), self.obj)
+      }
+    }
+  };
+}
+
 pub(crate) use impl_from_retval;
+pub(crate) use impl_display;

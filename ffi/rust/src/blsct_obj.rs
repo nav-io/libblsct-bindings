@@ -11,9 +11,12 @@ use serde::{
   Serialize,
   Serializer,
 };
-use std::ffi::{
-  c_void,
-  {CStr, CString},
+use std::{
+  ffi::{
+    c_void,
+    {CStr, CString},
+  },
+  fmt,
 };
 use std::ptr::NonNull;
 
@@ -22,6 +25,14 @@ pub struct BlsctObj<T: BlsctSerde> {
   ptr: NonNull<u8>,
   _size: usize,
   _x: std::marker::PhantomData<*mut T>
+}
+
+impl<T: BlsctSerde> fmt::Display for BlsctObj<T> {
+  fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    let bytes = bincode::serialize(self).map_err(|_| fmt::Error)?;
+    let hex = hex::encode(bytes);
+    write!(f, "{}", hex)
+  }
 }
 
 impl<T: BlsctSerde> BlsctObj<T> {
@@ -65,7 +76,10 @@ impl<T: BlsctSerde> Serialize for BlsctObj<T> {
     let c_hex = unsafe { T::serialize(self.as_ptr()) };
     let hex = unsafe { CStr::from_ptr(c_hex) }
       .to_str()
-      .map_err(|e| SerError::custom(format!("Converting C-Str to String failed: {:?}", e)))?;
+      .map_err(|e| SerError::custom(format!("Converting C-Str to String failed: {:?}", e)))?
+      .to_owned();
+
+    unsafe { free_obj(c_hex as *mut c_void); }
 
     serializer.serialize_str(&hex)
   }

@@ -10,8 +10,12 @@ use crate::ffi::{
   scalar_to_uint64,
   serialize_scalar,
 };
-use crate::macros::impl_from_retval;
+use crate::macros::{
+  impl_display,
+  impl_from_retval,
+};
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Scalar {
@@ -19,6 +23,7 @@ pub struct Scalar {
 }
 
 impl_from_retval!(Scalar);
+impl_display!(Scalar);
 
 impl Scalar {
   pub fn new(n: u64) -> Result<Self, &'static str> {
@@ -68,10 +73,9 @@ mod tests {
   fn test_new() {
     init();
 
-    let scalar = Scalar::new(123).unwrap();
-    let scalar_u64: u64 = scalar.into();
-    
-    assert!(scalar_u64 == 123);
+    let x = Scalar::new(123).unwrap();
+    let x_u64: u64 = x.into();
+    assert!(x_u64 == 123);
   }
 
   #[test]
@@ -82,17 +86,17 @@ mod tests {
     let mut dup_tolerance = 5;
 
     for _ in 0..1000 {
-      let scalar = Scalar::random().unwrap();
-      let scalar_u64: u64 = scalar.into();
+      let x = Scalar::random().unwrap();
+      let x_u64: u64 = x.into();
       
-      if prev == scalar_u64 {
+      if prev == x_u64 {
         dup_tolerance -= 1;
         if dup_tolerance == 0 {
-          panic!("random scalar generated the same value too many times");
+          panic!("Scalar.random() generated the same scalar too many times");
         }
       } else {
-        assert!(scalar_u64 != prev);
-        prev = scalar_u64;
+        assert!(x_u64 != prev);
+        prev = x_u64;
       }
     }
   }
@@ -101,9 +105,9 @@ mod tests {
   fn test_from() {
     init();
 
-    let scalar = Scalar::new(12345).unwrap();
-    let x: u64 = scalar.into();
-    assert!(x == 12345);
+    let x = Scalar::new(12345).unwrap();
+    let x_u64: u64 = x.into();
+    assert!(x_u64 == 12345);
   }
 
   #[test]
