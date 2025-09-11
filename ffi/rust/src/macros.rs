@@ -36,7 +36,9 @@ macro_rules! impl_key {
       ffi::BlsctScalar,
       scalar::Scalar,
     };
+    use serde::{Deserialize, Serialize};
 
+    #[derive(PartialEq, Eq, Debug, Deserialize, Serialize)]
     pub struct $name(Scalar);
 
     impl $name {

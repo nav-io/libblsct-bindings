@@ -1,14 +1,16 @@
-use crate::blsct_obj::BlsctObj;
-use crate::blsct_serde::BlsctSerde;
-use crate::ffi::{
-  BlsctRetVal,
-  BlsctScalar,
-  deserialize_scalar,
-  gen_scalar,
-  gen_random_scalar,
-  is_scalar_equal,
-  scalar_to_uint64,
-  serialize_scalar,
+use crate::{
+  blsct_obj::BlsctObj,
+  blsct_serde::BlsctSerde,
+  ffi::{
+    BlsctRetVal,
+    BlsctScalar,
+    deserialize_scalar,
+    gen_scalar,
+    gen_random_scalar,
+    is_scalar_equal,
+    scalar_to_uint64,
+    serialize_scalar,
+  },
 };
 use crate::macros::{
   impl_display,

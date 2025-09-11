@@ -14,7 +14,9 @@ use crate::{
     tx_key::TxKey,
   },
 };
+use serde::{Deserialize, Serialize};
 
+#[derive(PartialEq, Eq, Debug, Deserialize, Serialize)]
 pub struct ChildKey(Scalar);
 
 impl ChildKey {
@@ -47,15 +49,43 @@ impl ChildKey {
   }
 }
 
+macro_rules! impl_child_key_desc_deser_test {
+  ($derive_method:ident, $target_ty:path) => {
+    #[test]
+    fn test_deser() {
+      use crate::keys::child_key::ChildKey;
+      use bincode;
+
+      crate::ffi::init();
+
+      let seed = Scalar::random().unwrap();
+      let child_key = ChildKey::from_seed(&seed);
+
+      let a: $target_ty = child_key.$derive_method();
+      let hex = bincode::serialize(&a).unwrap();
+      let b: $target_ty = bincode::deserialize::<$target_ty>(&hex).unwrap();
+
+      assert_eq!(a, b);
+    }
+  };
+}
+
+pub(crate) use impl_child_key_desc_deser_test;
+
 #[cfg(test)]
 mod tests {
   use super::*;
   use crate::ffi::init;
+  use bincode;
+
+  fn gen_seed() -> Scalar {
+    init();
+    Scalar::random().unwrap()
+  }
 
   #[test]
   fn test_from_seed() {
-    init();
-    let seed = Scalar::random().unwrap();
+    let seed = gen_seed();
     ChildKey::from_seed(&seed);
   }
 
@@ -81,6 +111,17 @@ mod tests {
     let seed = Scalar::random().unwrap();
     let child_key = ChildKey::from_seed(&seed);
     child_key.to_tx_key();
+  }
+
+  #[test]
+  fn test_deser() {
+    init();
+
+    let seed = gen_seed();
+    let a = ChildKey::from_seed(&seed);
+    let hex = bincode::serialize(&a).unwrap();
+    let b = bincode::deserialize::<ChildKey>(&hex).unwrap();
+    assert!(a == b);
   }
 }
 

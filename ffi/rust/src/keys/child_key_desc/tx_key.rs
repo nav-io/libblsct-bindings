@@ -25,6 +25,30 @@ impl TxKey {
   }
 }
 
+macro_rules! impl_tx_key_deser_desc_test {
+  ($derive_method:ident, $target_ty:path) => {
+    #[test]
+    fn test_deser() {
+      use crate::keys::child_key::ChildKey;
+      use bincode;
+
+      crate::ffi::init();
+
+      let seed = Scalar::random().unwrap();
+      let child_key = ChildKey::from_seed(&seed);
+      let tx_key = child_key.to_tx_key();
+
+      let a: $target_ty = tx_key.$derive_method();
+      let hex = bincode::serialize(&a).unwrap();
+      let b: $target_ty = bincode::deserialize::<$target_ty>(&hex).unwrap();
+
+      assert_eq!(a, b);
+    }
+  };
+}
+
+pub(crate) use impl_tx_key_desc_deser_test;
+
 #[cfg(test)]
 mod tests {
   use super::*;
@@ -53,4 +77,9 @@ mod tests {
     tx_key.to_view_key();
   }
 }
+
+crate::keys::child_key::impl_child_key_desc_deser_test!(
+  to_tx_key,
+  TxKey
+);
 
