@@ -29,6 +29,31 @@ macro_rules! impl_value {
   };
 }
 
+macro_rules! impl_key {
+  ($name:ident) => {
+    use crate::{
+      blsct_obj::BlsctObj,
+      ffi::BlsctScalar,
+      scalar::Scalar,
+    };
+
+    pub struct $name(Scalar);
+
+    impl $name {
+      pub fn value(&self) -> *const BlsctScalar {
+        self.0.value()
+      }
+    }
+
+    impl From<BlsctObj<Scalar, BlsctScalar>> for $name {
+      fn from(obj: BlsctObj<Scalar, BlsctScalar>) -> $name {
+        $name(obj.into())
+      }
+    }
+  };
+}
+
 pub(crate) use impl_display;
 pub(crate) use impl_from_retval;
 pub(crate) use impl_value;
+pub(crate) use impl_key;

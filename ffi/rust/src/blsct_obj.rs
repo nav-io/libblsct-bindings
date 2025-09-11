@@ -65,7 +65,7 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
     })
   }
 
-  pub fn from_blsct_obj(blsct_obj: *mut U) -> Self {
+  pub fn from_c_obj(blsct_obj: *mut U) -> Self {
     let ptr = NonNull::new(blsct_obj as *mut u8).unwrap();
     let size = std::mem::size_of::<U>();
 

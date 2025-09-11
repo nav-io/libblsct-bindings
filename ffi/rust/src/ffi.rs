@@ -42,6 +42,16 @@ pub fn is_valid_point(blsct_point: *const BlsctPoint) -> c_int;
 pub fn point_from_scalar(scalar: *const BlsctScalar) -> *mut BlsctPoint;
 pub fn serialize_point(blsct_point: *const BlsctPoint) -> *const c_char;
 
+// ChildKey
+pub fn from_seed_to_child_key(seed: *const BlsctScalar) -> *mut BlsctScalar;
+pub fn from_child_key_to_blinding_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
+pub fn from_child_key_to_token_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
+pub fn from_child_key_to_tx_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
+
+// TxKey
+pub fn from_tx_key_to_view_key(tx_key: *const BlsctScalar) -> *mut BlsctScalar;
+pub fn from_tx_key_to_spending_key(tx_key: *const BlsctScalar) -> *mut BlsctScalar;
+
 }
 
 // init only once during the program lifetime

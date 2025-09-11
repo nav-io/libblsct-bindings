@@ -53,7 +53,7 @@ impl From<BlsctObj<Point, BlsctPoint>> for Point {
 impl From<&Scalar> for Point {
   fn from(scalar: &Scalar) -> Point {
     let blsct_scalar = unsafe { point_from_scalar(scalar.value()) };
-    let obj = BlsctObj::from_blsct_obj(blsct_scalar);
+    let obj = BlsctObj::from_c_obj(blsct_scalar);
     obj.into()
   }
 }

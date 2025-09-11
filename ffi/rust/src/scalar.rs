@@ -54,6 +54,12 @@ impl From<Scalar> for u64 {
   }
 }
 
+impl From<BlsctObj<Scalar, BlsctScalar>> for Scalar {
+  fn from(obj: BlsctObj<Scalar, BlsctScalar>) -> Scalar {
+    Scalar { obj }
+  }
+}
+
 impl PartialEq for Scalar {
   fn eq(&self, other: &Self) -> bool {
     unsafe { is_scalar_equal(
