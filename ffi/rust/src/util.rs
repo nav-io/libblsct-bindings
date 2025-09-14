@@ -28,7 +28,7 @@ pub fn build_succ_blsct_ret_val<const N: usize>(
   value: *const u8
 ) -> Result<*mut BlsctRetVal, &'static str> {
 
-  // allocate memory for BlsctPubKey
+  // allocate memory for BlsctRetVal
   let rv_ptr = unsafe {
     malloc(std::mem::size_of::<BlsctRetVal>()) as *mut BlsctRetVal
   };
@@ -55,7 +55,7 @@ pub fn pad_hex_left<T>(hex: *const c_char) -> CString {
 
   if h.len() < len {
     let mut padded = Vec::with_capacity(len);
-    padded.resize(len - h.len(), b'0'); // left pad
+    padded.resize(len - h.len(), b'0');
     padded.extend_from_slice(&h);
     h = padded;
   }
