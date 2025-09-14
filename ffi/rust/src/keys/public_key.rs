@@ -53,8 +53,6 @@ impl PublicKey {
   impl_value!(PublicKey, BlsctPubKey);
 }
 
-// since de/ser functions for PublicKey don't exist in libblsct,
-// we implement them here
 impl BlsctSerde for PublicKey {
   unsafe fn serialize(ptr: *const u8) -> *const i8 {
     // serialize the PublicKey as a Point

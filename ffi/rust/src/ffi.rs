@@ -44,6 +44,15 @@ pub fn is_valid_point(blsct_point: *const BlsctPoint) -> c_int;
 pub fn point_from_scalar(scalar: *const BlsctScalar) -> *mut BlsctPoint;
 pub fn serialize_point(blsct_point: *const BlsctPoint) -> *const c_char;
 
+// PrivSpendingKey
+pub fn calc_priv_spending_key(
+  blsct_blinding_pub_key: *const BlsctPubKey,
+  blsct_view_key: *const BlsctScalar,
+  blsct_spending_key: *const BlsctScalar,
+  account: i64,
+  address: u64,
+) -> *mut BlsctScalar;
+
 // PublicKey
 pub fn gen_random_public_key() -> *mut BlsctRetVal;
 pub fn get_public_key_point(pub_key: *const BlsctPubKey) -> *mut BlsctPoint;
