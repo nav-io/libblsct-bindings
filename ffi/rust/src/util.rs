@@ -2,7 +2,11 @@ use crate::ffi::{
   BlsctRetVal,
   malloc,
 };
-use std::ffi::c_char;
+use std::ffi::{
+  c_char,
+  CStr,
+  CString,
+};
 
 pub fn c_hex_str_to_array<const N: usize>(
   raw_hex_c_str: *const c_char
@@ -41,4 +45,19 @@ pub fn build_succ_blsct_ret_val<const N: usize>(
     };
   }
   Ok(rv_ptr)
+}
+
+pub fn pad_hex_left<T>(hex: *const c_char) -> CString {
+  let mut h = unsafe {
+    CStr::from_ptr(hex).to_bytes().to_vec()
+  };
+  let len = std::mem::size_of::<T>() * 2;
+
+  if h.len() < len {
+    let mut padded = Vec::with_capacity(len);
+    padded.resize(len - h.len(), b'0'); // left pad
+    padded.extend_from_slice(&h);
+    h = padded;
+  }
+  CString::new(h).unwrap()
 }

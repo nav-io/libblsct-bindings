@@ -32,7 +32,7 @@ macro_rules! impl_tx_key_desc_deser_test {
       use crate::keys::child_key::ChildKey;
       use bincode;
 
-      crate::ffi::init();
+      crate::initializer::init();
 
       let seed = Scalar::random().unwrap();
       let child_key = ChildKey::from_seed(&seed);
@@ -53,7 +53,7 @@ pub(crate) use impl_tx_key_desc_deser_test;
 mod tests {
   use super::*;
   use crate::{
-    ffi::init,
+    initializer::init,
     keys::child_key::ChildKey,
   };
 

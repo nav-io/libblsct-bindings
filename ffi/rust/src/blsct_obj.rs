@@ -65,6 +65,7 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
 
     // check if generating object is failed
     if result != 0 {
+      println!("result code: {}", result);
       return Err("Failed to generate object");
     }
     assert!(!value.is_null(),

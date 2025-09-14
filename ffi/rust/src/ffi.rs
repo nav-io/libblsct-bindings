@@ -1,6 +1,5 @@
 use std::ffi::c_void;
 use std::os::raw::{c_char, c_int};
-use std::sync::Once;
 
 #[repr(C)]
 #[derive(Debug)]
@@ -13,9 +12,11 @@ pub struct BlsctRetVal {
 // constsnts
 pub const POINT_SIZE: usize = 48;
 pub const PUBLIC_KEY_SIZE: usize = 48;
+pub const DOULBLE_PUBLIC_KEY_SIZE: usize = PUBLIC_KEY_SIZE * 2;
 const SCALAR_SIZE: usize = 32;
 
 // serialized types
+pub type BlsctDoublePubKey = [u8; DOULBLE_PUBLIC_KEY_SIZE];
 pub type BlsctPoint = [u8; POINT_SIZE];
 pub type BlsctPubKey = [u8; PUBLIC_KEY_SIZE];
 pub type BlsctScalar = [u8; SCALAR_SIZE];
@@ -23,10 +24,6 @@ pub type BlsctScalar = [u8; SCALAR_SIZE];
 extern "C" {
 
 pub fn malloc(size: usize) -> *mut core::ffi::c_void;
-
-#[link_name = "init"]
-pub fn init_impl();  // rename on the rust side to avoid name conflict
-
 pub fn free_obj(x: *mut c_void);
 
 // ChildKey
@@ -34,6 +31,20 @@ pub fn from_seed_to_child_key(seed: *const BlsctScalar) -> *mut BlsctScalar;
 pub fn from_child_key_to_blinding_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
 pub fn from_child_key_to_token_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
 pub fn from_child_key_to_tx_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
+
+// DoublePublicKey
+pub fn deserialize_dpk(hex: *const c_char) -> *mut BlsctRetVal;
+pub fn gen_double_pub_key(
+  blsct_pk1: *const BlsctPubKey,
+  blsct_pk2: *const BlsctPubKey,
+) -> *mut BlsctRetVal;
+pub fn serialize_dpk(blsct_dpk: *const BlsctDoublePubKey) -> *const c_char;
+pub fn gen_dpk_with_keys_and_sub_addr_id(
+  blsct_view_key: *const BlsctScalar,
+  blsct_spending_pub_key: *const BlsctPubKey,
+  account: i64,
+  address: u64,
+) -> *mut BlsctDoublePubKey;
 
 // Point
 pub fn gen_base_point() -> *mut BlsctRetVal;
@@ -75,23 +86,5 @@ pub fn serialize_scalar(blsct_scalar: *const BlsctScalar) -> *const c_char;
 pub fn from_tx_key_to_view_key(tx_key: *const BlsctScalar) -> *mut BlsctScalar;
 pub fn from_tx_key_to_spending_key(tx_key: *const BlsctScalar) -> *mut BlsctScalar;
 
-}
-
-// init only once during the program lifetime
-static INIT: Once = Once::new();
-pub fn init() {
-  INIT.call_once(|| unsafe {
-    init_impl();
-  });
-}
-
-#[cfg(test)]
-mod tests {
-  use super::*;
-
-  #[test]
-  fn test_init() {
-    init();
-  }
 }
 

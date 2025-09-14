@@ -84,8 +84,7 @@ impl Eq for Point {}
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::ffi::init;
-  use bincode;
+  use crate::initializer::init;
 
   #[test]
   fn test_base() {

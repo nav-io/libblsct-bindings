@@ -37,7 +37,7 @@ impl PrivSpendingKey {
 mod tests {
   use super::*;
   use crate::{
-    ffi::init,
+    initializer::init,
     keys::child_key::ChildKey,
   };
 

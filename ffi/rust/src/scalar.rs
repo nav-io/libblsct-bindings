@@ -11,6 +11,7 @@ use crate::{
     scalar_to_uint64,
     serialize_scalar,
   },
+  util::pad_hex_left,
 };
 use crate::macros::{
   impl_display,
@@ -18,6 +19,7 @@ use crate::macros::{
   impl_value,
 };
 use serde::{Deserialize, Serialize};
+use std::ffi::c_char;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Scalar {
@@ -44,8 +46,9 @@ impl BlsctSerde for Scalar {
     serialize_scalar(ptr as *const BlsctScalar)
   }
 
-  unsafe fn deserialize(hex: *const i8) -> *mut BlsctRetVal {
-    deserialize_scalar(hex)
+  unsafe fn deserialize(hex: *const c_char) -> *mut BlsctRetVal {
+    let padded_hex = pad_hex_left::<BlsctScalar>(hex);
+    deserialize_scalar(padded_hex.as_ptr())
   }
 }
 
@@ -76,8 +79,7 @@ impl Eq for Scalar {}
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::ffi::init;
-  use bincode;
+  use crate::initializer::init;
 
   #[test]
   fn test_new() {

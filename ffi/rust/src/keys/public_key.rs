@@ -103,10 +103,9 @@ impl From<&Scalar> for PublicKey {
 mod tests {
   use super::*;
   use crate::{
-    ffi::init,
+    initializer::init,
     keys::child_key::ChildKey,
   };
-  use bincode;
 
   #[test]
   fn test_random() {
