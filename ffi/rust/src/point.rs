@@ -1,15 +1,17 @@
-use crate::blsct_obj::BlsctObj;
-use crate::blsct_serde::BlsctSerde;
-use crate::ffi::{
-  BlsctPoint,
-  BlsctRetVal,
-  deserialize_point,
-  gen_base_point,
-  gen_random_point,
-  is_point_equal,
-  is_valid_point,
-  point_from_scalar,
-  serialize_point,
+use crate::{
+  blsct_obj::BlsctObj,
+  blsct_serde::BlsctSerde,
+  ffi::{
+    BlsctPoint,
+    BlsctRetVal,
+    deserialize_point,
+    gen_base_point,
+    gen_random_point,
+    is_point_equal,
+    is_valid_point,
+    point_from_scalar,
+    serialize_point,
+  },
 };
 use crate::macros::{
   impl_display,

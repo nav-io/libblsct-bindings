@@ -1,3 +1,4 @@
+use std::slice;
 use crate::blsct_serde::BlsctSerde;
 use crate::ffi::{
   BlsctRetVal,
@@ -20,12 +21,26 @@ use std::{
 };
 use std::ptr::NonNull;
 
-#[derive(Debug)]
+#[derive(Eq, Debug)]
 pub struct BlsctObj<T: BlsctSerde, U> {
   ptr: NonNull<u8>,
   size: usize,
   _t: std::marker::PhantomData<*mut T>,
   _u: std::marker::PhantomData<fn() -> U>,
+}
+
+// assumes that `ptr` points to readble memory of `size` bytes
+impl<T: BlsctSerde, U> PartialEq for BlsctObj<T, U> {
+  fn eq(&self, other: &Self) -> bool {
+    if self.size != other.size {
+      return false;
+    }
+    unsafe {
+      let a: &[u8] = slice::from_raw_parts(self.ptr.as_ptr(), self.size);
+      let b: &[u8] = slice::from_raw_parts(other.ptr.as_ptr(), other.size);
+      a == b
+    }
+  }
 }
 
 impl<T: BlsctSerde, U> fmt::Display for BlsctObj<T, U> {
@@ -84,10 +99,15 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
   }
 }
 
+// expects T::serialize to take a pointer to a BLSCT object
+// and return a pointer to a c-string (null-terminated byte sequence)
 impl<T: BlsctSerde, U> Serialize for BlsctObj<T, U> {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
   where S: Serializer {
     let c_hex = unsafe { T::serialize(self.as_ptr() as *const u8) };
+    if c_hex.is_null() {
+      return Err(SerError::custom("Serialization failed. c_hex is null"));
+    }
     let hex = unsafe { CStr::from_ptr(c_hex) }
       .to_str()
       .map_err(|e| SerError::custom(format!("Converting C-Str to String failed: {:?}", e)))?
@@ -99,12 +119,16 @@ impl<T: BlsctSerde, U> Serialize for BlsctObj<T, U> {
   }
 }
 
+// expects T::deserialize to take a pointer to a c-string
+// and return a pointer to a BlsctRetVal
 impl<'de, T: BlsctSerde, U> Deserialize<'de> for BlsctObj<T, U> {
   fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
   where D: Deserializer<'de> {
     let hex: String = Deserialize::deserialize(deserializer)?;
-    let c_hex = CString::new(hex).unwrap();
-    let rv = unsafe { T::deserialize(c_hex.as_ptr()) };
+    let hex_c_str = CString::new(hex)
+      .map_err(|_| DeError::custom("string contains interior NUL"))?;
+
+    let rv = unsafe { T::deserialize(hex_c_str.as_ptr()) };
 
     Ok(BlsctObj::<T, U>::from_retval(rv)
       .map_err(|e| DeError::custom(format!("Deserialization failed: {:?}", e)))?)

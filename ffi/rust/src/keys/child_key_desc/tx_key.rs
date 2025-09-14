@@ -25,7 +25,7 @@ impl TxKey {
   }
 }
 
-macro_rules! impl_tx_key_deser_desc_test {
+macro_rules! impl_tx_key_desc_deser_test {
   ($derive_method:ident, $target_ty:path) => {
     #[test]
     fn test_deser() {

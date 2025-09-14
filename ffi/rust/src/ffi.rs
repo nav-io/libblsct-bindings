@@ -11,27 +11,29 @@ pub struct BlsctRetVal {
 }
 
 // constsnts
-const POINT_SIZE: usize = 32;
-const SCALAR_SIZE: usize = 48;
+pub const POINT_SIZE: usize = 48;
+pub const PUBLIC_KEY_SIZE: usize = 48;
+const SCALAR_SIZE: usize = 32;
 
 // serialized types
 pub type BlsctPoint = [u8; POINT_SIZE];
+pub type BlsctPubKey = [u8; PUBLIC_KEY_SIZE];
 pub type BlsctScalar = [u8; SCALAR_SIZE];
 
 extern "C" {
+
+pub fn malloc(size: usize) -> *mut core::ffi::c_void;
 
 #[link_name = "init"]
 pub fn init_impl();  // rename on the rust side to avoid name conflict
 
 pub fn free_obj(x: *mut c_void);
 
-// Scalar
-pub fn deserialize_scalar(hex: *const c_char) -> *mut BlsctRetVal;
-pub fn gen_scalar(n: u64) -> *mut BlsctRetVal;
-pub fn gen_random_scalar() -> *mut BlsctRetVal;
-pub fn is_scalar_equal(a: *const BlsctScalar, b: *const BlsctScalar) -> c_int;
-pub fn scalar_to_uint64(blsct_scalar: *const BlsctScalar) -> u64;
-pub fn serialize_scalar(blsct_scalar: *const BlsctScalar) -> *const c_char;
+// ChildKey
+pub fn from_seed_to_child_key(seed: *const BlsctScalar) -> *mut BlsctScalar;
+pub fn from_child_key_to_blinding_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
+pub fn from_child_key_to_token_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
+pub fn from_child_key_to_tx_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
 
 // Point
 pub fn gen_base_point() -> *mut BlsctRetVal;
@@ -42,11 +44,23 @@ pub fn is_valid_point(blsct_point: *const BlsctPoint) -> c_int;
 pub fn point_from_scalar(scalar: *const BlsctScalar) -> *mut BlsctPoint;
 pub fn serialize_point(blsct_point: *const BlsctPoint) -> *const c_char;
 
-// ChildKey
-pub fn from_seed_to_child_key(seed: *const BlsctScalar) -> *mut BlsctScalar;
-pub fn from_child_key_to_blinding_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
-pub fn from_child_key_to_token_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
-pub fn from_child_key_to_tx_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
+// PublicKey
+pub fn gen_random_public_key() -> *mut BlsctRetVal;
+pub fn get_public_key_point(pub_key: *const BlsctPubKey) -> *mut BlsctPoint;
+pub fn point_to_public_key(point: *const BlsctPoint) -> *mut BlsctPubKey;
+pub fn scalar_to_pub_key(blsct_scalar: *const BlsctScalar) -> *mut BlsctPubKey;
+pub fn calc_nonce(
+  blinding_pub_key: *const BlsctPubKey,
+  view_key: *const BlsctScalar, 
+) -> *mut BlsctPoint;
+
+// Scalar
+pub fn deserialize_scalar(hex: *const c_char) -> *mut BlsctRetVal;
+pub fn gen_scalar(n: u64) -> *mut BlsctRetVal;
+pub fn gen_random_scalar() -> *mut BlsctRetVal;
+pub fn is_scalar_equal(a: *const BlsctScalar, b: *const BlsctScalar) -> c_int;
+pub fn scalar_to_uint64(blsct_scalar: *const BlsctScalar) -> u64;
+pub fn serialize_scalar(blsct_scalar: *const BlsctScalar) -> *const c_char;
 
 // TxKey
 pub fn from_tx_key_to_view_key(tx_key: *const BlsctScalar) -> *mut BlsctScalar;
