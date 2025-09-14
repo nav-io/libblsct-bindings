@@ -28,7 +28,7 @@ import { ViewKey } from './childKeyDesc/txKeyDesc/viewKey'
  * const pk = PublicKey.fromPoint(p)
  * pk.getPoint()
  * const vk = new ViewKey()
- * PublicKey.generateNonce(pk, vk)
+ * pk.generateNonce(vk)
  * const ser = pk.serialize()
  * const deser = PublicKey.deserialize(ser)
  * ser == deser.serialize()
@@ -81,18 +81,16 @@ export class PublicKey extends ManagedObj {
     return PublicKey.fromObj(blsctPubKey)
   }
 
-  /** Generates a nonce PublicKey from blinding public key and view key.
+  /** Generates a nonce from this `PublicKey` using a `ViewKey`.
    *
-   * @param blindingPubKey - The blinding public key.
    * @param viewKey - The view key.
    * @returns A new `PublicKey` that represents the nonce.
    */
-  static generateNonce(
-    blindingPubKey: PublicKey,
+  generateNonce(
     viewKey: ViewKey
   ): PublicKey {
     const blsctNonce = calcNonce(
-      blindingPubKey.value(),
+      this.value(),
       viewKey.value()
     )
     return PublicKey.fromObj(blsctNonce)

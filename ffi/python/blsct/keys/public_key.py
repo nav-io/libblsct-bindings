@@ -22,7 +22,7 @@ class PublicKey(ManagedObj, Serializable, PrettyPrintable):
   >>> pk.pretty_print()
   '1 70896870760eba69c20a1f0d740855a91560a...' # doctest: +SKIP
   >>> vk = ViewKey()
-  >>> PublicKey.generate_nonce(pk, vk)
+  >>> pk.generate_nonce(vk)
   PublicKey(91458dc61b63095b1d5f13...) # doctest: +SKIP
   >>> pk.get_point()
   Point(a70896870760eba69c20a1f0d7...) # doctest: +SKIP
@@ -65,18 +65,17 @@ class PublicKey(ManagedObj, Serializable, PrettyPrintable):
     blsct_pub_key = blsct.scalar_to_pub_key(scalar.value())
     return cls(blsct_pub_key)
 
-  @classmethod
   def generate_nonce(
-    cls: Type[Self],
-    blinding_pub_key: Self,
+    self,
     view_key: ViewKey
   ) -> Self:
    """Generate a nonce PublicKey from blinding public key and view key"""
-   blsct_nonce = blsct.calc_nonce(
-     blinding_pub_key.value(),
+   blsct_point = blsct.calc_nonce(
+     self.value(),
      view_key.value()
    )
-   return cls(blsct_nonce)
+   blsct_pub_key = blsct.point_to_public_key(blsct_point)
+   return self.__class__(blsct_pub_key)
 
   @override
   def value(self):

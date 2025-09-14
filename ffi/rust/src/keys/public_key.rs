@@ -7,22 +7,25 @@ use crate::{
     calc_nonce,
     gen_random_public_key,
     get_public_key_point,
-    malloc,
     point_to_public_key,
-    POINT_SIZE,
     PUBLIC_KEY_SIZE,
     scalar_to_pub_key,
     serialize_point,
   },
   keys::child_key_desc::tx_key_desc::view_key::ViewKey,
+  macros::{
+    impl_display,
+    impl_from_retval,
+    impl_value,
+  },
   point::Point,
   scalar::Scalar,
+  util::{
+    c_hex_str_to_array,
+    build_succ_blsct_ret_val,
+  },
 };
-use crate::macros::{
-  impl_display,
-  impl_from_retval,
-  impl_value,
-};
+use std::ffi::c_char;
 use serde::{Deserialize, Serialize};
 
 #[derive(PartialEq, Eq, Debug, Deserialize, Serialize)]
@@ -59,29 +62,12 @@ impl BlsctSerde for PublicKey {
     serialize_point(point)
   }
 
-  unsafe fn deserialize(hex: *const i8) -> *mut BlsctRetVal {
-    // hex is a serialized Point
-    let hex_c_str = std::ffi::CStr::from_ptr(hex as *const i8);
-    let hex_str = hex_c_str.to_str().unwrap();
-    let bytes = hex::decode(hex_str).unwrap();
-
-    let mut buf = [0u8; POINT_SIZE];
-    buf.copy_from_slice(&bytes);
-
-    // convert Point back to PublicKey
+  unsafe fn deserialize(hex: *const c_char) -> *mut BlsctRetVal {
+    // since hex is a serialized Point, convert it back to BlsctPoint 
+    let buf = c_hex_str_to_array(hex);
     let blsct_pub_key = unsafe { point_to_public_key(&buf) };
 
-    let rv_ptr = malloc(std::mem::size_of::<BlsctRetVal>()) as *mut BlsctRetVal;
-    if rv_ptr.is_null() {
-      panic!("Failed to allocate memory for BlsctRetVal");
-    }
-
-    *rv_ptr = BlsctRetVal {
-      result: 0,
-      value: blsct_pub_key as *const std::ffi::c_void,
-      value_size: PUBLIC_KEY_SIZE,
-    };
-    rv_ptr
+    build_succ_blsct_ret_val::<PUBLIC_KEY_SIZE>(blsct_pub_key as *const u8).unwrap()
   }
 }
 

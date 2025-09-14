@@ -30,7 +30,7 @@ test('fromScalar', () => {
 test('generateNonce', () => {
   const pk = PublicKey.random()
   const viewKey = new ChildKey().toTxKey().toViewKey()
-  const nonce = PublicKey.generateNonce(pk, viewKey)
+  const nonce = pk.generateNonce(viewKey)
   expect(nonce.getPoint().isValid()).toBe(true)
 })
 

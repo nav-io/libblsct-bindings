@@ -206,7 +206,7 @@ def test_key_derivation():
   )
   print(f"hash_id: {hash_id}")
 
-  nonce = PublicKey.generate_nonce(blinding_pub_key, view_key)
+  nonce = blinding_pub_key.generate_nonce(view_key)
   print(f"nonce: {nonce}")
 
   sub_addr_id = SubAddrId(account, address)
