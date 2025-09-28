@@ -29,6 +29,17 @@ macro_rules! impl_value {
   };
 }
 
+macro_rules! impl_clone {
+  ($name:ident) => {
+    impl Clone for $name {
+      fn clone(&self) -> Self {
+        let hex = bincode::serialize(self).unwrap();
+        bincode::deserialize::<$name>(&hex).unwrap()
+      }
+    }
+  }
+}
+
 macro_rules! impl_key {
   ($name:ident) => {
     use crate::{
@@ -52,9 +63,17 @@ macro_rules! impl_key {
         $name(obj.into())
       }
     }
+
+    impl Clone for $name {
+      fn clone(&self) -> Self {
+        let hex = bincode::serialize(self).unwrap();
+        bincode::deserialize::<$name>(&hex).unwrap()
+      }
+    }
   };
 }
 
+pub(crate) use impl_clone;
 pub(crate) use impl_display;
 pub(crate) use impl_from_retval;
 pub(crate) use impl_value;

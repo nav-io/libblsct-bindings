@@ -6,10 +6,11 @@ use crate::{
     BlsctRetVal,
     deserialize_dpk,
     gen_double_pub_key,
-    gen_dpk_with_keys_and_sub_addr_id,
+    gen_dpk_with_keys_acct_addr,
     serialize_dpk,
   },
   macros::{
+    impl_clone,
     impl_display,
     impl_from_retval,
     impl_value,
@@ -29,6 +30,7 @@ pub struct DoublePublicKey {
 
 impl_from_retval!(DoublePublicKey);
 impl_display!(DoublePublicKey);
+impl_clone!(DoublePublicKey);
 
 impl From<BlsctObj<DoublePublicKey, BlsctDoublePubKey>> for DoublePublicKey {
   fn from(obj: BlsctObj<DoublePublicKey, BlsctDoublePubKey>) -> DoublePublicKey {
@@ -57,7 +59,7 @@ impl DoublePublicKey {
     address: u64,
   ) -> Result<Self, &'static str> {
     let dpk = unsafe {
-      gen_dpk_with_keys_and_sub_addr_id(
+      gen_dpk_with_keys_acct_addr(
         view_key.value(),
         spending_pub_key.value(),
         account,
@@ -97,14 +99,12 @@ mod tests {
   #[test]
   fn test_random() {
     init();
-
     let _: PublicKey = PublicKey::random().unwrap();
   }
 
   #[test]
   fn test_from_public_keys() {
     init();
-
     let a = PublicKey::random().unwrap();
     let b = PublicKey::random().unwrap();
     let _: DoublePublicKey = 
@@ -114,7 +114,6 @@ mod tests {
   #[test]
   fn test_from_keys_acct_addr() {
     init();
-
     let seed = Scalar::random().unwrap();
     let child_key = ChildKey::from_seed(&seed);
     let tx_key = child_key.to_tx_key();
@@ -132,7 +131,6 @@ mod tests {
   #[test]
   fn test_eq() {
     init();
-
     let (a, b) = {
       loop {
         let a = DoublePublicKey::random().unwrap();
@@ -151,7 +149,6 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-
     let a = DoublePublicKey::random().unwrap();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<DoublePublicKey>(&hex).unwrap();

@@ -14,6 +14,7 @@ use crate::{
   },
   keys::child_key_desc::tx_key_desc::view_key::ViewKey,
   macros::{
+    impl_clone,
     impl_display,
     impl_from_retval,
     impl_value,
@@ -35,6 +36,7 @@ pub struct PublicKey {
 
 impl_from_retval!(PublicKey);
 impl_display!(PublicKey);
+impl_clone!(PublicKey);
 
 impl PublicKey {
   pub fn random() -> Result<Self, &'static str> {

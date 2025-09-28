@@ -2,6 +2,12 @@
 
 [![Crates.io](https://img.shields.io/crates/v/navio-blsct.svg)](https://crates.io/crates/navio-blsct)
 
+## Forcing libblsct rebuild
+```bash
+rm -f ./ffi/rust/libs/*.a
+cargo build
+```
+
 ## Running an example code
 
 ```bash
