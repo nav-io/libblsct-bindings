@@ -25,6 +25,7 @@ pub const DOUBLE_PUBLIC_KEY_SIZE: usize = PUBLIC_KEY_SIZE * 2;
 const OUT_POINT_SIZE: usize = 36;
 const SUB_ADDR_SIZE: usize = DOUBLE_PUBLIC_KEY_SIZE;
 const SCALAR_SIZE: usize = 32;
+pub const SCRIPT_SIZE: usize = 28;
 const SIGNATURE_SIZE: usize = 96;
 const SUB_ADDR_ID_SIZE: usize = 16;
 pub const TOKEN_ID_SIZE: usize = 40;
@@ -37,6 +38,7 @@ pub type BlsctOutPoint = [u8; OUT_POINT_SIZE];
 pub type BlsctPoint = [u8; POINT_SIZE];
 pub type BlsctPubKey = [u8; PUBLIC_KEY_SIZE];
 pub type BlsctScalar = [u8; SCALAR_SIZE];
+pub type BlsctScript = [u8; SCRIPT_SIZE];
 pub type BlsctSignature = [u8; SIGNATURE_SIZE];
 pub type BlsctSubAddr = [u8; SUB_ADDR_SIZE];
 pub type BlsctSubAddrId = [u8; SUB_ADDR_ID_SIZE];
@@ -129,6 +131,10 @@ pub fn gen_random_scalar() -> *mut BlsctRetVal;
 pub fn is_scalar_equal(a: *const BlsctScalar, b: *const BlsctScalar) -> c_int;
 pub fn scalar_to_uint64(blsct_scalar: *const BlsctScalar) -> u64;
 pub fn serialize_scalar(blsct_scalar: *const BlsctScalar) -> *const c_char;
+
+// Script
+pub fn serialize_script(blsct_script: *const BlsctScript) -> *const c_char;
+pub fn deserialize_script(hex: *const c_char) -> *mut BlsctRetVal;
 
 // SubAddr
 pub fn derive_sub_address(

@@ -9,10 +9,13 @@ use crate::{
     malloc,
   },
 };
-use std::ffi::{
-  c_char,
-  CStr,
-  CString,
+use rand::Rng;
+use std::{
+  ffi::{
+    c_char,
+    CStr,
+    CString,
+  },
 };
 
 pub fn c_hex_str_to_array<const N: usize>(
@@ -73,5 +76,18 @@ pub fn gen_random_view_key() -> ViewKey {
   let seed = Scalar::random();
   let child_key = ChildKey::from_seed(&seed);
   child_key.to_tx_key().to_view_key() 
+}
+
+pub fn gen_random_malloced_buf<const N: usize>() -> *mut [u8; N] {
+  let mut rng = rand::rng();
+  let mut buf = [0u8; N];
+  rng.fill(&mut buf[..]);
+
+  let c_obj = unsafe { libc::malloc(N) as *mut [u8; N] };
+  assert!(!c_obj.is_null(), "malloc failed");
+  unsafe {
+    std::ptr::copy_nonoverlapping(buf.as_ptr(), c_obj as *mut u8, N);
+  }
+  c_obj
 }
 

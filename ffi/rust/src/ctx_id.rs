@@ -14,13 +14,10 @@ use crate::{
     impl_from_retval,
     impl_value,
   },
+  util::gen_random_malloced_buf,
 };
-use rand::Rng;
 use serde::{Deserialize, Serialize};
-use std::{
-  ffi::c_char,
-  ptr,
-};
+use std::ffi::c_char;
 
 #[derive(Debug, Deserialize, Serialize, Eq)]
 pub struct CTxId {
@@ -32,20 +29,9 @@ impl_display!(CTxId);
 impl_clone!(CTxId);
 
 impl CTxId {
-  pub fn random() -> CTxId {
-    // create a random vector of size CTX_ID_SIZE
-    let mut rng = rand::rng();
-    let mut buf = vec![0u8; CTX_ID_SIZE];
-    rng.fill(&mut buf[..]);
-
-    // copy vec to malloced buf
-    let c_obj = unsafe { libc::malloc(CTX_ID_SIZE) as *mut BlsctCTxId };
-    assert!(!c_obj.is_null(), "malloc failed");
-    unsafe {
-      ptr::copy_nonoverlapping(buf.as_ptr(), c_obj as *mut u8, CTX_ID_SIZE);
-    }
-
-    let obj = BlsctObj::from_c_obj(c_obj);
+  pub fn random() -> Self {
+    let c_buf = gen_random_malloced_buf::<CTX_ID_SIZE>();
+    let obj = BlsctObj::from_c_obj(c_buf);
     obj.into()
   }
 

@@ -6,6 +6,7 @@ pub mod keys;
 pub mod out_point;
 pub mod point;
 pub mod scalar;
+pub mod script;
 pub mod sub_addr;
 pub mod sub_addr_id;
 pub mod token_id;
