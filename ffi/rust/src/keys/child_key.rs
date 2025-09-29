@@ -58,7 +58,7 @@ macro_rules! impl_child_key_desc_deser_test {
 
       crate::initializer::init();
 
-      let seed = Scalar::random().unwrap();
+      let seed = Scalar::random();
       let child_key = ChildKey::from_seed(&seed);
 
       let a: $target_ty = child_key.$derive_method();
@@ -80,7 +80,7 @@ mod tests {
 
   fn gen_seed() -> Scalar {
     init();
-    Scalar::random().unwrap()
+    Scalar::random()
   }
 
   #[test]
@@ -92,7 +92,7 @@ mod tests {
   #[test]
   fn test_to_blinding_key() {
     init();
-    let seed = Scalar::random().unwrap();
+    let seed = Scalar::random();
     let child_key = ChildKey::from_seed(&seed);
     child_key.to_blinding_key();
   }
@@ -100,7 +100,7 @@ mod tests {
   #[test]
   fn test_to_token_key() {
     init();
-    let seed = Scalar::random().unwrap();
+    let seed = Scalar::random();
     let child_key = ChildKey::from_seed(&seed);
     child_key.to_token_key();
   }
@@ -108,7 +108,7 @@ mod tests {
   #[test]
   fn test_to_tx_key() {
     init();
-    let seed = Scalar::random().unwrap();
+    let seed = Scalar::random();
     let child_key = ChildKey::from_seed(&seed);
     child_key.to_tx_key();
   }
@@ -121,7 +121,7 @@ mod tests {
     let a = ChildKey::from_seed(&seed);
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<ChildKey>(&hex).unwrap();
-    assert!(a == b);
+    assert_eq!(a, b);
   }
 }
 

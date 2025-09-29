@@ -69,7 +69,7 @@ mod tests {
     init();
 
     for encoding in [AddressEncoding::Bech32, AddressEncoding::Bech32M] {
-      let addr_dpk = DoublePublicKey::random().unwrap();
+      let addr_dpk = DoublePublicKey::random();
       let addr_str = Address::encode(&addr_dpk, encoding).unwrap();
       println!("addr_str: {}", addr_str);
 

@@ -44,12 +44,12 @@ impl DoublePublicKey {
   pub fn from_public_keys(
     pk1: &PublicKey,
     pk2: &PublicKey,
-  ) -> Result<Self, &'static str> {
+  ) -> Self {
     let rv = unsafe {
       gen_double_pub_key(pk1.value(), pk2.value())
     };
-    let obj = BlsctObj::from_retval(rv)?;
-    Ok(obj.into())
+    let obj = BlsctObj::from_retval(rv).unwrap();
+    obj.into()
   }
 
   pub fn from_keys_acct_addr(
@@ -57,7 +57,7 @@ impl DoublePublicKey {
     spending_pub_key: &PublicKey,
     account: i64,
     address: u64,
-  ) -> Result<Self, &'static str> {
+  ) -> Self {
     let dpk = unsafe {
       gen_dpk_with_keys_acct_addr(
         view_key.value(),
@@ -67,12 +67,12 @@ impl DoublePublicKey {
       )
     };
     let obj = BlsctObj::from_c_obj(dpk);
-    Ok(obj.into())
+    obj.into()
   }
 
-  pub fn random() -> Result<Self, &'static str> { 
-    let pk1 = PublicKey::random().unwrap();
-    let pk2 = PublicKey::random().unwrap();
+  pub fn random() -> Self { 
+    let pk1 = PublicKey::random();
+    let pk2 = PublicKey::random();
     Self::from_public_keys(&pk1, &pk2)
   }
 }
@@ -99,33 +99,33 @@ mod tests {
   #[test]
   fn test_random() {
     init();
-    let _: PublicKey = PublicKey::random().unwrap();
+    let _: PublicKey = PublicKey::random();
   }
 
   #[test]
   fn test_from_public_keys() {
     init();
-    let a = PublicKey::random().unwrap();
-    let b = PublicKey::random().unwrap();
+    let a = PublicKey::random();
+    let b = PublicKey::random();
     let _: DoublePublicKey = 
-      DoublePublicKey::from_public_keys(&a, &b).unwrap();
+      DoublePublicKey::from_public_keys(&a, &b);
   }
 
   #[test]
   fn test_from_keys_acct_addr() {
     init();
-    let seed = Scalar::random().unwrap();
+    let seed = Scalar::random();
     let child_key = ChildKey::from_seed(&seed);
     let tx_key = child_key.to_tx_key();
     let view_key = tx_key.to_view_key();
-    let pub_key = PublicKey::random().unwrap();
+    let pub_key = PublicKey::random();
 
     DoublePublicKey::from_keys_acct_addr(
       &view_key,
       &pub_key,
       123,
       456,
-    ).unwrap();
+    );
   }
 
   #[test]
@@ -133,8 +133,8 @@ mod tests {
     init();
     let (a, b) = {
       loop {
-        let a = DoublePublicKey::random().unwrap();
-        let b = DoublePublicKey::random().unwrap();
+        let a = DoublePublicKey::random();
+        let b = DoublePublicKey::random();
         if a != b {
           break (a, b);
         }
@@ -149,10 +149,10 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-    let a = DoublePublicKey::random().unwrap();
+    let a = DoublePublicKey::random();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<DoublePublicKey>(&hex).unwrap();
 
-    assert!(a == b);
+    assert_eq!(a, b);
   }
 }

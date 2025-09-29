@@ -30,12 +30,14 @@ impl_from_retval!(Point);
 impl_display!(Point);
 
 impl Point {
-  pub fn base() -> Result<Self, &'static str> {
+  pub fn base() -> Self {
     Self::from_retval(unsafe { gen_base_point() })
+      .expect("Failed to allocate memory")
   }
 
-  pub fn random() -> Result<Self, &'static str> {
+  pub fn random() -> Self {
     Self::from_retval(unsafe { gen_random_point() })
+      .expect("Failed to allocate memory")
   }
 
   pub fn is_valid(&self) -> bool {
@@ -90,8 +92,8 @@ mod tests {
   fn test_base() {
     init();
 
-    let a = Point::base().unwrap();
-    let b = Point::base().unwrap();
+    let a = Point::base();
+    let b = Point::base();
     assert!(a == b);
   }
 
@@ -99,11 +101,11 @@ mod tests {
   fn test_random() {
     init();
 
-    let mut prev: Point = Point::base().unwrap();
+    let mut prev: Point = Point::base();
     let mut dup_tolerance = 5;
 
     for _ in 0..1000 {
-      let x = Point::random().unwrap();
+      let x = Point::random();
       
       if prev == x {
         dup_tolerance -= 1;
@@ -121,7 +123,7 @@ mod tests {
   fn test_is_valid() {
     init();
 
-    let x = Point::base().unwrap();
+    let x = Point::base();
     assert!(x.is_valid());
   }
 
@@ -129,7 +131,7 @@ mod tests {
   fn test_from_scalar() {
     init();
 
-    let scalar = Scalar::new(123).unwrap();
+    let scalar = Scalar::new(123);
     let _ = Point::from(&scalar);
   }
 
@@ -139,8 +141,8 @@ mod tests {
 
     let (a, b) = {
       loop {
-        let a = Point::random().unwrap();
-        let b = Point::random().unwrap();
+        let a = Point::random();
+        let b = Point::random();
         if a != b {
           break (a, b);
         }
@@ -156,10 +158,10 @@ mod tests {
   fn test_deser() {
     init();
 
-    let a = Point::base().unwrap();
+    let a = Point::base();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<Point>(&hex).unwrap();
-    assert!(a == b);
+    assert_eq!(a, b);
   }
 }
 

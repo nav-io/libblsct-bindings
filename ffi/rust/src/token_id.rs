@@ -119,7 +119,7 @@ mod tests {
     let a = TokenId::from_token_and_subid(123, 456);
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<TokenId>(&hex).unwrap();
-    assert!(a == b);
+    assert_eq!(a, b);
   }
 }
 

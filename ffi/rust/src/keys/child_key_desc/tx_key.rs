@@ -34,7 +34,7 @@ macro_rules! impl_tx_key_desc_deser_test {
 
       crate::initializer::init();
 
-      let seed = Scalar::random().unwrap();
+      let seed = Scalar::random();
       let child_key = ChildKey::from_seed(&seed);
       let tx_key = child_key.to_tx_key();
 
@@ -58,7 +58,7 @@ mod tests {
   };
 
   fn get_tx_key() -> TxKey {
-    let seed = Scalar::random().unwrap();
+    let seed = Scalar::random();
     let child_key = ChildKey::from_seed(&seed);
     child_key.to_tx_key()
   }

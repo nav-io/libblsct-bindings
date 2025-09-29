@@ -45,12 +45,12 @@ mod tests {
   fn test_new() {
     init();
 
-    let seed = Scalar::random().unwrap();
+    let seed = Scalar::random();
     let child_key = ChildKey::from_seed(&seed);
     let tx_key = child_key.to_tx_key();
     let view_key = tx_key.to_view_key();
     let spending_key = tx_key.to_spending_key();
-    let blinding_pub_key = PublicKey::random().unwrap();
+    let blinding_pub_key = PublicKey::random();
 
     let _: PrivSpendingKey = PrivSpendingKey::new(
       blinding_pub_key,

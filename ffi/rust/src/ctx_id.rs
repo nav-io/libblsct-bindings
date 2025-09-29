@@ -86,7 +86,7 @@ mod tests {
     let a = CTxId::random();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<CTxId>(&hex).unwrap();
-    assert!(a == b);
+    assert_eq!(a, b);
   }
 }
 

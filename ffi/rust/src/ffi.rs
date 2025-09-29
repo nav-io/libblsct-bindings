@@ -16,17 +16,21 @@ pub enum AddressEncoding {
   Bech32M,
 }
 
-// constsnts
+// constants
 pub const CTX_ID_SIZE: usize = 32;
+pub const KEY_ID_SIZE: usize = 20;
 pub const POINT_SIZE: usize = 48;
 pub const PUBLIC_KEY_SIZE: usize = 48;
 pub const DOULBLE_PUBLIC_KEY_SIZE: usize = PUBLIC_KEY_SIZE * 2;
 const SCALAR_SIZE: usize = 32;
 pub const TOKEN_ID_SIZE: usize = 40;
+const OUT_POINT_SIZE: usize = 36;
 
 // serialized types
 pub type BlsctCTxId = [u8; CTX_ID_SIZE];
 pub type BlsctDoublePubKey = [u8; DOULBLE_PUBLIC_KEY_SIZE];
+pub type BlsctKeyId = [u8; KEY_ID_SIZE];  // = used for HashId
+pub type BlsctOutPoint = [u8; OUT_POINT_SIZE];
 pub type BlsctPoint = [u8; POINT_SIZE];
 pub type BlsctPubKey = [u8; PUBLIC_KEY_SIZE];
 pub type BlsctScalar = [u8; SCALAR_SIZE];
@@ -67,6 +71,21 @@ pub fn gen_dpk_with_keys_acct_addr(
   account: i64,
   address: u64,
 ) -> *mut BlsctDoublePubKey;
+
+// HashId
+pub fn calc_key_id(
+  blsct_blinding_pub_key: *const BlsctPubKey,
+  blsct_spending_pub_key: *const BlsctPubKey,
+  blsct_view_key: *const BlsctScalar,
+) -> *mut BlsctKeyId;
+pub fn serialize_key_id(blsct_key_id: *const BlsctKeyId) -> *const c_char;
+pub fn deserialize_key_id(hex: *const c_char) -> *mut BlsctRetVal;
+
+// OutPoint
+pub fn gen_out_point(ctx_id_c_str: *const c_char, n: u32) -> *mut BlsctRetVal;
+pub fn get_out_point_n(blsct_out_point: *const BlsctOutPoint) -> u32;
+pub fn serialize_out_point(blsct_out_point: *const BlsctOutPoint) -> *const c_char;
+pub fn deserialize_out_point(hex: *const c_char) -> *mut BlsctRetVal;
 
 // Point
 pub fn gen_base_point() -> *mut BlsctRetVal;

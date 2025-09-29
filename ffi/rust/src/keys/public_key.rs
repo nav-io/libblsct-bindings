@@ -39,8 +39,9 @@ impl_display!(PublicKey);
 impl_clone!(PublicKey);
 
 impl PublicKey {
-  pub fn random() -> Result<Self, &'static str> {
+  pub fn random() -> Self {
     Self::from_retval(unsafe { gen_random_public_key() })
+      .expect("Failed to allocate memory")
   }
 
   pub fn generate_nonce(&self, view_key: &ViewKey) -> Self {
@@ -113,15 +114,15 @@ mod tests {
   fn test_random() {
     init();
 
-    let _: PublicKey = PublicKey::random().unwrap();
+    let _: PublicKey = PublicKey::random();
   }
 
   #[test]
   fn test_generate_nonce() {
     init();
 
-    let pub_key = PublicKey::random().unwrap();
-    let seed = Scalar::random().unwrap();
+    let pub_key = PublicKey::random();
+    let seed = Scalar::random();
     let child_key = ChildKey::from_seed(&seed);
     let view_key = child_key.to_tx_key().to_view_key();
     let _: PublicKey = pub_key.generate_nonce(&view_key);
@@ -131,7 +132,7 @@ mod tests {
   fn test_from_scalar() {
     init();
 
-    let scalar = Scalar::random().unwrap();
+    let scalar = Scalar::random();
     let _: PublicKey = (&scalar).into();
   }
 
@@ -139,7 +140,7 @@ mod tests {
   fn test_from_point() {
     init();
 
-    let point = Point::random().unwrap();
+    let point = Point::random();
     let _: PublicKey = (&point).into();
   }
 
@@ -147,7 +148,7 @@ mod tests {
   fn test_to_point() {
     init();
 
-    let pub_key = PublicKey::random().unwrap();
+    let pub_key = PublicKey::random();
     let _: Point = (&pub_key).into();
   }
 
@@ -157,8 +158,8 @@ mod tests {
 
     let (a, b) = {
       loop {
-        let a = PublicKey::random().unwrap();
-        let b = PublicKey::random().unwrap();
+        let a = PublicKey::random();
+        let b = PublicKey::random();
         if a != b {
           break (a, b);
         }
@@ -174,11 +175,11 @@ mod tests {
   fn test_deser() {
     init();
 
-    let a = PublicKey::random().unwrap();
+    let a = PublicKey::random();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<PublicKey>(&hex).unwrap();
 
-    assert!(a == b);
+    assert_eq!(a, b);
   }
 }
 
