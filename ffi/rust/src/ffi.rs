@@ -22,12 +22,12 @@ pub const KEY_ID_SIZE: usize = 20;
 pub const POINT_SIZE: usize = 48;
 pub const PUBLIC_KEY_SIZE: usize = 48;
 pub const DOUBLE_PUBLIC_KEY_SIZE: usize = PUBLIC_KEY_SIZE * 2;
+const OUT_POINT_SIZE: usize = 36;
 const SUB_ADDR_SIZE: usize = DOUBLE_PUBLIC_KEY_SIZE;
 const SCALAR_SIZE: usize = 32;
 const SIGNATURE_SIZE: usize = 96;
 const SUB_ADDR_ID_SIZE: usize = 16;
 pub const TOKEN_ID_SIZE: usize = 40;
-const OUT_POINT_SIZE: usize = 36;
 
 // serialized types
 pub type BlsctCTxId = [u8; CTX_ID_SIZE];
@@ -158,6 +158,12 @@ pub fn deserialize_token_id(hex: *const c_char) -> *mut BlsctRetVal;
 // TxKey
 pub fn from_tx_key_to_view_key(tx_key: *const BlsctScalar) -> *mut BlsctScalar;
 pub fn from_tx_key_to_spending_key(tx_key: *const BlsctScalar) -> *mut BlsctScalar;
+
+// ViewTag
+pub fn calc_view_tag(
+  blinding_pub_key: *const BlsctPubKey,
+  view_key: *const BlsctScalar,
+) -> u64;
 
 }
 
