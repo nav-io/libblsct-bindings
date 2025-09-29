@@ -4,11 +4,14 @@ use crate::{
   ffi::{
     BlsctDoublePubKey,
     BlsctRetVal,
+    BlsctSubAddr,
     deserialize_dpk,
+    dpk_to_sub_addr,
     gen_double_pub_key,
     gen_dpk_with_keys_acct_addr,
     serialize_dpk,
   },
+  sub_addr::SubAddr,
   macros::{
     impl_clone,
     impl_display,
@@ -38,6 +41,13 @@ impl From<BlsctObj<DoublePublicKey, BlsctDoublePubKey>> for DoublePublicKey {
   }
 }
 
+impl From<DoublePublicKey> for SubAddr {
+  fn from(dpk: DoublePublicKey) -> SubAddr {
+    let rv = unsafe { dpk_to_sub_addr(dpk.value()) };
+    BlsctObj::<SubAddr, BlsctSubAddr>::from_retval(rv).unwrap().into()
+  }
+}
+
 impl DoublePublicKey {
   impl_value!(DoublePublicKey, BlsctDoublePubKey);
 
@@ -48,7 +58,8 @@ impl DoublePublicKey {
     let rv = unsafe {
       gen_double_pub_key(pk1.value(), pk2.value())
     };
-    let obj = BlsctObj::from_retval(rv).unwrap();
+    let obj = BlsctObj::from_retval(rv)
+      .expect("Failed to allocate memory");
     obj.into()
   }
 

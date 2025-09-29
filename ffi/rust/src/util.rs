@@ -1,6 +1,13 @@
-use crate::ffi::{
-  BlsctRetVal,
-  malloc,
+use crate::{
+  scalar::Scalar,
+  keys::{
+    child_key::ChildKey,
+    child_key_desc::tx_key_desc::view_key::ViewKey,
+  },
+  ffi::{
+    BlsctRetVal,
+    malloc,
+  },
 };
 use std::ffi::{
   c_char,
@@ -61,3 +68,10 @@ pub fn pad_hex_left<T>(hex: *const c_char) -> CString {
   }
   CString::new(h).unwrap()
 }
+
+pub fn gen_random_view_key() -> ViewKey {
+  let seed = Scalar::random();
+  let child_key = ChildKey::from_seed(&seed);
+  child_key.to_tx_key().to_view_key() 
+}
+

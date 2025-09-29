@@ -21,19 +21,25 @@ pub const CTX_ID_SIZE: usize = 32;
 pub const KEY_ID_SIZE: usize = 20;
 pub const POINT_SIZE: usize = 48;
 pub const PUBLIC_KEY_SIZE: usize = 48;
-pub const DOULBLE_PUBLIC_KEY_SIZE: usize = PUBLIC_KEY_SIZE * 2;
+pub const DOUBLE_PUBLIC_KEY_SIZE: usize = PUBLIC_KEY_SIZE * 2;
+const SUB_ADDR_SIZE: usize = DOUBLE_PUBLIC_KEY_SIZE;
 const SCALAR_SIZE: usize = 32;
+const SIGNATURE_SIZE: usize = 96;
+const SUB_ADDR_ID_SIZE: usize = 16;
 pub const TOKEN_ID_SIZE: usize = 40;
 const OUT_POINT_SIZE: usize = 36;
 
 // serialized types
 pub type BlsctCTxId = [u8; CTX_ID_SIZE];
-pub type BlsctDoublePubKey = [u8; DOULBLE_PUBLIC_KEY_SIZE];
+pub type BlsctDoublePubKey = [u8; DOUBLE_PUBLIC_KEY_SIZE];
 pub type BlsctKeyId = [u8; KEY_ID_SIZE];  // = used for HashId
 pub type BlsctOutPoint = [u8; OUT_POINT_SIZE];
 pub type BlsctPoint = [u8; POINT_SIZE];
 pub type BlsctPubKey = [u8; PUBLIC_KEY_SIZE];
 pub type BlsctScalar = [u8; SCALAR_SIZE];
+pub type BlsctSignature = [u8; SIGNATURE_SIZE];
+pub type BlsctSubAddr = [u8; SUB_ADDR_SIZE];
+pub type BlsctSubAddrId = [u8; SUB_ADDR_ID_SIZE];
 pub type BlsctTokenId = [u8; TOKEN_ID_SIZE];
 
 extern "C" {
@@ -71,6 +77,7 @@ pub fn gen_dpk_with_keys_acct_addr(
   account: i64,
   address: u64,
 ) -> *mut BlsctDoublePubKey;
+pub fn dpk_to_sub_addr(blsct_dpk: *const BlsctDoublePubKey) -> *mut BlsctRetVal;
 
 // HashId
 pub fn calc_key_id(
@@ -122,6 +129,22 @@ pub fn gen_random_scalar() -> *mut BlsctRetVal;
 pub fn is_scalar_equal(a: *const BlsctScalar, b: *const BlsctScalar) -> c_int;
 pub fn scalar_to_uint64(blsct_scalar: *const BlsctScalar) -> u64;
 pub fn serialize_scalar(blsct_scalar: *const BlsctScalar) -> *const c_char;
+
+// SubAddr
+pub fn derive_sub_address(
+    blsct_view_key: *const BlsctScalar,
+    blsct_spending_pub_key: *const BlsctPubKey,
+    blsct_sub_addr_id: *const BlsctSubAddrId,
+) -> *mut BlsctSubAddr;
+pub fn serialize_sub_addr(blsct_sub_addr: *const BlsctSignature) -> *const c_char;
+pub fn deserialize_sub_addr(hex: *const c_char) -> *mut BlsctRetVal;
+
+// SubAddrId
+pub fn gen_sub_addr_id(account: i64, address: u64) -> *mut BlsctSubAddrId;
+pub fn serialize_sub_addr_id(blsct_sub_addr_id: *const BlsctSubAddrId) -> *const c_char;
+pub fn deserialize_sub_addr_id(hex: *const c_char) -> *mut BlsctRetVal;
+pub fn get_sub_addr_id_account(blsct_sub_addr_id: *const BlsctSubAddrId) -> i64;
+pub fn get_sub_addr_id_address(blsct_sub_addr_id: *const BlsctSubAddrId) -> u64;
 
 // TokenId
 pub fn gen_token_id_with_token_and_subid(token: u64, subid: u64) -> *mut BlsctRetVal;
