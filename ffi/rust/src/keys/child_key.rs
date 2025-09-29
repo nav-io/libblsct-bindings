@@ -116,7 +116,6 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-
     let seed = gen_seed();
     let a = ChildKey::from_seed(&seed);
     let hex = bincode::serialize(&a).unwrap();

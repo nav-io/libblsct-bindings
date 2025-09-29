@@ -100,7 +100,6 @@ mod tests {
     assert!(a != b);
     assert!(b != a);
     assert!(b == b);
-
   }
 
   #[test]

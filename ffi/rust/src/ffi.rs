@@ -26,7 +26,7 @@ const OUT_POINT_SIZE: usize = 36;
 const SUB_ADDR_SIZE: usize = DOUBLE_PUBLIC_KEY_SIZE;
 const SCALAR_SIZE: usize = 32;
 pub const SCRIPT_SIZE: usize = 28;
-const SIGNATURE_SIZE: usize = 96;
+pub const SIGNATURE_SIZE: usize = 96;
 const SUB_ADDR_ID_SIZE: usize = 16;
 pub const TOKEN_ID_SIZE: usize = 40;
 
@@ -135,6 +135,10 @@ pub fn serialize_scalar(blsct_scalar: *const BlsctScalar) -> *const c_char;
 // Script
 pub fn serialize_script(blsct_script: *const BlsctScript) -> *const c_char;
 pub fn deserialize_script(hex: *const c_char) -> *mut BlsctRetVal;
+
+// Signature
+pub fn serialize_signature(blsct_signature: *const BlsctSignature) -> *const c_char;
+pub fn deserialize_signature(hex: *const c_char) -> *mut BlsctRetVal;
 
 // SubAddr
 pub fn derive_sub_address(

@@ -115,7 +115,6 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-
     let a = TokenId::from_token_and_subid(123, 456);
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<TokenId>(&hex).unwrap();

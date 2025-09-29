@@ -58,6 +58,7 @@ mod tests {
   };
 
   fn get_tx_key() -> TxKey {
+    init();
     let seed = Scalar::random();
     let child_key = ChildKey::from_seed(&seed);
     child_key.to_tx_key()

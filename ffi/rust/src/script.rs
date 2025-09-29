@@ -71,19 +71,20 @@ mod tests {
 
   #[test]
   fn test_new() {
+    init();
     let blsct_script = gen_random_malloced_buf::<SCRIPT_SIZE>();
     let _ = Script::new(blsct_script);
   }
 
   #[test]
   fn test_random() {
+    init();
     let _ = Script::random();
   }
 
   #[test]
   fn test_eq() {
     init();
-
     let (a, b) = {
       loop {
         let a = Script::random();
@@ -97,13 +98,11 @@ mod tests {
     assert!(a != b);
     assert!(b != a);
     assert!(b == b);
-
   }
 
   #[test]
   fn test_deser() {
     init();
-
     let a = Script::random();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<Script>(&hex).unwrap();

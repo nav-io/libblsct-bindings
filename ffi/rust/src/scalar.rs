@@ -118,7 +118,6 @@ mod tests {
   #[test]
   fn test_from() {
     init();
-
     let x = Scalar::new(12345);
     let x_u64: u64 = x.into();
     assert!(x_u64 == 12345);
@@ -127,7 +126,6 @@ mod tests {
   #[test]
   fn test_eq() {
     init();
-
     let a = Scalar::new(123);
     let b = Scalar::new(456);
 
@@ -140,7 +138,6 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-
     let a = Scalar::new(12345);
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<Scalar>(&hex).unwrap();
@@ -151,7 +148,6 @@ mod tests {
   fn test_display() {
     use regex::Regex;
     init();
-
     let x = Scalar::random();
     let s = format!("{}", x);
 

@@ -44,7 +44,6 @@ mod tests {
   #[test]
   fn test_new() {
     init();
-
     let seed = Scalar::random();
     let child_key = ChildKey::from_seed(&seed);
     let tx_key = child_key.to_tx_key();

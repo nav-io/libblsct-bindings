@@ -76,6 +76,7 @@ mod tests {
 
   #[test]
   fn test_index() {
+    init();
     let ctx_id = CTxId::random();
     let index = 3;
     let a = OutPoint::new(&ctx_id, index);
@@ -85,7 +86,6 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-
     let ctx_id = CTxId::random();
     let index = 3;
     let a = OutPoint::new(&ctx_id, index);

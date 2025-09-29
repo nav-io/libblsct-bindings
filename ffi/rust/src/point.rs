@@ -91,7 +91,6 @@ mod tests {
   #[test]
   fn test_base() {
     init();
-
     let a = Point::base();
     let b = Point::base();
     assert!(a == b);
@@ -100,7 +99,6 @@ mod tests {
   #[test]
   fn test_random() {
     init();
-
     let mut prev: Point = Point::base();
     let mut dup_tolerance = 5;
 
@@ -122,7 +120,6 @@ mod tests {
   #[test]
   fn test_is_valid() {
     init();
-
     let x = Point::base();
     assert!(x.is_valid());
   }
@@ -138,7 +135,6 @@ mod tests {
   #[test]
   fn test_eq() {
     init();
-
     let (a, b) = {
       loop {
         let a = Point::random();
@@ -157,7 +153,6 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-
     let a = Point::base();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<Point>(&hex).unwrap();

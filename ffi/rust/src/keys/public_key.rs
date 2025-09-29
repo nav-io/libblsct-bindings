@@ -113,14 +113,12 @@ mod tests {
   #[test]
   fn test_random() {
     init();
-
     let _: PublicKey = PublicKey::random();
   }
 
   #[test]
   fn test_generate_nonce() {
     init();
-
     let pub_key = PublicKey::random();
     let seed = Scalar::random();
     let child_key = ChildKey::from_seed(&seed);
@@ -131,7 +129,6 @@ mod tests {
   #[test]
   fn test_from_scalar() {
     init();
-
     let scalar = Scalar::random();
     let _: PublicKey = (&scalar).into();
   }
@@ -139,7 +136,6 @@ mod tests {
   #[test]
   fn test_from_point() {
     init();
-
     let point = Point::random();
     let _: PublicKey = (&point).into();
   }
@@ -147,7 +143,6 @@ mod tests {
   #[test]
   fn test_to_point() {
     init();
-
     let pub_key = PublicKey::random();
     let _: Point = (&pub_key).into();
   }
@@ -155,7 +150,6 @@ mod tests {
   #[test]
   fn test_eq() {
     init();
-
     let (a, b) = {
       loop {
         let a = PublicKey::random();
@@ -174,7 +168,6 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-
     let a = PublicKey::random();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<PublicKey>(&hex).unwrap();

@@ -95,7 +95,6 @@ mod tests {
   #[test]
   fn test_eq() {
     init();
-
     let (a, b) = {
       loop {
         let a = HashId::random();
@@ -109,13 +108,11 @@ mod tests {
     assert!(a != b);
     assert!(b != a);
     assert!(b == b);
-
   }
 
   #[test]
   fn test_deser() {
     init();
-
     let a = HashId::random();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<HashId>(&hex).unwrap();
