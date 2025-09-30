@@ -1,5 +1,4 @@
 use crate::{
-  scalar::Scalar,
   keys::{
     child_key::ChildKey,
     child_key_desc::tx_key_desc::view_key::ViewKey,
@@ -73,8 +72,7 @@ pub fn pad_hex_left<T>(hex: *const c_char) -> CString {
 }
 
 pub fn gen_random_view_key() -> ViewKey {
-  let seed = Scalar::random();
-  let child_key = ChildKey::from_seed(&seed);
+  let child_key = ChildKey::random();
   child_key.to_tx_key().to_view_key() 
 }
 

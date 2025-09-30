@@ -14,6 +14,8 @@ pub mod signature;
 pub mod sub_addr;
 pub mod sub_addr_id;
 pub mod token_id;
+pub mod tx_in;
+pub mod tx_out;
 pub mod view_tag;
 
 mod blsct_obj;

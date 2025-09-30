@@ -120,8 +120,7 @@ mod tests {
   fn test_generate_nonce() {
     init();
     let pub_key = PublicKey::random();
-    let seed = Scalar::random();
-    let child_key = ChildKey::from_seed(&seed);
+    let child_key = ChildKey::random();
     let view_key = child_key.to_tx_key().to_view_key();
     let _: PublicKey = pub_key.generate_nonce(&view_key);
   }

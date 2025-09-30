@@ -26,6 +26,11 @@ impl ChildKey {
     ChildKey(obj.into())
   }
 
+  pub fn random() -> Self {
+    let seed = Scalar::random();
+    ChildKey::from_seed(&seed)
+  }
+
   pub fn value(&self) -> *const BlsctScalar {
     self.0.value()
   }
@@ -57,9 +62,7 @@ macro_rules! impl_child_key_desc_deser_test {
       use bincode;
 
       crate::initializer::init();
-
-      let seed = Scalar::random();
-      let child_key = ChildKey::from_seed(&seed);
+      let child_key = ChildKey::random();
 
       let a: $target_ty = child_key.$derive_method();
       let hex = bincode::serialize(&a).unwrap();
@@ -78,46 +81,44 @@ mod tests {
   use crate::initializer::init;
   use bincode;
 
-  fn gen_seed() -> Scalar {
+  #[test]
+  fn test_from_seed() {
     init();
-    Scalar::random()
+    let seed = Scalar::random();
+    ChildKey::from_seed(&seed);
   }
 
   #[test]
-  fn test_from_seed() {
-    let seed = gen_seed();
-    ChildKey::from_seed(&seed);
+  fn test_random() {
+    init();
+    let _ = ChildKey::random();
   }
 
   #[test]
   fn test_to_blinding_key() {
     init();
-    let seed = Scalar::random();
-    let child_key = ChildKey::from_seed(&seed);
+    let child_key = ChildKey::random();
     child_key.to_blinding_key();
   }
 
   #[test]
   fn test_to_token_key() {
     init();
-    let seed = Scalar::random();
-    let child_key = ChildKey::from_seed(&seed);
+    let child_key = ChildKey::random();
     child_key.to_token_key();
   }
 
   #[test]
   fn test_to_tx_key() {
     init();
-    let seed = Scalar::random();
-    let child_key = ChildKey::from_seed(&seed);
+    let child_key = ChildKey::random();
     child_key.to_tx_key();
   }
 
   #[test]
   fn test_deser() {
     init();
-    let seed = gen_seed();
-    let a = ChildKey::from_seed(&seed);
+    let a = ChildKey::random();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<ChildKey>(&hex).unwrap();
     assert_eq!(a, b);

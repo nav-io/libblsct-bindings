@@ -32,10 +32,40 @@ pub struct BlsctAmountRecoveryReq {
 }
 
 #[repr(C)]
+#[derive(Debug, PartialEq, Eq)]
+pub struct BlsctTxIn {
+  amount: u64,
+  gamma: u64,
+  spending_key: BlsctScalar,
+  token_id: BlsctTokenId,
+  out_point: BlsctOutPoint,
+  staked_commitment: bool,
+  rbf: bool,
+}
+
+#[repr(C)]
+#[derive(Debug, PartialEq, Eq)]
+pub struct BlsctTxOut {
+  dest: BlsctSubAddr,
+  amount: u64,
+  memo_c_str: [u8; MEMO_BUF_SIZE],
+  token_id: BlsctTokenId,
+  output_type: TxOutputType,
+  min_stake: u64,
+}
+
+#[repr(C)]
 #[derive(Debug)]
 pub enum AddressEncoding {
   Bech32,
   Bech32M,
+}
+
+#[repr(C)]
+#[derive(Debug, PartialEq, Eq)]
+pub enum TxOutputType {
+  Normal,
+  StakedCommitment
 }
 
 // constants
@@ -51,6 +81,8 @@ pub const SCRIPT_SIZE: usize = 28;
 pub const SIGNATURE_SIZE: usize = 96;
 const SUB_ADDR_ID_SIZE: usize = 16;
 pub const TOKEN_ID_SIZE: usize = 40;
+pub const MAX_MEMO_LEN: usize = 100;
+pub const MEMO_BUF_SIZE: usize = MAX_MEMO_LEN + 1;
 
 // serialized types
 pub type BlsctCTxId = [u8; CTX_ID_SIZE];
@@ -262,6 +294,42 @@ pub fn get_token_id_subid(blsct_token_id: *const BlsctTokenId) -> u64;
 pub fn serialize_token_id(blsct_token_id: *const BlsctTokenId) -> *const c_char;
 pub fn deserialize_token_id(hex: *const c_char) -> *mut BlsctRetVal;
 
+// TxIn
+pub fn build_tx_in(
+  amount: u64,
+  gamma: u64,
+  spending_key: *const BlsctScalar,
+  token_id: *const BlsctTokenId,
+  out_point: *const BlsctOutPoint,
+  staked_commitment: bool,
+  rbf: bool,
+) -> *mut BlsctRetVal;
+
+pub fn get_tx_in_amount(tx_in: *const BlsctTxIn) -> u64;
+pub fn get_tx_in_gamma(tx_in: *const BlsctTxIn) -> u64;
+pub fn get_tx_in_spending_key(tx_in: *const BlsctTxIn) -> *mut BlsctScalar;
+pub fn get_tx_in_token_id(tx_in: *const BlsctTxIn) -> *mut BlsctTokenId;
+pub fn get_tx_in_out_point(tx_in: *const BlsctTxIn) -> *mut BlsctOutPoint;
+pub fn get_tx_in_staked_commitment(tx_in: *const BlsctTxIn) -> bool;
+pub fn get_tx_in_rbf(tx_in: *const BlsctTxIn) -> bool;
+
+// TxOut
+pub fn build_tx_out(
+  blsct_dest: *const BlsctSubAddr,
+  amount: u64,
+  memo_c_str: *const c_char,
+  blsct_token_id: *const BlsctTokenId,  
+  output_type: TxOutputType,
+  min_stake: u64,
+) -> *mut BlsctRetVal;
+
+pub fn get_tx_out_destination(tx_out: *const BlsctTxOut) -> *const BlsctSubAddr;
+pub fn get_tx_out_amount(tx_out: *const BlsctTxOut) -> u64;
+pub fn get_tx_out_memo(tx_out: *const BlsctTxOut) -> *const c_char;
+pub fn get_tx_out_token_id(tx_out: *const BlsctTxOut) -> *const BlsctTokenId;
+pub fn get_tx_out_output_type(tx_out: *const BlsctTxOut) -> TxOutputType;
+pub fn get_tx_out_min_stake(tx_out: *const BlsctTxOut) -> u64;
+
 // TxKey
 pub fn from_tx_key_to_view_key(tx_key: *const BlsctScalar) -> *mut BlsctScalar;
 pub fn from_tx_key_to_spending_key(tx_key: *const BlsctScalar) -> *mut BlsctScalar;
@@ -273,6 +341,9 @@ pub fn calc_view_tag(
 ) -> u64;
 
 // Misc helper functions
+pub fn succ(value: *mut c_void, value_size: usize) -> *mut BlsctRetVal;
+pub fn hex_to_malloced_buf(hex: *const c_char) -> *mut u8;
+pub fn buf_to_malloced_hex_c_str(buf: *const u8, size: usize) -> *const c_char;
 
 // uint64 vector
 pub fn create_uint64_vec() -> *mut c_void;

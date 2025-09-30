@@ -19,7 +19,6 @@ use crate::{
     impl_from_retval,
     impl_value,
   },
-  scalar::Scalar,
 };
 use serde::{Deserialize, Serialize};
 use std::ffi::c_char;
@@ -51,8 +50,7 @@ impl HashId {
     let blinding_pub_key = PublicKey::random();
     let spending_pub_key = PublicKey::random();
     let view_key = {
-      let seed = Scalar::random();
-      let child_key = ChildKey::from_seed(&seed);
+      let child_key = ChildKey::random();
       child_key.to_tx_key().to_view_key() 
     };
     Self::new(

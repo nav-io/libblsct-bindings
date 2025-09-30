@@ -34,8 +34,7 @@ macro_rules! impl_tx_key_desc_deser_test {
 
       crate::initializer::init();
 
-      let seed = Scalar::random();
-      let child_key = ChildKey::from_seed(&seed);
+      let child_key = ChildKey::random();
       let tx_key = child_key.to_tx_key();
 
       let a: $target_ty = tx_key.$derive_method();
@@ -59,8 +58,7 @@ mod tests {
 
   fn get_tx_key() -> TxKey {
     init();
-    let seed = Scalar::random();
-    let child_key = ChildKey::from_seed(&seed);
+    let child_key = ChildKey::random();
     child_key.to_tx_key()
   }
 

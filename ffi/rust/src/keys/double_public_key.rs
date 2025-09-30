@@ -104,7 +104,6 @@ mod tests {
   use crate::{
     initializer::init,
     keys::child_key::ChildKey,
-    scalar::Scalar,
   };
 
   #[test]
@@ -125,8 +124,7 @@ mod tests {
   #[test]
   fn test_from_keys_acct_addr() {
     init();
-    let seed = Scalar::random();
-    let child_key = ChildKey::from_seed(&seed);
+    let child_key = ChildKey::random();
     let tx_key = child_key.to_tx_key();
     let view_key = tx_key.to_view_key();
     let pub_key = PublicKey::random();
