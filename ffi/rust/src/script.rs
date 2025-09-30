@@ -43,7 +43,7 @@ impl Script {
 }
 
 impl BlsctSerde for Script {
-  unsafe fn serialize(ptr: *const u8) -> *const i8 {
+  unsafe fn serialize(ptr: *const u8, _: usize) -> *const i8 {
     serialize_script(ptr as *const BlsctScript)
   }
 

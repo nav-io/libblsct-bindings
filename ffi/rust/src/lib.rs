@@ -1,10 +1,13 @@
 pub mod address;
+pub mod amount_recovery_req;
+pub mod amount_recovery_res;
 pub mod ctx_id;
 pub mod hash_id;
 pub mod initializer;
 pub mod keys;
 pub mod out_point;
 pub mod point;
+pub mod range_proof;
 pub mod scalar;
 pub mod script;
 pub mod signature;

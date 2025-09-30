@@ -43,7 +43,7 @@ impl Signature {
 }
 
 impl BlsctSerde for Signature {
-  unsafe fn serialize(ptr: *const u8) -> *const i8 {
+  unsafe fn serialize(ptr: *const u8, _: usize) -> *const i8 {
     serialize_signature(ptr as *const BlsctSignature)
   }
 

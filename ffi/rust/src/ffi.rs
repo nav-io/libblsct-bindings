@@ -11,6 +11,28 @@ pub struct BlsctRetVal {
 
 #[repr(C)]
 #[derive(Debug)]
+pub struct BlsctBoolRetVal {
+  pub result: u8,
+  pub value: bool,
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct BlsctAmountsRetVal {
+  pub result: u8,
+  pub value: *mut c_void, // = Vec<*mut BlsctAmountRecoveryResult>
+}
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct BlsctAmountRecoveryReq {
+  range_proof: *mut BlsctRangeProof,
+  range_proof_size: usize,
+  nonce: *mut BlsctPoint,
+}
+
+#[repr(C)]
+#[derive(Debug)]
 pub enum AddressEncoding {
   Bech32,
   Bech32M,
@@ -44,10 +66,13 @@ pub type BlsctSubAddr = [u8; SUB_ADDR_SIZE];
 pub type BlsctSubAddrId = [u8; SUB_ADDR_ID_SIZE];
 pub type BlsctTokenId = [u8; TOKEN_ID_SIZE];
 
+pub type BlsctRangeProof = u8;
+
 extern "C" {
 
 pub fn malloc(size: usize) -> *mut core::ffi::c_void;
 pub fn free_obj(x: *mut c_void);
+pub fn free_amounts_ret_val(rv: *mut BlsctAmountsRetVal);
 
 // Address
 pub fn decode_address(blsct_enc_addr: *const c_char) -> *mut BlsctRetVal;
@@ -124,6 +149,78 @@ pub fn calc_nonce(
   view_key: *const BlsctScalar, 
 ) -> *mut BlsctPoint;
 
+// RangeProof
+pub fn build_range_proof(
+  vp_uint64_vec: *const c_void,
+  blsct_nonce: *const BlsctPoint,
+  blsct_msg: *const c_char,
+  blsct_token_id: *const BlsctTokenId,
+) -> *mut BlsctRetVal;
+
+pub fn verify_range_proofs(
+  vp_range_proofs: *const c_void,
+) -> *mut BlsctBoolRetVal;
+
+pub fn gen_amount_recovery_req(
+  vp_blsct_range_proof: *const c_void,
+  range_proof_size: usize,
+  vp_blsct_nonce: *const c_void,
+) -> *mut BlsctAmountRecoveryReq;
+
+pub fn recover_amount(
+  vp_amt_recovery_req_vec: *mut c_void
+) -> *mut BlsctAmountsRetVal;
+
+pub fn get_range_proof_A(
+  blsct_range_proof: *const BlsctRangeProof,
+  range_proof_size: usize,
+) -> *mut BlsctPoint;
+
+pub fn get_range_proof_A_wip(
+  blsct_range_proof: *const BlsctRangeProof,
+  range_proof_size: usize,
+) -> *mut BlsctPoint;
+
+pub fn get_range_proof_B(
+  blsct_range_proof: *const BlsctRangeProof,
+  range_proof_size: usize,
+) -> *mut BlsctPoint;
+
+pub fn get_range_proof_r_prime(
+  blsct_range_proof: *const BlsctRangeProof,
+  range_proof_size: usize,
+) -> *mut BlsctScalar;
+
+pub fn get_range_proof_s_prime(
+  blsct_range_proof: *const BlsctRangeProof,
+  range_proof_size: usize,
+) -> *mut BlsctScalar;
+
+pub fn get_range_proof_delta_prime(
+  blsct_range_proof: *const BlsctRangeProof,
+  range_proof_size: usize,
+) -> *mut BlsctScalar;
+
+pub fn get_range_proof_alpha_hat(
+  blsct_range_proof: *const BlsctRangeProof,
+  range_proof_size: usize,
+) -> *mut BlsctScalar;
+
+pub fn get_range_proof_tau_x(
+  blsct_range_proof: *const BlsctRangeProof,
+  range_proof_size: usize,
+) -> *mut BlsctScalar;
+
+pub fn serialize_range_proof(
+  blsct_range_proof: *const BlsctRangeProof,
+  obj_size: usize,
+) -> *const c_char;
+
+pub fn deserialize_range_proof(
+  hex: *const c_char,
+  obj_size: usize,
+) -> *mut BlsctRetVal;
+
 // Scalar
 pub fn deserialize_scalar(hex: *const c_char) -> *mut BlsctRetVal;
 pub fn gen_scalar(n: u64) -> *mut BlsctRetVal;
@@ -175,5 +272,50 @@ pub fn calc_view_tag(
   view_key: *const BlsctScalar,
 ) -> u64;
 
-}
+// Misc helper functions
+
+// uint64 vector
+pub fn create_uint64_vec() -> *mut c_void;
+pub fn add_to_uint64_vec(vp_uint64_vec: *mut c_void, n: u64);
+pub fn delete_uint64_vec(vp_vec: *mut c_void);
+
+// range proof vector
+pub fn create_range_proof_vec() -> *mut c_void;
+pub fn add_to_range_proof_vec(
+  vp_range_proofs: *mut c_void,
+  blsct_range_proof: *const BlsctRangeProof,
+  blsct_range_proof_size: usize,
+);
+pub fn delete_range_proof_vec(vp_range_proofs: *const c_void);
+
+// amount recovery request vector
+pub fn create_amount_recovery_req_vec() -> *mut c_void;
+
+pub fn add_to_amount_recovery_req_vec(
+  vp_amt_recovery_req_vec: *mut c_void,
+  vp_amt_recovery_req: *mut c_void,
+);
+
+pub fn delete_amount_recovery_req_vec(vp_amt_recovery_req_vec: *mut c_void);
+
+pub fn get_amount_recovery_result_size(
+  vp_amt_recovery_res_vec: *mut c_void
+) -> i16;
+
+pub fn get_amount_recovery_result_is_succ(
+  vp_amt_recovery_req_vec: *mut c_void,
+  idx: usize,
+) -> bool;
+
+pub fn get_amount_recovery_result_amount(
+  vp_amt_recovery_req_vec: *mut c_void,
+  idx: usize,
+) -> u64;
+
+pub fn get_amount_recovery_result_msg(
+  vp_amt_recovery_req_vec: *mut c_void,
+  idx: usize,
+) -> *const c_char;
+
+} // extern "C"
 

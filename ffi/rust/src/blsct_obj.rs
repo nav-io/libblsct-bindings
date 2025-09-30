@@ -84,7 +84,6 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
   pub fn from_c_obj(c_obj: *mut U) -> Self {
     let ptr = NonNull::new(c_obj as *mut u8).unwrap();
     let size = std::mem::size_of::<U>();
-
     Self {
       ptr,
       size,
@@ -93,7 +92,7 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
     }
   }
 
-  #[inline] pub fn _len(&self) -> usize { self.size }
+  #[inline] pub fn size(&self) -> usize { self.size }
 
   #[inline] pub fn as_ptr(&self) -> *const U {
     self.ptr.as_ptr() as *const U
@@ -105,7 +104,7 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
 impl<T: BlsctSerde, U> Serialize for BlsctObj<T, U> {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
   where S: Serializer {
-    let c_hex = unsafe { T::serialize(self.as_ptr() as *const u8) };
+    let c_hex = unsafe { T::serialize(self.as_ptr() as *const u8, self.size()) };
     if c_hex.is_null() {
       return Err(SerError::custom("Serialization failed. c_hex is null"));
     }

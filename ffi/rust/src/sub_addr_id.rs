@@ -50,7 +50,7 @@ impl SubAddrId {
 }
 
 impl BlsctSerde for SubAddrId {
-  unsafe fn serialize(ptr: *const u8) -> *const i8 {
+  unsafe fn serialize(ptr: *const u8, _: usize) -> *const i8 {
     serialize_sub_addr_id(ptr as *const BlsctSubAddrId)
   }
 

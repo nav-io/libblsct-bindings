@@ -57,7 +57,7 @@ impl PublicKey {
 }
 
 impl BlsctSerde for PublicKey {
-  unsafe fn serialize(ptr: *const u8) -> *const i8 {
+  unsafe fn serialize(ptr: *const u8, _: usize) -> *const i8 {
     // serialize the PublicKey as a Point
     let point = get_public_key_point(ptr as *const BlsctPubKey);
     serialize_point(point)

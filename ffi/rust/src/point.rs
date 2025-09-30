@@ -14,6 +14,7 @@ use crate::{
   },
 };
 use crate::macros::{
+  impl_clone,
   impl_display,
   impl_from_retval,
   impl_value,
@@ -26,6 +27,7 @@ pub struct Point {
   obj: BlsctObj<Point, BlsctPoint>,
 }
 
+impl_clone!(Point);
 impl_from_retval!(Point);
 impl_display!(Point);
 
@@ -63,7 +65,7 @@ impl From<&Scalar> for Point {
 }
 
 impl BlsctSerde for Point {
-  unsafe fn serialize(ptr: *const u8) -> *const i8 {
+  unsafe fn serialize(ptr: *const u8, _: usize) -> *const i8 {
     serialize_point(ptr as *const BlsctPoint)
   }
 

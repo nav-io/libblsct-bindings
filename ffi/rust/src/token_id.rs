@@ -59,7 +59,7 @@ impl TokenId {
 }
 
 impl BlsctSerde for TokenId {
-  unsafe fn serialize(ptr: *const u8) -> *const i8 {
+  unsafe fn serialize(ptr: *const u8, _: usize) -> *const i8 {
     serialize_token_id(ptr as *const BlsctTokenId)
   }
 
