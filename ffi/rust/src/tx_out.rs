@@ -3,7 +3,6 @@ use crate::{
   blsct_serde::BlsctSerde, 
   ffi::{
     BlsctRetVal,
-    BlsctScalar,
     BlsctSubAddr,
     BlsctTxOut,
     BlsctTokenId,
@@ -21,15 +20,12 @@ use crate::{
     succ,
     TxOutputType,
   },
-  keys::child_key_desc::tx_key_desc::spending_key::SpendingKey,
   macros::{
     impl_clone,
     impl_display,
     impl_from_retval,
     impl_value,
   },
-  out_point::OutPoint,
-  scalar::Scalar,
   sub_addr::SubAddr,
   token_id::TokenId,
 };
@@ -38,6 +34,7 @@ use std::ffi::{
   c_char,
   c_void,
   CStr,
+  CString,
 };
 
 #[derive(Debug, Deserialize, Serialize, Eq)]
@@ -58,10 +55,13 @@ impl TxOut {
     output_type: TxOutputType,
     min_stake: u64,
   ) -> Self {
+    let memo_c_str = CString::new(memo)
+      .expect("Failed to convert memo to c-str");
+
     let rv = unsafe { build_tx_out(
       destination.value(),
       amount,
-      memo.as_ptr() as *const c_char,
+      memo_c_str.as_ptr(),
       token_id.value(),
       output_type,
       min_stake,
@@ -141,19 +141,17 @@ mod tests {
   use super::*;
   use crate::{
     initializer::init,
-    sub_addr::SubAddrId,
-    token_id::TokenId,
     keys::{
       child_key::ChildKey,
       public_key::PublicKey,
     },
+    sub_addr_id::SubAddrId,
+    token_id::TokenId,
   };
 
-  fn gen_tx_out(
-  ) -> TxOut {
+  fn gen_tx_out(sub_addr_id: &SubAddrId) -> TxOut {
     let destination = {
       let view_key = ChildKey::random().to_tx_key().to_view_key();
-      let sub_addr_id = SubAddrId::new(123, 456);
       let spending_pub_key = PublicKey::random();
       SubAddr::new(
         &view_key,
@@ -161,23 +159,84 @@ mod tests {
         &sub_addr_id
       )
     };
-    let token_id = TokenId::defatul();
+    let token_id = TokenId::default();
+
     TxOut::new(
       &destination,
       123,
       "navio",
       &token_id,  
       TxOutputType::Normal,
-      0,
+      5,
     )
+  }
+
+  #[test]
+  fn test_destination() {
+    init();
+    let sub_addr_id = SubAddrId::new(123, 456);
+    let tx_out = gen_tx_out(&sub_addr_id);
+    let _dest = tx_out.destination();
+  }
+
+  #[test]
+  fn test_amount() {
+    init();
+    let sub_addr_id = SubAddrId::new(123, 456);
+    let tx_out = gen_tx_out(&sub_addr_id);
+    let amount = tx_out.amount();
+    assert_eq!(amount, 123);
+  }
+
+  #[test]
+  fn test_memo() {
+    init();
+    let sub_addr_id = SubAddrId::new(123, 456);
+    let tx_out = gen_tx_out(&sub_addr_id);
+    let memo = tx_out.memo();
+    assert_eq!(&memo, "navio");
+  }
+
+  #[test]
+  fn test_token_id() {
+    init();
+    let sub_addr_id = SubAddrId::new(123, 456);
+    let tx_out = gen_tx_out(&sub_addr_id);
+    let token_id = tx_out.token_id();
+    assert_eq!(token_id, TokenId::default());
+  }
+
+  #[test]
+  fn test_output_type() {
+    init();
+    let sub_addr_id = SubAddrId::new(123, 456);
+    let tx_out = gen_tx_out(&sub_addr_id);
+    let output_type = tx_out.output_type();
+    assert_eq!(output_type, TxOutputType::Normal);
+  }
+
+  #[test]
+  fn test_min_stake() {
+    init();
+    let sub_addr_id = SubAddrId::new(123, 456);
+    let tx_out = gen_tx_out(&sub_addr_id);
+    let min_stake = tx_out.min_stake();
+    assert_eq!(min_stake, 5);
   }
 
   #[test]
   fn test_eq() {
     init();
 
-    //let a = gen_tx_id(123, &spending_key, &out_point);
-    //let b = gen_tx_id(456, &spending_key, &out_point);
+    let a = {
+      let sub_addr_id = SubAddrId::new(123, 456);
+      gen_tx_out(&sub_addr_id)
+    };
+    let b = {
+      let sub_addr_id = SubAddrId::new(234, 567);
+      gen_tx_out(&sub_addr_id)
+    };
+
     assert!(a == a);
     assert!(a != b);
     assert!(b != a);
@@ -188,7 +247,10 @@ mod tests {
   fn test_deser() {
     init();
 
-    //let a = gen_tx_id(123, &spending_key, &out_point);
+    let a = {
+      let sub_addr_id = SubAddrId::new(123, 456);
+      gen_tx_out(&sub_addr_id)
+    };
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<TxOut>(&hex).unwrap();
     assert_eq!(a, b);

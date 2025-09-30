@@ -145,92 +145,87 @@ mod tests {
     token_id::TokenId,
   };
 
-  fn gen_tx_id(
-    amount: u64,
-    spending_key: &SpendingKey,
-    out_point: &OutPoint,
-  ) -> TxIn {
-    let token_id = &TokenId::default();
+  fn gen_tx_in(amount: u64) -> TxIn {
+    let spending_key = {
+      let child_key = ChildKey::random();
+      child_key.to_tx_key().to_spending_key()
+    };
+    let out_point = {
+      let ctx_id = CTxId::random();
+      OutPoint::new(&ctx_id, 56)
+    };
+    let token_id = TokenId::default();
     TxIn::new(
       amount,
       42,
-      spending_key,
-      token_id,
-      out_point,
+      &spending_key,
+      &token_id,
+      &out_point,
       false,
       false,
     )
   }
 
-  fn gen_random_tx_id() -> TxIn {
-    let spending_key = {
-      let child_key = ChildKey::random();
-      child_key.to_tx_key().to_spending_key()
-    };
-    let out_point = OutPoint::new(&CTxId::random(), 2);
-    gen_tx_id(123, &spending_key, &out_point)
-  }
-
   #[test]
   fn test_amount() {
     init();
-    let tx_id = gen_random_tx_id();
-    let _ = tx_id.amount();
+    let tx_in = gen_tx_in(123);
+    let amount = tx_in.amount();
+    assert_eq!(amount, 123);
   }
 
   #[test]
   fn test_gamma() {
     init();
-    let tx_id = gen_random_tx_id();
-    let _ = tx_id.gamma();
+    let tx_in = gen_tx_in(123);
+    let gamma = tx_in.gamma();
+    assert_eq!(gamma, 42);
   }
 
   #[test]
   fn test_spending_key() {
     init();
-    let tx_id = gen_random_tx_id();
-    let _ = tx_id.spending_key();
+    let tx_in = gen_tx_in(123);
+    let _ = tx_in.spending_key();
   }
 
   #[test]
   fn test_token_id() {
     init();
-    let tx_id = gen_random_tx_id();
-    let _ = tx_id.token_id();
+    let tx_in = gen_tx_in(123);
+    let token_id = tx_in.token_id();
+    assert_eq!(token_id, TokenId::default());
   }
 
   #[test]
   fn test_out_point() {
     init();
-    let tx_id = gen_random_tx_id();
-    let _ = tx_id.out_point();
+    let tx_in = gen_tx_in(123);
+    let _ = tx_in.out_point();
   }
 
   #[test]
   fn test_is_staked_commitment() {
     init();
-    let tx_id = gen_random_tx_id();
-    let _ = tx_id.is_staked_commitment();
+    let tx_in = gen_tx_in(123);
+    let is_staked_commitment = tx_in.is_staked_commitment();
+    assert_eq!(is_staked_commitment, false); 
   }
 
   #[test]
   fn test_is_rbf() {
     init();
-    let tx_id = gen_random_tx_id();
-    let _ = tx_id.is_rbf();
+    let tx_in = gen_tx_in(123);
+    let is_rbf = tx_in.is_rbf();
+    assert_eq!(is_rbf, false); 
   }
 
   #[test]
   fn test_eq() {
     init();
-    let spending_key = {
-      let child_key = ChildKey::random();
-      child_key.to_tx_key().to_spending_key()
-    };
-    let out_point = OutPoint::new(&CTxId::random(), 2);
+    let a = gen_tx_in(123);
+    let b = gen_tx_in(456);
 
-    let a = gen_tx_id(123, &spending_key, &out_point);
-    let b = gen_tx_id(456, &spending_key, &out_point);
     assert!(a == a);
     assert!(a != b);
     assert!(b != a);
@@ -240,13 +235,7 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-    let spending_key = {
-      let child_key = ChildKey::random();
-      child_key.to_tx_key().to_spending_key()
-    };
-    let out_point = OutPoint::new(&CTxId::random(), 2);
-
-    let a = gen_tx_id(123, &spending_key, &out_point);
+    let a = gen_tx_in(123);
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<TxIn>(&hex).unwrap();
     assert_eq!(a, b);

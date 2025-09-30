@@ -60,6 +60,7 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
     let (result, value, value_size) = unsafe {
       ((*rv).result, (*rv).value, (*rv).value_size)
     };
+
     // BlscRetVal is no longer needed
     unsafe { free_obj(rv as *mut c_void); }
 
