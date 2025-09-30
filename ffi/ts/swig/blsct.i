@@ -376,7 +376,7 @@ typedef struct {
   size_t ser_ctx_size;
   size_t in_amount_err_index;
   size_t out_amount_err_index;
-} BlsctCtxRetVal;
+} BlsctCTxRetVal;
 
 export void init();
 export bool set_chain(enum Chain chain);
@@ -556,7 +556,7 @@ export const BlsctRetVal* get_ctx_out_range_proof(const CTxOut* ctx_out);
 export uint16_t get_ctx_out_view_tag(const CTxOut* ctx_out);
 
 // tx
-export BlsctCtxRetVal* build_ctx(
+export BlsctCTxRetVal* build_ctx(
     const void* void_tx_ins,
     const void* void_tx_outs
 );

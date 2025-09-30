@@ -34,7 +34,7 @@ export interface BlsctBoolRetVal {
   result: number
 }
 
-export interface BlsctCtxRetVal {
+export interface BlsctCTxRetVal {
   result: number
   ser_ctx: any
   ser_ctx_size: number
@@ -78,7 +78,7 @@ export const addTxOutToVec = (vec: any, txOut: any): void => {
   return blsct.add_tx_out_to_vec(vec, txOut)
 }
 
-export const buildCTx = (txIns: any, txOuts: any): BlsctCtxRetVal => {
+export const buildCTx = (txIns: any, txOuts: any): BlsctCTxRetVal => {
   return blsct.build_ctx(txIns, txOuts)
 }
 
