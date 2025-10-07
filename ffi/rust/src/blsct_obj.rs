@@ -52,6 +52,15 @@ impl<T: BlsctSerde, U> fmt::Display for BlsctObj<T, U> {
 }
 
 impl<T: BlsctSerde, U> BlsctObj<T, U> {
+  pub fn new(ptr: NonNull<u8>, size: usize) -> Self {
+    Self {
+      ptr,
+      size,
+      _t: std::marker::PhantomData,
+      _u: std::marker::PhantomData,
+    }
+  }
+
   pub fn from_retval(rv: *mut BlsctRetVal) -> Result<Self, &'static str> {
     // check if allocating memory for BlsctRetVal is failed
     if rv.is_null() {
