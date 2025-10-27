@@ -35,7 +35,7 @@ impl CTxId {
     obj.into()
   }
 
-  impl_value!(CTxId, BlsctCTxId);
+  impl_value!(BlsctCTxId);
 }
 
 impl BlsctSerde for CTxId {

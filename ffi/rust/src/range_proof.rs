@@ -233,7 +233,7 @@ impl RangeProof {
     BlsctObj::<Scalar, BlsctScalar>::from_c_obj(obj).into()
   }
 
-  impl_value!(RangeProof, BlsctRangeProof);
+  impl_value!(BlsctRangeProof);
 }
 
 impl BlsctSerde for RangeProof {

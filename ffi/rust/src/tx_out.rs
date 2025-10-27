@@ -103,7 +103,7 @@ impl TxOut {
     unsafe { get_tx_out_min_stake(self.value()) }
   }
 
-  impl_value!(TxOut, BlsctTxOut);
+  impl_value!(BlsctTxOut);
 }
 
 impl BlsctSerde for TxOut {

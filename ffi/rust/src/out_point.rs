@@ -39,7 +39,7 @@ impl OutPoint {
     unsafe { get_out_point_n(self.value()) }
   }
 
-  impl_value!(OutPoint, BlsctOutPoint);
+  impl_value!(BlsctOutPoint);
 }
 
 impl BlsctSerde for OutPoint {

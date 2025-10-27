@@ -47,7 +47,7 @@ impl Point {
     return b != 0;
   }
 
-  impl_value!(Point, BlsctPoint);
+  impl_value!(BlsctPoint);
 }
 
 impl From<BlsctObj<Point, BlsctPoint>> for Point {

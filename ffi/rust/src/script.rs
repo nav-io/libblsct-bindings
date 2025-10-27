@@ -39,7 +39,7 @@ impl Script {
     obj.into()
   }
 
-  impl_value!(Script, BlsctScript);
+  impl_value!(BlsctScript);
 }
 
 impl BlsctSerde for Script {

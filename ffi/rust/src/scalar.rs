@@ -40,7 +40,7 @@ impl Scalar {
       .expect("Failed to allocate memory")
   }
 
-  impl_value!(Scalar, BlsctScalar);
+  impl_value!(BlsctScalar);
 }
 
 impl BlsctSerde for Scalar {

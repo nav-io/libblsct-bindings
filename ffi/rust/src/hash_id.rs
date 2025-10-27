@@ -60,7 +60,7 @@ impl HashId {
     )
   }
 
-  impl_value!(HashId, BlsctKeyId);
+  impl_value!(BlsctKeyId);
 }
 
 impl BlsctSerde for HashId {

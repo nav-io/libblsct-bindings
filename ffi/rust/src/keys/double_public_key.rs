@@ -49,7 +49,7 @@ impl From<DoublePublicKey> for SubAddr {
 }
 
 impl DoublePublicKey {
-  impl_value!(DoublePublicKey, BlsctDoublePubKey);
+  impl_value!(BlsctDoublePubKey);
 
   pub fn from_public_keys(
     pk1: &PublicKey,

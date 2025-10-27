@@ -46,7 +46,7 @@ impl SubAddrId {
     unsafe { get_sub_addr_id_address(self.value()) }
   }
 
-  impl_value!(SubAddrId, BlsctSubAddrId);
+  impl_value!(BlsctSubAddrId);
 }
 
 impl BlsctSerde for SubAddrId {

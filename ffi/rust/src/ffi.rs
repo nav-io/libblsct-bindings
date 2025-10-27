@@ -1,5 +1,11 @@
-use std::ffi::c_void;
-use std::os::raw::{c_char, c_int};
+use std::{
+  ffi::c_void,
+  os::raw::{
+    c_char,
+    c_int,
+  },
+};
+use serde::{Deserialize, Serialize};
 
 #[repr(C)]
 #[derive(Debug)]
@@ -27,8 +33,7 @@ pub struct BlsctAmountsRetVal {
 #[derive(Debug)]
 pub struct BlsctCTxRetVal {
   pub result: u8,
-  pub ser_ctx: *mut u8,
-  pub ser_ctx_size: usize,
+  pub ctx: *mut c_void,
   pub in_amount_err_index: usize,
   pub out_amount_err_index: usize,
 }
@@ -77,18 +82,6 @@ pub enum TxOutputType {
   Normal,
   StakedCommitment
 }
-
-#[repr(C)]
-pub struct BlsctCTxIn { _unused: [u8; 0] }
-
-#[repr(C)]
-pub struct BlsctCTxIns { _unused: [u8; 0] }
-
-#[repr(C)]
-pub struct BlsctCTxOut { _unused: [u8; 0] }
-
-#[repr(C)]
-pub struct BlsctCTxOuts { _unused: [u8; 0] }
 
 // constants
 pub const CTX_ID_SIZE: usize = 32;
@@ -146,10 +139,6 @@ pub fn from_child_key_to_blinding_key(child_key: *const BlsctScalar) -> *mut Bls
 pub fn from_child_key_to_token_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
 pub fn from_child_key_to_tx_key(child_key: *const BlsctScalar) -> *mut BlsctScalar;
 
-// CTxId
-pub fn serialize_ctx_id(blsct_ctx_id: *const BlsctCTxId) -> *const c_char;
-pub fn deserialize_ctx_id(hex: *const c_char) -> *mut BlsctRetVal;
-
 // CTx
 pub fn create_tx_in_vec() -> *mut c_void;
 pub fn add_to_tx_in_vec(vp_tx_in_vec: *mut c_void, tx_in: *const BlsctTxIn);
@@ -164,46 +153,36 @@ pub fn build_ctx(
   void_tx_outs: *const c_void,
 ) -> *mut BlsctCTxRetVal;
 
-pub fn get_ctx_id(
-  ser_ctx: *const u8,
-  ser_ctx_size: usize,
-) -> *const c_char;
-
-pub fn get_ctx_ins(
-  ser_ctx: *const u8,
-  ser_ctx_size: usize,
-) -> *const BlsctCTxIns;
-
-pub fn get_ctx_outs(
-  ser_ctx: *const u8,
-  ser_ctx_size: usize
-) -> *const BlsctCTxOuts;
-
-pub fn get_ctx_ins_size(blsct_ctx_ins: *const BlsctCTxIns) -> usize;
-pub fn get_ctx_outs_size(blsct_ctx_outs: *const BlsctCTxOuts) -> usize;
-
-pub fn delete_ctx_ins(blsct_ctx_ins: *const BlsctCTxIns);
-pub fn delete_ctx_outs(blsct_ctx_outs: *const BlsctCTxOuts);
-
-pub fn get_ctx_in_at(
-    blsct_ctx_ins: *const BlsctCTxIns,
-    i: usize,
-) -> *const BlsctRetVal;
-
-pub fn get_ctx_out_at(
-    blsct_ctx_outs: *const BlsctCTxOuts,
-    i: usize,
-) -> *const BlsctRetVal;
-
-pub fn serialize_ctx(ser_ctx: *const u8, ser_ctx_size: usize) -> *const c_char;
+pub fn get_ctx_id(vp_ctx: *mut c_void) -> *const c_char;
+pub fn get_ctx_ins(vp_ctx: *mut c_void) -> *const c_void;
+pub fn get_ctx_outs(vp_ctx: *mut c_void) -> *const c_void;
+pub fn serialize_ctx(vp_ctx: *mut c_void) -> *const c_char;
 pub fn deserialize_ctx(hex: *const c_char) -> *mut BlsctRetVal;
 
+// CTxId
+pub fn serialize_ctx_id(blsct_ctx_id: *const BlsctCTxId) -> *const c_char;
+pub fn deserialize_ctx_id(hex: *const c_char) -> *mut BlsctRetVal;
+
 // CTxIn
-pub fn get_ctx_in_script_sig(blsct_ctx_in: *const BlsctCTxIn) -> *const BlsctScript;
-pub fn get_ctx_in_sequence(blsct_ctx_in: *const BlsctCTxIn) -> u32;
-pub fn get_ctx_in_script_witness(blsct_ctx_in: *const BlsctCTxIn) -> *const BlsctScript;
-pub fn get_ctx_in_prev_out_hash(blsct_ctx_in: *const BlsctCTxIn) -> *const BlsctCTxId;
-pub fn get_ctx_in_prev_out_n(blsct_ctx_in: *const BlsctCTxIn) -> u32;
+pub fn are_ctx_in_equal(vp_a: *const c_void, vp_b: *const c_void) -> bool;
+pub fn get_ctx_in_prev_out_hash(vp_ctx_in: *const c_void) -> *const BlsctCTxId;
+pub fn get_ctx_in_prev_out_n(vp_ctx_in: *const c_void) -> u32;
+pub fn get_ctx_in_script_sig(vp_ctx_in: *const c_void) -> *const BlsctScript;
+pub fn get_ctx_in_sequence(vp_ctx_in: *const c_void) -> u32;
+pub fn get_ctx_in_script_witness(vp_ctx_in: *const c_void) -> *const BlsctScript;
+
+// CTxIns
+pub fn are_ctx_ins_equal(vp_a: *const c_void, vp_b: *const c_void) -> bool;
+pub fn get_ctx_ins_size(vp_ctx_ins: *const c_void) -> usize;
+pub fn get_ctx_in_at(vp_ctx_ins: *const c_void, i: usize) -> *const c_void;
+
+// CTxOut
+pub fn are_ctx_out_equal(vp_a: *const c_void, vp_b: *const c_void) -> bool;
+
+// CTxOuts
+pub fn are_ctx_outs_equal(vp_a: *const c_void, vp_b: *const c_void) -> bool;
+pub fn get_ctx_outs_size(vp_ctx_outs: *const c_void) -> usize;
+pub fn get_ctx_out_at(vp_ctx_outs: *const c_void, i: usize) -> *const c_void;
 
 // DoublePublicKey
 pub fn deserialize_dpk(hex: *const c_char) -> *mut BlsctRetVal;

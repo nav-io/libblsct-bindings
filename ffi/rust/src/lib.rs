@@ -4,7 +4,9 @@ pub mod amount_recovery_res;
 pub mod ctx;
 pub mod ctx_id;
 pub mod ctx_in;
+pub mod ctx_ins;
 pub mod ctx_out;
+pub mod ctx_outs;
 pub mod hash_id;
 pub mod initializer;
 pub mod keys;
@@ -25,5 +27,5 @@ mod blsct_obj;
 mod blsct_serde;
 mod ffi;
 mod macros;
+mod test_util;
 mod util;
-

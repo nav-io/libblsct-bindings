@@ -39,7 +39,7 @@ impl Signature {
     obj.into()
   }
 
-  impl_value!(Signature, BlsctSignature);
+  impl_value!(BlsctSignature);
 }
 
 impl BlsctSerde for Signature {

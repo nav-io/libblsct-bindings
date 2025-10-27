@@ -18,13 +18,14 @@ use std::{
     {CStr, CString},
   },
   fmt,
+  ptr::NonNull,
 };
-use std::ptr::NonNull;
 
 #[derive(Eq, Debug)]
 pub struct BlsctObj<T: BlsctSerde, U> {
   ptr: NonNull<u8>,
   size: usize,
+  dropper: Option<unsafe extern "C" fn(*mut c_void)>,
   _t: std::marker::PhantomData<*mut T>,
   _u: std::marker::PhantomData<fn() -> U>,
 }
@@ -56,10 +57,14 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
     Self {
       ptr,
       size,
+      dropper: None,
       _t: std::marker::PhantomData,
       _u: std::marker::PhantomData,
     }
   }
+
+  // TODO implement this
+  pub fn set_dropper() {}
 
   pub fn from_retval(rv: *mut BlsctRetVal) -> Result<Self, &'static str> {
     // check if allocating memory for BlsctRetVal is failed
@@ -88,6 +93,7 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
       size: value_size,
       _t: std::marker::PhantomData,
       _u: std::marker::PhantomData,
+      dropper: None,
     })
   }
 
@@ -99,6 +105,7 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
       size,
       _t: std::marker::PhantomData,
       _u: std::marker::PhantomData,
+      dropper: None,
     }
   }
 
@@ -147,8 +154,11 @@ impl<'de, T: BlsctSerde, U> Deserialize<'de> for BlsctObj<T, U> {
 
 impl<T: BlsctSerde, U> Drop for BlsctObj<T, U> {
   fn drop(&mut self) {
-    unsafe {
-      free_obj(self.ptr.as_ptr() as *mut c_void);
+    match self.dropper {
+      Some(f) => unsafe { 
+        f(self.ptr.as_ptr().cast::<c_void>())
+      },
+      None => unsafe { free_obj(self.ptr.as_ptr() as *mut c_void); },
     }
   }
 }

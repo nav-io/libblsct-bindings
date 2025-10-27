@@ -2,14 +2,14 @@ use crate::{
   blsct_obj::BlsctObj,
   blsct_serde::BlsctSerde, 
   ctx_id::CTxId,
+  ctx_ins::CTxIns,
+  ctx_outs::CTxOuts,
   ffi::{
     add_to_tx_in_vec,
     add_to_tx_out_vec,
     BlsctRetVal,
     BlsctCTx,
     BlsctCTxId,
-    BlsctCTxIns,
-    BlsctCTxOuts,
     BLSCT_IN_AMOUNT_ERROR,
     BLSCT_OUT_AMOUNT_ERROR,
     build_ctx,
@@ -28,7 +28,6 @@ use crate::{
   macros::{
     impl_clone,
     impl_display,
-    impl_value,
   },
   tx_in::TxIn,
   tx_out::TxOut,
@@ -79,8 +78,8 @@ impl CTx {
       };
 
       if (*rv).result == 0 {
-        let ser_ctx = NonNull::<u8>::new((*rv).ser_ctx).unwrap();
-        let obj = BlsctObj::<CTx, BlsctCTx>::new(ser_ctx, (*rv).ser_ctx_size);
+        let vp_ctx = NonNull::<u8>::new((*rv).ctx as *mut u8).unwrap();
+        let obj = BlsctObj::<CTx, BlsctCTx>::new(vp_ctx, 0); // size will not be used
         clean_up();
         Ok(obj.into())
 
@@ -108,27 +107,33 @@ impl CTx {
 
   pub fn get_ctx_id(&self) -> CTxId {
     let rv = unsafe { 
-      let c_str_hex = get_ctx_id(self.value(), self.obj.size());
+      let c_str_hex = get_ctx_id(self.value());
       deserialize_ctx_id(c_str_hex)
     };
     let obj = BlsctObj::<CTxId, BlsctCTxId>::from_retval(rv).unwrap();
     obj.into()
   }
 
-  pub fn get_ctx_ins(&self) -> *const BlsctCTxIns {
-    unsafe { get_ctx_ins(self.value(), self.obj.size()) }
+  pub fn get_ctx_ins(&self) -> CTxIns {
+    let obj = unsafe { get_ctx_ins(self.value()) };
+    obj.into()
   }
 
-  pub fn get_ctx_outs(&self) -> *const BlsctCTxOuts {
-    unsafe { get_ctx_outs(self.value(), self.obj.size()) }
+  pub fn get_ctx_outs(&self) -> CTxOuts {
+    let obj = unsafe { get_ctx_outs(self.value()) };
+    obj.into()
   }
 
-  impl_value!(CTx, BlsctCTx);
+  // not using impl_void_ptr_value!() to return *mut c_void
+  // to avoid const_cast
+  pub fn value(&self) -> *mut c_void {
+    self.obj.as_ptr() as *mut c_void
+  }
 }
 
 impl BlsctSerde for CTx {
-  unsafe fn serialize(ptr: *const u8, size: usize) -> *const i8 {
-    serialize_ctx(ptr, size)
+  unsafe fn serialize(ptr: *const u8, _: usize) -> *const i8 {
+    serialize_ctx(ptr as *mut c_void)
   }
 
   unsafe fn deserialize(hex: *const c_char) -> *mut BlsctRetVal {
@@ -152,67 +157,13 @@ impl PartialEq for CTx {
 mod tests {
   use super::*;
   use crate::{
-    ctx_id::CTxId,
     ffi::{
       get_ctx_ins_size,
       get_ctx_outs_size,
-      TxOutputType,
     },
     initializer::init,
-    keys::child_key::ChildKey,
-    out_point::OutPoint,
-    keys::public_key::PublicKey,
-    sub_addr::SubAddr,
-    sub_addr_id::SubAddrId,
-    token_id::TokenId,
+    test_util::gen_ctx,
   };
-
-  fn gen_ctx() -> CTx {
-    let spending_key = ChildKey::random().to_tx_key().to_spending_key();
-    let out_point = {
-      let ctx_id = CTxId::random();
-      OutPoint::new(&ctx_id, 0)
-    };
-    let num_tx_in = 1;
-    let num_tx_out = 1;
-    let default_fee = 200000;
-    let fee = (num_tx_in + num_tx_out) * default_fee;
-    let out_amount = 10000;
-    let in_amount = fee + out_amount;
-
-    let tx_in = TxIn::new(
-      in_amount, 
-      100,
-      &spending_key,
-      &TokenId::default(), 
-      &out_point,
-      false, 
-      false
-    );
-
-    let destination = {
-      let view_key = ChildKey::random().to_tx_key().to_view_key();
-      let spending_pub_key = PublicKey::random();
-      let sub_addr_id = SubAddrId::new(67, 78);
-      SubAddr::new(
-        &view_key,
-        &spending_pub_key, 
-        &sub_addr_id,
-      )
-    };
-    let tx_out = TxOut::new(
-      &destination, 
-      out_amount, 
-      "navio",
-      &TokenId::default(), 
-      TxOutputType::Normal,
-      0,
-    );
-
-    let tx_ins = vec![tx_in];
-    let tx_outs = vec![tx_out];
-    CTx::new(&tx_ins, &tx_outs).unwrap()
-  }
 
   #[test]
   fn test_get_ctx_id() {
@@ -226,7 +177,7 @@ mod tests {
     init();
     let ctx = gen_ctx();
     let ctx_ins = ctx.get_ctx_ins();
-    let ctx_ins_size = unsafe { get_ctx_ins_size(ctx_ins) };
+    let ctx_ins_size = unsafe { get_ctx_ins_size(ctx_ins.value()) };
     assert_eq!(ctx_ins_size, 1);
   }
 
@@ -235,7 +186,7 @@ mod tests {
     init();
     let ctx = gen_ctx();
     let ctx_outs = ctx.get_ctx_outs();
-    let ctx_outs_size = unsafe { get_ctx_outs_size(ctx_outs) };
+    let ctx_outs_size = unsafe { get_ctx_outs_size(ctx_outs.value()) };
     assert_eq!(ctx_outs_size, 3);
   }
 

@@ -53,7 +53,7 @@ impl PublicKey {
     (&point).into()
   }
 
-  impl_value!(PublicKey, BlsctPubKey);
+  impl_value!(BlsctPubKey);
 }
 
 impl BlsctSerde for PublicKey {

@@ -46,7 +46,7 @@ impl SubAddr {
     BlsctObj::from_c_obj(blsct_sub_addr).into()
   }
 
-  impl_value!(SubAddr, BlsctSubAddr);
+  impl_value!(BlsctSubAddr);
 }
 
 impl BlsctSerde for SubAddr {

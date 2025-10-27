@@ -100,7 +100,7 @@ impl TxIn {
     unsafe { get_tx_in_rbf(self.value()) }
   }
 
-  impl_value!(TxIn, BlsctTxIn);
+  impl_value!(BlsctTxIn);
 }
 
 impl BlsctSerde for TxIn {

@@ -55,7 +55,7 @@ impl TokenId {
     unsafe { get_token_id_subid(self.value()) }
   }
 
-  impl_value!(TokenId, BlsctTokenId);
+  impl_value!(BlsctTokenId);
 }
 
 impl BlsctSerde for TokenId {
