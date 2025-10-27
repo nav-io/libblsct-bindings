@@ -18,7 +18,7 @@ import { SpendingKey } from './keys/childKeyDesc/txKeyDesc/spendingKey'
  *
  * Also known as `CTxOutBlsctData` on the C++ side. This class provides access to the `CTxOutBlsctData` object, but does not own neither the `CTxOut` nor `CTxOutBlsctData` object.
  *
- * For code examples, see the `ctx.py` class documentation.
+ * For code examples, see the `ctx.ts` class documentation.
  */
 export class CTxOutBlsctData extends ManagedObj {
   rangeProofCache?: RangeProof

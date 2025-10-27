@@ -15,6 +15,7 @@ use crate::{
     build_ctx,
     create_tx_in_vec,
     create_tx_out_vec,
+    delete_ctx,
     delete_tx_in_vec,
     delete_tx_out_vec,
     deserialize_ctx,
@@ -79,7 +80,8 @@ impl CTx {
 
       if (*rv).result == 0 {
         let vp_ctx = NonNull::<u8>::new((*rv).ctx as *mut u8).unwrap();
-        let obj = BlsctObj::<CTx, BlsctCTx>::new(vp_ctx, 0); // size will not be used
+        let obj = BlsctObj::<CTx, BlsctCTx>::new_with_deallocator(vp_ctx, 0, Some(delete_ctx)); // size will not be used
+
         clean_up();
         Ok(obj.into())
 

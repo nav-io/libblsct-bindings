@@ -15,7 +15,8 @@ use serde::{
 use std::{
   ffi::{
     c_void,
-    {CStr, CString},
+    CStr,
+    CString,
   },
   fmt,
   ptr::NonNull,
@@ -25,7 +26,7 @@ use std::{
 pub struct BlsctObj<T: BlsctSerde, U> {
   ptr: NonNull<u8>,
   size: usize,
-  dropper: Option<unsafe extern "C" fn(*mut c_void)>,
+  deallocator: Option<unsafe extern "C" fn(*mut c_void)>,
   _t: std::marker::PhantomData<*mut T>,
   _u: std::marker::PhantomData<fn() -> U>,
 }
@@ -53,18 +54,32 @@ impl<T: BlsctSerde, U> fmt::Display for BlsctObj<T, U> {
 }
 
 impl<T: BlsctSerde, U> BlsctObj<T, U> {
-  pub fn new(ptr: NonNull<u8>, size: usize) -> Self {
+  pub fn new_with_deallocator(
+    ptr: NonNull<u8>,
+    size: usize,
+    deallocator: Option<unsafe extern "C" fn(*mut c_void)>,
+  ) -> Self {
     Self {
       ptr,
       size,
-      dropper: None,
+      deallocator,
       _t: std::marker::PhantomData,
       _u: std::marker::PhantomData,
     }
   }
 
-  // TODO implement this
-  pub fn set_dropper() {}
+  pub fn new(
+    ptr: NonNull<u8>,
+    size: usize,
+  ) -> Self {
+    Self {
+      ptr,
+      size,
+      deallocator: None,
+      _t: std::marker::PhantomData,
+      _u: std::marker::PhantomData,
+    }
+  }
 
   pub fn from_retval(rv: *mut BlsctRetVal) -> Result<Self, &'static str> {
     // check if allocating memory for BlsctRetVal is failed
@@ -93,7 +108,7 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
       size: value_size,
       _t: std::marker::PhantomData,
       _u: std::marker::PhantomData,
-      dropper: None,
+      deallocator: None,
     })
   }
 
@@ -105,7 +120,7 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
       size,
       _t: std::marker::PhantomData,
       _u: std::marker::PhantomData,
-      dropper: None,
+      deallocator: None,
     }
   }
 
@@ -154,7 +169,7 @@ impl<'de, T: BlsctSerde, U> Deserialize<'de> for BlsctObj<T, U> {
 
 impl<T: BlsctSerde, U> Drop for BlsctObj<T, U> {
   fn drop(&mut self) {
-    match self.dropper {
+    match self.deallocator {
       Some(f) => unsafe { 
         f(self.ptr.as_ptr().cast::<c_void>())
       },

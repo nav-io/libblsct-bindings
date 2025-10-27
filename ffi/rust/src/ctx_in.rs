@@ -14,7 +14,7 @@ use crate::{
   macros::impl_value_raw_const_obj,
   script::Script,
 };
-use std::ffi::{c_void};
+use std::ffi::c_void;
 
 #[derive(Debug)]
 pub struct CTxIn {

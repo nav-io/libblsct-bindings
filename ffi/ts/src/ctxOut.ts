@@ -17,7 +17,7 @@ import { Script } from './script'
 
 /** Represents a transaction output in a constructed confidential transaction. Also known as `CTxOut` on the C++ side.
  *
- * For code examples, see the `ctx.py` class documentation.
+ * For code examples, see the `ctx.ts` class documentation.
  */
 export class CTxOut extends ManagedObj {
   blsctDataCache?: CTxOutBlsctData

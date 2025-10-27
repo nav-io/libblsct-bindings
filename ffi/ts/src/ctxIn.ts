@@ -16,7 +16,7 @@ import { CTxId } from './ctxId'
 
 /** Represents a transaction input in a constructed confidential transaction. Also known as `CTxIn` on the C++ side.
  *
- * For code examples, see the `ctx.py` class documentation.
+ * For code examples, see the `ctx.ts` class documentation.
  */
 export class CTxIn extends ManagedObj {
   constructor(obj: any) {

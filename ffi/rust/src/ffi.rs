@@ -158,6 +158,7 @@ pub fn get_ctx_ins(vp_ctx: *mut c_void) -> *const c_void;
 pub fn get_ctx_outs(vp_ctx: *mut c_void) -> *const c_void;
 pub fn serialize_ctx(vp_ctx: *mut c_void) -> *const c_char;
 pub fn deserialize_ctx(hex: *const c_char) -> *mut BlsctRetVal;
+pub fn delete_ctx(vp_ctx: *mut c_void);
 
 // CTxId
 pub fn serialize_ctx_id(blsct_ctx_id: *const BlsctCTxId) -> *const c_char;
@@ -178,6 +179,10 @@ pub fn get_ctx_in_at(vp_ctx_ins: *const c_void, i: usize) -> *const c_void;
 
 // CTxOut
 pub fn are_ctx_out_equal(vp_a: *const c_void, vp_b: *const c_void) -> bool;
+pub fn get_ctx_out_value(vp_ctx_out: *const c_void) -> u64;
+pub fn get_ctx_out_script_pub_key(vp_ctx_out: *const c_void) -> *const BlsctScript;
+pub fn get_ctx_out_token_id(vp_ctx_out: *const c_void) -> *const BlsctTokenId;
+pub fn get_ctx_out_vector_predicate(vp_ctx_out: *const c_void) -> *const BlsctRetVal;
 
 // CTxOuts
 pub fn are_ctx_outs_equal(vp_a: *const c_void, vp_b: *const c_void) -> bool;
