@@ -6,6 +6,7 @@ pub mod ctx_id;
 pub mod ctx_in;
 pub mod ctx_ins;
 pub mod ctx_out;
+pub mod ctx_out_blsct_data;
 pub mod ctx_outs;
 pub mod hash_id;
 pub mod initializer;
@@ -21,6 +22,7 @@ pub mod sub_addr_id;
 pub mod token_id;
 pub mod tx_in;
 pub mod tx_out;
+pub mod vector_predicate;
 pub mod view_tag;
 
 mod blsct_obj;

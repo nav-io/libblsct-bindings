@@ -5,7 +5,6 @@ use std::{
     c_int,
   },
 };
-use serde::{Deserialize, Serialize};
 
 #[repr(C)]
 #[derive(Debug)]
@@ -119,6 +118,7 @@ pub type BlsctTokenId = [u8; TOKEN_ID_SIZE];
 
 pub type BlsctRangeProof = u8;
 pub type BlsctCTx = u8;
+pub type BlsctVectorPredicate = u8;
 
 extern "C" {
 
@@ -164,6 +164,11 @@ pub fn delete_ctx(vp_ctx: *mut c_void);
 pub fn serialize_ctx_id(blsct_ctx_id: *const BlsctCTxId) -> *const c_char;
 pub fn deserialize_ctx_id(hex: *const c_char) -> *mut BlsctRetVal;
 
+// CTxIns
+pub fn are_ctx_ins_equal(vp_a: *const c_void, vp_b: *const c_void) -> bool;
+pub fn get_ctx_ins_size(vp_ctx_ins: *const c_void) -> usize;
+pub fn get_ctx_in_at(vp_ctx_ins: *const c_void, i: usize) -> *const c_void;
+
 // CTxIn
 pub fn are_ctx_in_equal(vp_a: *const c_void, vp_b: *const c_void) -> bool;
 pub fn get_ctx_in_prev_out_hash(vp_ctx_in: *const c_void) -> *const BlsctCTxId;
@@ -172,22 +177,17 @@ pub fn get_ctx_in_script_sig(vp_ctx_in: *const c_void) -> *const BlsctScript;
 pub fn get_ctx_in_sequence(vp_ctx_in: *const c_void) -> u32;
 pub fn get_ctx_in_script_witness(vp_ctx_in: *const c_void) -> *const BlsctScript;
 
-// CTxIns
-pub fn are_ctx_ins_equal(vp_a: *const c_void, vp_b: *const c_void) -> bool;
-pub fn get_ctx_ins_size(vp_ctx_ins: *const c_void) -> usize;
-pub fn get_ctx_in_at(vp_ctx_ins: *const c_void, i: usize) -> *const c_void;
+// CTxOuts
+pub fn are_ctx_outs_equal(vp_a: *const c_void, vp_b: *const c_void) -> bool;
+pub fn get_ctx_outs_size(vp_ctx_outs: *const c_void) -> usize;
+pub fn get_ctx_out_at(vp_ctx_outs: *const c_void, i: usize) -> *const c_void;
 
 // CTxOut
 pub fn are_ctx_out_equal(vp_a: *const c_void, vp_b: *const c_void) -> bool;
 pub fn get_ctx_out_value(vp_ctx_out: *const c_void) -> u64;
 pub fn get_ctx_out_script_pub_key(vp_ctx_out: *const c_void) -> *const BlsctScript;
 pub fn get_ctx_out_token_id(vp_ctx_out: *const c_void) -> *const BlsctTokenId;
-pub fn get_ctx_out_vector_predicate(vp_ctx_out: *const c_void) -> *const BlsctRetVal;
-
-// CTxOuts
-pub fn are_ctx_outs_equal(vp_a: *const c_void, vp_b: *const c_void) -> bool;
-pub fn get_ctx_outs_size(vp_ctx_outs: *const c_void) -> usize;
-pub fn get_ctx_out_at(vp_ctx_outs: *const c_void, i: usize) -> *const c_void;
+pub fn get_ctx_out_vector_predicate(vp_ctx_out: *const c_void) -> *mut BlsctRetVal;
 
 // DoublePublicKey
 pub fn deserialize_dpk(hex: *const c_char) -> *mut BlsctRetVal;
@@ -223,7 +223,7 @@ pub fn deserialize_out_point(hex: *const c_char) -> *mut BlsctRetVal;
 pub fn gen_base_point() -> *mut BlsctRetVal;
 pub fn gen_random_point() -> *mut BlsctRetVal;
 pub fn deserialize_point(hex: *const c_char) -> *mut BlsctRetVal;
-pub fn is_point_equal(a: *const BlsctPoint, b: *const BlsctPoint) -> c_int;
+pub fn are_point_equal(a: *const BlsctPoint, b: *const BlsctPoint) -> c_int;
 pub fn is_valid_point(blsct_point: *const BlsctPoint) -> c_int;
 pub fn point_from_scalar(scalar: *const BlsctScalar) -> *mut BlsctPoint;
 pub fn serialize_point(blsct_point: *const BlsctPoint) -> *const c_char;
@@ -323,7 +323,7 @@ pub fn deserialize_range_proof(
 pub fn deserialize_scalar(hex: *const c_char) -> *mut BlsctRetVal;
 pub fn gen_scalar(n: u64) -> *mut BlsctRetVal;
 pub fn gen_random_scalar() -> *mut BlsctRetVal;
-pub fn is_scalar_equal(a: *const BlsctScalar, b: *const BlsctScalar) -> c_int;
+pub fn are_scalar_equal(a: *const BlsctScalar, b: *const BlsctScalar) -> c_int;
 pub fn scalar_to_uint64(blsct_scalar: *const BlsctScalar) -> u64;
 pub fn serialize_scalar(blsct_scalar: *const BlsctScalar) -> *const c_char;
 
@@ -399,6 +399,23 @@ pub fn get_tx_out_min_stake(tx_out: *const BlsctTxOut) -> u64;
 // TxKey
 pub fn from_tx_key_to_view_key(tx_key: *const BlsctScalar) -> *mut BlsctScalar;
 pub fn from_tx_key_to_spending_key(tx_key: *const BlsctScalar) -> *mut BlsctScalar;
+
+// VectorPredicate
+pub fn are_vector_predicate_equal(
+  a: *const BlsctVectorPredicate,
+  a_size: usize,
+  b: *const BlsctVectorPredicate,
+  b_size: usize,
+) -> c_int;
+
+pub fn serialize_vector_predicate(
+  blsct_vector_predicate: *const BlsctVectorPredicate,
+  obj_size: usize,
+) -> *const c_char;
+
+pub fn deserialize_vector_predicate(
+  hex: *const c_char,
+) -> *mut BlsctRetVal;
 
 // ViewTag
 pub fn calc_view_tag(

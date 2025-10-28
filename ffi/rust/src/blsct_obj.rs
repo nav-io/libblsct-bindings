@@ -1,9 +1,12 @@
 use std::slice;
-use crate::blsct_serde::BlsctSerde;
-use crate::ffi::{
-  BlsctRetVal,
-  free_obj,
+use crate::{
+  blsct_serde::BlsctSerde,
+  ffi::{
+    BlsctRetVal,
+    free_obj,
+  },
 };
+
 use serde::{
   de::Error as DeError,
   ser::Error as SerError,
@@ -21,6 +24,7 @@ use std::{
   fmt,
   ptr::NonNull,
 };
+
 
 #[derive(Eq, Debug)]
 pub struct BlsctObj<T: BlsctSerde, U> {
@@ -115,6 +119,20 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
   pub fn from_c_obj(c_obj: *mut U) -> Self {
     let ptr = NonNull::new(c_obj as *mut u8).unwrap();
     let size = std::mem::size_of::<U>();
+    Self {
+      ptr,
+      size,
+      _t: std::marker::PhantomData,
+      _u: std::marker::PhantomData,
+      deallocator: None,
+    }
+  }
+
+  pub fn from_c_obj_and_size(
+    c_obj: *mut c_void,
+    size: usize,
+  ) -> Self {
+    let ptr = NonNull::new(c_obj as *mut u8).unwrap();
     Self {
       ptr,
       size,

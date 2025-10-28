@@ -42,6 +42,7 @@ use crate::{
     impl_clone,
     impl_display,
     impl_from_retval,
+    impl_size,
     impl_value,
   },
   point::Point,
@@ -120,10 +121,6 @@ impl RangeProof {
     if result == 0 { Ok(value) } else {
       Err("Verifying range proofs failed")
     }
-  }
-
-  pub fn size(&self) -> usize {
-    self.obj.size()
   }
 
   pub fn recover_amounts(
@@ -233,6 +230,7 @@ impl RangeProof {
     BlsctObj::<Scalar, BlsctScalar>::from_c_obj(obj).into()
   }
 
+  impl_size!();
   impl_value!(BlsctRangeProof);
 }
 
@@ -242,9 +240,9 @@ impl BlsctSerde for RangeProof {
   }
 
   unsafe fn deserialize(hex: *const c_char) -> *mut BlsctRetVal {
-    let cstr = unsafe { CStr::from_ptr(hex) };
-    let size = cstr.to_bytes().len() / 2;
-    deserialize_range_proof(hex, size)
+    let c_str = unsafe { CStr::from_ptr(hex) };
+    let obj_size = c_str.to_bytes().len() / 2;
+    deserialize_range_proof(hex, obj_size)
   }
 }
 

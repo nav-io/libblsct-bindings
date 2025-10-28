@@ -7,7 +7,7 @@ use crate::{
     deserialize_scalar,
     gen_scalar,
     gen_random_scalar,
-    is_scalar_equal,
+    are_scalar_equal,
     scalar_to_uint64,
     serialize_scalar,
   },
@@ -69,7 +69,7 @@ impl From<BlsctObj<Scalar, BlsctScalar>> for Scalar {
 
 impl PartialEq for Scalar {
   fn eq(&self, other: &Self) -> bool {
-    unsafe { is_scalar_equal(
+    unsafe { are_scalar_equal(
       self.obj.as_ptr() as *const BlsctScalar,
       other.obj.as_ptr() as *const BlsctScalar
     ) != 0 }

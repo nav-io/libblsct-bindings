@@ -21,9 +21,17 @@ macro_rules! impl_from_retval {
   };
 }
 
+macro_rules! impl_size {
+  () => {
+    #[inline] pub fn size(&self) -> usize {
+      self.obj.size()
+    }
+  };
+}
+
 macro_rules! impl_value {
   ($t:ident) => {
-    pub fn value(&self) -> *const $t {
+    #[inline] pub fn value(&self) -> *const $t {
       self.obj.as_ptr()
     }
   };
@@ -31,7 +39,7 @@ macro_rules! impl_value {
 
 macro_rules! impl_value_raw_const_obj {
   () => {
-    pub fn value(&self) -> *const c_void {
+    #[inline] pub fn value(&self) -> *const c_void {
       self.obj
     }
   };
@@ -84,7 +92,8 @@ macro_rules! impl_key {
 pub(crate) use impl_clone;
 pub(crate) use impl_display;
 pub(crate) use impl_from_retval;
+pub(crate) use impl_key;
+pub(crate) use impl_size;
 pub(crate) use impl_value;
 pub(crate) use impl_value_raw_const_obj;
-pub(crate) use impl_key;
 

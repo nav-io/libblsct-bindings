@@ -7,7 +7,7 @@ use crate::{
     deserialize_point,
     gen_base_point,
     gen_random_point,
-    is_point_equal,
+    are_point_equal,
     is_valid_point,
     point_from_scalar,
     serialize_point,
@@ -76,7 +76,7 @@ impl BlsctSerde for Point {
 
 impl PartialEq for Point {
   fn eq(&self, other: &Self) -> bool {
-    unsafe { is_point_equal(
+    unsafe { are_point_equal(
       self.obj.as_ptr() as *const BlsctPoint,
       other.obj.as_ptr() as *const BlsctPoint
     ) != 0 }
