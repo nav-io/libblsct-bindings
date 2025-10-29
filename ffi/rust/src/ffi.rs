@@ -99,6 +99,7 @@ pub const MAX_MEMO_LEN: usize = 100;
 pub const MEMO_BUF_SIZE: usize = MAX_MEMO_LEN + 1;
 
 // error codes
+pub const BLSCT_FAILURE: u8 = 1;
 pub const BLSCT_IN_AMOUNT_ERROR: u8 = 14;
 pub const BLSCT_OUT_AMOUNT_ERROR: u8 = 15;
 
@@ -188,6 +189,13 @@ pub fn get_ctx_out_value(vp_ctx_out: *const c_void) -> u64;
 pub fn get_ctx_out_script_pub_key(vp_ctx_out: *const c_void) -> *const BlsctScript;
 pub fn get_ctx_out_token_id(vp_ctx_out: *const c_void) -> *const BlsctTokenId;
 pub fn get_ctx_out_vector_predicate(vp_ctx_out: *const c_void) -> *mut BlsctRetVal;
+
+// CTxOutBlsctData
+pub fn get_ctx_out_spending_key(vp_ctx_out: *const c_void) -> *const BlsctPoint;
+pub fn get_ctx_out_ephemeral_key(vp_jctx_out: *const c_void) -> *const BlsctPoint;
+pub fn get_ctx_out_blinding_key(vp_ctx_out: *const c_void) -> *const BlsctPoint;
+pub fn get_ctx_out_range_proof(vp_ctx_out: *const c_void) -> *const BlsctRetVal;
+pub fn get_ctx_out_view_tag(vp_ctx_out: *const c_void) -> u16;
 
 // DoublePublicKey
 pub fn deserialize_dpk(hex: *const c_char) -> *mut BlsctRetVal;
@@ -425,6 +433,7 @@ pub fn calc_view_tag(
 
 // Misc helper functions
 pub fn succ(value: *mut c_void, value_size: usize) -> *mut BlsctRetVal;
+pub fn err_bool(result: u8) -> *mut BlsctRetVal;
 pub fn hex_to_malloced_buf(hex: *const c_char) -> *mut u8;
 pub fn buf_to_malloced_hex_c_str(buf: *const u8, size: usize) -> *const c_char;
 

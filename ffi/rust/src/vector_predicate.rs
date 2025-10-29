@@ -17,10 +17,7 @@ use crate::{
   },
 };
 use serde::{Deserialize, Serialize};
-use std::ffi::{
-  c_char,
-  c_void,
-};
+use std::ffi::c_char;
 
 #[derive(Debug, Deserialize, Serialize, Eq)]
 pub struct VectorPredicate {
@@ -79,6 +76,7 @@ mod tests {
   use crate::{
     initializer::init,
   };
+  use std::ffi::c_void;
 
   fn gen_vector_predicate(n: u8) -> VectorPredicate {
     const OBJ_SIZE: usize = 5;

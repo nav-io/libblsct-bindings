@@ -1,5 +1,5 @@
 use crate::{
-  blsct_obj::BlsctObj,
+  blsct_obj::{BlsctObj, self},
   blsct_serde::BlsctSerde, 
   ffi::{
     BlsctKeyId,
@@ -46,18 +46,18 @@ impl HashId {
     BlsctObj::from_c_obj(blsct_key_id).into()
   }
 
-  pub fn random() -> Self {
-    let blinding_pub_key = PublicKey::random();
-    let spending_pub_key = PublicKey::random();
+  pub fn random<'a>() -> Result<Self, blsct_obj::Error<'a>> {
+    let blinding_pub_key = PublicKey::random()?;
+    let spending_pub_key = PublicKey::random()?;
     let view_key = {
-      let child_key = ChildKey::random();
+      let child_key = ChildKey::random()?;
       child_key.to_tx_key().to_view_key() 
     };
-    Self::new(
+    Ok(Self::new(
       &blinding_pub_key,
       &spending_pub_key,
       &view_key,
-    )
+    ))
   }
 
   impl_value!(BlsctKeyId);
@@ -95,8 +95,8 @@ mod tests {
     init();
     let (a, b) = {
       loop {
-        let a = HashId::random();
-        let b = HashId::random();
+        let a = HashId::random().unwrap();
+        let b = HashId::random().unwrap();
         if a != b {
           break (a, b);
         }
@@ -111,7 +111,7 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-    let a = HashId::random();
+    let a = HashId::random().unwrap();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<HashId>(&hex).unwrap();
     assert_eq!(a, b);

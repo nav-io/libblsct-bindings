@@ -37,11 +37,11 @@ mod tests {
   fn test_deser() {
     init();
     let values = vec![123u64];
-    let nonce = Point::random();
-    let token_id = TokenId::default();
+    let nonce = Point::random().unwrap();
+    let token_id = TokenId::default().unwrap();
     let rp = RangeProof::new(&values, &nonce, "navio", &token_id).unwrap();
 
-    let nonce = Point::random();
+    let nonce = Point::random().unwrap();
 
     let a = AmountRecoveryReq::new(&rp, &nonce);
     let hex = bincode::serialize(&a).unwrap();

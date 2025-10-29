@@ -1,5 +1,5 @@
 use crate::{
-  blsct_obj::BlsctObj,
+  blsct_obj::{BlsctObj, self},
   blsct_serde::BlsctSerde, 
   ffi::{
     BlsctOutPoint,
@@ -47,7 +47,7 @@ impl_display!(TxIn);
 impl_from_retval!(TxIn);
 
 impl TxIn {
-  pub fn new(
+  pub fn new<'a>(
     amount: u64,
     gamma: u64,
     spending_key: &SpendingKey,
@@ -55,7 +55,7 @@ impl TxIn {
     out_point: &OutPoint,
     is_staked_commitment: bool,
     is_rbf: bool,
-  ) -> Self {
+  ) -> Result<Self, blsct_obj::Error<'a>> {
     let rv = unsafe { build_tx_in(
       amount,
       gamma,
@@ -66,7 +66,8 @@ impl TxIn {
       is_rbf,
     )};
 
-    BlsctObj::from_retval(rv).unwrap().into()
+    let obj = BlsctObj::from_retval(rv)?;
+    Ok(obj.into())
   }
 
   pub fn amount(&self) -> u64 {
@@ -147,14 +148,14 @@ mod tests {
 
   fn gen_tx_in(amount: u64) -> TxIn {
     let spending_key = {
-      let child_key = ChildKey::random();
+      let child_key = ChildKey::random().unwrap();
       child_key.to_tx_key().to_spending_key()
     };
     let out_point = {
       let ctx_id = CTxId::random();
-      OutPoint::new(&ctx_id, 56)
+      OutPoint::new(&ctx_id, 56).unwrap()
     };
-    let token_id = TokenId::default();
+    let token_id = TokenId::default().unwrap();
     TxIn::new(
       amount,
       42,
@@ -163,7 +164,7 @@ mod tests {
       &out_point,
       false,
       false,
-    )
+    ).unwrap()
   }
 
   #[test]
@@ -194,7 +195,7 @@ mod tests {
     init();
     let tx_in = gen_tx_in(123);
     let token_id = tx_in.token_id();
-    assert_eq!(token_id, TokenId::default());
+    assert_eq!(token_id, TokenId::default().unwrap());
   }
 
   #[test]

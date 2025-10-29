@@ -1,10 +1,12 @@
 use crate::{
-  blsct_obj::BlsctObj,
+  blsct_obj::{BlsctObj, self},
   blsct_serde::BlsctSerde, 
   ffi::{
+    BLSCT_FAILURE,
     BlsctPubKey,
     BlsctRetVal,
     calc_nonce,
+    err_bool,
     gen_random_public_key,
     get_public_key_point,
     point_to_public_key,
@@ -39,9 +41,8 @@ impl_display!(PublicKey);
 impl_clone!(PublicKey);
 
 impl PublicKey {
-  pub fn random() -> Self {
+  pub fn random<'a>() -> Result<Self, blsct_obj::Error<'a>> {
     Self::from_retval(unsafe { gen_random_public_key() })
-      .expect("Failed to allocate memory")
   }
 
   pub fn generate_nonce(&self, view_key: &ViewKey) -> Self {
@@ -65,10 +66,18 @@ impl BlsctSerde for PublicKey {
 
   unsafe fn deserialize(hex: *const c_char) -> *mut BlsctRetVal {
     // since hex is a serialized Point, convert it back to BlsctPoint 
-    let buf = c_hex_str_to_array(hex);
-    let blsct_pub_key = unsafe { point_to_public_key(&buf) };
-
-    build_succ_blsct_ret_val::<PUBLIC_KEY_SIZE>(blsct_pub_key as *const u8).unwrap()
+    match c_hex_str_to_array(hex) {
+      Ok(buf) => {
+        let blsct_pub_key = unsafe { point_to_public_key(&buf) };
+        match build_succ_blsct_ret_val::<PUBLIC_KEY_SIZE>(blsct_pub_key as *const u8) {
+          Ok(rv) => rv,
+          Err(_) => err_bool(BLSCT_FAILURE),
+        }
+      },
+      Err(_) => {
+        err_bool(BLSCT_FAILURE)
+      },
+    }
   }
 }
 
@@ -113,14 +122,14 @@ mod tests {
   #[test]
   fn test_random() {
     init();
-    let _: PublicKey = PublicKey::random();
+    let _: PublicKey = PublicKey::random().unwrap();
   }
 
   #[test]
   fn test_generate_nonce() {
     init();
-    let pub_key = PublicKey::random();
-    let child_key = ChildKey::random();
+    let pub_key = PublicKey::random().unwrap();
+    let child_key = ChildKey::random().unwrap();
     let view_key = child_key.to_tx_key().to_view_key();
     let _: PublicKey = pub_key.generate_nonce(&view_key);
   }
@@ -128,21 +137,21 @@ mod tests {
   #[test]
   fn test_from_scalar() {
     init();
-    let scalar = Scalar::random();
+    let scalar = Scalar::random().unwrap();
     let _: PublicKey = (&scalar).into();
   }
 
   #[test]
   fn test_from_point() {
     init();
-    let point = Point::random();
+    let point = Point::random().unwrap();
     let _: PublicKey = (&point).into();
   }
 
   #[test]
   fn test_to_point() {
     init();
-    let pub_key = PublicKey::random();
+    let pub_key = PublicKey::random().unwrap();
     let _: Point = (&pub_key).into();
   }
 
@@ -151,8 +160,8 @@ mod tests {
     init();
     let (a, b) = {
       loop {
-        let a = PublicKey::random();
-        let b = PublicKey::random();
+        let a = PublicKey::random().unwrap();
+        let b = PublicKey::random().unwrap();
         if a != b {
           break (a, b);
         }
@@ -167,7 +176,7 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-    let a = PublicKey::random();
+    let a = PublicKey::random().unwrap();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<PublicKey>(&hex).unwrap();
 

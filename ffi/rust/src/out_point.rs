@@ -1,5 +1,5 @@
 use crate::{
-  blsct_obj::BlsctObj,
+  blsct_obj::{BlsctObj, self},
   blsct_serde::BlsctSerde, 
   ctx_id::CTxId,
   ffi::{
@@ -30,9 +30,10 @@ impl_display!(OutPoint);
 impl_clone!(OutPoint);
 
 impl OutPoint {
-  pub fn new(ctx_id: &CTxId, index: u32) -> Self {
+  pub fn new<'a>(ctx_id: &CTxId, index: u32) -> Result<Self, blsct_obj::Error<'a>> {
     let rv = unsafe { gen_out_point(ctx_id.value() as *const c_char, index) };
-    BlsctObj::from_retval(rv).unwrap().into()
+    let obj = BlsctObj::from_retval(rv)?;
+    Ok(obj.into())
   }
 
   pub fn index(&self) -> u32 {
@@ -79,7 +80,7 @@ mod tests {
     init();
     let ctx_id = CTxId::random();
     let index = 3;
-    let a = OutPoint::new(&ctx_id, index);
+    let a = OutPoint::new(&ctx_id, index).unwrap();
     assert_eq!(a.index(), 3);
   }
 
@@ -88,7 +89,7 @@ mod tests {
     init();
     let ctx_id = CTxId::random();
     let index = 3;
-    let a = OutPoint::new(&ctx_id, index);
+    let a = OutPoint::new(&ctx_id, index).unwrap();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<OutPoint>(&hex).unwrap();
     assert_eq!(a, b);

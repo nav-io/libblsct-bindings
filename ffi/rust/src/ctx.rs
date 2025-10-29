@@ -1,5 +1,5 @@
 use crate::{
-  blsct_obj::BlsctObj,
+  blsct_obj::{BlsctObj, self},
   blsct_serde::BlsctSerde, 
   ctx_id::CTxId,
   ctx_ins::CTxIns,
@@ -39,8 +39,34 @@ use std::{
     c_char,
     c_void,
   },
+  fmt,
   ptr::NonNull,
 };
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Error {
+  FailedToAllocateMemory,
+  InAmountError(usize),
+  OutAmountError(usize),
+  FailedToBuildCTx(u8),
+}
+
+impl std::error::Error for Error {}
+
+impl fmt::Display for Error {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      Error::FailedToAllocateMemory =>
+        write!(f, "Failed to allocate memory for CTx"),
+      Error::InAmountError(index) =>
+        write!(f, "Invalid in-amount found at {index}"),
+      Error::OutAmountError(index) =>
+        write!(f, "Invalid out-amount found at {index}"),
+      Error::FailedToBuildCTx(e) =>
+        write!(f, "Failed to build CTx: {e}"),
+    }
+  }
+}
 
 #[derive(Debug, Deserialize, Serialize, Eq)]
 pub struct CTx {
@@ -54,7 +80,7 @@ impl CTx {
   pub fn new(
     tx_ins: &Vec<TxIn>,
     tx_outs: &Vec<TxOut>
-  ) -> Result<Self, String> {
+  ) -> Result<Self, Error> {
     unsafe {
       let vp_tx_ins = create_tx_in_vec();
       let vp_tx_outs = create_tx_out_vec();
@@ -69,7 +95,7 @@ impl CTx {
       if rv.is_null() {
         delete_tx_in_vec(vp_tx_ins);
         delete_tx_out_vec(vp_tx_outs);
-        return Err("Building ctx failed. Failed to allocate memory to rv".to_string());
+        return Err(Error::FailedToAllocateMemory);
       }
 
       let clean_up = || {
@@ -86,34 +112,34 @@ impl CTx {
         Ok(obj.into())
 
       } else {
-        let msg = {
+        let e = {
           match (*rv).result {
             BLSCT_IN_AMOUNT_ERROR => {
-              let in_index = (*rv).in_amount_err_index;
-              format!("Building ctx failed. tx_ins[{in_index}] has an invalid amount")
+              let index = (*rv).in_amount_err_index;
+              Error::InAmountError(index)
             },
             BLSCT_OUT_AMOUNT_ERROR => {
-              let out_index = (*rv).out_amount_err_index;
-              format!("Building ctx failed. tx_outs[{out_index}] has an invalid amount")
+              let index = (*rv).out_amount_err_index;
+              Error::OutAmountError(index)
             },
             err_code => {
-              format!("Building ctx failed. error code = {err_code}")
+              Error::FailedToBuildCTx(err_code)
             }
           }
         };
         clean_up();
-        Err(msg)
+        Err(e)
       } 
     }
   }
 
-  pub fn get_ctx_id(&self) -> CTxId {
+  pub fn get_ctx_id<'a>(&self) -> Result<CTxId, blsct_obj::Error<'a>> {
     let rv = unsafe { 
       let c_str_hex = get_ctx_id(self.value());
       deserialize_ctx_id(c_str_hex)
     };
-    let obj = BlsctObj::<CTxId, BlsctCTxId>::from_retval(rv).unwrap();
-    obj.into()
+    let obj = BlsctObj::<CTxId, BlsctCTxId>::from_retval(rv)?;
+    Ok(obj.into())
   }
 
   pub fn get_ctx_ins(&self) -> CTxIns {

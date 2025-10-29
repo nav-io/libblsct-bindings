@@ -1,4 +1,5 @@
 use crate::{
+  blsct_obj,
   ffi::calc_view_tag,
   keys::{
     public_key::PublicKey,
@@ -24,10 +25,10 @@ impl ViewTag {
     ViewTag { value }
   }
 
-  pub fn random() -> Self {
-    let blinding_pub_key = PublicKey::random();
-    let view_key = gen_random_view_key();
-    Self::new(&blinding_pub_key, &view_key)
+  pub fn random<'a>() -> Result<Self, blsct_obj::Error<'a>> {
+    let blinding_pub_key = PublicKey::random()?;
+    let view_key = gen_random_view_key()?;
+    Ok(Self::new(&blinding_pub_key, &view_key))
   }
 }
 
@@ -42,8 +43,8 @@ mod tests {
   #[test]
   fn test_new() {
     init();
-    let blinding_pub_key = PublicKey::random();
-    let view_key = gen_random_view_key();
+    let blinding_pub_key = PublicKey::random().unwrap();
+    let view_key = gen_random_view_key().unwrap();
     let _ = ViewTag::new(&blinding_pub_key, &view_key);
   }
 
@@ -56,7 +57,7 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-    let a = ViewTag::random();
+    let a = ViewTag::random().unwrap();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<ViewTag>(&hex).unwrap();
     assert_eq!(a, b);

@@ -1,5 +1,5 @@
 use crate::{
-  blsct_obj::BlsctObj,
+  blsct_obj::{self, BlsctObj},
   blsct_serde::BlsctSerde,
   ffi::{
     BlsctDoublePubKey,
@@ -51,16 +51,15 @@ impl From<DoublePublicKey> for SubAddr {
 impl DoublePublicKey {
   impl_value!(BlsctDoublePubKey);
 
-  pub fn from_public_keys(
+  pub fn from_public_keys<'a>(
     pk1: &PublicKey,
     pk2: &PublicKey,
-  ) -> Self {
+  ) -> Result<Self, blsct_obj::Error<'a>> {
     let rv = unsafe {
       gen_double_pub_key(pk1.value(), pk2.value())
     };
-    let obj = BlsctObj::from_retval(rv)
-      .expect("Failed to allocate memory");
-    obj.into()
+    let obj = BlsctObj::from_retval(rv)?;
+    Ok(obj.into())
   }
 
   pub fn from_keys_acct_addr(
@@ -81,9 +80,9 @@ impl DoublePublicKey {
     obj.into()
   }
 
-  pub fn random() -> Self { 
-    let pk1 = PublicKey::random();
-    let pk2 = PublicKey::random();
+  pub fn random<'a>() -> Result<Self, blsct_obj::Error<'a>> { 
+    let pk1 = PublicKey::random()?;
+    let pk2 = PublicKey::random()?;
     Self::from_public_keys(&pk1, &pk2)
   }
 }
@@ -109,25 +108,25 @@ mod tests {
   #[test]
   fn test_random() {
     init();
-    let _: PublicKey = PublicKey::random();
+    let _: PublicKey = PublicKey::random().unwrap();
   }
 
   #[test]
   fn test_from_public_keys() {
     init();
-    let a = PublicKey::random();
-    let b = PublicKey::random();
+    let a = PublicKey::random().unwrap();
+    let b = PublicKey::random().unwrap();
     let _: DoublePublicKey = 
-      DoublePublicKey::from_public_keys(&a, &b);
+      DoublePublicKey::from_public_keys(&a, &b).unwrap();
   }
 
   #[test]
   fn test_from_keys_acct_addr() {
     init();
-    let child_key = ChildKey::random();
+    let child_key = ChildKey::random().unwrap();
     let tx_key = child_key.to_tx_key();
     let view_key = tx_key.to_view_key();
-    let pub_key = PublicKey::random();
+    let pub_key = PublicKey::random().unwrap();
 
     DoublePublicKey::from_keys_acct_addr(
       &view_key,
@@ -142,8 +141,8 @@ mod tests {
     init();
     let (a, b) = {
       loop {
-        let a = DoublePublicKey::random();
-        let b = DoublePublicKey::random();
+        let a = DoublePublicKey::random().unwrap();
+        let b = DoublePublicKey::random().unwrap();
         if a != b {
           break (a, b);
         }
@@ -158,7 +157,7 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-    let a = DoublePublicKey::random();
+    let a = DoublePublicKey::random().unwrap();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<DoublePublicKey>(&hex).unwrap();
 

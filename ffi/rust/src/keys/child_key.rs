@@ -1,5 +1,5 @@
 use crate::{
-  blsct_obj::BlsctObj,
+  blsct_obj::{BlsctObj, self},
   ffi::{
     BlsctScalar,
     from_child_key_to_blinding_key,
@@ -26,9 +26,10 @@ impl ChildKey {
     ChildKey(obj.into())
   }
 
-  pub fn random() -> Self {
-    let seed = Scalar::random();
-    ChildKey::from_seed(&seed)
+  pub fn random<'a>() -> Result<Self, blsct_obj::Error<'a>> {
+    let seed = Scalar::random()?;
+    let child_key = ChildKey::from_seed(&seed);
+    Ok(child_key)
   }
 
   pub fn value(&self) -> *const BlsctScalar {
@@ -62,7 +63,7 @@ macro_rules! impl_child_key_desc_deser_test {
       use bincode;
 
       crate::initializer::init();
-      let child_key = ChildKey::random();
+      let child_key = ChildKey::random().unwrap();
 
       let a: $target_ty = child_key.$derive_method();
       let hex = bincode::serialize(&a).unwrap();
@@ -84,41 +85,41 @@ mod tests {
   #[test]
   fn test_from_seed() {
     init();
-    let seed = Scalar::random();
+    let seed = Scalar::random().unwrap();
     ChildKey::from_seed(&seed);
   }
 
   #[test]
   fn test_random() {
     init();
-    let _ = ChildKey::random();
+    let _ = ChildKey::random().unwrap();
   }
 
   #[test]
   fn test_to_blinding_key() {
     init();
-    let child_key = ChildKey::random();
+    let child_key = ChildKey::random().unwrap();
     child_key.to_blinding_key();
   }
 
   #[test]
   fn test_to_token_key() {
     init();
-    let child_key = ChildKey::random();
+    let child_key = ChildKey::random().unwrap();
     child_key.to_token_key();
   }
 
   #[test]
   fn test_to_tx_key() {
     init();
-    let child_key = ChildKey::random();
+    let child_key = ChildKey::random().unwrap();
     child_key.to_tx_key();
   }
 
   #[test]
   fn test_deser() {
     init();
-    let a = ChildKey::random();
+    let a = ChildKey::random().unwrap();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<ChildKey>(&hex).unwrap();
     assert_eq!(a, b);

@@ -1,5 +1,5 @@
 use crate::{
-  blsct_obj::BlsctObj,
+  blsct_obj::{BlsctObj, self},
   blsct_serde::BlsctSerde,
   ffi::{
     BlsctPoint,
@@ -32,14 +32,12 @@ impl_from_retval!(Point);
 impl_display!(Point);
 
 impl Point {
-  pub fn base() -> Self {
+  pub fn base<'a>() -> Result<Self, blsct_obj::Error<'a>> {
     Self::from_retval(unsafe { gen_base_point() })
-      .expect("Failed to allocate memory")
   }
 
-  pub fn random() -> Self {
+  pub fn random<'a>() -> Result<Self, blsct_obj::Error<'a>> {
     Self::from_retval(unsafe { gen_random_point() })
-      .expect("Failed to allocate memory")
   }
 
   pub fn is_valid(&self) -> bool {
@@ -93,19 +91,19 @@ mod tests {
   #[test]
   fn test_base() {
     init();
-    let a = Point::base();
-    let b = Point::base();
+    let a = Point::base().unwrap();
+    let b = Point::base().unwrap();
     assert!(a == b);
   }
 
   #[test]
   fn test_random() {
     init();
-    let mut prev: Point = Point::base();
+    let mut prev: Point = Point::base().unwrap();
     let mut dup_tolerance = 5;
 
     for _ in 0..1000 {
-      let x = Point::random();
+      let x = Point::random().unwrap();
       
       if prev == x {
         dup_tolerance -= 1;
@@ -122,7 +120,7 @@ mod tests {
   #[test]
   fn test_is_valid() {
     init();
-    let x = Point::base();
+    let x = Point::base().unwrap();
     assert!(x.is_valid());
   }
 
@@ -130,7 +128,7 @@ mod tests {
   fn test_from_scalar() {
     init();
 
-    let scalar = Scalar::new(123);
+    let scalar = Scalar::new(123).unwrap();
     let _ = Point::from(&scalar);
   }
 
@@ -139,8 +137,8 @@ mod tests {
     init();
     let (a, b) = {
       loop {
-        let a = Point::random();
-        let b = Point::random();
+        let a = Point::random().unwrap();
+        let b = Point::random().unwrap();
         if a != b {
           break (a, b);
         }
@@ -155,7 +153,7 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-    let a = Point::base();
+    let a = Point::base().unwrap();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<Point>(&hex).unwrap();
     assert_eq!(a, b);

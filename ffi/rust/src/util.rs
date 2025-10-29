@@ -1,4 +1,5 @@
 use crate::{
+  blsct_obj,
   keys::{
     child_key::ChildKey,
     child_key_desc::tx_key_desc::view_key::ViewKey,
@@ -15,11 +16,27 @@ use std::{
     CStr,
     CString,
   },
+  fmt,
 };
 
+#[derive(Debug, PartialEq, Eq)]
+pub enum Error {
+  InvalidHexSize(String),
+}
+
+impl<'a> std::error::Error for Error {}
+
+impl fmt::Display for Error {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      Error::InvalidHexSize(msg) =>
+        write!(f, "Invalid hex size: {msg:?}"),
+    }
+  }
+}
 pub fn c_hex_str_to_array<const N: usize>(
   raw_hex_c_str: *const c_char
-) -> [u8; N] {
+) -> Result<[u8; N], Error> {
 
   let hex_c_str = unsafe {
     std::ffi::CStr::from_ptr(raw_hex_c_str)
@@ -30,19 +47,19 @@ pub fn c_hex_str_to_array<const N: usize>(
   bytes
     .as_slice()
     .try_into()
-    .expect("Hex length doesn't match the expected Blsct object size")
+    .map_err(|e| Error::InvalidHexSize(format!("{e:?}")))
 }
 
-pub fn build_succ_blsct_ret_val<const N: usize>(
+pub fn build_succ_blsct_ret_val<'a, const N: usize>(
   value: *const u8
-) -> Result<*mut BlsctRetVal, &'static str> {
+) -> Result<*mut BlsctRetVal, blsct_obj::Error<'a>> {
 
   // allocate memory for BlsctRetVal
   let rv_ptr = unsafe {
     malloc(std::mem::size_of::<BlsctRetVal>()) as *mut BlsctRetVal
   };
   if rv_ptr.is_null() {
-    return Err("Failed to allocate memory for BlsctRetVal");
+    return Err(blsct_obj::Error::FailedToAllocateMemory("BlsctRetVal"));
   }
 
   // copy local BlsctRetVal to the allocated memory
@@ -71,9 +88,10 @@ pub fn pad_hex_left<T>(hex: *const c_char) -> CString {
   CString::new(h).unwrap()
 }
 
-pub fn gen_random_view_key() -> ViewKey {
-  let child_key = ChildKey::random();
-  child_key.to_tx_key().to_view_key() 
+pub fn gen_random_view_key<'a>() -> Result<ViewKey, blsct_obj::Error<'a>> {
+  let child_key = ChildKey::random()?;
+  let view_key = child_key.to_tx_key().to_view_key();
+  Ok(view_key)
 }
 
 pub fn gen_random_malloced_buf<const N: usize>() -> *mut [u8; N] {

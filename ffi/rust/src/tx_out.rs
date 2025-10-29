@@ -1,21 +1,21 @@
 use crate::{
-  blsct_obj::BlsctObj,
+  blsct_obj::{BlsctObj, self},
   blsct_serde::BlsctSerde, 
   ffi::{
+    BLSCT_FAILURE,
     BlsctRetVal,
     BlsctSubAddr,
     BlsctTxOut,
     BlsctTokenId,
     buf_to_malloced_hex_c_str,
-
     build_tx_out,
+    err_bool,
     get_tx_out_destination,
     get_tx_out_amount,
     get_tx_out_memo,
     get_tx_out_token_id,
     get_tx_out_output_type,
     get_tx_out_min_stake,
-
     hex_to_malloced_buf,
     succ,
     TxOutputType,
@@ -30,13 +30,39 @@ use crate::{
   token_id::TokenId,
 };
 use serde::{Deserialize, Serialize};
-use std::ffi::{
-  c_char,
-  c_void,
-  CStr,
-  CString,
+use std::{
+  ffi::{
+    c_char,
+    c_void,
+    CStr,
+    CString,
+    NulError,
+  },
+  fmt,
+  str::Utf8Error,
 };
 
+#[derive(Debug, PartialEq, Eq)]
+pub enum Error<'a> {
+  BlsctObjError(blsct_obj::Error<'a>),
+  FailedToCreateCString(NulError),
+  FailedToConvertCStrToStr(Utf8Error),
+}
+
+impl<'a> std::error::Error for Error<'a> {}
+
+impl<'a> fmt::Display for Error<'a> {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      Error::BlsctObjError(e) =>
+        write!(f, "BlsctObjError: {e:?}"),
+      Error::FailedToCreateCString(e) =>
+        write!(f, "Failed to create CString: {e:?}"),
+      Error::FailedToConvertCStrToStr(e) =>
+        write!(f, "Failed to convert CStr to &str: {e:?}"),
+    }
+  }
+}
 #[derive(Debug, Deserialize, Serialize, Eq)]
 pub struct TxOut {
   obj: BlsctObj<TxOut, BlsctTxOut>,
@@ -47,16 +73,16 @@ impl_display!(TxOut);
 impl_from_retval!(TxOut);
 
 impl TxOut {
-  pub fn new(
+  pub fn new<'a>(
     destination: &SubAddr,
     amount: u64,
     memo: &str,
     token_id: &TokenId,  
     output_type: TxOutputType,
     min_stake: u64,
-  ) -> Self {
+  ) -> Result<Self, Error<'a>> {
     let memo_c_str = CString::new(memo)
-      .expect("Failed to convert memo to c-str");
+      .map_err(|e| Error::FailedToCreateCString(e))?;
 
     let rv = unsafe { build_tx_out(
       destination.value(),
@@ -66,8 +92,10 @@ impl TxOut {
       output_type,
       min_stake,
     )};
+    let obj = BlsctObj::from_retval(rv)
+      .map_err(|e| Error::BlsctObjError(e))?;
 
-    BlsctObj::from_retval(rv).unwrap().into()
+    Ok(obj.into())
   }
 
   pub fn destination(&self) -> SubAddr {
@@ -81,12 +109,14 @@ impl TxOut {
     unsafe { get_tx_out_amount(self.value()) }
   }
 
-  pub fn memo(&self) -> String {
+  pub fn memo(&self) -> Result<String, Error> {
     let c_str = unsafe {
       let ptr = get_tx_out_memo(self.value());
       CStr::from_ptr(ptr)
     };
-    c_str.to_str().expect("Malformed c-string found").to_string()
+    let str = c_str.to_str()
+      .map_err(|e| Error::FailedToConvertCStrToStr(e))?;
+    Ok(str.to_owned())
   }
 
   pub fn token_id(&self) -> TokenId {
@@ -113,9 +143,14 @@ impl BlsctSerde for TxOut {
 
   unsafe fn deserialize(hex: *const c_char) -> *mut BlsctRetVal {
     let buf = hex_to_malloced_buf(hex);
-    let len = CStr::from_ptr(hex).to_str()
-      .expect("Malformed c-string found").len() / 2;
-    succ(buf as *mut c_void, len) 
+
+    match CStr::from_ptr(hex).to_str() {
+      Err(_) => err_bool(BLSCT_FAILURE),
+      Ok(str) => {
+        let len = str.len() / 2;
+        succ(buf as *mut c_void, len) 
+      },
+    }
   }
 }
 
@@ -151,15 +186,16 @@ mod tests {
 
   fn gen_tx_out(sub_addr_id: &SubAddrId) -> TxOut {
     let destination = {
-      let view_key = ChildKey::random().to_tx_key().to_view_key();
-      let spending_pub_key = PublicKey::random();
+      let view_key = ChildKey::random()
+        .unwrap().to_tx_key().to_view_key();
+      let spending_pub_key = PublicKey::random().unwrap();
       SubAddr::new(
         &view_key,
         &spending_pub_key, 
         &sub_addr_id
       )
     };
-    let token_id = TokenId::default();
+    let token_id = TokenId::default().unwrap();
 
     TxOut::new(
       &destination,
@@ -168,7 +204,7 @@ mod tests {
       &token_id,  
       TxOutputType::Normal,
       5,
-    )
+    ).unwrap()
   }
 
   #[test]
@@ -193,7 +229,7 @@ mod tests {
     init();
     let sub_addr_id = SubAddrId::new(123, 456);
     let tx_out = gen_tx_out(&sub_addr_id);
-    let memo = tx_out.memo();
+    let memo = tx_out.memo().unwrap();
     assert_eq!(&memo, "navio");
   }
 
@@ -203,7 +239,7 @@ mod tests {
     let sub_addr_id = SubAddrId::new(123, 456);
     let tx_out = gen_tx_out(&sub_addr_id);
     let token_id = tx_out.token_id();
-    assert_eq!(token_id, TokenId::default());
+    assert_eq!(token_id, TokenId::default().unwrap());
   }
 
   #[test]

@@ -16,6 +16,7 @@ use serde::{
   Serializer,
 };
 use std::{
+  any::type_name,
   ffi::{
     c_void,
     CStr,
@@ -25,6 +26,24 @@ use std::{
   ptr::NonNull,
 };
 
+#[derive(Debug, PartialEq, Eq)]
+pub enum Error<'a> {
+  FailedToAllocateMemory(&'static str),
+  FailedToGenerateObject(&'a str),
+}
+
+impl<'a> std::error::Error for Error<'a> {}
+
+impl<'a> fmt::Display for Error<'a> {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      Error::FailedToAllocateMemory(target) =>
+        write!(f, "Failed to allocate memory for {target}"),
+      Error::FailedToGenerateObject(target) =>
+        write!(f, "Failed to generate object for {target}"),
+    }
+  }
+}
 
 #[derive(Eq, Debug)]
 pub struct BlsctObj<T: BlsctSerde, U> {
@@ -85,10 +104,10 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
     }
   }
 
-  pub fn from_retval(rv: *mut BlsctRetVal) -> Result<Self, &'static str> {
+  pub fn from_retval<'a>(rv: *mut BlsctRetVal) -> Result<Self, Error<'a>> {
     // check if allocating memory for BlsctRetVal is failed
     if rv.is_null() {
-      return Err("Failed to allocate memory to the object");
+      return Err(Error::FailedToAllocateMemory("BlsctRetVal"));
     }
     let (result, value, value_size) = unsafe {
       ((*rv).result, (*rv).value, (*rv).value_size)
@@ -99,8 +118,7 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
 
     // check if generating object is failed
     if result != 0 {
-      println!("result code: {}", result);
-      return Err("Failed to generate object");
+      return Err(Error::FailedToGenerateObject(type_name::<Self>()));
     }
     assert!(!value.is_null(),
       "the value is null altough result is 0. check code.");

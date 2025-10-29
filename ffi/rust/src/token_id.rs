@@ -1,5 +1,5 @@
 use crate::{
-  blsct_obj::BlsctObj,
+  blsct_obj::{BlsctObj, self},
   blsct_serde::BlsctSerde, 
   ffi::{
     BlsctRetVal,
@@ -32,19 +32,23 @@ impl_display!(TokenId);
 impl_clone!(TokenId);
 
 impl TokenId {
-  pub fn default() -> Self {
+  pub fn default<'a>() -> Result<Self, blsct_obj::Error<'a>> {
     let rv = unsafe { gen_default_token_id() };
-    BlsctObj::from_retval(rv).unwrap().into()
+    let obj = BlsctObj::from_retval(rv)?;
+    Ok(obj.into())
   }
 
-  pub fn from_token(token: u64) -> Self {
+  pub fn from_token<'a>(token: u64) -> Result<Self, blsct_obj::Error<'a>> {
     let rv = unsafe { gen_token_id(token) };
-    BlsctObj::from_retval(rv).unwrap().into()
+    let obj = BlsctObj::from_retval(rv)?;
+    Ok(obj.into())
   }
 
-  pub fn from_token_and_subid(token: u64, subid: u64) -> Self {
+  pub fn from_token_and_subid<'a>(token: u64, subid: u64)
+    -> Result<Self, blsct_obj::Error<'a>> {
     let rv = unsafe { gen_token_id_with_token_and_subid(token, subid) };
-    BlsctObj::from_retval(rv).unwrap().into()
+    let obj = BlsctObj::from_retval(rv)?;
+    Ok(obj.into())
   }
 
   pub fn token(&self) -> u64 {
@@ -88,7 +92,7 @@ mod tests {
   #[test]
   fn test_default() {
     init();
-    let token_id = TokenId::default();
+    let token_id = TokenId::default().unwrap();
     assert_eq!(token_id.token(), 0);
     assert_eq!(token_id.subid(), u64::MAX); // should be uint64 max
   }
@@ -97,7 +101,7 @@ mod tests {
   fn test_from_token() {
     init();
     let token = 123u64;
-    let token_id = TokenId::from_token(token);
+    let token_id = TokenId::from_token(token).unwrap();
     assert_eq!(token_id.token(), token);
     assert_eq!(token_id.subid(), u64::MAX); // should be uint64 max
   }
@@ -107,7 +111,7 @@ mod tests {
     init();
     let token = 123u64;
     let subid = 456u64;
-    let token_id = TokenId::from_token_and_subid(token, subid);
+    let token_id = TokenId::from_token_and_subid(token, subid).unwrap();
     assert_eq!(token_id.token(), token);
     assert_eq!(token_id.subid(), subid);
   }
@@ -115,7 +119,7 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-    let a = TokenId::from_token_and_subid(123, 456);
+    let a = TokenId::from_token_and_subid(123, 456).unwrap();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<TokenId>(&hex).unwrap();
     assert_eq!(a, b);

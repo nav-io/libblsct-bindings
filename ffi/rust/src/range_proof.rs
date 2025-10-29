@@ -1,7 +1,7 @@
 use crate::{
   amount_recovery_req::AmountRecoveryReq,
   amount_recovery_res::AmountRecoveryRes,
-  blsct_obj::BlsctObj,
+  blsct_obj::{BlsctObj, self},
   blsct_serde::BlsctSerde, 
   ffi::{
     add_to_amount_recovery_req_vec,
@@ -50,12 +50,50 @@ use crate::{
   token_id::TokenId,
 };
 use serde::{Deserialize, Serialize};
-use std::ffi::{
-  CStr,
-  CString,
-  c_char,
-  c_void,
+use std::{
+  ffi::{
+    CStr,
+    CString,
+    c_char,
+    c_void,
+    NulError,
+  },
+  fmt,
 };
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Error<'a> {
+  BlsctObjError(blsct_obj::Error<'a>),
+  FailedToCreateUint64Vec,
+  FailedToCreateCString(NulError),
+  FailedToCreateRangeProofVector,
+  FailedToVerifyRangeProofs(u8),
+  FailedToCreateAmountRecoveryRequestVector,
+  FailedToRecoverAmount(u8),
+}
+
+impl<'a> std::error::Error for Error<'a> {}
+
+impl<'a> fmt::Display for Error<'a> {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      Error::BlsctObjError(e) =>
+        write!(f, "BlsctObjError: {e:?}"),
+      Error::FailedToCreateUint64Vec =>
+        write!(f, "Failed to create uint64_t vector"),
+      Error::FailedToCreateCString(e) =>
+        write!(f, "Failed to create CString: {e:?}"),
+      Error::FailedToCreateRangeProofVector =>
+        write!(f, "Failed to create range proof vector"),
+      Error::FailedToVerifyRangeProofs(e) =>
+        write!(f, "Failed to verify range proofs: {e}"),
+      Error::FailedToCreateAmountRecoveryRequestVector =>
+        write!(f, "Failed to create amount recovery request vector"),
+      Error::FailedToRecoverAmount(e) =>
+        write!(f, "Failed to recover amount: {e}"),
+    }
+  }
+}
 
 #[derive(Debug, Deserialize, Serialize, Eq)]
 pub struct RangeProof {
@@ -67,23 +105,24 @@ impl_display!(RangeProof);
 impl_clone!(RangeProof);
 
 impl RangeProof {
-  pub fn new(
+  pub fn new<'a>(
     amounts: &Vec<u64>,
     nonce: &Point,
     msg: &str,
     token_id: &TokenId
-  ) -> Result<Self, &'static str> {
+  ) -> Result<Self, Error<'a>> {
     let vp_u64_vec = {
       let vec = unsafe { create_uint64_vec() };
       if vec.is_null() {
-        return Err("Failed to create uint64 vector");
+        return Err(Error::FailedToCreateUint64Vec);
       }
       for amount in amounts {
         unsafe { add_to_uint64_vec(vec, *amount) };
       }
       vec
     };
-    let c_msg = CString::new(msg).expect("Failed to create a CString");
+    let c_msg = CString::new(msg)
+      .map_err(|e| Error::FailedToCreateCString(e))?;
 
     let rv = unsafe { build_range_proof(
       vp_u64_vec,
@@ -93,13 +132,15 @@ impl RangeProof {
     )};
     unsafe { delete_uint64_vec(vp_u64_vec) };
 
-    Ok(BlsctObj::from_retval(rv)?.into())
+    let obj = BlsctObj::from_retval(rv)
+      .map_err(|e| Error::BlsctObjError(e))?;
+    Ok(obj.into())
   }
 
-  pub fn verify_proofs(proofs: &Vec<RangeProof>) -> Result<bool, &'static str> {
+  pub fn verify_proofs<'a>(proofs: &Vec<RangeProof>) -> Result<bool, Error<'a>> {
     let range_proofs = unsafe { create_range_proof_vec() };
     if range_proofs.is_null() {
-      return Err("Failed to create range proof vector");
+      return Err(Error::FailedToCreateRangeProofVector);
     }
 
     for proof in proofs {
@@ -118,18 +159,20 @@ impl RangeProof {
       free_obj(rv as *mut c_void);
     };
 
-    if result == 0 { Ok(value) } else {
-      Err("Verifying range proofs failed")
+    if result == 0 { 
+      Ok(value)
+    } else {
+      Err(Error::FailedToVerifyRangeProofs(result))
     }
   }
 
-  pub fn recover_amounts(
+  pub fn recover_amounts<'a>(
     reqs: Vec<AmountRecoveryReq>,
-  ) -> Result<Vec<AmountRecoveryRes>, &'static str> {
+  ) -> Result<Vec<AmountRecoveryRes>, Error<'a>> {
 
     let req_vec = unsafe { create_amount_recovery_req_vec() };
     if req_vec.is_null() {
-      return Err("Failed to create amount recovery request vector");
+      return Err(Error::FailedToCreateAmountRecoveryRequestVector);
     }
     for req in reqs {
       let blsct_req = unsafe { gen_amount_recovery_req(
@@ -150,7 +193,7 @@ impl RangeProof {
     let (result, value) = unsafe { ((*rv).result, (*rv).value) };
     if result != 0 {
       unsafe { free_amounts_ret_val(rv) };
-      return Err("Recovering amount failed");
+      return Err(Error::FailedToRecoverAmount(result));
     }
 
     let mut results: Vec<AmountRecoveryRes> = vec![];
@@ -272,8 +315,8 @@ mod tests {
 
   fn gen_range_proof() -> RangeProof {
     let values = vec![123u64];
-    let nonce = Point::random();
-    let token_id = TokenId::default();
+    let nonce = Point::random().unwrap();
+    let token_id = TokenId::default().unwrap();
     RangeProof::new(&values, &nonce, "navio", &token_id).unwrap()
   }
 
@@ -357,8 +400,8 @@ mod tests {
     let amount = 123u64;
 
     let values = vec![amount];
-    let nonce = Point::random();
-    let token_id = TokenId::default();
+    let nonce = Point::random().unwrap();
+    let token_id = TokenId::default().unwrap();
 
     let rp = RangeProof::new(&values, &nonce, msg, &token_id).unwrap();
 

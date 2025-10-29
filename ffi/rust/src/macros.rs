@@ -12,7 +12,7 @@ macro_rules! impl_from_retval {
   ($type:ident) => {
     impl $type {
       #[inline]
-      pub fn from_retval(rv: *mut BlsctRetVal) -> Result<Self, &'static str> {
+      pub fn from_retval<'a>(rv: *mut BlsctRetVal) -> Result<Self, crate::blsct_obj::Error<'a>> {
         let obj = BlsctObj::from_retval(rv)?;
         let inst = Self { obj };
         Ok(inst)

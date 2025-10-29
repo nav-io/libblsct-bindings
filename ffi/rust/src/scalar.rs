@@ -1,5 +1,5 @@
 use crate::{
-  blsct_obj::BlsctObj,
+  blsct_obj::{BlsctObj, self},
   blsct_serde::BlsctSerde,
   ffi::{
     BlsctRetVal,
@@ -30,14 +30,12 @@ impl_from_retval!(Scalar);
 impl_display!(Scalar);
 
 impl Scalar {
-  pub fn new(n: u64) -> Self {
+  pub fn new<'a>(n: u64) -> Result<Self, blsct_obj::Error<'a>> {
     Self::from_retval(unsafe { gen_scalar(n) })
-      .expect("Failed to allocate memory")
   }
 
-  pub fn random() -> Self {
+  pub fn random<'a>() -> Result<Self, blsct_obj::Error<'a>> {
     Self::from_retval(unsafe { gen_random_scalar() })
-      .expect("Failed to allocate memory")
   }
 
   impl_value!(BlsctScalar);
@@ -87,7 +85,7 @@ mod tests {
   fn test_new() {
     init();
 
-    let x = Scalar::new(123);
+    let x = Scalar::new(123).unwrap();
     let x_u64: u64 = x.into();
     assert!(x_u64 == 123);
   }
@@ -100,7 +98,7 @@ mod tests {
     let mut dup_tolerance = 5;
 
     for _ in 0..1000 {
-      let x = Scalar::random();
+      let x = Scalar::random().unwrap();
       let x_u64: u64 = x.into();
       
       if prev == x_u64 {
@@ -118,7 +116,7 @@ mod tests {
   #[test]
   fn test_from() {
     init();
-    let x = Scalar::new(12345);
+    let x = Scalar::new(12345).unwrap();
     let x_u64: u64 = x.into();
     assert!(x_u64 == 12345);
   }
@@ -138,7 +136,7 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-    let a = Scalar::new(12345);
+    let a = Scalar::new(12345).unwrap();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<Scalar>(&hex).unwrap();
     assert!(a == b);
@@ -148,7 +146,7 @@ mod tests {
   fn test_display() {
     use regex::Regex;
     init();
-    let x = Scalar::random();
+    let x = Scalar::random().unwrap();
     let s = format!("{}", x);
 
     let re = Regex::new(r"^Scalar\([0-9a-fA-F]+\)$").unwrap();

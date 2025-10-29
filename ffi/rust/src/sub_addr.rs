@@ -83,15 +83,15 @@ mod tests {
   #[test]
   fn test_from_dpk() {
     init();
-    let dpk = DoublePublicKey::random();
+    let dpk = DoublePublicKey::random().unwrap();
     let _: SubAddr = dpk.into();
   }
 
   #[test]
   fn test_eq() {
     init();
-    let spending_pub_key = PublicKey::random();
-    let view_key = gen_random_view_key();
+    let spending_pub_key = PublicKey::random().unwrap();
+    let view_key = gen_random_view_key().unwrap();
     let sub_addr_id_a = SubAddrId::new(123, 456);
     let sub_addr_id_b = SubAddrId::new(234, 567);
 
@@ -107,8 +107,8 @@ mod tests {
   #[test]
   fn test_deser() {
     init();
-    let spending_pub_key = PublicKey::random();
-    let view_key = gen_random_view_key();
+    let spending_pub_key = PublicKey::random().unwrap();
+    let view_key = gen_random_view_key().unwrap();
     let sub_addr_id = SubAddrId::new(123, 456);
     
     let a = SubAddr::new(

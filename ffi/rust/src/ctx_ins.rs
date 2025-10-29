@@ -1,4 +1,3 @@
-use std::ffi::c_void;
 use crate::{
   ctx_in::CTxIn,
   ffi::{
@@ -10,6 +9,26 @@ use crate::{
     impl_value_raw_const_obj,
   },
 };
+use std::{
+  ffi::c_void,
+  fmt,
+};
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Error {
+  IndexOutOfRange { index: usize, max_index: usize },
+}
+
+impl std::error::Error for Error {}
+
+impl fmt::Display for Error {
+  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    match self {
+      Error::IndexOutOfRange { index, max_index } =>
+        write!(f, "Index {index} is out of range. Max index is {max_index}"),
+    }
+  }
+}
 
 /* obj is an opaque pointer to:
  
@@ -23,9 +42,12 @@ pub struct CTxIns {
 }
 
 impl CTxIns {
-  pub fn get_ctx_in_at(&self, i: usize) -> Result<CTxIn, &str> {
+  pub fn get_ctx_in_at(&self, i: usize) -> Result<CTxIn, Error> {
     if i >= self.len() {
-      return Err("index out of range");
+      return Err(Error::IndexOutOfRange {
+        index: i,
+        max_index: self.len() - 1,
+      });
     }
     let obj = unsafe { get_ctx_in_at(self.value(), i) };
     Ok(obj.into())

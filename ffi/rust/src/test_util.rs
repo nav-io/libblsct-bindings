@@ -1,3 +1,4 @@
+#[cfg(test)]
 use crate::{
   ctx::CTx,
   ctx_id::CTxId,
@@ -12,11 +13,13 @@ use crate::{
   tx_out::TxOut,
 };
 
+#[cfg(test)]
 pub fn gen_ctx() -> CTx {
-  let spending_key = ChildKey::random().to_tx_key().to_spending_key();
+  let spending_key = ChildKey::random().unwrap()
+    .to_tx_key().to_spending_key();
   let out_point = {
     let ctx_id = CTxId::random();
-    OutPoint::new(&ctx_id, 0)
+    OutPoint::new(&ctx_id, 0).unwrap()
   };
   let num_tx_in = 1;
   let num_tx_out = 1;
@@ -29,15 +32,16 @@ pub fn gen_ctx() -> CTx {
     in_amount, 
     100,
     &spending_key,
-    &TokenId::default(), 
+    &TokenId::default().unwrap(), 
     &out_point,
     false, 
     false
-  );
+  ).unwrap();
 
   let destination = {
-    let view_key = ChildKey::random().to_tx_key().to_view_key();
-    let spending_pub_key = PublicKey::random();
+    let view_key = ChildKey::random().unwrap()
+      .to_tx_key().to_view_key();
+    let spending_pub_key = PublicKey::random().unwrap();
     let sub_addr_id = SubAddrId::new(67, 78);
     SubAddr::new(
       &view_key,
@@ -49,10 +53,10 @@ pub fn gen_ctx() -> CTx {
     &destination, 
     out_amount, 
     "navio",
-    &TokenId::default(), 
+    &TokenId::default().unwrap(), 
     TxOutputType::Normal,
     0,
-  );
+  ).unwrap();
 
   let tx_ins = vec![tx_in];
   let tx_outs = vec![tx_out];
