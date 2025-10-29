@@ -1,5 +1,5 @@
 use crate::{
-  blsct_obj::{self, BlsctObj},
+  blsct_obj::{BlsctObj, self},
   blsct_serde::BlsctSerde,
   ffi::{
     BlsctDoublePubKey,
