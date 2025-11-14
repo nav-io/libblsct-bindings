@@ -20,7 +20,7 @@ class DoublePublicKey(ManagedObj, Serializable):
   DoublePublicKey(8284d61a300241dcbe...) # doctest: +SKIP
   >>> vk = ViewKey()
   >>> spending_pk = PublicKey()
-  >>> DoublePublicKey.from_keys_and_acct_addr(vk, spending_pk, 1, 2)
+  >>> DoublePublicKey.from_keys_acct_addr(vk, spending_pk, 1, 2)
   DoublePublicKey(8eb6d5f160935d06a1a...) # doctest: +SKIP
   >>> dpk = DoublePublicKey()
   >>> ser = dpk.serialize()
@@ -44,7 +44,7 @@ class DoublePublicKey(ManagedObj, Serializable):
     return dpk
 
   @classmethod
-  def from_keys_and_acct_addr(
+  def from_keys_acct_addr(
     cls: Type[Self],
     view_key: Scalar,
     spending_pub_key: PublicKey,
@@ -52,7 +52,7 @@ class DoublePublicKey(ManagedObj, Serializable):
     address: int
   ) -> Self:
     """Create a DoublePublicKey from a view key, spending public key, account, and address."""
-    obj = blsct.gen_dpk_with_keys_and_sub_addr_id(
+    obj = blsct.gen_dpk_with_keys_acct_addr(
       view_key.value(),
       spending_pub_key.value(),
       account,

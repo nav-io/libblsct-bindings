@@ -482,3 +482,31 @@ pub fn get_amount_recovery_result_msg(
 
 } // extern "C"
 
+#[cfg(test)]
+mod tests {
+  use super::*;
+  use std::ffi::{CStr, CString};
+
+  #[test]
+  fn test_hex_to_malloced_buf() {
+    let test = |hex: &str| {
+      unsafe {
+        let hex_cstring = CString::new(hex).unwrap();
+        let bytes_buf = hex_to_malloced_buf(hex_cstring.as_ptr());
+        let hex_buf = buf_to_malloced_hex_c_str(bytes_buf, hex.len() / 2);
+        let rec_hex = CStr::from_ptr(hex_buf).to_str().unwrap();
+
+        assert_eq!(hex, rec_hex);
+
+        free_obj(bytes_buf as *mut c_void);
+        free_obj(hex_buf as *mut c_void);
+      }
+    };
+    for n in (1u32..=0xFFFF).step_by(3) {
+      let hex = format!("{:04x}", n);
+      test(&hex);
+    }
+  }
+}
+
+

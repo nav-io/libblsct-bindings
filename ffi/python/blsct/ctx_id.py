@@ -23,7 +23,7 @@ class CTxId(ManagedObj, Serializable):
   def serialize(self) -> str:
     """Serialize the CTxId object to a hexadecimal string."""
     buf = blsct.cast_to_uint8_t_ptr(self.value())
-    return blsct.to_hex(buf, blsct.CTX_ID_SIZE)
+    return blsct.buf_to_malloced_hex_c_str(buf, blsct.CTX_ID_SIZE)
 
   @classmethod
   @override

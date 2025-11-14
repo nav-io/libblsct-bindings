@@ -215,7 +215,7 @@ def test_key_derivation():
   sub_addr = SubAddr(view_key, spending_pub_key, sub_addr_id)
   print(f"sub_addr: {sub_addr}")
 
-  dpk = DoublePublicKey.from_keys_and_acct_addr(
+  dpk = DoublePublicKey.from_keys_acct_addr(
     view_key,
     spending_pub_key,
     account,
@@ -292,21 +292,29 @@ def test_tx():
     [tx_out],
   )
 
+  ctx_id = ctx.get_ctx_id()
+  print(f"ctx_id: {ctx_id}")
+
   ctx_hex = ctx.serialize()
   print(f"ctx_hex: {ctx_hex}")
 
+  print("Deserializing...")
   ctx2 = CTx.deserialize(ctx_hex)
+  print(f"Deserialized {ctx2}")
+
   ctx2_hex = ctx2.serialize()
+  print(f"ctx2_hex: {ctx2_hex}")
+
   assert(ctx_hex == ctx2_hex)
 
   deser_ctx_id = ctx2.get_ctx_id()
   print(f"ctx_id (deser): {deser_ctx_id}")
 
   ctx_ins = ctx2.get_ctx_ins()
-  print(f"# of ctx_ins: {len(ctx_ins)}")
+  print(f"# of ctx_ins: {ctx_ins.size()}")
 
   ctx_outs = ctx2.get_ctx_outs()
-  print(f"# of ctx_outs: {len(ctx_outs)}")
+  print(f"# of ctx_outs: {ctx_outs.size()}")
 
   print("<ctx in>")
   for ctx_in in ctx_ins: 
@@ -322,13 +330,13 @@ def test_tx():
     print(f"script_pub_key: {ctx_out.get_script_pub_key()}")
     print(f"token_id: token={ctx_out.get_token_id().token()}, subid={ctx_out.get_token_id().subid()}")
 
-    blsct_data = ctx_out.blsct_data()
-    print(f"spending_key: {blsct_data.get_spending_key()}")
-    print(f"ephemeral_key: {blsct_data.get_ephemeral_key()}")
-    print(f"blinding_key: {blsct_data.get_blinding_key()}")
-    print(f"view_tag: {blsct_data.get_view_tag()}")
+    # blsct data
+    print(f"spending_key: {ctx_out.get_spending_key()}")
+    print(f"ephemeral_key: {ctx_out.get_ephemeral_key()}")
+    print(f"blinding_key: {ctx_out.get_blinding_key()}")
+    print(f"view_tag: {ctx_out.get_view_tag()}")
 
-    rp = blsct_data.get_range_proof()
+    rp = ctx_out.get_range_proof()
     print(f"range_proof.A: {rp.get_A().serialize()}")
     print(f"range_proof.A: {rp.get_A_wip().serialize()}")
     print(f"range_proof.B: {rp.get_B().serialize()}")

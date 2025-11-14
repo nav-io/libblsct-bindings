@@ -36,8 +36,7 @@ export interface BlsctBoolRetVal {
 
 export interface BlsctCTxRetVal {
   result: number
-  ser_ctx: any
-  ser_ctx_size: number
+  ctx: any
   in_amount_err_index: number
   out_amount_err_index: number
 }
@@ -70,12 +69,12 @@ export const fromChildKeyToTxKey = (childKey: any): any => {
 }
 
 // ctx
-export const addTxInToVec = (vec: any, txIn: any): void => {
-  return blsct.add_tx_in_to_vec(vec, txIn)
+export const addToTxInVec = (vec: any, txIn: any): void => {
+  return blsct.add_to_tx_in_vec(vec, txIn)
 }
 
-export const addTxOutToVec = (vec: any, txOut: any): void => {
-  return blsct.add_tx_out_to_vec(vec, txOut)
+export const addToTxOutVec = (vec: any, txOut: any): void => {
+  return blsct.add_to_tx_out_vec(vec, txOut)
 }
 
 export const buildCTx = (txIns: any, txOuts: any): BlsctCTxRetVal => {
@@ -90,32 +89,44 @@ export const createTxOutVec = (): any => {
   return blsct.create_tx_out_vec()
 }
 
-export const getCTxId = (ctx: any, objSize: number): string => {
-  return blsct.get_ctx_id(ctx, objSize)
+export const deleteTxInVec = (txInVec: any): any => {
+  return blsct.delete_tx_in_vec(txInVec)
 }
 
-export const getCTxIn = (ctxIns: any, i: number): BlsctRetVal => {
-  return blsct.get_ctx_in(ctxIns, i)
+export const deleteTxOutVec = (txOutVec: any): any => {
+  return blsct.delete_tx_out_vec(txOutVec)
 }
 
-export const getCTxInCount = (ctxIn: any): number => {
-  return blsct.get_ctx_in_count(ctxIn)
+export const deleteCTx = (ctx: any): void => {
+  return blsct.delete_ctx_(ctx)
 }
 
-export const getCTxIns = (ctx: any, objSize: number): any => {
-  return blsct.get_ctx_ins(ctx, objSize)
+export const getCTxId = (ctx: any): string => {
+  return blsct.get_ctx_id(ctx)
 }
 
-export const getCTxOut = (ctxOuts: any, i: number): BlsctRetVal => {
-  return blsct.get_ctx_out(ctxOuts, i)
+export const getCTxIns = (ctx: any): any => {
+  return blsct.get_ctx_ins(ctx)
 }
 
-export const getCTxOutCount = (ctx: any): number => {
-  return blsct.get_ctx_out_count(ctx)
+export const getCTxInAt = (ctxIns: any, i: number): any => {
+  return blsct.get_ctx_in_at(ctxIns, i)
 }
 
-export const getCTxOuts = (ctx: any, objSize: number): any => {
-  return blsct.get_ctx_outs(ctx, objSize)
+export const getCTxInsSize = (ctxIns: any): number => {
+  return blsct.get_ctx_ins_size(ctxIns)
+}
+
+export const getCTxOuts = (ctx: any): any => {
+  return blsct.get_ctx_outs(ctx)
+}
+
+export const getCTxOutAt = (ctxOuts: any, i: number): any => {
+  return blsct.get_ctx_out_at(ctxOuts, i)
+}
+
+export const getCTxOutsSize = (ctxOuts: any): number => {
+  return blsct.get_ctx_outs_size(ctxOuts)
 }
 
 // ctx id
@@ -146,7 +157,7 @@ export const getCTxOutValue = (obj: any): number => {
 }
 
 export const getCTxOutScriptPubkey = (obj: any): any => {
-  return blsct.get_ctx_out_script_pubkey(obj)
+  return blsct.get_ctx_out_script_pub_key(obj)
 }
 
 export const getCTxOutTokenId = (obj: any): any => {
@@ -185,13 +196,13 @@ export const deserializeDpk = (hex: string): BlsctRetVal => {
 export const genDoublePubKey = (pk1: any, pk2: any): BlsctRetVal => {
   return blsct.gen_double_pub_key(pk1, pk2)
 }
-export const genDpkWithKeysAndSubAddrId = (
+export const genDpkWithKeysAcctAddr = (
   viewKey: any,
   spendingPubKey: any,
   account: number,
   address: number
 ): any => {
-  return blsct.gen_dpk_with_keys_and_sub_addr_id(
+  return blsct.gen_dpk_with_keys_acct_addr(
     viewKey,
     spendingPubKey,
     account,
@@ -237,10 +248,10 @@ export const runGc = async (): Promise<void> => {
   }
 }
 export const toHex = (buf: any, size: number): string => {
-  return blsct.to_hex(buf, size)
+  return blsct.buf_to_malloced_hex_c_str(buf, size)
 }
 export const getValueAsCStr = (rv: BlsctRetVal): string => {
-  return blsct.as_string(rv.value)
+  return blsct.cast_to_const_char_ptr(rv.value)
 }
 
 // out point
@@ -264,8 +275,8 @@ export const genBasePoint = (): BlsctRetVal => {
 export const genRandomPoint = (): BlsctRetVal => {
   return blsct.gen_random_point()
 }
-export const isPointEqual = (a: any, b: any): boolean => {
-  return blsct.is_point_equal(a, b) !== 0
+export const arePointEqual = (a: any, b: any): boolean => {
+  return blsct.are_point_equal(a, b) !== 0
 }
 export const isValidPoint = (point: any): boolean => {
   return blsct.is_valid_point(point) !== 0
@@ -315,15 +326,15 @@ export const scalarToPubKey = (scalar: any): any => {
 }
 
 // range proof
-export const addRangeProofToVec = (
+export const addToRangeProofVec = (
   rangeProofs: any,
-  numRangeProofs: number,
   rangeProof: any,
+  rangeProofSize: number,
 ): void => {
-  blsct.add_range_proof_to_vec(
+  blsct.add_to_range_proof_vec(
     rangeProofs,
-    numRangeProofs,
-    rangeProof
+    rangeProof,
+    rangeProofSize,
   )
 }
 export const addToAmountRecoveryReqVec = (
@@ -362,17 +373,17 @@ export const deserializeRangeProof = (hex: string): BlsctRetVal => {
   const objSize = hex.length / 2
   return blsct.deserialize_range_proof(hex, objSize)
 }
-export const freeAmountRecoveryReqVec = (reqs: any): void => {
-  blsct.free_amount_recovery_req_vec(reqs)
+export const deleteAmountRecoveryReqVec = (reqs: any): void => {
+  blsct.delete_amount_recovery_req_vec(reqs)
 }
-export const freeAmountsRetVal = (rv: BlsctAmountsRetVal): void => {
-  blsct.free_amounts_ret_val(rv)
+export const deleteAmountsRetVal = (rv: BlsctAmountsRetVal): void => {
+  blsct.delete_amounts_ret_val(rv)
 }
-export const freeRangeProofVec = (rangeProofs: any): void => {
-  blsct.free_range_proof_vec(rangeProofs)
+export const deleteRangeProofVec = (rangeProofs: any): void => {
+  blsct.delete_range_proof_vec(rangeProofs)
 }
-export const freeUint64Vec = (vec: any): any => {
-  blsct.free_uint64_vec(vec)
+export const deleteUint64Vec = (vec: any): any => {
+  blsct.delete_uint64_vec(vec)
 }
 export const genAmountRecoveryReq = (
     rangeProof: any,
@@ -452,8 +463,8 @@ export const genRandomScalar = (): BlsctRetVal => {
 export const genScalar = (value: number): BlsctRetVal => {
   return blsct.gen_scalar(value)
 }
-export const isScalarEqual = (a: any, b: any): boolean => {
-  return blsct.is_scalar_equal(a, b) !== 0
+export const areScalarEqual = (a: any, b: any): boolean => {
+  return blsct.are_scalar_equal(a, b) !== 0
 }
 export const scalarToUint64 = (scalar: any): number => {
   return blsct.scalar_to_uint64(scalar)
@@ -535,7 +546,7 @@ export const genTokenId = (token: number): BlsctRetVal => {
   return blsct.gen_token_id(token)
 }
 export const genTokenIdWithSubid = (token: number, subid: number): BlsctRetVal => {
-  return blsct.gen_token_id_with_subid(token, subid)
+  return blsct.gen_token_id_with_token_and_subid(token, subid)
 }
 export const genDefaultTokenId = (): BlsctRetVal => {
   return blsct.gen_default_token_id()
@@ -677,7 +688,7 @@ export const getTxOutMinStake = (obj: any): number => {
 
 // typecast
 export const asString = (obj: string): any => {
-  return blsct.as_string(obj)
+  return blsct.cast_to_const_char_ptr(obj)
 }
 export const castToCTxIn = (obj: any): any => {
   return blsct.cast_to_ctx_in(obj)

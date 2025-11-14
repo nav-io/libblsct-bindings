@@ -4,7 +4,7 @@ import {
   freeObj,
   genRandomScalar,
   genScalar,
-  isScalarEqual,
+  areScalarEqual,
   scalarToUint64,
   serializeScalar,
 } from './blsct'
@@ -76,7 +76,7 @@ export class Scalar extends ManagedObj {
    * @returns `true` if the scalars are equal, `false` otherwise.
    */
   equals(other: Scalar): boolean {
-    return isScalarEqual(this.value(), other.value())
+    return areScalarEqual(this.value(), other.value())
   }
 
   /** Serialize the scalar to a hexadecimal string.

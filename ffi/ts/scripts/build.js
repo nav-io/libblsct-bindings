@@ -4,15 +4,17 @@ const path = require('path')
 const { spawnSync } = require('child_process')
 
 // TODO: turn this on for production builds
-const IS_PROD = true
+const IS_PROD = false
 
 const getCfg = (isProd) => {
   baseDir = path.resolve(__dirname, '..')
   swigDir = path.join(baseDir, 'swig')
-  libDir = path.join(baseDir, 'lib')
   navioCoreDir = path.join(baseDir, 'navio-core')
   dependsDir = path.join(navioCoreDir, 'depends')
-  dependsBakDir = path.join(baseDir, 'depends')
+  libsDir = path.join(baseDir, 'libs')
+
+  bakDir = path.join(os.homedir(), '.navio-tmp')
+  dependsBakDir = path.join(bakDir, 'depends')
 
   srcPath = path.join(navioCoreDir, "src")
   blsPath = path.join(srcPath, "bls")
@@ -20,22 +22,31 @@ const getCfg = (isProd) => {
   mclPath = path.join(blsPath, "mcl")
   mclLibPath = path.join(mclPath, "lib")
 
-  const libFiles = [
+  const srcDotAFiles = [
     path.join(srcPath, "libblsct.a"),
     path.join(srcPath, "libunivalue_blsct.a"),
     path.join(blsLibPath, "libbls384_256.a"),
     path.join(mclLibPath, "libmcl.a"),
   ]
+  const destDotAFiles = [
+    path.join(libsDir, "libblsct.a"),
+    path.join(libsDir, "libunivalue_blsct.a"),
+    path.join(libsDir, "libbls384_256.a"),
+    path.join(libsDir, "libmcl.a"),
+  ]
+
   return {
     swigDir,
-    libDir,
     stdCpp: '-std=c++20',
     navioCoreRepo: isProd ? 'https://github.com/nav-io/navio-core' : 'https://github.com/gogoex/navio-core',
-    navioCoreBranch: isProd ? '' : '', // 'development-branch-name'
+    navioCoreBranch: isProd ? '' : 'add-missing-deser-funcs', // 'development-branch-name'
     navioCoreDir,
     dependsDir,
     dependsBakDir,
-    libFiles,
+
+    srcDotAFiles,
+    destDotAFiles,
+    libsDir,
   }
 }
 
@@ -184,17 +195,17 @@ const buildLibBlsct = (cfg, numCpus, depArchDir) => {
     throw new Error(`Building libblsct failed: ${JSON.stringify(makeRes)}`)
   }
 
-  // prepare a fresh lib dir
-  if (fs.existsSync(cfg.libDir)) {
-    fs.rmSync(cfg.libDir, { recursive: true, force: true })
+  // prepare a fresh backup dir
+  if (fs.existsSync(cfg.libsDir)) {
+    fs.rmSync(cfg.libsDir, { recursive: true, force: true })
   }
-  fs.mkdirSync(cfg.libDir, { recursive: true })
+  fs.mkdirSync(cfg.libsDir, { recursive: true })
 
-  // copy .a files to the lib dir
-  for (const libFile of cfg.libFiles) {
-    const dest = path.join(cfg.libDir, path.basename(libFile))
-    console.log(`Copying ${libFile} to ${dest}...`)
-    fs.copyFileSync(libFile, dest)
+  // copy .a files to the libs dir
+  const src_dest = cfg.srcDotAFiles.map((src, i) => [src, cfg.destDotAFiles[i]]);
+  for(const [src, dest] of src_dest) {
+    console.log(`Copying ${src} to ${dest}...`)
+    fs.copyFileSync(src, dest)
   }
 }
 
@@ -215,8 +226,21 @@ const main = () => {
 
   installSystemDeps()
   gitCloneNavioCore(cfg)
-  depArchDir = buildDepends(cfg, numCpus)
-  buildLibBlsct(cfg, numCpus, depArchDir)
+
+  // if .a files have been built, copy them from the backup dir
+  if (cfg.destDotAFiles.every(file => fs.existsSync(file))) {
+    const src_dest = cfg.srcDotAFiles.map((src, i) => [src, cfg.destDotAFiles[i]]);
+    for(const [src, dest] of src_dest) {
+      console.log(`Copying ${dest} to ${src}...`)
+      fs.copyFileSync(dest, src)
+    }
+  } 
+  // otherwise, build them and create backups
+  else {
+    depArchDir = buildDepends(cfg, numCpus)
+    buildLibBlsct(cfg, numCpus, depArchDir)
+  }
+
   buildSwigWrapper(cfg)
 }
 

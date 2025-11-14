@@ -66,7 +66,7 @@ True
       message,
       token_id.value(),
     )
-    blsct.free_uint64_vec(vec)
+    blsct.delete_uint64_vec(vec)
 
     rv_result = int(rv.result)
     if rv_result != 0:
@@ -82,7 +82,7 @@ True
     """Verify a list of range proofs."""
     vec = blsct.create_range_proof_vec()
     for proof in proofs:
-      blsct.add_range_proof_to_vec(vec, proof.obj_size, proof.value())
+      blsct.add_to_range_proof_vec(vec, proof.value(), proof.obj_size)
     
     rv = blsct.verify_range_proofs(vec)
     rv_result = int(rv.result)
@@ -91,7 +91,7 @@ True
       blsct.free_obj(rv)
       raise RuntimeError(f"Verifying range proofs failed. Error code = {rv_result}")
 
-    blsct.free_range_proof_vec(vec)
+    blsct.delete_range_proof_vec(vec)
 
     return rv.value != 0
 
@@ -111,7 +111,7 @@ True
       blsct.add_to_amount_recovery_req_vec(req_vec, blsct_req)
 
     rv = blsct.recover_amount(req_vec)
-    blsct.free_amount_recovery_req_vec(req_vec)
+    blsct.delete_amount_recovery_req_vec(req_vec)
 
     rv_result = int(rv.result)
     if rv_result != 0:

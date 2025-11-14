@@ -7,6 +7,11 @@
    ```bash
    npx node-gyp configure build
    ```
+## Running unit test
+```
+npm run test
+```
+
 ## Testing BLSCT wrapper classes in REPL
 1. Start `node` from `ffi/ts` directory
 2. Require `navio-blsct` package
@@ -20,9 +25,4 @@
    ```javascript
    const { Scalar } = blsct
    ```
-
-## Running unit tests
-```bash
-npm run testnpx tsc && npx jest
-```
 

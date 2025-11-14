@@ -66,7 +66,7 @@ class Scalar(ManagedObj, Serializable, PrettyPrintable):
   @override
   def __eq__(self, other: object) -> bool:
     if isinstance(other, Scalar):
-      return bool(blsct.is_scalar_equal(self.value(), other.value()))
+      return bool(blsct.are_scalar_equal(self.value(), other.value()))
     else:
       return False
 

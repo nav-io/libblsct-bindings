@@ -35,7 +35,7 @@ class Address():
       blsct.free_obj(rv)
       raise ValueError(f"Failed to encode address. Error code = {rv_result}")
 
-    enc_addr = blsct.as_string(rv.value)
+    enc_addr = blsct.cast_to_const_char_ptr(rv.value)
     blsct.free_obj(rv)
     return enc_addr
 

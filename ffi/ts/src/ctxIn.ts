@@ -1,16 +1,11 @@
 import {
-  castToCTxIn,
-  castToUint8_tPtr,
   getCTxInPrevOutHash,
   getCTxInPrevOutN,
   getCTxInScriptSig,
   getCTxInSequence,
   getCTxInScriptWitness,
-  hexToMallocedBuf,
-  toHex,
 } from './blsct'
 
-import { ManagedObj } from './managedObj'
 import { Script } from './script'
 import { CTxId } from './ctxId'
 
@@ -18,20 +13,18 @@ import { CTxId } from './ctxId'
  *
  * For code examples, see the `ctx.ts` class documentation.
  */
-export class CTxIn extends ManagedObj {
-  constructor(obj: any) {
-    super(obj)
-  }
+export class CTxIn {
+  private obj: any
 
-  override value(): any {
-    return castToCTxIn(this.obj)
+  constructor(obj: any) {
+    this.obj = obj
   }
 
   /** Returns the transaction ID of the previous output being spent.
    * @returns The transaction ID of the previous output.
    */
   getPrevOutHash(): CTxId {
-    const obj = getCTxInPrevOutHash(this.value())
+    const obj = getCTxInPrevOutHash(this.obj)
     return CTxId.fromObj(obj)
   }
 
@@ -39,14 +32,14 @@ export class CTxIn extends ManagedObj {
    * @returns The index of the previous output.
    */
   getPrevOutN(): number {
-    return getCTxInPrevOutN(this.value())
+    return getCTxInPrevOutN(this.obj)
   }
 
   /** Returns the `scriptSig` of the input.
    * @returns The `scriptSig`.
    */
   getScriptSig(): Script {
-    const obj = getCTxInScriptSig(this.value())
+    const obj = getCTxInScriptSig(this.obj)
     return Script.fromObj(obj)
   }
 
@@ -54,37 +47,15 @@ export class CTxIn extends ManagedObj {
    * @returns The sequence number.
    */
   getSequence(): number {
-    return getCTxInSequence(this.value())
+    return getCTxInSequence(this.obj)
   }
 
   /** Returns the `scriptWitness` of the input.
    * @returns The `scriptWitness`.
    */
   getScriptWitness(): Script {
-    const obj = getCTxInScriptWitness(this.value())
+    const obj = getCTxInScriptWitness(this.obj)
     return Script.fromObj(obj)
-  }
-
-  override serialize(): string {
-    const buf = castToUint8_tPtr(this.value())
-    return toHex(buf, this.size())
-  }
-
-  /** Deserializes a `CTxIn` from its hexadecimal representation.
-   * @param hex - The hexadecimal string to deserialize.
-   * @returns A new `CTxIn` instance.
-   */
-  static deserialize(
-    this: new (obj: any) => CTxIn,
-    hex: string
-  ): CTxIn {
-    if (hex.length % 2 !== 0) {
-      hex = `0${hex}`
-    }
-    const obj = hexToMallocedBuf(hex)
-    const x = new CTxIn(obj)
-    x.objSize = hex.length / 2 
-    return x
   }
 }
 
