@@ -14,10 +14,7 @@ IS_PROD = True
 
 std_cpp = "-std=c++20"
 
-package_dir = os.path.abspath(os.path.dirname(__file__))
-
-blsct_dir = os.path.join(package_dir, "blsct")
-lib_dir = os.path.join(blsct_dir, "lib")
+package_dir = Path(os.path.abspath(os.path.dirname(__file__)))
 
 if IS_PROD:
   navio_core_repo = "https://github.com/nav-io/navio-core"
@@ -25,22 +22,35 @@ else:
   navio_core_repo = "https://github.com/gogoex/navio-core"
   navio_core_branch = ""
 
-navio_core_dir = os.path.join(package_dir, "navio-core")
-depends_dir = Path(os.path.join(navio_core_dir, "depends"))
-depends_bak_dir = Path.home() / "depends"
+navio_core_dir = package_dir / "navio-core"
+depends_dir = navio_core_dir / "depends"
+navio_tmp_dir = Path.home() / ".navio-tmp"
+depends_bak_dir = navio_tmp_dir / "depends"
 
-src_path = os.path.join(navio_core_dir, "src")
-bls_path = os.path.join(src_path, "bls")
-bls_lib_path = os.path.join(bls_path, "lib")
-mcl_path = os.path.join(bls_path, "mcl")
-mcl_lib_path = os.path.join(mcl_path, "lib")
+src_path = navio_core_dir / "src"
+bls_path = src_path / "bls"
+bls_lib_path = bls_path / "lib"
+mcl_path = bls_path / "mcl"
+mcl_lib_path = mcl_path / "lib"
 
-libblsct_a = os.path.join(src_path, "libblsct.a")
-libunivalue_blsct_a = os.path.join(src_path, "libunivalue_blsct.a")
-libmcl_a = os.path.join(mcl_lib_path, "libmcl.a")
-libbls384_256_a = os.path.join(bls_lib_path, "libbls384_256.a")
+src_libblsct_a = src_path / "libblsct.a"
+src_libunivalue_blsct_a = src_path / "libunivalue_blsct.a"
+src_libmcl_a = mcl_lib_path / "libmcl.a"
+src_libbls384_256_a = bls_lib_path / "libbls384_256.a"
 
-dot_a_files = [libblsct_a, libunivalue_blsct_a, libmcl_a, libbls384_256_a]
+src_dot_a_files = [src_libblsct_a, src_libunivalue_blsct_a, src_libmcl_a, src_libbls384_256_a]
+
+libs_dir = navio_tmp_dir / "libs"
+
+dest_libblsct_a = libs_dir / "libblsct.a"
+dest_libunivalue_blsct_a = libs_dir / "libunivalue_blsct.a"
+dest_libmcl_a = libs_dir / "libmcl.a"
+dest_libbls384_256_a = libs_dir / "libbls384_256.a"
+
+dest_dot_a_files = [dest_libblsct_a, dest_libunivalue_blsct_a, dest_libmcl_a, dest_libbls384_256_a]
+
+def log(s):
+  print(f"=========> {s}")
 
 class CustomBuildExt(build_ext):
   def get_arch_path(self, depends_dir: Path) -> Path:
@@ -67,13 +77,13 @@ class CustomBuildExt(build_ext):
     subprocess.run(cmd, check=True)
 
   def build_libblsct(self, num_cpus: str):
-    # if there is a backup, use it
+    # if there is a backup of depends directory, use it
     if os.path.isdir(depends_bak_dir):
-      print("Using backup of dependency directory...")
+      log("Using backup of dependency directory...")
       shutil.rmtree(depends_dir)
       shutil.copytree(depends_bak_dir, depends_dir)
     else:
-      print("Building dependendencies...")
+      log("Building dependendencies...")
       # otherwise, build the dependencies
       subprocess.run(
         ["make", "-j", num_cpus],
@@ -81,7 +91,7 @@ class CustomBuildExt(build_ext):
         check=True,
       )
       shutil.copytree(depends_dir, depends_bak_dir)
-      print("Created backup of dependency directory")
+      log("Created backup of dependency directory")
 
     # Run autogen, configure, and make
     subprocess.run(["./autogen.sh"], cwd=navio_core_dir, check=True)
@@ -94,16 +104,29 @@ class CustomBuildExt(build_ext):
     )
     subprocess.run(["make", "-j", num_cpus], cwd=navio_core_dir, check=True)
 
-    os.makedirs(lib_dir, exist_ok=True)
-
-    for f in dot_a_files:
-      if os.path.exists(f):
-        shutil.copy(f, lib_dir)
+    os.makedirs(libs_dir, exist_ok=True)
+    for (src, dest) in zip(src_dot_a_files, dest_dot_a_files):
+      if os.path.exists(src):
+        shutil.copy2(src, dest)
+        log(f"Copyied {src} to {dest}")
 
   def run(self):
-    num_cpus = str(multiprocessing.cpu_count())
+    # only blsct.h is needed actually, but clone the entire tree
+    # for the sake of simplicity
     self.clone_navio_core()
-    self.build_libblsct(num_cpus)
+
+    # copy existing .a files to appropriate locations if available 
+    if all(os.path.exists(f) for f in dest_dot_a_files):
+      log("Copying existing .a files to navio-core source tree...")
+      for (src, dest) in zip(src_dot_a_files, dest_dot_a_files):
+        shutil.copy2(dest, src)
+        log(f"Copyied {dest} to {src}")
+    else:
+      # build .a files
+      log("Building .a files...")
+      num_cpus = str(multiprocessing.cpu_count())
+      self.build_libblsct(num_cpus)
+
     super().run()
 
 def print_directory_structure(start_path, level=0):
@@ -160,12 +183,12 @@ swig_module = Extension(
     os.path.join(navio_core_dir, "src/bls/include"),
     os.path.join(navio_core_dir, "src/bls/mcl/include"),
   ],
-  library_dirs=[lib_dir],
+  library_dirs=[str(libs_dir)],
   libraries=["blsct", "univalue_blsct", "mcl", "bls384_256"],
   extra_compile_args=[
     std_cpp,
   ],
-  extra_objects=[os.path.join(lib_dir, f) for f in dot_a_files],
+  extra_objects=[str(p) for p in dest_dot_a_files],
   extra_link_args=extra_link_args,
   swig_opts=[
     "-c++",
@@ -182,5 +205,5 @@ setup(
   packages=find_packages(),
 )
 
-print_directory_structure(".")
+#print_directory_structure(".")
 

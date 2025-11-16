@@ -33,44 +33,33 @@ pip install setuptools build
 ```
 
 ## Building the package
+1. Configure navio-core repository info in `setup.py`:
+```
+IS_PROD = True
+... 
+if IS_PROD:
+  navio_core_repo = "https://github.com/nav-io/navio-core"
+else:
+  navio_core_repo = "https://github.com/gogoex/navio-core"
+  navio_core_branch = "add-missing-deser-funcs"
+```
 
+2. Activate virtual environment
 ```bash
-python -m build
+python3 -m venv venv
+source venv/bin/activate
 ```
 
 ## Testing the package
+Note that to reflect the changes to the python wrapper in tests, a new package needs to be built and installed. Making changes to tests themselves works locally.
 
 ```bash
-pip install dist/*.whl
-cd ..
-python -c "import blsct"
-```
-
-## Testing with locally installed navio-blsct package
-
-1. cd to `ffi/python` directory
-
-1. Install the navio-blsct package
-
-- Install `venv`, `build` and `setuptools` (first time only)
-```bash
-python3 -m venv venv
-pip install build setuptools
-```
-
-- Build and install the navio-blsct package
-```bash
-source venv/bin/activate
 python -m build
-pip install --force-reinstall dist/*.whl
+pip install dist/*.whl
+pytest tests -vv -s
 ```
 
-1. Move to the parent directory to avoid using the source codes under `ffi/python`
-
-1. Test that the installation was successful
-
-```bash
-python -c 'import blsct'
-```
-
+### Testing the doctest in REPL
+1. Go up to the parent directory to avoid to use the local source code
+2. Start REPL and paste the doctest
 

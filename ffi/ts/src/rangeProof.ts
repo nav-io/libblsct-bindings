@@ -1,5 +1,5 @@
 import {
-  addRangeProofToVec,
+  addToRangeProofVec,
   addToAmountRecoveryReqVec,
   addToUint64Vec,
   buildRangeProof,
@@ -8,11 +8,11 @@ import {
   createRangeProofVec,
   createUint64Vec,
   deserializeRangeProof,
-  freeAmountRecoveryReqVec,
-  freeAmountsRetVal,
+  deleteAmountRecoveryReqVec,
+  deleteAmountsRetVal,
+  deleteRangeProofVec,
+  deleteUint64Vec,
   freeObj,
-  freeRangeProofVec,
-  freeUint64Vec,
   genAmountRecoveryReq,
   getAmountRecoveryResultAmount,
   getAmountRecoveryResultIsSucc,
@@ -96,7 +96,7 @@ export class RangeProof extends ManagedObj {
       msg,
       tokenId.value(),
     )
-    freeUint64Vec(vec)
+    deleteUint64Vec(vec)
 
     if (rv.result !== 0) {
       const msg = `Building range proof failed. Error code = ${rv.result}`
@@ -118,7 +118,7 @@ export class RangeProof extends ManagedObj {
   static verifyProofs(proofs: RangeProof[]): boolean {
     const vec = createRangeProofVec()
     for (const proof of proofs) {
-      addRangeProofToVec(vec, proof.size(), proof.value())
+      addToRangeProofVec(vec, proof.value(), proof.size())
     }
     
     const rv = verifyRangeProofs(vec)
@@ -127,7 +127,7 @@ export class RangeProof extends ManagedObj {
       freeObj(rv)
       throw new Error(msg)
     }
-    freeRangeProofVec(vec)
+    deleteRangeProofVec(vec)
     return rv.value
   }
 
@@ -148,11 +148,11 @@ export class RangeProof extends ManagedObj {
     }
 
     const rv = recoverAmount(reqVec)
-    freeAmountRecoveryReqVec(reqVec)
+    deleteAmountRecoveryReqVec(reqVec)
 
     if (rv.result !== 0) {
       const msg = `Recovering amount failed. Error code = ${rv.result}`
-      freeAmountsRetVal(rv)
+      deleteAmountsRetVal(rv)
       throw new Error(msg)
     } 
 
@@ -171,7 +171,7 @@ export class RangeProof extends ManagedObj {
       results.push(x)
     }
     
-    freeAmountsRetVal(rv)
+    deleteAmountsRetVal(rv)
     return results
   }
 

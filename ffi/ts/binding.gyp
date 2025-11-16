@@ -12,7 +12,7 @@
       ],
       'link_settings': {
         'library_dirs': [
-          '<(module_root_dir)/lib'
+          '<(module_root_dir)/libs'
         ],
         'libraries': [
           '-lblsct',

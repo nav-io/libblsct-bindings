@@ -2,66 +2,59 @@ import {
   castToCTxOut,
   castToUint8_tPtr,
   freeObj,
-  getCTxOutValue,
+  getCTxOutBlindingKey,
+  getCTxOutEphemeralKey,
+  getCTxOutRangeProof,
   getCTxOutScriptPubkey,
+  getCTxOutSpendingKey,
   getCTxOutTokenId,
+  getCTxOutValue,
   getCTxOutVectorPredicate,
+  getCTxOutViewTag,
   hexToMallocedBuf,
   toHex,
 } from './blsct'
 
+import { BlindingKey } from './keys/childKeyDesc/blindingKey'
 import { ManagedObj } from './managedObj'
+import { Point } from './point'
+import { RangeProof } from './rangeProof'
+import { SpendingKey } from './keys/childKeyDesc/txKeyDesc/spendingKey'
 import { TokenId } from './tokenId'
-import { CTxOutBlsctData } from './ctxOutBlsctData'
 import { Script } from './script'
 
 /** Represents a transaction output in a constructed confidential transaction. Also known as `CTxOut` on the C++ side.
  *
- * For code examples, see the `ctx.py` class documentation.
+ * For code examples, see the `ctx.ts` class documentation.
  */
-export class CTxOut extends ManagedObj {
-  blsctDataCache?: CTxOutBlsctData
+export class CTxOut {
+  private obj: any
+  private rangeProofCache?: RangeProof
 
   constructor(obj: any) {
-    super(obj)
-  }
-
-  override value(): any {
-    return castToCTxOut(this.obj)
+    this.obj = obj
   }
 
   /** Returns the value of the transaction output.
    * * @returns The value of the output.
    */
   getValue(): number {
-    return getCTxOutValue(this.value())
+    return getCTxOutValue(this.obj)
   }
 
   /** Returns the `scriptPubKey' of the transaction output.
    * * @returns The `scriptPubKey` of the output.
    */
   getScriptPubKey(): Script {
-    const obj = getCTxOutScriptPubkey(this.value())
+    const obj = getCTxOutScriptPubkey(this.obj)
     return Script.fromObj(obj)
-  }
-
-  /** Returns the `CTxOutBlsctData` object associated with the transaction output.
-   * @returns The `CTxOutBlsctData` object.
-   */
-  blsctData(): CTxOutBlsctData {
-    if (this.blsctDataCache !== undefined) {
-      return this.blsctDataCache
-    }
-    const x = CTxOutBlsctData.fromObj(this.value())
-    this.blsctDataCache = x
-    return x
   }
 
   /** Returns the token ID associated with the transaction output.
    * @returns The token ID of the output.
    */
   getTokenId(): TokenId {
-    const obj = getCTxOutTokenId(this.value())
+    const obj = getCTxOutTokenId(this.obj)
     return TokenId.fromObj(obj)
   }
 
@@ -69,7 +62,7 @@ export class CTxOut extends ManagedObj {
    * * @returns The vector predicate as a hexadecimal string.
    */
   getVectorPredicate(): string {
-    const rv = getCTxOutVectorPredicate(this.value())
+    const rv = getCTxOutVectorPredicate(this.obj)
     if (rv.result != 0) {
       const msg = `Failed to get vector predicate. Error code = ${rv.result}`
       freeObj(rv)
@@ -85,26 +78,49 @@ export class CTxOut extends ManagedObj {
     return hex 
   }
 
-  override serialize(): string {
-    const buf = castToUint8_tPtr(this.value())
-    return toHex(buf, this.size())
+  /** Returns the spending key associated with the transaction output.
+   * @returns The spending key of the output.
+   */
+  getSpendingKey(): SpendingKey {
+    const obj = getCTxOutSpendingKey(this.obj)
+    return SpendingKey.fromObj(obj)
+  }
+  
+  /** Returns the ephemeral key associated with the transaction output.
+   * @returns The ephemeral key of the output.
+   */
+  getEphemeralKey(): Point {
+    const obj = getCTxOutEphemeralKey(this.obj)
+    return Point.fromObj(obj)
   }
 
-  /** Deserializes a `CTxOut` from its hexadecimal representation.
-   * @param hex - The hexadecimal string to deserialize.
-   * @returns A new `CTxOut` instance. w
+  /** Returns the blinding key associated with the transaction output.
+   * @returns The blinding key of the output.
    */
-  static deserialize(
-    this: new (obj: any) => CTxOut,
-    hex: string
-  ): CTxOut {
-    if (hex.length % 2 !== 0) {
-      hex = `0${hex}`
+  getBlindingKey(): BlindingKey {
+    const obj = getCTxOutBlindingKey(this.obj)
+    return BlindingKey.fromObj(obj)
+  }
+
+  /** Returns the range proof associated with the transaction output.
+   * @returns The range proof of the output.
+   */
+  getRangeProof(): RangeProof {
+    if (this.rangeProofCache !== undefined) {
+      return this.rangeProofCache
     }
-    const obj = hexToMallocedBuf(hex)
-    const x = new CTxOut(obj)
-    x.objSize = hex.length / 2 
+    const rv = getCTxOutRangeProof(this.obj)
+    const x = RangeProof.fromObjAndSize(rv.value, rv.value_size)
+    freeObj(rv)
+    this.rangeProofCache = x
     return x
+  }
+
+  /** Returns the view tag associated with the view of the transaction output.
+   * @returns The view tag of the output.
+   */
+  getViewTag(): number {
+    return getCTxOutViewTag(this.obj)
   }
 }
 

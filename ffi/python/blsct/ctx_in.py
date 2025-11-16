@@ -14,6 +14,7 @@ class CTxIn(ManagedObj, Serializable):
 
   def __init__(self, obj: Any = None):
     super().__init__(obj)
+    self.set_borrowed()
 
   def get_prev_out_hash(self) -> CTxId:
     """Get the transaction ID of the previous output being spent."""
@@ -50,7 +51,7 @@ class CTxIn(ManagedObj, Serializable):
   def serialize(self) -> str:
     """Serialize the CTxIn object to a hexadecimal string."""
     buf = blsct.cast_to_uint8_t_ptr(self.value())
-    return blsct.to_hex(buf, self.obj_size)
+    return blsct.buf_to_malloced_hex_c_str(buf, self.obj_size)
 
   @classmethod
   @override

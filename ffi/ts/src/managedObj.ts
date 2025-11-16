@@ -8,13 +8,17 @@ export type FinalizerInfo = {
   cls: string,
   obj: any,
   isBorrow: boolean,
+  deleteMethod?: () => void,
 }
 
 const finalizer = new FinalizationRegistry(
   (fi: FinalizerInfo) => {
     if (fi.obj && !fi.isBorrow) {
-      freeObj(fi.obj)
-      fi.obj = undefined
+      if (fi.deleteMethod) {
+        fi.deleteMethod()
+      } else {
+        freeObj(fi.obj)
+      }
     }
   }
 )
@@ -29,11 +33,13 @@ export abstract class ManagedObj {
    */
   constructor(
     obj: any,
+    deleteMethod?: () => void,
   ) {
     this.fi = {
       obj,
       cls: this.constructor.name,
       isBorrow: false,
+      deleteMethod,
     }
     if (obj !== undefined) {
       finalizer.register(this, this.fi, this)

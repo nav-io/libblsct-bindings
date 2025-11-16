@@ -18,8 +18,9 @@ from .amount_recovery_res import AmountRecoveryRes
 from .ctx import CTx
 from .ctx_id import CTxId
 from .ctx_in import CTxIn
+from .ctx_ins import CTxIns
 from .ctx_out import CTxOut
-from .ctx_out_blsct_data import CTxOutBlsctData
+from .ctx_outs import CTxOuts
 from .hash_id import HashId
 from .keys.child_key import ChildKey
 from .keys.child_key_desc.blinding_key import BlindingKey

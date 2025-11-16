@@ -40,7 +40,7 @@ class TokenId(ManagedObj, Serializable):
     subid: int,
   ) -> Self:
     """Generate a token ID from a given token and subid."""
-    rv = blsct.gen_token_id_with_subid(token, subid) 
+    rv = blsct.gen_token_id_with_token_and_subid(token, subid) 
     token_id = cls(rv.value)
     blsct.free_obj(rv)
     return token_id

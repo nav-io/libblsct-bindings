@@ -6,9 +6,10 @@ use std::process::Command;
 use num_cpus;
 
 const IS_PROD: bool = true;
+
 const NAVIO_REPO_URL_PROD: &str = "https://github.com/nav-io/navio-core";
 const NAIVO_REPO_URL_DEV: &str = "https://github.com/gogoex/navio-core";
-const NAVIO_REPO_BRANCH: &str = "dev-branch-name-here";
+const NAVIO_REPO_BRANCH: &str = "";
 
 fn copy_dir(src_dir: &Path, dest_dir: &Path) -> io::Result<()> {
   fs::create_dir_all(dest_dir)?;
@@ -54,6 +55,8 @@ fn clone_navio_core(navio_core_path: &Path) {
     args.push("--branch");
     args.push(branch)
   }
+  println!("{:?}", args);
+  //panic!("build script failed4 {:?}", args);
   args.push(repo_url);
   args.push(navio_core_path.file_name().unwrap().to_str().unwrap());
 

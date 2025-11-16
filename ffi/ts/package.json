@@ -5,7 +5,7 @@
     "install": "node scripts/build.js && node-gyp configure build && tsc",
     "docs": "typedoc",
     "docs:watch": "nodemon --watch src --ext ts --exec \"npx typedoc\"",
-    "test": "tsc && node_options='--expose-gc' jest"
+    "test": "tsc && NODE_OPTIONS=--expose-gc jest"
   },
   "license": "MIT",
   "main": "dist/index.js",
@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@types/node": "^24.1.0",
+    "navio-blsct": "^1.0.15",
     "typescript": "^5.8.3"
   },
   "keywords": [

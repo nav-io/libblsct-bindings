@@ -1,6 +1,8 @@
 from . import blsct
 from .ctx_in import CTxIn
+from .ctx_ins import CTxIns
 from .ctx_out import CTxOut
+from .ctx_outs import CTxOuts
 from .managed_obj import ManagedObj
 from .serializable import Serializable
 from .ctx_id import CTxId
@@ -31,7 +33,9 @@ class CTx(ManagedObj, Serializable):
   >>> sub_addr = SubAddr.from_double_public_key(DoublePublicKey())
   >>> tx_out = TxOut(sub_addr, out_amount, 'navio')
   >>> ctx = CTx([tx_in], [tx_out])
-  >>> for ctx_in in ctx.get_ctx_ins(): 
+  >>> ctx_ins = ctx.get_ctx_ins()
+  >>> for i in range(ctx_ins.size()):
+  ...   ctx_in = ctx_ins.at(i)
   ...   print(f"prev_out_hash: {ctx_in.get_prev_out_hash()}")
   ...   print(f"prev_out_n: {ctx_in.get_prev_out_n()}")
   ...   print(f"script_sig: {ctx_in.get_script_sig()}")
@@ -43,14 +47,16 @@ class CTx(ManagedObj, Serializable):
   script_sig: Script(0000000000008f676000000000006b67400000000000726720000000)
   sequence: 4294967295
   script_witness: Script(0000000000008f676000000000006b67400000000000726720000000)
-  >>> for ctx_out in ctx.get_ctx_outs():
+  >>> ctx_outs = ctx.get_ctx_outs()
+  >>> for i in range(ctx_outs.size()):
+  ...   ctx_out = ctx_outs.at(i)
   ...   print(f"value: {ctx_out.get_value()}")
   ...   print(f"script_pub_key: {ctx_out.get_script_pub_key()}")
-  ...   print(f"blsct_data.spending_key: {ctx_out.blsct_data().get_spending_key()}")
-  ...   print(f"blsct_data.ephemeral_key: {ctx_out.blsct_data().get_ephemeral_key()}")
-  ...   print(f"blsct_data.blinding_key: {ctx_out.blsct_data().get_blinding_key()}")
-  ...   print(f"blsct_data.view_tag: {ctx_out.blsct_data().get_view_tag()}")
-  ...   rp = ctx_out.blsct_data().get_range_proof()
+  ...   print(f"blsct_data.spending_key: {ctx_out.get_spending_key()}")
+  ...   print(f"blsct_data.ephemeral_key: {ctx_out.get_ephemeral_key()}")
+  ...   print(f"blsct_data.blinding_key: {ctx_out.get_blinding_key()}")
+  ...   print(f"blsct_data.view_tag: {ctx_out.get_view_tag()}")
+  ...   rp = ctx_out.get_range_proof()
   ...   print(f"blsct_data.range_proof.A: {rp.get_A()}")
   ...   print(f"blsct_data.range_proof.A_wip: {rp.get_A_wip()}")
   ...   print(f"blsct_data.range_proof.B: {rp.get_B()}")
@@ -116,99 +122,61 @@ class CTx(ManagedObj, Serializable):
   True
   """
   def __init__(self, tx_ins: list[TxIn], tx_outs: list[TxOut]):
-    self.tx_ins = []
-    for tx_in in tx_ins:
-      self.tx_ins.append(tx_in.clone())
-
-    self.tx_outs = []
-    for tx_out in tx_outs:
-      self.tx_outs.append(tx_out.clone())
-
-    def free_tx_ins_outs():
-      for tx_in in self.tx_ins:
-        blsct.free_obj(tx_in.value())
-
-      for tx_out in self.tx_outs:
-        blsct.free_obj(tx_out.value())
-
-    # create vector object and add tx_ins to it
     tx_in_vec = blsct.create_tx_in_vec()
-    for tx_in in self.tx_ins:
-      blsct.add_tx_in_to_vec(tx_in_vec, tx_in.value())
+    for tx_in in tx_ins:
+      blsct.add_to_tx_in_vec(tx_in_vec, tx_in.value())
 
-    # create vector object and add tx_outs to it
     tx_out_vec = blsct.create_tx_out_vec()
-    for tx_out in self.tx_outs:
-      blsct.add_tx_out_to_vec(tx_out_vec, tx_out.value())
+    for tx_out in tx_outs:
+      blsct.add_to_tx_out_vec(tx_out_vec, tx_out.value())
 
     rv = blsct.build_ctx(tx_in_vec, tx_out_vec)
     rv_result = int(rv.result)
 
-    # free the temporary vector objects
-    blsct.free_obj(tx_in_vec)
-    blsct.free_obj(tx_out_vec)
+    blsct.delete_tx_in_vec(tx_in_vec)
+    blsct.delete_tx_out_vec(tx_out_vec)
 
     if rv_result == blsct.BLSCT_IN_AMOUNT_ERROR:
       blsct.free_obj(rv)
-      free_tx_ins_outs()
       raise ValueError(f"Failed to build transaction. tx_ins[{rv.in_amount_err_index}] has an invalid amount")
 
     if rv_result == blsct.BLSCT_OUT_AMOUNT_ERROR:
       blsct.free_obj(rv)
-      free_tx_ins_outs()
       raise ValueError(f"Failed to build transaciton. tx_outs[{rv.out_amount_err_index}] has an invalid amount")
 
     if rv_result != 0:
-      free_tx_ins_outs()
       blsct.free_obj(rv)
       raise ValueError(f"building tx failed. Error code = {rv_result}")
 
-    obj = rv.ser_ctx # rv.ser_ctx is a byte array*
-    obj_size = rv.ser_ctx_size # rv.ser_ctx_size is the byte array size
+    obj = rv.ctx
     blsct.free_obj(rv)
 
     super().__init__(obj)
-    self.obj_size = obj_size
+    self.obj_size = 0
+    self.del_method = lambda: blsct.delete_ctx(obj)
 
   def get_ctx_id(self) -> CTxId:
     """Get the transaction ID."""
-    tx_id_hex = blsct.get_ctx_id(self.value(), self.obj_size)
+    hex_c_str = blsct.get_ctx_id(self.value())
+    rv = blsct.deserialize_ctx_id(hex_c_str)
+    obj = CTxId.from_obj(rv.value)
+    blsct.free_obj(rv)
+    return obj
 
-    return CTxId.deserialize(tx_id_hex)
+  def get_ctx_ins(self) -> CTxIns:
+    """Get the list of CTxIns."""
+    obj = blsct.get_ctx_ins(self.value())
+    return CTxIns(obj)
 
-  def get_ctx_ins(self) -> list[CTxIn]:
-    """Get the list of CTxIns generated from TxIns."""
-    ctx_ins = blsct.get_ctx_ins(self.value(), self.obj_size)
-    num_ctx_ins = blsct.get_ctx_in_count(ctx_ins)
-
-    xs = []
-    for i in range(num_ctx_ins):
-      rv = blsct.get_ctx_in(ctx_ins, i)
-      x = CTxIn.from_obj(rv.value)
-      xs.append(x)
-
-    blsct.free_obj(ctx_ins)
-    return xs
-
-  def get_ctx_outs(self) -> list[CTxOut]:
-    """Get the list of CTxOuts generated from TxOuts."""
-    ctx_outs = blsct.get_ctx_outs(self.value(), self.obj_size)
-    num_ctx_outs = blsct.get_ctx_out_count(ctx_outs)
-
-    xs = []
-    for i in range(num_ctx_outs):
-      rv = blsct.get_ctx_out(ctx_outs, i)
-      x = CTxOut.from_obj(rv.value)
-      xs.append(x)
-
-    blsct.free_obj(ctx_outs)
-    return xs
+  def get_ctx_outs(self) -> CTxOuts:
+    """Get the list of CTxOuts."""
+    obj = blsct.get_ctx_outs(self.value())
+    return CTxOuts(obj)
 
   @override
   def serialize(self) -> str:
     """Serialize the transaction to a hexadecimal string."""
-    buf = blsct.cast_to_uint8_t_ptr(self.value())
-    return blsct.to_hex(buf, self.obj_size)
+    return blsct.serialize_ctx(self.value())
 
   @classmethod
   @override
@@ -216,9 +184,14 @@ class CTx(ManagedObj, Serializable):
     """Deserialize a transaction from a hexadecimal string."""
     if len(hex) % 2 != 0:
       hex = f"0{hex}"
-    obj_size = len(hex) // 2
-    obj = blsct.hex_to_malloced_buf(hex)
-    return cls.from_obj_with_size(obj, obj_size)
+    rv = blsct.deserialize_ctx(hex)
+    if int(rv.result) != 0:
+      raise ValueError(f"Failed to deserialize CTx: {rv.result}")
+    x = cls.from_obj(rv.value)
+    x.del_method = lambda: blsct.delete_ctx(x)
+    x.obj_size = 0
+    blsct.free_obj(rv)
+    return x
 
   @override
   def value(self) -> Any:

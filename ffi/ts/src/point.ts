@@ -4,7 +4,7 @@ import {
   freeObj,
   genBasePoint,
   genRandomPoint,
-  isPointEqual,
+  arePointEqual,
   isValidPoint,
   pointFromScalar,
   pointToStr,
@@ -98,7 +98,7 @@ export class Point extends ManagedObj {
    * @returns `true` if the points are equal, `false` otherwise.
    */
   equals(other: Point): boolean {
-    return isPointEqual(this.value(), other.value())
+    return arePointEqual(this.value(), other.value())
   }
 
   override serialize(): string {

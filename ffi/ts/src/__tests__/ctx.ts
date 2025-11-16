@@ -50,17 +50,17 @@ test('generate', () => {
   genCTx()
 })
 
-test('getCtxId', () => {
+test('getCTxId', () => {
   const x = genCTx()
   x.getCTxId()
 })
 
-test('getCtxIns', () => {
+test('getCTxIns', () => {
   const x = genCTx()
   x.getCTxIns()
 })
 
-test('getCtxOuts', () => {
+test('getCTxOuts', () => {
   const x = genCTx()
   x.getCTxOuts()
 })

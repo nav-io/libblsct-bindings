@@ -3,7 +3,7 @@ import {
   deserializeDpk,
   freeObj,
   genDoublePubKey,
-  genDpkWithKeysAndSubAddrId,
+  genDpkWithKeysAcctAddr,
   serializeDpk,
 } from '../blsct'
 
@@ -76,13 +76,13 @@ export class DoublePublicKey extends ManagedObj {
    * @param address - The address.
    * @returns A new `DoublePublicKey` instance.
    */
-  static fromKeysAndAcctAddr(
+  static fromKeysAcctAddr(
     viewKey: ViewKey,
     spendingPubKey: PublicKey,
     account: number,
     address: number,
   ): DoublePublicKey {
-    const obj = genDpkWithKeysAndSubAddrId(
+    const obj = genDpkWithKeysAcctAddr(
       viewKey.value(),
       spendingPubKey.value(),
       account,

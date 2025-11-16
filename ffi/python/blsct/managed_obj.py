@@ -1,6 +1,6 @@
 from . import blsct
 from abc import ABC, abstractmethod
-from typing import Any, Type, Self
+from typing import Any, Type, Self, Callable, Optional
 from .serializable import Serializable
 
 class ManagedObj(ABC):
@@ -8,6 +8,7 @@ class ManagedObj(ABC):
     self.obj_size: int | None = None
     self._managed: bool = False
     self._borrowed: bool = False
+    self._del_method: Optional[Callable[[], None]] = None
 
   def __init__(self, obj=None):
     self.obj = self.default_obj() if obj is None else obj
@@ -29,8 +30,18 @@ class ManagedObj(ABC):
     self.obj = None
     return obj
 
+  def set_del_method(self, f):
+    self._del_method = f
+
+  def set_borrowed(self):
+    self._borrowed = True
+
   def __del__(self):
-    if self.obj is not None and self._borrowed is False:
+    if self.obj is None or self._borrowed is False:
+      return
+    if self._del_method:
+      self._del_method()
+    else:
       blsct.free_obj(self.obj)
 
   def __enter__(self):

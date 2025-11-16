@@ -1,6 +1,9 @@
 from . import blsct
-from .ctx_out_blsct_data import CTxOutBlsctData
+from .keys.child_key_desc.blinding_key import BlindingKey
+from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .managed_obj import ManagedObj
+from .point import Point
+from .range_proof import RangeProof
 from .script import Script
 from .serializable import Serializable
 from .token_id import TokenId
@@ -14,6 +17,7 @@ class CTxOut(ManagedObj, Serializable):
   """
   def __init__(self, obj: Any = None):
     super().__init__(obj)
+    self.set_borrowed()
 
   def get_value(self) -> int:
     """Get the value of the transaction output."""
@@ -21,17 +25,8 @@ class CTxOut(ManagedObj, Serializable):
 
   def get_script_pub_key(self) -> Script:
     """Get the scriptPubKey of the transaction output."""
-    obj = blsct.get_ctx_out_script_pubkey(self.value())
+    obj = blsct.get_ctx_out_script_pub_key(self.value())
     return Script.from_obj(obj)
-
-  def blsct_data(self) -> CTxOutBlsctData:
-    """Get the blsct-related data of the transaction output."""
-    if hasattr(self, "blsct_data_cache") and self.blsct_data_cache is not None:
-      return self.blsct_data_cache
-    inst = CTxOutBlsctData.from_obj(self.value())
-    inst._borrowed = True
-    self.blsct_data_cache = inst
-    return inst
 
   def get_token_id(self) -> 'TokenId':
     """Get the token ID of the transaction output."""
@@ -48,10 +43,38 @@ class CTxOut(ManagedObj, Serializable):
       blsct.free_obj(rv)
       return ""
     buf = blsct.cast_to_uint8_t_ptr(rv.value)
-    hex = blsct.to_hex(buf, rv.value_size)
+    hex = blsct.buf_to_malloced_hex_c_str(buf, rv.value_size)
     blsct.free_obj(rv)
     return hex 
 
+  def get_spending_key(self) -> SpendingKey:
+    """Get the spending key of the transaction output."""
+    obj = blsct.get_ctx_out_spending_key(self.value())
+    return SpendingKey.from_obj(obj)
+
+  def get_ephemeral_key(self) -> Point:
+    """Get the ephemeral key of the transaction output."""
+    obj = blsct.get_ctx_out_ephemeral_key(self.value())
+    return Point.from_obj(obj)
+
+  def get_blinding_key(self) -> BlindingKey:
+    """Get the blinding key of the transaction output."""
+    obj = blsct.get_ctx_out_blinding_key(self.value())
+    return BlindingKey.from_obj(obj)
+
+  def get_range_proof(self) -> RangeProof:
+    """Get the range proof of the transaction output."""
+    if hasattr(self, "rp_cache") and self.rp_cache is not None:
+      return self.rp_cache
+    rv = blsct.get_ctx_out_range_proof(self.value())
+    inst = RangeProof.from_obj_with_size(rv.value, rv.value_size)
+    blsct.free_obj(rv)
+    self.rp_cache = inst
+    return inst
+
+  def get_view_tag(self) -> int:
+    """Get the view tag of the transaction output."""
+    return blsct.get_ctx_out_view_tag(self.value())
   @override
   def value(self) -> Any:
     return blsct.cast_to_ctx_out(self.obj)
@@ -64,7 +87,7 @@ class CTxOut(ManagedObj, Serializable):
   def serialize(self) -> str:
     """Serialize the CTxOut object to a hexadecimal string."""
     buf = blsct.cast_to_uint8_t_ptr(self.value())
-    return blsct.to_hex(buf, self.obj_size)
+    return blsct.buf_to_malloced_hex_c_str(buf, self.obj_size)
 
   @classmethod
   @override

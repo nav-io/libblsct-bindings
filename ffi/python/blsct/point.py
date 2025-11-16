@@ -104,7 +104,7 @@ class Point(ManagedObj, Serializable, PrettyPrintable):
   @override
   def __eq__(self, other: object) -> bool:
     if isinstance(other, Point):
-      return bool(blsct.is_point_equal(self.value(), other.value()))
+      return bool(blsct.are_point_equal(self.value(), other.value()))
     else:
       return False
 

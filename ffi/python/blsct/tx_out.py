@@ -99,7 +99,7 @@ class TxOut(ManagedObj, Serializable):
   def serialize(self) -> str:
     """Serialize the TxOut to a hexadecimal string"""
     buf = blsct.cast_to_uint8_t_ptr(self.value())
-    return blsct.to_hex(buf, self.obj_size)
+    return blsct.buf_to_malloced_hex_c_str(buf, self.obj_size)
 
   @classmethod
   @override

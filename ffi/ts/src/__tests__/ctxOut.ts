@@ -4,7 +4,7 @@ import { CTxOut } from '../ctxOut'
 const genCTxOut = (): CTxOut => {
   const ctx = genCTx()
   const txOuts = ctx.getCTxOuts()
-  return txOuts[0]
+  return txOuts.at(0)
 }
 
 test('getValue', () => {
@@ -27,17 +27,28 @@ test('getVectorPredicate', () => {
   x.getVectorPredicate()
 })
 
-test('blsctData', () => {
+test('getSpendingKey', () => {
   const x = genCTxOut()
-  expect(x.blsctData() !== undefined).toBe(true)
+  x.getSpendingKey()
 })
 
-test('serialize and deserialize', () => {
-  const a = genCTxOut()
-  const a_hex = a.serialize()
-  const b = CTxOut.deserialize(a_hex)
-  const b_hex = b.serialize()
+test('getEphemeralKey', () => {
+  const x = genCTxOut()
+  x.getEphemeralKey()
+})
 
-  expect(a_hex).toBe(b_hex)
+test('getBlindingKey', () => {
+  const x = genCTxOut()
+  x.getBlindingKey()
+})
+
+test('getRangeProof', () => {
+  const x = genCTxOut()
+  x.getRangeProof()
+})
+
+test('getViewTag', () => {
+  const x = genCTxOut()
+  x.getViewTag()
 })
 
