@@ -4,7 +4,7 @@ const path = require('path')
 const { spawnSync } = require('child_process')
 
 // TODO: turn this on for production builds
-const IS_PROD = false
+const IS_PROD = true
 
 const getCfg = (isProd) => {
   baseDir = path.resolve(__dirname, '..')
@@ -39,7 +39,7 @@ const getCfg = (isProd) => {
     swigDir,
     stdCpp: '-std=c++20',
     navioCoreRepo: isProd ? 'https://github.com/nav-io/navio-core' : 'https://github.com/gogoex/navio-core',
-    navioCoreBranch: isProd ? '' : 'add-missing-deser-funcs', // 'development-branch-name'
+    navioCoreBranch: isProd ? '' : 'development-branch-name',
     navioCoreDir,
     dependsDir,
     dependsBakDir,
