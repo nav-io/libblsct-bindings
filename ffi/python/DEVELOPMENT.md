@@ -39,6 +39,8 @@ IS_PROD = True
 ... 
 if IS_PROD:
   navio_core_repo = "https://github.com/nav-io/navio-core"
+  # git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
+  navio_core_master_sha = "..." 
 else:
   navio_core_repo = "https://github.com/gogoex/navio-core"
   navio_core_branch = "add-missing-deser-funcs"

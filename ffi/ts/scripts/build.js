@@ -6,6 +6,9 @@ const { spawnSync } = require('child_process')
 // TODO: turn this on for production builds
 const IS_PROD = true
 
+// git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
+const MASTER_SHA = '3f7805c30db897c787b9cae50a013f9c8cd20086' 
+
 const getCfg = (isProd) => {
   baseDir = path.resolve(__dirname, '..')
   swigDir = path.join(baseDir, 'swig')
@@ -39,6 +42,7 @@ const getCfg = (isProd) => {
     swigDir,
     stdCpp: '-std=c++20',
     navioCoreRepo: isProd ? 'https://github.com/nav-io/navio-core' : 'https://github.com/gogoex/navio-core',
+    navioCoreMasterSha: isProd ? MASTER_SHA : '',
     navioCoreBranch: isProd ? '' : 'development-branch-name',
     navioCoreDir,
     dependsDir,
@@ -134,19 +138,39 @@ const gitCloneNavioCore = (cfg) => {
   }
 
   const cmd = ['git', 'clone', '--depth', '1']
-  if (cfg.navioCoreBranch !== "") {
+  if (cfg.navioCoreBranch !== '') {
     cmd.push('--branch', cfg.navioCoreBranch)
     console.log(`Using navio-core ${cfg.navioCoreBranch} branch...`)
   } else {
     console.log(`Using navio-core master branch...`)
   }
-  cmd.push(cfg.navioCoreRepo, 'navio-core')
+  cmd.push(cfg.navioCoreRepo, cfg.navioCoreDir)
 
   const res = spawnSync(cmd[0], cmd.slice(1))
   if (res.status !== 0) {
     throw new Error(`${cmd.join(' ')} failed: ${JSON.stringify(res)}`)
   }
   console.log(`Cloned navio-core`)
+
+  if (cfg.navioCoreMasterSha !== '') {
+    const cwd = cfg.navioCoreDir
+    {
+      const cmd = ['git', 'fetch', '--depth', '1', 'origin', cfg.navioCoreMasterSha]
+      const res = spawnSync(cmd[0], cmd.slice(1), { cwd })
+      if (res.status !== 0) {
+        throw new Error(`${cmd.join(' ')} failed: ${JSON.stringify(res)}`)
+      }
+      console.log(`Fetched navio-core commit ${cfg.navioCoreMasterSha}`)
+    }
+    {
+      const cmd = ['git', 'checkout', cfg.navioCoreMasterSha]
+      const res = spawnSync(cmd[0], cmd.slice(1), { cwd })
+      if (res.status !== 0) {
+        throw new Error(`${cmd.join(' ')} failed: ${JSON.stringify(res)}`)
+      }
+      console.log(`Checked out navio-core commit ${cfg.navioCoreMasterSha}`)
+    }
+  }
 }
 
 const buildDepends = (cfg, numCpus) => {
