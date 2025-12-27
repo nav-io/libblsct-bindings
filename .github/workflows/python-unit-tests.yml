@@ -32,6 +32,14 @@ jobs:
             brew install swig autoconf automake libtool pkg-config 
           fi
 
+      - name: macOS SDK setup
+        if: runner.os == 'macOS'
+        run: |
+          sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+          xcode-select -p
+          xcrun --show-sdk-path
+          clang --version
+
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
@@ -48,6 +56,12 @@ jobs:
       - name: Build and install the package
         run: |
           cd ffi/python
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            export SDKROOT="$(xcrun --show-sdk-path)"
+            export CPPFLAGS="-isysroot $SDKROOT"
+            export CFLAGS="-isysroot $SDKROOT"
+            export CXXFLAGS="-isysroot $SDKROOT"
+          fi
           python -m build
           pip install dist/*.whl
 
