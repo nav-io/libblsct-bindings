@@ -18,6 +18,8 @@ package_dir = Path(os.path.abspath(os.path.dirname(__file__)))
 
 if IS_PROD:
   navio_core_repo = "https://github.com/nav-io/navio-core"
+  # git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
+  navio_core_master_sha = "3f7805c30db897c787b9cae50a013f9c8cd20086" 
 else:
   navio_core_repo = "https://github.com/gogoex/navio-core"
   navio_core_branch = ""
@@ -50,7 +52,7 @@ dest_libbls384_256_a = libs_dir / "libbls384_256.a"
 dest_dot_a_files = [dest_libblsct_a, dest_libunivalue_blsct_a, dest_libmcl_a, dest_libbls384_256_a]
 
 def log(s):
-  print(f"=========> {s}")
+  print(f"===> {s}")
 
 class CustomBuildExt(build_ext):
   def get_arch_path(self, depends_dir: Path) -> Path:
@@ -75,6 +77,21 @@ class CustomBuildExt(build_ext):
     cmd += [navio_core_repo, navio_core_dir]
 
     subprocess.run(cmd, check=True)
+
+    if IS_PROD:
+      subprocess.run(
+        ["git", "fetch", "--depth", "1", "origin", navio_core_master_sha],
+        cwd=navio_core_dir,
+        check=True,
+      )
+      log(f"Fetched navio-core commit {navio_core_master_sha}")
+
+      subprocess.run(
+        ["git", "checkout", navio_core_master_sha],
+        cwd=navio_core_dir,
+        check=True,
+      )
+      log(f"Checked out navio-core commit {navio_core_master_sha}")
 
   def build_libblsct(self, num_cpus: str):
     # if there is a backup of depends directory, use it
