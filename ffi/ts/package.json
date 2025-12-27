@@ -22,7 +22,6 @@
   },
   "dependencies": {
     "@types/node": "^24.1.0",
-    "navio-blsct": "^1.0.15",
     "typescript": "^5.8.3"
   },
   "keywords": [

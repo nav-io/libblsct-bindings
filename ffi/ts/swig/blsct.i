@@ -16,24 +16,6 @@
 %constant size_t BLSCT_OUT_AMOUNT_ERROR = BLSCT_OUT_AMOUNT_ERROR;
 
 %inline %{
-#define HANDLE_MEM_ALLOC_FAILURE(name) \
-if (name == nullptr) { \
-  printf("ERROR: Memory allocation failed\n"); \
-  return nullptr; \
-}
-
-#define RETURN_RET_VAL_IF_NULL(p, ret_val) \
-if (p == nullptr) { \
-  printf("ERROR: " #p " is null\n"); \
-  return ret_val; \
-}
-
-#define RETURN_IF_NULL(p) \
-if (p == nullptr) { \
-  printf("ERROR: " #p " is null\n"); \
-  return; \
-}
-
   BlsctDoublePubKey* cast_to_dpk(void* x) {
     return static_cast<BlsctDoublePubKey*>(x);
   }
