@@ -30,6 +30,6 @@ describe('KeyDerivation', () => {
 
   test('TxKey -> ViewKey', () => {
     const x = new ChildKey()
-    x.toTxKey().toSpendingKey()
+    x.toTxKey().toViewKey()
   })
 })

@@ -4,14 +4,13 @@ from ..point import Point
 from ..scalar import Scalar
 from ..serializable import Serializable
 from ..pretty_printable import PrettyPrintable
-from .child_key_desc.tx_key_desc.view_key import ViewKey
 from typing import Any, override, Self, Type
 
 class PublicKey(ManagedObj, Serializable, PrettyPrintable):
   """
   Represents an element in the BLS12-381 G1 curve group that is used as a public key.
 
-  >>> from blsct import Point, PublicKey, Scalar, ViewKey
+  >>> from blsct import Point, PublicKey, Scalar
   >>> s = Scalar.random()
   >>> PublicKey.from_scalar(s)
   PublicKey(a4a04797481bd531f9cb56...) # doctest: +SKIP
@@ -21,7 +20,7 @@ class PublicKey(ManagedObj, Serializable, PrettyPrintable):
   >>> pk = PublicKey.random()
   >>> pk.pretty_print()
   '1 70896870760eba69c20a1f0d740855a91560a...' # doctest: +SKIP
-  >>> vk = ViewKey()
+  >>> vk = Scalar()
   >>> pk.generate_nonce(vk)
   PublicKey(91458dc61b63095b1d5f13...) # doctest: +SKIP
   >>> pk.get_point()
@@ -67,7 +66,7 @@ class PublicKey(ManagedObj, Serializable, PrettyPrintable):
 
   def generate_nonce(
     self,
-    view_key: ViewKey
+    view_key: Scalar
   ) -> Self:
    """Generate a nonce PublicKey from blinding public key and view key"""
    blsct_point = blsct.calc_nonce(

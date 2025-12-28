@@ -5,11 +5,12 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use num_cpus;
 
-const IS_PROD: bool = true;
+const IS_PROD: bool = false;
 
 const NAVIO_REPO_URL_PROD: &str = "https://github.com/nav-io/navio-core";
 const NAIVO_REPO_URL_DEV: &str = "https://github.com/gogoex/navio-core";
-const NAVIO_REPO_BRANCH: &str = "";
+const NAVIO_REPO_PROD_SHA: &str = "3f7805c30db897c787b9cae50a013f9c8cd20086";
+const NAVIO_REPO_DEV_BRANCH: &str = "add-missing-functionality";
 
 fn copy_dir(src_dir: &Path, dest_dir: &Path) -> io::Result<()> {
   fs::create_dir_all(dest_dir)?;
@@ -48,7 +49,7 @@ fn clone_navio_core(navio_core_path: &Path) {
   // construct git clone command
   let (repo_url, branch) = match IS_PROD {
     true => (NAVIO_REPO_URL_PROD, None), 
-    false => (NAIVO_REPO_URL_DEV, Some(NAVIO_REPO_BRANCH)),
+    false => (NAIVO_REPO_URL_DEV, Some(NAVIO_REPO_DEV_BRANCH)),
   }; 
   let mut args = vec!["clone", "--depth", "1"];
   if let Some(branch) = branch {
@@ -67,6 +68,22 @@ fn clone_navio_core(navio_core_path: &Path) {
     .current_dir(navio_core_path.parent().unwrap())
     .status()
     .expect("Failed to clone navio-core repository");
+
+  if IS_PROD {
+    let args = vec!["fetch", "--depth", "1", "origin", NAVIO_REPO_PROD_SHA];
+    Command::new("git")
+      .args(args)
+      .current_dir(navio_core_path)
+      .status()
+      .expect(format!("Failed to fetch commit {NAVIO_REPO_PROD_SHA}").as_str());
+
+    let args = vec!["checkout", NAVIO_REPO_PROD_SHA];
+    Command::new("git")
+      .args(args)
+      .current_dir(navio_core_path)
+      .status()
+      .expect(format!("Failed to checkout commit {NAVIO_REPO_PROD_SHA}").as_str());
+  }
 }
 
 fn get_depends_arch_path(depends_path: &Path) -> io::Result<PathBuf> {

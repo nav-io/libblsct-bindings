@@ -14,7 +14,6 @@ use crate::{
     scalar_to_pub_key,
     serialize_point,
   },
-  keys::child_key_desc::tx_key_desc::view_key::ViewKey,
   macros::{
     impl_clone,
     impl_display,
@@ -45,7 +44,7 @@ impl PublicKey {
     Self::from_retval(unsafe { gen_random_public_key() })
   }
 
-  pub fn generate_nonce(&self, view_key: &ViewKey) -> Self {
+  pub fn generate_nonce(&self, view_key: &Scalar) -> Self {
     let blsct_point = unsafe {
       calc_nonce(self.value(), view_key.value())
     };

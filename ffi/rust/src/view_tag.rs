@@ -1,13 +1,12 @@
 use crate::{
   blsct_obj,
   ffi::calc_view_tag,
-  keys::{
-    public_key::PublicKey,
-    child_key_desc::tx_key_desc::view_key::ViewKey,
-  },
+  keys::public_key::PublicKey,
   util::gen_random_view_key,
+  scalar::Scalar,
 };
 use serde::{Deserialize, Serialize};
+
 
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct ViewTag {
@@ -17,7 +16,7 @@ pub struct ViewTag {
 impl ViewTag {
   pub fn new(
     blinding_pub_key: &PublicKey,
-    view_key: &ViewKey,
+    view_key: &Scalar,
   ) -> Self {
     let value = unsafe {
       calc_view_tag(blinding_pub_key.value(), view_key.value()) 

@@ -1,11 +1,11 @@
 import { HashId } from '../hashId'
 import { PublicKey } from '../keys/publicKey'
-import { ViewKey } from '../keys/childKeyDesc/txKeyDesc/viewKey'
+import { Scalar } from '../scalar'
 
 test('generate', () => {
   const blindingPubKey = PublicKey.random()
   const spendingPubKey = PublicKey.random()
-  const viewKey = ViewKey.random()
+  const viewKey = Scalar.random()
   HashId.generate(blindingPubKey, spendingPubKey, viewKey)
 })
 

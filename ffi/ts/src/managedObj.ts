@@ -14,11 +14,13 @@ export type FinalizerInfo = {
 const finalizer = new FinalizationRegistry(
   (fi: FinalizerInfo) => {
     if (fi.obj && !fi.isBorrow) {
+      //console.log("Trying to finalize " + fi.cls)
       if (fi.deleteMethod) {
         fi.deleteMethod()
       } else {
         freeObj(fi.obj)
       }
+      //console.log("Finalized " + fi.cls)
     }
   }
 )
@@ -58,25 +60,6 @@ export abstract class ManagedObj {
    */
   size(): number {
     return this.objSize
-  }
-
-  /** Returns the underlying C++ object,
-   * transferring ownership from this instance to the caller.
-   * @returns The underlying object of the instance.
-   */
-  move(): any {
-    if (this.obj === undefined) {
-      throw new Error('Obj has already been moved')
-    }
-    const obj = this.obj
-    this.obj = undefined
-
-    // both fi.obj and unregister can suppress freeing memory
-    // using both just in case either of them fails
-    this.fi.obj = undefined
-    finalizer.unregister(this)
-
-    return obj  
   }
 
   /** Constucts a new instance using the provided object.

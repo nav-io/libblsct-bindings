@@ -1,5 +1,5 @@
 from . import blsct
-from .keys.child_key_desc.tx_key_desc.view_key import ViewKey
+from .scalar import Scalar
 from .keys.public_key import PublicKey
 from .scalar import Scalar
 from typing import Any, Self, Type
@@ -18,7 +18,7 @@ class ViewTag:
   def __init__(
     self,
     blinding_pub_key: PublicKey,
-    view_key: ViewKey
+    view_key: Scalar
   ):
     value = blsct.calc_view_tag(
       blinding_pub_key.value(),
@@ -36,6 +36,6 @@ class ViewTag:
   @classmethod
   def default_obj(cls: Type[Self]) -> Any:
     blinding_pub_key = PublicKey()
-    view_key = ViewKey()
+    view_key = Scalar()
     return cls(blinding_pub_key, view_key)
 

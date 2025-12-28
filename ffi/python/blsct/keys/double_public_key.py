@@ -11,14 +11,14 @@ class DoublePublicKey(ManagedObj, Serializable):
 
   Instantiating a DoublePublicKey object without a parameter returns a DoublePublicKey consisting of two randomly generated PublicKeys.
 
-  >>> from blsct import DoublePublicKey, PublicKey, ViewKey
+  >>> from blsct import DoublePublicKey, PublicKey, Scalar
   >>> DoublePublicKey()
   DoublePublicKey(889636dce7b7706ad4...) # doctest: +SKIP
   >>> pk1 = PublicKey()
   >>> pk2 = PublicKey()
   >>> DoublePublicKey.from_public_keys(pk1, pk2)
   DoublePublicKey(8284d61a300241dcbe...) # doctest: +SKIP
-  >>> vk = ViewKey()
+  >>> vk = Scalar()
   >>> spending_pk = PublicKey()
   >>> DoublePublicKey.from_keys_acct_addr(vk, spending_pk, 1, 2)
   DoublePublicKey(8eb6d5f160935d06a1a...) # doctest: +SKIP

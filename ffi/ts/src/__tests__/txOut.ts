@@ -7,10 +7,10 @@ import { SubAddr } from '../subAddr'
 import { SubAddrId } from '../subAddrId'
 import { TokenId } from '../tokenId'
 import { TxOut } from '../txOut'
-import { ViewKey } from '../keys/childKeyDesc/txKeyDesc/viewKey'
+import { Scalar } from '../scalar'
 
 const genTxOut = (): TxOut => {
-  const vk = ViewKey.random()
+  const vk = Scalar.random()
   const spendingPk = PublicKey.random()
   const subAddrId = SubAddrId.generate(1, 2)
   const subAddr = SubAddr.generate(vk, spendingPk, subAddrId)

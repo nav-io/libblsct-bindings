@@ -8,43 +8,31 @@ use crate::{
     free_obj,
   },
 };
-use std::{
-  fmt,
-  ffi::{
-    c_char,
-    c_void,
-    CStr,
-    CString,
-    NulError,
-  },
+use std::ffi::{
+  c_char,
+  c_void,
+  CStr,
+  CString,
+  NulError,
 };
+use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Error, Debug)]
 pub enum Error<'a> {
+  #[error("Failed to allocate memory for {0:?}")]
   FailedToAllocateMemory(&'static str),
+  
+  #[error("Failed to construct BlsctRetVal: {0:?}")]
   FailedToConstructBlsctRetVal(blsct_obj::Error<'a>),
+
+  #[error("Failed to encode address: {0:?}")]
   FailedToEncodeAddress(&'a DoublePublicKey),
+
+  #[error("Failed to decode address: {0:?}")]
   FailedToDecodeAddress(&'a str),
+
+  #[error("Failed to construct CString: {0:?}")]
   FailedToConstructCString(NulError),
-}
-
-impl<'a> std::error::Error for Error<'a> {}
-
-impl<'a> fmt::Display for Error<'a> {
-  fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    match self {
-      Error::FailedToAllocateMemory(target) =>
-        write!(f, "Failed to allocate memory for {target}"),
-      Error::FailedToConstructBlsctRetVal(e) =>
-        write!(f, "Failed to construct BlsctRetVal: {e:?}"),
-      Error::FailedToEncodeAddress(dpk) =>
-        write!(f, "Failed to encode address: {dpk:?}"),
-      Error::FailedToDecodeAddress(addr_str) =>
-        write!(f, "Failed to decode address: {addr_str}"),
-      Error::FailedToConstructCString(e) =>
-        write!(f, "Failed to construct CString: {e:?}"),
-    }
-  }
 }
 
 pub struct Address();

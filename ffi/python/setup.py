@@ -10,7 +10,7 @@ import shutil
 import subprocess
 
 # TODO: turn this on for production builds
-IS_PROD = True
+IS_PROD = False
 
 std_cpp = "-std=c++20"
 
@@ -22,7 +22,7 @@ if IS_PROD:
   navio_core_master_sha = "3f7805c30db897c787b9cae50a013f9c8cd20086" 
 else:
   navio_core_repo = "https://github.com/gogoex/navio-core"
-  navio_core_branch = ""
+  navio_core_branch = "add-missing-functionality"
 
 navio_core_dir = package_dir / "navio-core"
 depends_dir = navio_core_dir / "depends"

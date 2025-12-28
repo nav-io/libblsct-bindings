@@ -1,11 +1,8 @@
 use crate::{
   ffi::calc_priv_spending_key,
   keys::{
+    child_key_desc::tx_key_desc::spending_key::SpendingKey,
     public_key::PublicKey,
-    child_key_desc::tx_key_desc::{
-      spending_key::SpendingKey,
-      view_key::ViewKey,
-    },
   },
 };
 
@@ -14,7 +11,7 @@ crate::macros::impl_key!(PrivSpendingKey);
 impl PrivSpendingKey {
   pub fn new(
     blinding_pub_key: PublicKey,
-    view_key: ViewKey,
+    view_key: Scalar,
     spending_key: SpendingKey,
     account: i64,
     address: u64,

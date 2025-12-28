@@ -5,8 +5,13 @@ use crate::{
     BlsctSubAddr,
     BlsctRetVal,
     derive_sub_address,
-    serialize_sub_addr,
     deserialize_sub_addr,
+    dpk_to_sub_addr,
+    serialize_sub_addr,
+  },
+  keys::{
+    double_public_key::DoublePublicKey,
+    public_key::PublicKey,
   },
   macros::{
     impl_clone,
@@ -14,10 +19,7 @@ use crate::{
     impl_from_retval,
     impl_value,
   },
-  keys::{
-    public_key::PublicKey,
-    child_key_desc::tx_key_desc::view_key::ViewKey,
-  },
+  scalar::Scalar,
   sub_addr_id::SubAddrId,
 };
 use serde::{Deserialize, Serialize};
@@ -34,7 +36,7 @@ impl_clone!(SubAddr);
 
 impl SubAddr {
   pub fn new(
-    view_key: &ViewKey,
+    view_key: &Scalar,
     spending_pub_key: &PublicKey,
     sub_addr_id: &SubAddrId,
   ) -> Self {
@@ -47,6 +49,13 @@ impl SubAddr {
   }
 
   impl_value!(BlsctSubAddr);
+}
+
+impl From<DoublePublicKey> for SubAddr {
+  fn from(dpk: DoublePublicKey) -> SubAddr {
+    let rv = unsafe { dpk_to_sub_addr(dpk.value()) };
+    BlsctObj::<SubAddr, BlsctSubAddr>::from_retval(rv).unwrap().into()
+  }
 }
 
 impl BlsctSerde for SubAddr {

@@ -13,6 +13,13 @@ export const SCRIPT_SIZE = blsct.SCRIPT_SIZE
 export const BLSCT_IN_AMOUNT_ERROR = blsct.BLSCT_IN_AMOUNT_ERROR
 export const BLSCT_OUT_AMOUNT_ERROR = blsct.BLSCT_OUT_AMOUNT_ERROR
 
+export enum BlsctChain {
+  Mainnet = 0,
+  Testnet = 1,
+  Signet = 2,
+  Regtest = 3,
+}
+
 export enum TxOutputType {
   Normal,
   StakedCommitment,
@@ -53,6 +60,15 @@ export const encodeAddress = (
 }
 export const Bech32 = blsct.Bech32
 export const Bech32M = blsct.Bech32M
+
+// chain
+export const getChain = (): BlsctChain => {
+  return blsct.get_blsct_chain()
+}
+
+export const setChain = (chain: BlsctChain): void => {
+  blsct.set_blsct_chain(chain)
+}
 
 // child key
 export const fromSeedToChildKey = (seed: any): any => {
@@ -98,7 +114,7 @@ export const deleteTxOutVec = (txOutVec: any): any => {
 }
 
 export const deleteCTx = (ctx: any): void => {
-  return blsct.delete_ctx_(ctx)
+  return blsct.delete_ctx(ctx)
 }
 
 export const getCTxId = (ctx: any): string => {
@@ -513,6 +529,9 @@ export const deriveSubAddress = (
     spendingPubKey,
     subAddrId, 
   )
+}
+export const subAddrToDpk = (subAddr: any): any => {
+  return blsct.sub_addr_to_dpk(subAddr)
 }
 export const deserializeSubAddr = (hex: string): any => {
   return blsct.deserialize_sub_addr(hex)

@@ -15,6 +15,7 @@ from .address import Address
 from .address_encoding import AddressEncoding
 from .amount_recovery_req import AmountRecoveryReq
 from .amount_recovery_res import AmountRecoveryRes
+from .chain import Chain, get_chain, set_chain
 from .ctx import CTx
 from .ctx_id import CTxId
 from .ctx_in import CTxIn
@@ -27,7 +28,6 @@ from .keys.child_key_desc.blinding_key import BlindingKey
 from .keys.child_key_desc.token_key import TokenKey
 from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .keys.child_key_desc.tx_key import TxKey
-from .keys.child_key_desc.tx_key_desc.view_key import ViewKey
 from .keys.double_public_key import DoublePublicKey
 from .keys.priv_spending_key import PrivSpendingKey
 from .keys.public_key import PublicKey

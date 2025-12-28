@@ -1,15 +1,15 @@
 from . import blsct
 from .serializable import Serializable
 from .keys.public_key import PublicKey
-from .keys.child_key_desc.tx_key_desc.view_key import ViewKey
 from .managed_obj import ManagedObj
+from .scalar import Scalar
 from typing import Any, override, Self
 
 class HashId(ManagedObj, Serializable):
   """
   Represents a hash ID consisting of a blinding public key, a spending public key, and a view key. Also known as `CKeyId` which is an alias for `uint160` on the C++ side.
 
-  >>> from blsct import ChildKey, HashId, PublicKey, ViewKey, Scalar
+  >>> from blsct import ChildKey, HashId, PublicKey, Scalar
   >>> blinding_pub_key = PublicKey()
   >>> spending_pub_key = PublicKey()
   >>> seed = Scalar()
@@ -24,7 +24,7 @@ class HashId(ManagedObj, Serializable):
     self,
     blinding_pub_key: PublicKey,
     spending_pub_key: PublicKey,
-    view_key: ViewKey
+    view_key: Scalar, 
   ):
     obj = blsct.calc_key_id(
       blinding_pub_key.value(),
@@ -61,7 +61,7 @@ class HashId(ManagedObj, Serializable):
   def default_obj(cls) -> Any:
     blinding_pub_key = PublicKey()
     spending_pub_key = PublicKey()
-    view_key = ViewKey()
+    view_key = Scalar()
 
     return blsct.calc_key_id(
       blinding_pub_key.value(),

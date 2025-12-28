@@ -4,7 +4,8 @@ const path = require('path')
 const { spawnSync } = require('child_process')
 
 // TODO: turn this on for production builds
-const IS_PROD = true
+const IS_PROD = false
+const DEV_BRANCH = 'add-missing-functionality'
 
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
 const MASTER_SHA = '3f7805c30db897c787b9cae50a013f9c8cd20086' 
@@ -43,7 +44,7 @@ const getCfg = (isProd) => {
     stdCpp: '-std=c++20',
     navioCoreRepo: isProd ? 'https://github.com/nav-io/navio-core' : 'https://github.com/gogoex/navio-core',
     navioCoreMasterSha: isProd ? MASTER_SHA : '',
-    navioCoreBranch: isProd ? '' : 'development-branch-name',
+    navioCoreBranch: isProd ? '' : DEV_BRANCH,
     navioCoreDir,
     dependsDir,
     dependsBakDir,

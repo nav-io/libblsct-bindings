@@ -3,8 +3,12 @@ from blsct import (
   AddressEncoding,
   AmountRecoveryReq,
   BlindingKey,
+  Chain,
   ChildKey,
+  CTx,
+  CTxId,
   DoublePublicKey,
+  get_chain,
   HashId,
   OutPoint,
   Point,
@@ -12,22 +16,29 @@ from blsct import (
   PublicKey,
   RangeProof,
   Scalar,
+  set_chain,
   Signature,
   SpendingKey,
   SubAddr,
   SubAddrId,
   TokenId,
   TokenKey,
-  CTx,
-  CTxId,
   TxIn,
   TxOut,
   TxKey,
-  ViewKey,
   ViewTag,
 )
 
 import secrets
+
+def test_chain():
+  chains = [Chain.Mainnet, Chain.Testnet, Chain.Signet, Chain.Regtest]
+  for exp_chain in chains:
+    set_chain(exp_chain)
+    act_chain = get_chain()
+    assert exp_chain == act_chain, "Chain set/get are not working as expected"
+    
+  set_chain(Chain.Mainnet)  # reset to mainnet
 
 def test_scalar():
   s1 = Scalar.random()
@@ -223,18 +234,19 @@ def test_key_derivation():
   )
   print(f"dpk: {dpk}")
 
+  dpk2 = sub_addr.to_double_public_key()
+  print(f"dpk from sub_addr: {dpk2}")
+
   # test also direct instantiation
   SpendingKey()
-  ViewKey()
   BlindingKey()
   TokenKey()
   TxKey()
   ChildKey(Scalar())
   DoublePublicKey()
-  PrivSpendingKey(PublicKey(), ViewKey(), SpendingKey(), 1, 2)
+  PrivSpendingKey(PublicKey(), Scalar(), SpendingKey(), 1, 2)
   PublicKey()
-  ViewKey()
-  ViewTag(PublicKey(), ViewKey())
+  ViewTag(PublicKey(), Scalar())
 
 def test_tx():
   num_tx_in = 1

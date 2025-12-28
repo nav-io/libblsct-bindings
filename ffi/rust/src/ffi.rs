@@ -127,6 +127,9 @@ pub fn malloc(size: usize) -> *mut core::ffi::c_void;
 pub fn free_obj(x: *mut c_void);
 pub fn free_amounts_ret_val(rv: *mut BlsctAmountsRetVal);
 
+pub fn set_blsct_chain(chain: c_int);
+pub fn get_blsct_chain() -> c_int;
+
 // Address
 pub fn decode_address(blsct_enc_addr: *const c_char) -> *mut BlsctRetVal;
 pub fn encode_address(
@@ -349,6 +352,9 @@ pub fn derive_sub_address(
     blsct_spending_pub_key: *const BlsctPubKey,
     blsct_sub_addr_id: *const BlsctSubAddrId,
 ) -> *mut BlsctSubAddr;
+pub fn sub_addr_to_dpk(
+  blsct_sub_addr: *const BlsctSubAddr,
+) -> *mut BlsctDoublePubKey;
 pub fn serialize_sub_addr(blsct_sub_addr: *const BlsctSignature) -> *const c_char;
 pub fn deserialize_sub_addr(hex: *const c_char) -> *mut BlsctRetVal;
 
@@ -508,5 +514,4 @@ mod tests {
     }
   }
 }
-
 
