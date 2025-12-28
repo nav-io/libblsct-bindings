@@ -47,7 +47,7 @@ export const genCTx = (): CTx => {
 }
 
 test('generate', () => {
-  genCTx()
+  const ctx = genCTx()
 })
 
 test('getCTxId', () => {

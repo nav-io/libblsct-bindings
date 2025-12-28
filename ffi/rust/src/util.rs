@@ -1,13 +1,11 @@
 use crate::{
   blsct_obj,
-  keys::{
-    child_key::ChildKey,
-    child_key_desc::tx_key_desc::view_key::ViewKey,
-  },
   ffi::{
     BlsctRetVal,
     malloc,
   },
+  keys::child_key::ChildKey,
+  scalar::Scalar,
 };
 use rand::Rng;
 use std::{
@@ -88,7 +86,7 @@ pub fn pad_hex_left<T>(hex: *const c_char) -> CString {
   CString::new(h).unwrap()
 }
 
-pub fn gen_random_view_key<'a>() -> Result<ViewKey, blsct_obj::Error<'a>> {
+pub fn gen_random_view_key<'a>() -> Result<Scalar, blsct_obj::Error<'a>> {
   let child_key = ChildKey::random()?;
   let view_key = child_key.to_tx_key().to_view_key();
   Ok(view_key)

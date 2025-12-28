@@ -26,13 +26,10 @@ export * from './keys/childKey'
 export * from './keys/doublePublicKey'
 export * from './keys/privSpendingKey'
 export * from './keys/publicKey'
-
 export * from './keys/childKeyDesc/blindingKey'
 export * from './keys/childKeyDesc/tokenKey'
 export * from './keys/childKeyDesc/txKey'
-
 export * from './keys/childKeyDesc/txKeyDesc/spendingKey'
-export * from './keys/childKeyDesc/txKeyDesc/viewKey'
 
 export * from './blsct'
 

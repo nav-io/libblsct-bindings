@@ -4,24 +4,21 @@ use crate::{
   ffi::{
     BlsctDoublePubKey,
     BlsctRetVal,
-    BlsctSubAddr,
     deserialize_dpk,
-    dpk_to_sub_addr,
     gen_double_pub_key,
     gen_dpk_with_keys_acct_addr,
     serialize_dpk,
+    sub_addr_to_dpk,
   },
-  sub_addr::SubAddr,
+  keys::public_key::PublicKey,
   macros::{
     impl_clone,
     impl_display,
     impl_from_retval,
     impl_value,
   },
-  keys::{
-    child_key_desc::tx_key_desc::view_key::ViewKey,
-    public_key::PublicKey,
-  },
+  scalar::Scalar,
+  sub_addr::SubAddr,
 };
 use std::ffi::c_char;
 use serde::{Deserialize, Serialize};
@@ -41,10 +38,11 @@ impl From<BlsctObj<DoublePublicKey, BlsctDoublePubKey>> for DoublePublicKey {
   }
 }
 
-impl From<DoublePublicKey> for SubAddr {
-  fn from(dpk: DoublePublicKey) -> SubAddr {
-    let rv = unsafe { dpk_to_sub_addr(dpk.value()) };
-    BlsctObj::<SubAddr, BlsctSubAddr>::from_retval(rv).unwrap().into()
+impl From<SubAddr> for DoublePublicKey {
+  fn from(sub_addr: SubAddr) -> Self {
+    let blsct_dpk = unsafe { sub_addr_to_dpk(sub_addr.value()) };
+    let obj = BlsctObj::<DoublePublicKey, BlsctDoublePubKey>::from_c_obj(blsct_dpk);
+    DoublePublicKey { obj }
   }
 }
 
@@ -63,7 +61,7 @@ impl DoublePublicKey {
   }
 
   pub fn from_keys_acct_addr(
-    view_key: &ViewKey,
+    view_key: &Scalar,
     spending_pub_key: &PublicKey,
     account: i64,
     address: u64,

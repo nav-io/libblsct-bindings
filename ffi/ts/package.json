@@ -1,11 +1,11 @@
 {
   "name": "navio-blsct",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "scripts": {
     "install": "node scripts/build.js && node-gyp configure build && tsc",
     "docs": "typedoc",
     "docs:watch": "nodemon --watch src --ext ts --exec \"npx typedoc\"",
-    "test": "tsc && NODE_OPTIONS=--expose-gc jest"
+    "test": "tsc && NODE_OPTIONS=--expose-gc jest --runInBand --verbose"
   },
   "license": "MIT",
   "main": "dist/index.js",

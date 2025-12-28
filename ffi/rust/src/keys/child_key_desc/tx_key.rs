@@ -3,10 +3,7 @@ use crate::{
     from_tx_key_to_spending_key,
     from_tx_key_to_view_key,
   },
-  keys::child_key_desc::tx_key_desc::{
-    spending_key::SpendingKey,
-    view_key::ViewKey,
-  },
+  keys::child_key_desc::tx_key_desc::spending_key::SpendingKey,
 };
 
 crate::macros::impl_key!(TxKey);
@@ -18,7 +15,7 @@ impl TxKey {
     obj.into()
   }
 
-  pub fn to_view_key(&self) -> ViewKey {
+  pub fn to_view_key(&self) -> Scalar {
     let blsct_scalar = unsafe { from_tx_key_to_view_key(self.0.value()) };
     let obj = BlsctObj::from_c_obj(blsct_scalar);
     obj.into()

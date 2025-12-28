@@ -105,9 +105,11 @@
 
 #define BLSCT_RESULT uint8_t
 
-extern enum Chain {
-  MainNet,
-  TestNet
+export enum BlsctChain {
+    Mainnet,
+    Testnet,
+    Signet,
+    Regtest,
 };
 
 export enum AddressEncoding {
@@ -146,7 +148,9 @@ typedef struct {
 export void free_obj(void* rv);
 export void free_amounts_ret_val(BlsctAmountsRetVal* rv);
 export void init();
-export bool set_chain(enum Chain chain);
+
+export enum BlsctChain get_blsct_chain();
+export void set_blsct_chain(enum BlsctChain chain);
 
 // address
 export BlsctRetVal* decode_address(
@@ -396,7 +400,9 @@ export BlsctSubAddr* derive_sub_address(
     const BlsctPubKey* blsct_spending_pub_key,
     const BlsctSubAddrId* blsct_sub_addr_id
 );
-
+export BlsctDoublePubKey* sub_addr_to_dpk(
+    const BlsctSubAddr* blsct_sub_addr
+);
 export const char* serialize_sub_addr(const BlsctSubAddr* blsct_sub_addr);
 export BlsctRetVal* deserialize_sub_addr(const char* hex);
 

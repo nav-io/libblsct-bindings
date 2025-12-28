@@ -10,7 +10,6 @@ use crate::{
   },
   keys::{
     child_key::ChildKey,
-    child_key_desc::tx_key_desc::view_key::ViewKey,
     public_key::PublicKey,
   },
   macros::{
@@ -19,6 +18,7 @@ use crate::{
     impl_from_retval,
     impl_value,
   },
+  scalar::Scalar,
 };
 use serde::{Deserialize, Serialize};
 use std::ffi::c_char;
@@ -36,7 +36,7 @@ impl HashId {
   pub fn new(
     blinding_pub_key: &PublicKey,
     spending_pub_key: &PublicKey,
-    view_key: &ViewKey,
+    view_key: &Scalar,
   ) -> Self {
     let blsct_key_id = unsafe { calc_key_id(
       blinding_pub_key.value(),

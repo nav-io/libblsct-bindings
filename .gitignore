@@ -1,3 +1,4 @@
 *~
 build/
 docs/
+ffi/.pytest_cache/

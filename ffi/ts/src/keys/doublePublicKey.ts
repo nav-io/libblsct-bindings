@@ -9,7 +9,7 @@ import {
 
 import { ManagedObj } from '../managedObj'
 import { PublicKey } from './publicKey'
-import { ViewKey } from './childKeyDesc/txKeyDesc/viewKey'
+import { Scalar } from '../scalar'
 
 /** The unique source from which an address is derived.
  * A `DoublePublicKey` is a pair of `PublicKey`s that can be used to derive an address.
@@ -18,12 +18,12 @@ import { ViewKey } from './childKeyDesc/txKeyDesc/viewKey'
  *
  * Examples:
  * ```ts
- * const { DoublePublicKey, PublicKey, ViewKey } = require('navio-blsct')
+ * const { DoublePublicKey, PublicKey } = require('navio-blsct')
  * const dpk = new DoublePublicKey()
  * const pk1 = PublicKey.random()
  * const pk2 = PublicKey.random()
  * const dpk2 = DoublePublicKey.from_public_keys(pk1, pk2)
- * const vk = new ViewKey()
+ * const vk = Scalar.random()
  * const spendingPk = PublicKey.random()
  * const dpk3 = DoublePublicKey.fromKeysAndAcctAddr(vk, spendingPk, 1, 2)
  * const ser = dpk3.serialize()
@@ -38,8 +38,12 @@ export class DoublePublicKey extends ManagedObj {
     } else {
       const pk1 = PublicKey.random()
       const pk2 = PublicKey.random()
-      const dpk = DoublePublicKey.fromPublicKeys(pk1, pk2)
-      super(dpk.move())
+
+      const rv = genDoublePubKey(pk1.value(), pk2.value())
+      if (rv.result !== 0) {
+        throw new Error(`Failed to generate DoublePublicKey: ${rv.result}`)
+      }
+      super(rv.value)
     }
   }
 
@@ -69,15 +73,15 @@ export class DoublePublicKey extends ManagedObj {
     return dpk
   }
 
-  /** Generates a `DoublePublicKey` from the provided `ViewKey`, `PublicKey`, account, and address 
-   * @param viewKey - The `ViewKey` used to derive the `DoublePublicKey`.
+  /** Generates a `DoublePublicKey` from the provided `PublicKey`, account, and address 
+   * @param viewKey - The `Scalar` used to derive the `DoublePublicKey`.
    * @param spendingPubKey - The `PublicKey` used for spending.
    * @param account - The account.
    * @param address - The address.
    * @returns A new `DoublePublicKey` instance.
    */
   static fromKeysAcctAddr(
-    viewKey: ViewKey,
+    viewKey: Scalar,
     spendingPubKey: PublicKey,
     account: number,
     address: number,

@@ -2,23 +2,22 @@ import {
   calcKeyId,
   castToKeyId,
   deserializeKeyId,
-  freeObj,
   serializeKeyId,
 } from './blsct'
 
 import { ManagedObj } from './managedObj'
 import { PublicKey } from './keys/publicKey'
-import { ViewKey } from './keys/childKeyDesc/txKeyDesc/viewKey'
+import { Scalar } from './scalar'
 
 /** Represents a hash ID consisting of a blinding public key, a spending public key, and a view key. Also known as `CKeyId` which is an alias for `uint160` on the C++ side.
  *
  * Examples:
  * ```ts
- * const { HashId, PublicKey, ViewKey, ChildKey, Scalar } = require('navio-blsct')
+ * const { HashId, PublicKey, ChildKey, Scalar } = require('navio-blsct')
  * const blindingPubKey = PublicKey.random()
  * const spendingPubKey = PublicKey.random()
  * const seed = Scalar.random()
- * const viewKey = new ChildKey(seed).toTxKey().toViewKey()
+ * const viewKey = Scalar.random()
  * const hashId = HashId.generate(blindingPubKey, spendingPubKey, viewKey)
  * const ser = hashId.serialize()
  * const deser = HashId.deserialize(ser)
@@ -33,7 +32,12 @@ export class HashId extends ManagedObj {
     if (typeof obj === 'object') {
       super(obj)
     } else {
-      super(HashId.random().move())
+      const obj = calcKeyId(
+        PublicKey.random().value(),
+        PublicKey.random().value(),
+        Scalar.random().value(),
+      )
+      super(obj)
     }
   }
 
@@ -46,7 +50,7 @@ export class HashId extends ManagedObj {
   static generate(
     blindingPubKey: PublicKey,
     spendingPubKey: PublicKey,
-    viewKey: ViewKey,
+    viewKey: Scalar,
   ): HashId {
     const obj = calcKeyId(
       blindingPubKey.value(),
@@ -63,7 +67,7 @@ export class HashId extends ManagedObj {
     return HashId.generate(
       PublicKey.random(),
       PublicKey.random(),
-      ViewKey.random(),
+      Scalar.random(),
     )
   }
   

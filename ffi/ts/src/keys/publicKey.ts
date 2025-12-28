@@ -11,13 +11,12 @@ import {
 import { ManagedObj } from '../managedObj'
 import { Point } from '../point'
 import { Scalar } from '../scalar'
-import { ViewKey } from './childKeyDesc/txKeyDesc/viewKey'
 
 /** Represents an element in the BLS12-381 G1 curve group that is used as a public key.
  *
  * Examples:
  * ```ts
- * const { PublicKey, Point, Scalar, ViewKey } = require('navio-blsct')
+ * const { PublicKey, Point, Scalar } = require('navio-blsct')
  * const s123 = new Scalar(123)
  * const pk123 = PublicKey.fromScalar(s123)
  * const s234 = new Scalar(234)
@@ -27,7 +26,7 @@ import { ViewKey } from './childKeyDesc/txKeyDesc/viewKey'
  * const p = Point.random()
  * const pk = PublicKey.fromPoint(p)
  * pk.getPoint()
- * const vk = new ViewKey()
+ * const vk = Scalar.random()
  * pk.generateNonce(vk)
  * const ser = pk.serialize()
  * const deser = PublicKey.deserialize(ser)
@@ -43,6 +42,9 @@ export class PublicKey extends ManagedObj {
       super(obj)
     } else {
       const rv = genRandomPublicKey()
+      if (rv.result !== 0) {
+        throw new Error('Failed to generate random PublicKey')
+      }
       super(rv.value)
     }
   }
@@ -81,13 +83,13 @@ export class PublicKey extends ManagedObj {
     return PublicKey.fromObj(blsctPubKey)
   }
 
-  /** Generates a nonce from this `PublicKey` using a `ViewKey`.
+  /** Generates a nonce from this `PublicKey` using a `Scalar` view key.
    *
    * @param viewKey - The view key.
    * @returns A new `PublicKey` that represents the nonce.
    */
   generateNonce(
-    viewKey: ViewKey
+    viewKey: Scalar
   ): PublicKey {
     const blsctNonce = calcNonce(
       this.value(),

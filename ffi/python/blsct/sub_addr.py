@@ -1,9 +1,9 @@
 from . import blsct
 from .managed_obj import ManagedObj
 from .scalar import Scalar
-from .keys.child_key_desc.tx_key_desc.view_key import ViewKey
 from .keys.double_public_key import DoublePublicKey
 from .keys.public_key import PublicKey
+from .scalar import Scalar
 from .serializable import Serializable
 from .sub_addr_id import SubAddrId
 from typing import Any, override, Self, Type
@@ -28,7 +28,7 @@ class SubAddr(ManagedObj, Serializable):
   """
   def __init__(
     self,
-    view_key: ViewKey,
+    view_key: Scalar,
     spending_pub_key: PublicKey,
     sub_addr_id: SubAddrId,
   ):
@@ -53,6 +53,11 @@ class SubAddr(ManagedObj, Serializable):
   @override
   def value(self) -> Any:
     return blsct.cast_to_sub_addr(self.obj)
+
+  def to_double_public_key(self) -> DoublePublicKey:
+    """Convert the SubAddr to a DoublePublicKey"""
+    blsct_dpk = blsct.sub_addr_to_dpk(self.value())
+    return DoublePublicKey(blsct_dpk)
 
   @classmethod
   @override

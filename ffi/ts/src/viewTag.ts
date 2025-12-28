@@ -3,7 +3,7 @@ import {
 } from './blsct'
 
 import { PublicKey } from './keys/publicKey'
-import { ViewKey } from './keys/childKeyDesc/txKeyDesc/viewKey'
+import { Scalar } from './scalar'
 
 /** Represents a view tag derived from a blinding public key and a view key. The view tag is a 64-bit unsigned integer.
  *
@@ -26,7 +26,7 @@ export class ViewTag {
    */
   constructor(
     blindingPubKey: PublicKey,
-    viewKey: ViewKey
+    viewKey: Scalar
   ) {
     this.value = calcViewTag(
       blindingPubKey.value(),
@@ -39,7 +39,7 @@ export class ViewTag {
    */
   static random(): ViewTag {
     const blindingPubKey = PublicKey.random()
-    const viewKey = ViewKey.random()
+    const viewKey = Scalar.random()
     return new ViewTag(blindingPubKey, viewKey)
   }
 }
