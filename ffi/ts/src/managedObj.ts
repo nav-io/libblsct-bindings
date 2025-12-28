@@ -2,7 +2,7 @@ import {
   BlsctRetVal,
   freeObj,
 } from './blsct'
-import util from 'util'
+import * as util from 'util'
 
 export type FinalizerInfo = {
   cls: string,
