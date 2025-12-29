@@ -1,6 +1,6 @@
 {
   "name": "navio-blsct",
-  "version": "1.0.17",
+  "version": "1.0.18",
   "scripts": {
     "install": "node scripts/build.js && node-gyp configure build && tsc",
     "docs": "typedoc",
