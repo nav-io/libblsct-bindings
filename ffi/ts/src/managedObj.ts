@@ -15,11 +15,11 @@ const finalizer = new FinalizationRegistry(
   (fi: FinalizerInfo) => {
     if (fi.obj && !fi.isBorrow) {
       //console.log("Trying to finalize " + fi.cls)
-      if (fi.deleteMethod) {
-        fi.deleteMethod()
-      } else {
-        freeObj(fi.obj)
-      }
+      // if (fi.deleteMethod) {
+      //   fi.deleteMethod()
+      // } else {
+      //   freeObj(fi.obj)
+      // }
       //console.log("Finalized " + fi.cls)
     }
   }
@@ -37,17 +37,19 @@ export abstract class ManagedObj {
     obj: any,
     deleteMethod?: () => void,
   ) {
+    if (obj === undefined || obj === null) {
+      throw new Error("Undefined/null object passed to ManagedObj")
+    }
+    this.obj = obj
+    this.objSize = 0
+
     this.fi = {
       obj,
       cls: this.constructor.name,
       isBorrow: false,
       deleteMethod,
     }
-    if (obj !== undefined) {
-      finalizer.register(this, this.fi, this)
-    }
-    this.obj = obj
-    this.objSize = 0
+    finalizer.register(this, this.fi, this)
   }
 
   /** Returnsthe underlying C++ object.
