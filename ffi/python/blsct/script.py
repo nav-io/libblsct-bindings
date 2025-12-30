@@ -10,7 +10,7 @@ class Script(ManagedObj, Serializable):
 
   A :class:`Script` appears as an attribute of :class:`CTxOut` (scriptPubKey) or :class:`CTxIn` (scriptSig and scriptWitness), and is not meant to be instantiated directly.
 
-  >>> from blsct import ChildKey, DoublePublicKey, OutPoint, PublicKey, SpendingKey, SubAddr, SubAddrId, TokenId, CTX_ID_SIZE, CTx, CTxId, TxIn, TxOut, Script
+  >>> from blsct import ChildKey, DoublePublicKey, OutPoint, PublicKey, Scalar, SubAddr, SubAddrId, TokenId, CTX_ID_SIZE, CTx, CTxId, TxIn, TxOut, Script
   >>> import secrets
   >>> num_tx_in = 1
   >>> num_tx_out = 1
@@ -22,7 +22,7 @@ class Script(ManagedObj, Serializable):
   >>> out_index = 0
   >>> out_point = OutPoint(ctx_id, out_index)
   >>> gamma = 100
-  >>> spending_key = SpendingKey()
+  >>> spending_key = Scalar()
   >>> token_id = TokenId()
   >>> tx_in = TxIn(in_amount, gamma, spending_key, token_id, out_point)
   >>> sub_addr = SubAddr.from_double_public_key(DoublePublicKey())

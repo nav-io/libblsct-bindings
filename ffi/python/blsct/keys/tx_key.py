@@ -1,6 +1,5 @@
-from ... import blsct
-from ...scalar import Scalar
-from .tx_key_desc.spending_key import SpendingKey
+from .. import blsct
+from ..scalar import Scalar
 from typing import Any
 
 class TxKey(Scalar):
@@ -17,10 +16,10 @@ class TxKey(Scalar):
   def __init__(self, obj: Any = None):
     super().__init__(obj)
 
-  def to_spending_key(self) -> SpendingKey:
+  def to_spending_key(self) -> Scalar:
     """derive a spending key from the tx key"""
     obj = blsct.from_tx_key_to_spending_key(self.value())
-    return SpendingKey(obj)
+    return Scalar(obj)
 
   def to_view_key(self) -> Scalar:
     """derive a view key from the tx key"""

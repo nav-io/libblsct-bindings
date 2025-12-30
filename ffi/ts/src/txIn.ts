@@ -15,15 +15,15 @@ import {
 } from './blsct'
 
 import { ManagedObj } from './managedObj'
-import { SpendingKey } from './keys/childKeyDesc/txKeyDesc/spendingKey'
-import { TokenId } from './tokenId'
 import { OutPoint } from './outPoint'
+import { Scalar } from './scalar'
+import { TokenId } from './tokenId'
 
 /** Represents a transaction input used to construct CTxIn in a confidential transaction.
  *
  * Examples:
  * ```ts
- * const { Scalar, ChildKey, OutPoint, SpendingKey, TokenId, CTxId, TxIn, CTX_ID_SIZE } = require('navio-blsct')
+ * const { Scalar, ChildKey, OutPoint, Scalar, TokenId, CTxId, TxIn, CTX_ID_SIZE } = require('navio-blsct')
  * const { randomBytes } = require('crypto')
  * const cTxIdHex = randomBytes(CTX_ID_SIZE).toString('hex')
  * const cTxId = CTxId.deserialize(cTxIdHex)
@@ -66,7 +66,7 @@ export class TxIn extends ManagedObj {
   static generate(
     amount: number,
     gamma: number,
-    spendingKey: SpendingKey,
+    spendingKey: Scalar,
     tokenId: TokenId,
     outPoint: OutPoint,
     isStakedCommitment: boolean = false,
@@ -114,9 +114,9 @@ export class TxIn extends ManagedObj {
   /** Returns the spending key associated with the transaction input.
    * @returns The spending key associated with the transaction input.
    */
-  getSpendingKey(): SpendingKey {
+  getSpendingKey(): Scalar {
     const obj = getTxInSpendingKey(this.value())
-    return SpendingKey.fromObj(obj)
+    return Scalar.fromObj(obj)
   }
 
   /** Returns the token ID associated with the transaction input.

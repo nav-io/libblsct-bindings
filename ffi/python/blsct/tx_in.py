@@ -1,9 +1,8 @@
 from . import blsct
-from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .managed_obj import ManagedObj
 from .out_point import OutPoint
+from .scalar import Scalar
 from .serializable import Serializable
-from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
 from .token_id import TokenId
 from typing import Any, override, Self
 
@@ -11,11 +10,11 @@ class TxIn(ManagedObj, Serializable):
   """
   Represents a transaction input used to construct CTxIn in a confidential transaction.
 
-  >>> from blsct import OutPoint, SpendingKey, TokenId, CTxId, TxIn, CTX_ID_SIZE
+  >>> from blsct import OutPoint, Scalar, TokenId, CTxId, TxIn, CTX_ID_SIZE
   >>> import secrets
   >>> amount = 123
   >>> gamma = 100
-  >>> spending_key = SpendingKey()
+  >>> spending_key = Scalar()
   >>> token_id = TokenId()
   >>> ctx_id = CTxId.deserialize(secrets.token_hex(CTX_ID_SIZE))
   >>> out_point = OutPoint(ctx_id, 0)
@@ -43,7 +42,7 @@ class TxIn(ManagedObj, Serializable):
     self,
     amount: int,
     gamma: int,
-    spending_key: SpendingKey,
+    spending_key: Scalar,
     token_id: TokenId,
     out_point: OutPoint,
     staked_commitment: bool = False,
@@ -78,10 +77,10 @@ class TxIn(ManagedObj, Serializable):
     """Get the gamma value of the transaction input."""
     return blsct.get_tx_in_gamma(self.value())
 
-  def get_spending_key(self) -> SpendingKey:
+  def get_spending_key(self) -> Scalar:
     """Get the spending key of the transaction input."""
     obj = blsct.get_tx_in_spending_key(self.value())
-    return SpendingKey.from_obj(obj)
+    return Scalar.from_obj(obj)
 
   def get_token_id(self) -> TokenId:
     """Get the token ID of the transaction input."""

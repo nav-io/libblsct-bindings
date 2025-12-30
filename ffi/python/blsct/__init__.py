@@ -24,10 +24,7 @@ from .ctx_out import CTxOut
 from .ctx_outs import CTxOuts
 from .hash_id import HashId
 from .keys.child_key import ChildKey
-from .keys.child_key_desc.blinding_key import BlindingKey
-from .keys.child_key_desc.token_key import TokenKey
-from .keys.child_key_desc.tx_key_desc.spending_key import SpendingKey
-from .keys.child_key_desc.tx_key import TxKey
+from .keys.tx_key import TxKey
 from .keys.double_public_key import DoublePublicKey
 from .keys.priv_spending_key import PrivSpendingKey
 from .keys.public_key import PublicKey

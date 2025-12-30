@@ -5,10 +5,8 @@ import {
   fromSeedToChildKey,
 } from '../blsct'
 
-import { BlindingKey } from './childKeyDesc/blindingKey'
 import { Scalar } from '../scalar'
-import { TokenKey } from './childKeyDesc/tokenKey'
-import { TxKey } from './childKeyDesc/txKey'
+import { TxKey } from './txKey'
 
 /** Represents a child key. A child key is a Scalar and introduces no new functionality; it serves purely as a semantic alias. BlindingKey, TokenKey and TxKey are exclusively derived from a ChildKey.
  *
@@ -40,17 +38,17 @@ export class ChildKey extends Scalar {
   /** Derives a ChildKey from a Scalar.
    *  @returns A new ChildKey instance derived from the provided Scalar.
    */
-  toBlindingKey(): BlindingKey {
+  toBlindingKey(): Scalar {
     const obj = fromChildKeyToBlindingKey(this.value())
-    return BlindingKey.fromObj(obj)
+    return Scalar.fromObj(obj)
   }
 
   /** Derives a TokenKey from a ChildKey.
    *  @returns A new TokenKey instance derived from the ChildKey.
    */
-  toTokenKey(): TokenKey {
+  toTokenKey(): Scalar {
     const obj = fromChildKeyToTokenKey(this.value())
-    return TokenKey.fromObj(obj)
+    return Scalar.fromObj(obj)
   }
 
   /** Derives a TxKey from a ChildKey.

@@ -5,7 +5,7 @@ import {
 import { CTx } from '../ctx'
 import { CTxId } from '../ctxId'
 import { OutPoint } from '../outPoint'
-import { SpendingKey } from '../keys/childKeyDesc/txKeyDesc/spendingKey'
+import { Scalar } from '../scalar'
 import { SubAddr } from '../subAddr'
 import { TxIn } from '../txIn'
 import { TxOut } from '../txOut'
@@ -28,7 +28,7 @@ export const genCTx = (): CTx => {
   const outIndex = 0
   const outPoint = OutPoint.generate(ctxId, outIndex)
   const gamma = 100
-  const spendingKey = new SpendingKey()
+  const spendingKey = Scalar.random()
   const tokenId = TokenId.default()
   const txIn = TxIn.generate(
     inAmount,

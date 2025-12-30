@@ -28,7 +28,7 @@ import { TxOut } from './txOut'
 /** Represents a confidential transaction. Also known as `CMutableTransaction` on the C++ side.
  * Examples:
  * ```ts
- * const { CTx, CTxId, TxIn, TxOut, ChildKey, SpendingKey, SubAddr, SubAddrId, DoublePublicKey, OutPoint, PublicKey, TokenId, CTX_ID_SIZE } = require('navio-blsct')
+ * const { CTx, CTxId, TxIn, TxOut, ChildKey, Scalar, SubAddr, SubAddrId, DoublePublicKey, OutPoint, PublicKey, TokenId, CTX_ID_SIZE } = require('navio-blsct')
  * const { randomBytes } = require('crypto')
  * const cTxIdHex = randomBytes(CTX_ID_SIZE).toString('hex')
  * const cTxId = CTxId.deserialize(cTxIdHex)
@@ -41,7 +41,7 @@ import { TxOut } from './txOut'
  * const outIndex = 0
  * const outPoint = OutPoint.generate(cTxId, outIndex)
  * const gamma = 100
- * const spendingKey = new SpendingKey()
+ * const spendingKey = Scalar.random()
  * const tokenId = TokenId.default()
  * const txIn = TxIn.generate(inAmount, gamma, spendingKey, tokenId, outPoint)
  * const viewKey = new ChildKey().toTxKey().toViewKey()

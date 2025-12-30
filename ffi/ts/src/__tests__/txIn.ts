@@ -3,14 +3,14 @@ import {
 } from '../blsct'
 
 import * as crypto from 'crypto'
-import { TxIn } from '../txIn'
-import { SpendingKey } from '../keys/childKeyDesc/txKeyDesc/spendingKey'
-import { TokenId } from '../tokenId'
-import { OutPoint } from '../outPoint'
 import { CTxId } from '../ctxId'
+import { OutPoint } from '../outPoint'
+import { Scalar } from '../scalar'
+import { TokenId } from '../tokenId'
+import { TxIn } from '../txIn'
 
 const genTxIn = (): TxIn => {
-  const spendingKey = SpendingKey.random()
+  const spendingKey = Scalar.random()
   const tokenId = TokenId.default()
   const ctxIdHex = crypto.randomBytes(CTX_ID_SIZE).toString('hex')
   const ctxId = CTxId.deserialize(ctxIdHex)
