@@ -1,10 +1,9 @@
 import {
   fromTxKeyToSpendingKey,
   fromTxKeyToViewKey
-} from '../../blsct'
+} from '../blsct'
 
-import { Scalar } from '../../scalar'
-import { SpendingKey } from './txKeyDesc/spendingKey'
+import { Scalar } from '../scalar'
 
 /** Represents a tx key. A tx key is a Scalar and introduces no new functionality; it serves purely as a semantic alias. Both SpendingKey and ViewKey are exclusively derived from a TxKey.
  *
@@ -13,9 +12,9 @@ import { SpendingKey } from './txKeyDesc/spendingKey'
  * const { Scalar, ChildKey } = require('navio-blsct')
  * const s = Scalar.random()
  * const ck = new ChildKey(s)
- * const txk = ck.toTxKey()
- * txk.toSpendingKey()
- * txk.toViewKey()
+ * const tk = ck.toTxKey()
+ * tk.toSpendingKey()
+ * tk.toViewKey()
  * ```
  */
 export class TxKey extends Scalar {
@@ -23,9 +22,9 @@ export class TxKey extends Scalar {
     super(obj)
   }
 
-  toSpendingKey(): SpendingKey {
+  toSpendingKey(): Scalar {
     const obj = fromTxKeyToSpendingKey(this.value())
-    return new SpendingKey(obj)
+    return new Scalar(obj)
   }
 
   toViewKey(): Scalar {

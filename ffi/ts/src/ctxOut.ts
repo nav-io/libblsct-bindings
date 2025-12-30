@@ -15,13 +15,11 @@ import {
   toHex,
 } from './blsct'
 
-import { BlindingKey } from './keys/childKeyDesc/blindingKey'
-import { ManagedObj } from './managedObj'
 import { Point } from './point'
 import { RangeProof } from './rangeProof'
-import { SpendingKey } from './keys/childKeyDesc/txKeyDesc/spendingKey'
-import { TokenId } from './tokenId'
+import { Scalar } from './scalar'
 import { Script } from './script'
+import { TokenId } from './tokenId'
 
 /** Represents a transaction output in a constructed confidential transaction. Also known as `CTxOut` on the C++ side.
  *
@@ -81,9 +79,9 @@ export class CTxOut {
   /** Returns the spending key associated with the transaction output.
    * @returns The spending key of the output.
    */
-  getSpendingKey(): SpendingKey {
+  getSpendingKey(): Scalar {
     const obj = getCTxOutSpendingKey(this.obj)
-    return SpendingKey.fromObj(obj)
+    return Scalar.fromObj(obj)
   }
   
   /** Returns the ephemeral key associated with the transaction output.
@@ -97,9 +95,9 @@ export class CTxOut {
   /** Returns the blinding key associated with the transaction output.
    * @returns The blinding key of the output.
    */
-  getBlindingKey(): BlindingKey {
+  getBlindingKey(): Scalar {
     const obj = getCTxOutBlindingKey(this.obj)
-    return BlindingKey.fromObj(obj)
+    return Scalar.fromObj(obj)
   }
 
   /** Returns the range proof associated with the transaction output.

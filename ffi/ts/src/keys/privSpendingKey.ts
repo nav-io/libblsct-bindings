@@ -4,7 +4,6 @@ import {
 
 import { Scalar } from '../scalar'
 import { PublicKey } from './publicKey'
-import { SpendingKey } from './childKeyDesc/txKeyDesc/spendingKey'
 
 /** Represents a private spending key. A private spending key is a `Scalar` and introduces no new functionality; it serves purely as a semantic alias.
   *
@@ -29,7 +28,7 @@ export class PrivSpendingKey extends Scalar {
   constructor(
     blindingPubKey: PublicKey,
     viewKey: Scalar,
-    spendingKey: SpendingKey,
+    spendingKey: Scalar,
     account: number,
     address: number
   ) {
