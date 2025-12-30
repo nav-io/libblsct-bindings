@@ -23,7 +23,7 @@ import { TokenId } from './tokenId'
  *
  * Examples:
  * ```ts
- * const { Scalar, ChildKey, OutPoint, SpendingKey, TokenId, CTxId, TxIn, CTX_ID_SIZE } = require('navio-blsct')
+ * const { Scalar, ChildKey, OutPoint, Scalar, TokenId, CTxId, TxIn, CTX_ID_SIZE } = require('navio-blsct')
  * const { randomBytes } = require('crypto')
  * const cTxIdHex = randomBytes(CTX_ID_SIZE).toString('hex')
  * const cTxId = CTxId.deserialize(cTxIdHex)

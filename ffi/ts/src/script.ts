@@ -12,7 +12,7 @@ import { ManagedObj } from './managedObj';
  *
  * Examples:
  * ```ts
- * const { CTx, CTxId, TxIn, TxOut, OutPoint, SubAddr, DoublePublicKey, SpendingKey, TokenId, Script, CTX_ID_SIZE } = require('navio-blsct')
+ * const { CTx, CTxId, TxIn, TxOut, OutPoint, Scalar, SubAddr, DoublePublicKey, TokenId, Script, CTX_ID_SIZE } = require('navio-blsct')
  * const { randomBytes } = require('crypto')
  * const numTxIn = 1
  * const numTxOut = 1
@@ -25,7 +25,7 @@ import { ManagedObj } from './managedObj';
  * const outIndex = 0
  * const outPoint = OutPoint.generate(cTxId, outIndex)
  * const gamma = 100
- * const spendingKey = SpendingKey.random()
+ * const spendingKey = Scalar.random()
  * const tokenId = TokenId.default()
  * const txIn = TxIn.generate(inAmount, gamma, spendingKey, tokenId, outPoint)
  * const subAddr = SubAddr.fromDoublePublicKey(DoublePublicKey.random())

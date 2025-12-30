@@ -10,9 +10,9 @@ class ChildKey(Scalar):
   >>> s = Scalar()
   >>> k = ChildKey(s)
   >>> k.to_blinding_key()
-  BlindingKey(610a6f73231d115a54aee8b43c6d6fc5349aa4c45dc9987aad3f7a98fc6249d8) # doctest: +SKIP
+  Scalar(610a6f73231d115a54aee8b43c6d6fc5349aa4c45dc9987aad3f7a98fc6249d8) # doctest: +SKIP
   >>> k.to_token_key()
-  TokenKey(58fd2bdf696268ecfbed529b4968dbfa0e324e5cbe00b18a6398c7feaa9627a4) # doctest: +SKIP
+  Scalar(58fd2bdf696268ecfbed529b4968dbfa0e324e5cbe00b18a6398c7feaa9627a4) # doctest: +SKIP
   >>> k.to_tx_key()
   TxKey(2fc0697ce315e42491d60e278ac729802be887e912f536f67a8eea9dc4b2900c) # doctest: +SKIP
   >>> 

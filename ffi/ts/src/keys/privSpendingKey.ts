@@ -9,10 +9,10 @@ import { PublicKey } from './publicKey'
   *
   * Examples:
   * ```ts
-  * const { PrivSpendingKey, PublicKey, SpendingKey } = require('navio-blsct')
+  * const { PrivSpendingKey, PublicKey } = require('navio-blsct')
   * const pk = PublicKey.random()
   * const vk = Scalar.random()
-  * const sk = SpendingKey.random()
+  * const sk = Scalar.random()
   * new PrivSpendingKey(pk, vk, sk, 1, 2)
   * ```
   */
