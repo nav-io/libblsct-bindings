@@ -19,7 +19,6 @@ use crate::{
     hex_to_malloced_buf,
     succ,
   },
-  keys::child_key_desc::tx_key_desc::spending_key::SpendingKey,
   macros::{
     impl_clone,
     impl_display,
@@ -50,7 +49,7 @@ impl TxIn {
   pub fn new<'a>(
     amount: u64,
     gamma: u64,
-    spending_key: &SpendingKey,
+    spending_key: &Scalar,
     token_id: &TokenId,
     out_point: &OutPoint,
     is_staked_commitment: bool,
@@ -78,7 +77,7 @@ impl TxIn {
     unsafe { get_tx_in_gamma(self.value()) }
   }
 
-  pub fn spending_key(&self) -> SpendingKey {
+  pub fn spending_key(&self) -> Scalar {
     let rv = unsafe { get_tx_in_spending_key(self.value()) };
     BlsctObj::<Scalar, BlsctScalar>::from_c_obj(rv).into()
   }

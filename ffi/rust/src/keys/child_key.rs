@@ -8,11 +8,7 @@ use crate::{
     from_seed_to_child_key,
   },
   scalar::Scalar,
-  keys::child_key_desc::{
-    blinding_key::BlindingKey,
-    token_key::TokenKey,
-    tx_key::TxKey,
-  },
+  keys::tx_key::TxKey,
 };
 use serde::{Deserialize, Serialize};
 
@@ -36,13 +32,13 @@ impl ChildKey {
     self.0.value()
   }
 
-  pub fn to_blinding_key(&self) -> BlindingKey {
+  pub fn to_blinding_key(&self) -> Scalar {
     let blsct_scalar = unsafe { from_child_key_to_blinding_key(self.0.value()) };
     let obj = BlsctObj::from_c_obj(blsct_scalar);
     obj.into()
   }
 
-  pub fn to_token_key(&self) -> TokenKey {
+  pub fn to_token_key(&self) -> Scalar {
     let blsct_scalar = unsafe { from_child_key_to_token_key(self.0.value()) };
     let obj = BlsctObj::from_c_obj(blsct_scalar);
     obj.into()
@@ -54,27 +50,6 @@ impl ChildKey {
     obj.into()
   }
 }
-
-macro_rules! impl_child_key_desc_deser_test {
-  ($derive_method:ident, $target_ty:path) => {
-    #[test]
-    fn test_deser() {
-      use crate::keys::child_key::ChildKey;
-      use bincode;
-
-      crate::initializer::init();
-      let child_key = ChildKey::random().unwrap();
-
-      let a: $target_ty = child_key.$derive_method();
-      let hex = bincode::serialize(&a).unwrap();
-      let b: $target_ty = bincode::deserialize::<$target_ty>(&hex).unwrap();
-
-      assert_eq!(a, b);
-    }
-  };
-}
-
-pub(crate) use impl_child_key_desc_deser_test;
 
 #[cfg(test)]
 mod tests {

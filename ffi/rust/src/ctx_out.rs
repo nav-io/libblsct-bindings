@@ -19,8 +19,6 @@ use crate::{
     get_ctx_out_view_tag,
     get_ctx_out_vector_predicate,
   },
-  keys::child_key_desc::tx_key_desc::spending_key::SpendingKey,
-  keys::child_key_desc::blinding_key::BlindingKey,
   macros::impl_value_raw_const_obj,
   point::Point,
   range_proof::RangeProof,
@@ -61,7 +59,7 @@ impl CTxOut {
     Ok(obj.into())
   }
 
-  pub fn blsct_data_spending_key(&self) -> SpendingKey {
+  pub fn blsct_data_spending_key(&self) -> Scalar {
     let c_obj = unsafe { get_ctx_out_spending_key(self.value()) }; 
     BlsctObj::<Scalar, BlsctScalar>::from_c_obj(
       c_obj as *mut BlsctScalar
@@ -75,7 +73,7 @@ impl CTxOut {
     ).into()
   }
 
-  pub fn blsct_data_blinding_key(&self) -> BlindingKey {
+  pub fn blsct_data_blinding_key(&self) -> Scalar {
     let c_obj = unsafe { get_ctx_out_blinding_key(self.value()) }; 
     BlsctObj::<Scalar, BlsctScalar>::from_c_obj(
       c_obj as *mut BlsctScalar
