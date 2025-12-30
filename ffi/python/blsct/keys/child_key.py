@@ -1,8 +1,6 @@
 from .. import blsct
 from ..scalar import Scalar
-from .child_key_desc.blinding_key import BlindingKey
-from .child_key_desc.token_key import TokenKey
-from .child_key_desc.tx_key import TxKey
+from .tx_key import TxKey
 
 class ChildKey(Scalar):
   """
@@ -27,15 +25,15 @@ class ChildKey(Scalar):
     obj = blsct.from_seed_to_child_key(seed.value())
     super().__init__(obj)
 
-  def to_blinding_key(self) -> BlindingKey:
+  def to_blinding_key(self) -> Scalar:
     """derive a blinding key from the child key"""
     obj = blsct.from_child_key_to_blinding_key(self.value())
-    return BlindingKey(obj)
+    return Scalar(obj)
 
-  def to_token_key(self) -> TokenKey:
+  def to_token_key(self) -> Scalar:
     """derive a token key from the child key"""
     obj = blsct.from_child_key_to_token_key(self.value())
-    return TokenKey(obj)
+    return Scalar(obj)
 
   def to_tx_key(self) -> TxKey:
     """derive a tx key from the child key"""

@@ -2,7 +2,6 @@ from blsct import (
   Address,
   AddressEncoding,
   AmountRecoveryReq,
-  BlindingKey,
   Chain,
   ChildKey,
   CTx,
@@ -18,11 +17,9 @@ from blsct import (
   Scalar,
   set_chain,
   Signature,
-  SpendingKey,
   SubAddr,
   SubAddrId,
   TokenId,
-  TokenKey,
   TxIn,
   TxOut,
   TxKey,
@@ -238,13 +235,10 @@ def test_key_derivation():
   print(f"dpk from sub_addr: {dpk2}")
 
   # test also direct instantiation
-  SpendingKey()
-  BlindingKey()
-  TokenKey()
   TxKey()
   ChildKey(Scalar())
   DoublePublicKey()
-  PrivSpendingKey(PublicKey(), Scalar(), SpendingKey(), 1, 2)
+  PrivSpendingKey(PublicKey(), Scalar(), Scalar(), 1, 2)
   PublicKey()
   ViewTag(PublicKey(), Scalar())
 
@@ -262,7 +256,7 @@ def test_tx():
   print(f"ctx_id: {ctx_id}")
 
   gamma = 100
-  spending_key = SpendingKey(12)
+  spending_key = Scalar(12)
   token_id = TokenId()
   out_index = 0
   out_point = OutPoint(ctx_id, out_index)

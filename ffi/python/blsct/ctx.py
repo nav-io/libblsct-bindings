@@ -1,7 +1,5 @@
 from . import blsct
-from .ctx_in import CTxIn
 from .ctx_ins import CTxIns
-from .ctx_out import CTxOut
 from .ctx_outs import CTxOuts
 from .managed_obj import ManagedObj
 from .serializable import Serializable
@@ -15,7 +13,7 @@ class CTx(ManagedObj, Serializable):
   """
   Represents a confidential transaction. Also known as `CMutableTransaction` on the C++ side.
 
-  >>> from blsct import ChildKey, DoublePublicKey, OutPoint, PublicKey, SpendingKey, SubAddr, SubAddrId, TokenId, CTX_ID_SIZE, CTx, CTxId, TxIn, TxOut
+  >>> from blsct import ChildKey, DoublePublicKey, OutPoint, PublicKey, Scalar, SubAddr, SubAddrId, TokenId, CTX_ID_SIZE, CTx, CTxId, TxIn, TxOut
   >>> import secrets
   >>> num_tx_in = 1
   >>> num_tx_out = 1
@@ -27,7 +25,7 @@ class CTx(ManagedObj, Serializable):
   >>> out_index = 0
   >>> out_point = OutPoint(ctx_id, out_index)
   >>> gamma = 100
-  >>> spending_key = SpendingKey()
+  >>> spending_key = Scalar()
   >>> token_id = TokenId()
   >>> tx_in = TxIn(in_amount, gamma, spending_key, token_id, out_point)
   >>> sub_addr = SubAddr.from_double_public_key(DoublePublicKey())
@@ -70,7 +68,7 @@ class CTx(ManagedObj, Serializable):
   ...
   value: 0
   script_pub_key: Script(51000000000000000000000000000000000000000000000000000000) # doctest: +SKIP
-  blsct_data.spending_key: SpendingKey(2db08363ad3374035953866a054d5501da26aefbe55b4566d5e28a8bd1c3c051) # doctest: +SKIP
+  blsct_data.spending_key: Scalar(2db08363ad3374035953866a054d5501da26aefbe55b4566d5e28a8bd1c3c051) # doctest: +SKIP
   blsct_data.ephemeral_key: Point(b56c69fa701103d7228d365f4405ac81ca91dc7c4fe439e700289da87ca60d370680f1e03e64109bbce546028be38515) # doctest: +SKIP
   blsct_data.blinding_key: BlindingKey(1f8947367d5a91d84b6e743072e55424b57b66e9030d84bc4d2c1f0f69633f29) # doctest: +SKIP
   blsct_data.view_tag: 31130 # doctest: +SKIP
@@ -86,7 +84,7 @@ class CTx(ManagedObj, Serializable):
   vector_predicate: # doctest: +SKIPu
   value: 0 # doctest: +SKIP
   script_pub_key: Script(51000000f5000000c000000020000000a00000040000800080000004) # doctest: +SKIP
-  blsct_data.spending_key: SpendingKey(24848b6f0958cf217783f48f260366e0e0c2ccda954a0188e83381c61bf33902) # doctest: +SKIP
+  blsct_data.spending_key: Scalar(24848b6f0958cf217783f48f260366e0e0c2ccda954a0188e83381c61bf33902) # doctest: +SKIP
   blsct_data.ephemeral_key: Point(800bfdedb0bee4dcf6f56309a8c6c566a57c12f77f0f2320243c672c7529451598b327f0fe58df8bbd655014620fcd8a) # doctest: +SKIP
   blsct_data.blinding_key: BlindingKey(4c1258acd66282b7ccc627f7f65e27faac425bfd0001a40100000000ffffffff) # doctest: +SKIP
   blsct_data.view_tag: 21881 # doctest: +SKIP
@@ -102,7 +100,7 @@ class CTx(ManagedObj, Serializable):
   vector_predicate: # doctest: +SKIP
   value: 292125 # doctest: +SKIP
   script_pub_key: Script(6a00000000000000ac00000000007400000000000000000001000000) # doctest: +SKIP
-  blsct_data.spending_key: SpendingKey(4c1258acd66282b7ccc627f7f65e27faac425bfd0001a40100000000ffffffff) # doctest: +SKIP
+  blsct_data.spending_key: Scalar(4c1258acd66282b7ccc627f7f65e27faac425bfd0001a40100000000ffffffff) # doctest: +SKIP
   blsct_data.ephemeral_key: Point(c00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000) # doctest: +SKIP
   blsct_data.blinding_key: BlindingKey(4c1258acd66282b7ccc627f7f65e27faac425bfd0001a40100000000ffffffff) # doctest: +SKIP
   blsct_data.view_tag: 0 # doctest: +SKIP
