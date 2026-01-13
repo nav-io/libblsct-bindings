@@ -393,7 +393,7 @@ export const deleteAmountRecoveryReqVec = (reqs: any): void => {
   blsct.delete_amount_recovery_req_vec(reqs)
 }
 export const deleteAmountsRetVal = (rv: BlsctAmountsRetVal): void => {
-  blsct.delete_amounts_ret_val(rv)
+  blsct.free_amounts_ret_val(rv)
 }
 export const deleteRangeProofVec = (rangeProofs: any): void => {
   blsct.delete_range_proof_vec(rangeProofs)
