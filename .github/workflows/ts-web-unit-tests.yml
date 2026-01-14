@@ -1,0 +1,65 @@
+name: 'TypeScript Web: Run unit tests'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'ffi/ts-web/**'
+      - 'navio-core/src/blsct/**'
+      - '.github/workflows/ts-web-unit-tests.yml'
+  pull_request:
+    paths:
+      - 'ffi/ts-web/**'
+      - 'navio-core/src/blsct/**'
+
+jobs:
+  run-unit-tests:
+    strategy:
+      matrix:
+        os: ["ubuntu-24.04", "macos-15"]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          clean: true
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: '3.1.51'
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Verify Emscripten installation
+        run: emcc --version
+
+      - name: Install dependencies
+        run: |
+          cd ffi/ts-web
+          npm install
+
+      - name: Build WASM module
+        run: |
+          cd ffi/ts-web
+          npm run build:wasm
+
+      - name: Build TypeScript
+        run: |
+          cd ffi/ts-web
+          npm run build:ts
+
+      - name: Run tests
+        run: |
+          cd ffi/ts-web
+          npm test
+

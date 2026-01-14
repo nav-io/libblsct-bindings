@@ -1,0 +1,12 @@
+{
+  "entryPoints": ["./src/index.ts"],
+  "out": "./docs",
+  "name": "navio-blsct-web",
+  "readme": "./README.md",
+  "includeVersion": true,
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "plugin": ["typedoc-plugin-markdown"],
+  "theme": "default"
+}
+

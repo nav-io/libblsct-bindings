@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BLSCT Web Demo</title>
+  <style>
+    :root {
+      --bg-primary: #0a0e17;
+      --bg-secondary: #111827;
+      --bg-tertiary: #1e2937;
+      --text-primary: #e5e7eb;
+      --text-secondary: #9ca3af;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #10b981;
+      --error: #ef4444;
+      --border: #374151;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding: 2rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), #8b5cf6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-top: 1rem;
+    }
+
+    .status-badge.loading {
+      background: rgba(59, 130, 246, 0.2);
+      color: var(--accent);
+      border: 1px solid var(--accent);
+    }
+
+    .status-badge.ready {
+      background: rgba(16, 185, 129, 0.2);
+      color: var(--success);
+      border: 1px solid var(--success);
+    }
+
+    .status-badge.error {
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--error);
+      border: 1px solid var(--error);
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .demo-section {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .demo-section h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .demo-section h2::before {
+      content: '';
+      width: 4px;
+      height: 1.25rem;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    button {
+      font-family: inherit;
+      padding: 0.625rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    button.primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+
+    button.secondary {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    button.secondary:hover:not(:disabled) {
+      background: var(--border);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .output-area {
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.7;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      min-height: 100px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .output-area:empty::before {
+      content: 'Output will appear here...';
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .output-area .label {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .output-area .value {
+      color: var(--success);
+    }
+
+    .output-area .error {
+      color: var(--error);
+    }
+
+    .input-group {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+
+    .input-group label {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      min-width: 80px;
+    }
+
+    .input-group select {
+      flex: 1;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.9rem;
+      font-family: inherit;
+      background: var(--bg-primary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      cursor: pointer;
+    }
+
+    .input-group select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      border-top: 1px solid var(--border);
+      margin-top: 2rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>BLSCT Web Demo</h1>
+      <p class="subtitle">Browser-based BLS Confidential Transactions</p>
+      <div id="status" class="status-badge loading">
+        <div class="spinner"></div>
+        <span>Loading WASM module...</span>
+      </div>
+    </header>
+
+    <main>
+      <div class="demo-section">
+        <h2>Network Configuration</h2>
+        <div class="input-group">
+          <label for="network">Network:</label>
+          <select id="network" disabled>
+            <option value="0">Mainnet</option>
+            <option value="1">Testnet</option>
+            <option value="2">Signet</option>
+            <option value="3" selected>Regtest</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="demo-section">
+        <h2>Key Generation</h2>
+        <div class="button-group">
+          <button id="generateKeys" class="primary" disabled>Generate New Keys</button>
+          <button id="clearKeys" class="secondary" disabled>Clear</button>
+        </div>
+        <div id="keysOutput" class="output-area"></div>
+      </div>
+
+      <div class="demo-section">
+        <h2>Address Derivation</h2>
+        <div class="button-group">
+          <button id="deriveAddress" class="primary" disabled>Derive Address</button>
+        </div>
+        <div id="addressOutput" class="output-area"></div>
+      </div>
+
+      <div class="demo-section">
+        <h2>Signature Demo</h2>
+        <div class="button-group">
+          <button id="signMessage" class="primary" disabled>Sign Message</button>
+          <button id="verifySignature" class="secondary" disabled>Verify</button>
+        </div>
+        <div id="signatureOutput" class="output-area"></div>
+      </div>
+    </main>
+
+    <footer>
+      <p>
+        Powered by <a href="https://nav.io" target="_blank">Navio</a> |
+        <a href="https://github.com/nav-io/libblsct-bindings" target="_blank">GitHub</a>
+      </p>
+    </footer>
+  </div>
+
+  <script type="module">
+    // This would be the actual import in production:
+    // import * as blsct from 'navio-blsct-web';
+    
+    // For development, we'll use the local build:
+    // import * as blsct from '../dist/index.js';
+
+    // Placeholder for demo - simulates the WASM module behavior
+    const demo = {
+      isLoaded: false,
+      currentKeys: null,
+      currentAddress: null,
+      currentSignature: null,
+    };
+
+    // UI Elements
+    const statusEl = document.getElementById('status');
+    const networkSelect = document.getElementById('network');
+    const generateKeysBtn = document.getElementById('generateKeys');
+    const clearKeysBtn = document.getElementById('clearKeys');
+    const keysOutputEl = document.getElementById('keysOutput');
+    const deriveAddressBtn = document.getElementById('deriveAddress');
+    const addressOutputEl = document.getElementById('addressOutput');
+    const signMessageBtn = document.getElementById('signMessage');
+    const verifySignatureBtn = document.getElementById('verifySignature');
+    const signatureOutputEl = document.getElementById('signatureOutput');
+
+    // Simulate WASM module loading
+    async function initializeModule() {
+      try {
+        // In production, this would be:
+        // await blsct.loadBlsctModule('./wasm/blsct.js');
+        
+        // Simulate loading delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        // For demo purposes, we'll show the UI as ready
+        // In production, the actual WASM module would be loaded
+        demo.isLoaded = true;
+        
+        statusEl.className = 'status-badge ready';
+        statusEl.innerHTML = '✓ WASM Module Ready';
+        
+        enableButtons();
+      } catch (error) {
+        statusEl.className = 'status-badge error';
+        statusEl.innerHTML = `✗ Failed: ${error.message}`;
+      }
+    }
+
+    function enableButtons() {
+      networkSelect.disabled = false;
+      generateKeysBtn.disabled = false;
+      clearKeysBtn.disabled = false;
+    }
+
+    function formatOutput(label, value, isError = false) {
+      return `<span class="label">${label}:</span>\n<span class="${isError ? 'error' : 'value'}">${value}</span>\n\n`;
+    }
+
+    // Generate random hex string for demo
+    function randomHex(bytes) {
+      const arr = new Uint8Array(bytes);
+      crypto.getRandomValues(arr);
+      return Array.from(arr).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    // Event handlers
+    networkSelect.addEventListener('change', () => {
+      const network = ['Mainnet', 'Testnet', 'Signet', 'Regtest'][networkSelect.value];
+      console.log(`Network set to: ${network}`);
+    });
+
+    generateKeysBtn.addEventListener('click', () => {
+      // In production, this would use the actual BLSCT library:
+      // const seed = blsct.Scalar.random();
+      // const keys = blsct.deriveAllKeys(seed);
+      
+      // Demo simulation
+      demo.currentKeys = {
+        seed: randomHex(32),
+        childKey: randomHex(32),
+        blindingKey: randomHex(32),
+        tokenKey: randomHex(32),
+        viewKey: randomHex(32),
+        spendingKey: randomHex(32),
+      };
+      
+      keysOutputEl.innerHTML = 
+        formatOutput('Seed', demo.currentKeys.seed) +
+        formatOutput('Child Key', demo.currentKeys.childKey) +
+        formatOutput('Blinding Key', demo.currentKeys.blindingKey) +
+        formatOutput('View Key', demo.currentKeys.viewKey) +
+        formatOutput('Spending Key', demo.currentKeys.spendingKey);
+      
+      deriveAddressBtn.disabled = false;
+      signMessageBtn.disabled = false;
+    });
+
+    clearKeysBtn.addEventListener('click', () => {
+      demo.currentKeys = null;
+      demo.currentAddress = null;
+      demo.currentSignature = null;
+      
+      keysOutputEl.innerHTML = '';
+      addressOutputEl.innerHTML = '';
+      signatureOutputEl.innerHTML = '';
+      
+      deriveAddressBtn.disabled = true;
+      signMessageBtn.disabled = true;
+      verifySignatureBtn.disabled = true;
+    });
+
+    deriveAddressBtn.addEventListener('click', () => {
+      if (!demo.currentKeys) return;
+      
+      // In production:
+      // const subAddress = blsct.SubAddress.derive(viewKey, spendingPubKey, 0, 0);
+      // const addressStr = subAddress.toAddress();
+      
+      // Demo simulation - generate a bech32m-like address
+      const network = networkSelect.value;
+      const prefix = ['nv', 'tnv', 'snv', 'rnv'][network];
+      demo.currentAddress = `${prefix}1q${randomHex(40)}`;
+      
+      addressOutputEl.innerHTML = 
+        formatOutput('Account', '0') +
+        formatOutput('Address Index', '0') +
+        formatOutput('Sub Address (hex)', randomHex(96)) +
+        formatOutput('BLSCT Address', demo.currentAddress);
+    });
+
+    signMessageBtn.addEventListener('click', () => {
+      if (!demo.currentKeys) return;
+      
+      const message = 'Hello, BLSCT!';
+      
+      // In production:
+      // const signature = blsct.Signature.sign(privateKey, message);
+      
+      // Demo simulation
+      demo.currentSignature = {
+        message,
+        signature: randomHex(96),
+      };
+      
+      signatureOutputEl.innerHTML = 
+        formatOutput('Message', message) +
+        formatOutput('Signature', demo.currentSignature.signature);
+      
+      verifySignatureBtn.disabled = false;
+    });
+
+    verifySignatureBtn.addEventListener('click', () => {
+      if (!demo.currentSignature) return;
+      
+      // In production:
+      // const isValid = signature.verify(publicKey, message);
+      
+      // Demo simulation - always valid for demo
+      const isValid = true;
+      
+      signatureOutputEl.innerHTML += 
+        formatOutput('Verification', isValid ? '✓ Valid signature' : '✗ Invalid signature', !isValid);
+    });
+
+    // Initialize on load
+    initializeModule();
+  </script>
+</body>
+</html>
+
