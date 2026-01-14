@@ -7,6 +7,9 @@ build-wasm/
 wasm/*.js
 wasm/*.wasm
 
+# Cloned navio-core (downloaded during build)
+navio-core/
+
 # Coverage
 coverage/
 
