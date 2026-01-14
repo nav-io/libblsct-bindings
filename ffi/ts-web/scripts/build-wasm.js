@@ -11,8 +11,14 @@ const { execSync, spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
+// Configuration
+const IS_PROD = process.env.BLSCT_PROD === '1';
+const DEV_BRANCH = 'add-missing-functionality';
+const NAVIO_CORE_REPO_PROD = 'https://github.com/nav-io/navio-core';
+const NAVIO_CORE_REPO_DEV = 'https://github.com/gogoex/navio-core';
+
 const ROOT_DIR = path.resolve(__dirname, '..');
-const NAVIO_CORE_DIR = path.resolve(ROOT_DIR, '../../navio-core');
+const NAVIO_CORE_DIR = path.resolve(ROOT_DIR, 'navio-core');
 const WASM_OUTPUT_DIR = path.resolve(ROOT_DIR, 'wasm');
 const BUILD_DIR = path.resolve(ROOT_DIR, 'build-wasm');
 
@@ -22,6 +28,46 @@ if (!fs.existsSync(WASM_OUTPUT_DIR)) {
 }
 if (!fs.existsSync(BUILD_DIR)) {
   fs.mkdirSync(BUILD_DIR, { recursive: true });
+}
+
+/**
+ * Clone navio-core repository if it doesn't exist
+ */
+function ensureNavioCore() {
+  const srcDir = path.join(NAVIO_CORE_DIR, 'src');
+  
+  if (fs.existsSync(srcDir)) {
+    console.log('✓ navio-core already exists');
+    return;
+  }
+
+  console.log('Cloning navio-core repository...');
+  
+  // Remove any partial clone
+  if (fs.existsSync(NAVIO_CORE_DIR)) {
+    fs.rmSync(NAVIO_CORE_DIR, { recursive: true, force: true });
+  }
+
+  const repo = IS_PROD ? NAVIO_CORE_REPO_PROD : NAVIO_CORE_REPO_DEV;
+  const branch = IS_PROD ? 'master' : DEV_BRANCH;
+  
+  console.log(`  Repository: ${repo}`);
+  console.log(`  Branch: ${branch}`);
+
+  const cloneCmd = [
+    'git', 'clone',
+    '--depth', '1',
+    '--branch', branch,
+    repo,
+    NAVIO_CORE_DIR
+  ];
+
+  const result = spawnSync(cloneCmd[0], cloneCmd.slice(1), { stdio: 'inherit' });
+  if (result.status !== 0) {
+    throw new Error(`Failed to clone navio-core: exit code ${result.status}`);
+  }
+
+  console.log('✓ navio-core cloned successfully');
 }
 
 // Check if emcc is available
