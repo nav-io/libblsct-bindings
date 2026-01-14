@@ -35,14 +35,14 @@ if (!fs.existsSync(BUILD_DIR)) {
  */
 function ensureNavioCore() {
   const srcDir = path.join(NAVIO_CORE_DIR, 'src');
-  
+
   if (fs.existsSync(srcDir)) {
     console.log('✓ navio-core already exists');
     return;
   }
 
   console.log('Cloning navio-core repository...');
-  
+
   // Remove any partial clone
   if (fs.existsSync(NAVIO_CORE_DIR)) {
     fs.rmSync(NAVIO_CORE_DIR, { recursive: true, force: true });
@@ -50,7 +50,7 @@ function ensureNavioCore() {
 
   const repo = IS_PROD ? NAVIO_CORE_REPO_PROD : NAVIO_CORE_REPO_DEV;
   const branch = IS_PROD ? 'master' : DEV_BRANCH;
-  
+
   console.log(`  Repository: ${repo}`);
   console.log(`  Branch: ${branch}`);
 
@@ -235,7 +235,7 @@ const EXPORTED_RUNTIME_METHODS = [
 function buildMcl() {
   console.log('Building mcl library for WASM...');
   const mclDir = path.join(NAVIO_CORE_DIR, 'src/bls/mcl');
-  
+
   const mclBuildCmd = [
     'emcc',
     '-O3',
@@ -261,7 +261,7 @@ function buildBls() {
   console.log('Building bls library for WASM...');
   const blsDir = path.join(NAVIO_CORE_DIR, 'src/bls');
   const mclDir = path.join(blsDir, 'mcl');
-  
+
   const blsBuildCmd = [
     'emcc',
     '-O3',
@@ -315,20 +315,20 @@ function buildBlsct() {
 
   // Compile each source file
   const objectFiles = [];
-  
+
   for (const source of BLSCT_SOURCES) {
     const sourcePath = path.join(srcDir, source);
     if (!fs.existsSync(sourcePath)) {
       console.warn(`  Warning: Source file not found: ${source}`);
       continue;
     }
-    
+
     const objName = source.replace(/\//g, '_').replace('.cpp', '.o');
     const objPath = path.join(BUILD_DIR, objName);
-    
+
     console.log(`  Compiling ${source}...`);
     const cmd = `emcc ${compilerFlags} ${includeFlags} -c ${sourcePath} -o ${objPath}`;
-    
+
     try {
       execSync(cmd, { stdio: 'pipe', cwd: BUILD_DIR });
       objectFiles.push(objPath);
@@ -342,7 +342,7 @@ function buildBlsct() {
 
 function linkWasm(objectFiles) {
   console.log('Linking WASM module...');
-  
+
   const linkFlags = [
     '-O3',
     '-s', 'WASM=1',
@@ -368,7 +368,7 @@ function linkWasm(objectFiles) {
 
   const outputJs = path.join(WASM_OUTPUT_DIR, 'blsct.js');
   const cmd = `emcc ${linkFlags} ${allObjects} -o ${outputJs}`;
-  
+
   execSync(cmd, { stdio: 'inherit', cwd: BUILD_DIR });
   console.log(`✓ WASM module created: ${outputJs}`);
 }
@@ -385,17 +385,20 @@ async function main() {
   console.log(`Build directory: ${BUILD_DIR}\n`);
 
   try {
+    // Ensure navio-core is available
+    ensureNavioCore();
+
     buildMcl();
     buildBls();
     const objectFiles = buildBlsct();
-    
+
     if (objectFiles.length === 0) {
       console.error('No object files were compiled. Check the source paths.');
       process.exit(1);
     }
 
     linkWasm(objectFiles);
-    
+
     console.log('\n=== Build complete! ===');
     console.log(`WASM files are in: ${WASM_OUTPUT_DIR}`);
   } catch (err) {
