@@ -1,0 +1,47 @@
+name: 'TypeScript Web: Publish doc website'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'ffi/ts-web/src/**'
+      - 'ffi/ts-web/README.md'
+      - '.github/workflows/ts-web-publish-doc.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        run: |
+          cd ffi/ts-web
+          npm install --ignore-scripts
+
+      - name: Generate TypeDoc documentation
+        run: |
+          cd ffi/ts-web
+          npm run docs
+
+      - name: Deploy TypeScript Web docs to /ts-web
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ffi/ts-web/docs
+          publish_branch: gh-pages
+          destination_dir: ts-web
+          keep_files: true
+
