@@ -12,13 +12,11 @@ import {
   freePtr,
   freeObj,
   parseRetVal,
-  parseBoolRetVal,
-  assertSuccess,
   type BlsctResult,
 } from './wasm/index.js';
 
-// Re-export initialization
-export { loadBlsctModule, isModuleLoaded } from './wasm/index.js';
+// Re-export initialization and utilities
+export { loadBlsctModule, isModuleLoaded, assertSuccess } from './wasm/index.js';
 
 // ============================================================================
 // Constants
