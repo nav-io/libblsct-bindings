@@ -314,7 +314,11 @@ function buildBlsct() {
   const blsDir = path.join(srcDir, 'bls');
   const mclDir = path.join(blsDir, 'mcl');
 
+  // Include boost stubs for WASM builds (avoids needing real Boost installation)
+  const boostStubsDir = path.join(__dirname, 'boost-stubs');
+
   const includeFlags = [
+    `-I${boostStubsDir}`,
     `-I${srcDir}`,
     `-I${srcDir}/config`,
     `-I${blsDir}/include`,
