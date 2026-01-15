@@ -119,6 +119,7 @@ const BLSCT_SOURCES = [
   'blsct/range_proof/bulletproofs_plus/range_proof.cpp',
   'blsct/range_proof/bulletproofs_plus/range_proof_logic.cpp',
   'blsct/range_proof/bulletproofs_plus/range_proof_with_transcript.cpp',
+  'blsct/range_proof/bulletproofs_plus/util.cpp',
   'blsct/set_mem_proof/set_mem_proof_prover.cpp',
   'blsct/set_mem_proof/set_mem_proof_setup.cpp',
   'blsct/set_mem_proof/set_mem_proof.cpp',
@@ -136,16 +137,20 @@ const BLSCT_SOURCES = [
   'blsct/wallet/verification.cpp',
 ];
 
-// Additional source files needed
+// Additional source files needed from navio-core
 const UTIL_SOURCES = [
   'crypto/hmac_sha256.cpp',
+  'crypto/hmac_sha512.cpp',
   'crypto/ripemd160.cpp',
   'crypto/sha256.cpp',
+  'crypto/sha512.cpp',
   'hash.cpp',
   'primitives/transaction.cpp',
   'script/interpreter.cpp',
   'script/script.cpp',
   'script/script_error.cpp',
+  'support/cleanse.cpp',
+  'support/lockedpool.cpp',
   'uint256.cpp',
   'util/strencodings.cpp',
 ];
@@ -288,6 +293,21 @@ function buildBls() {
   console.log('✓ bls built');
 }
 
+function setupConfigHeader() {
+  // Copy wasm-config.h to navio-core/src as bitcoin-config.h
+  const configSrc = path.join(__dirname, 'wasm-config.h');
+  const configDest = path.join(NAVIO_CORE_DIR, 'src/config/bitcoin-config.h');
+
+  // Ensure config directory exists
+  const configDir = path.dirname(configDest);
+  if (!fs.existsSync(configDir)) {
+    fs.mkdirSync(configDir, { recursive: true });
+  }
+
+  fs.copyFileSync(configSrc, configDest);
+  console.log('✓ Config header installed');
+}
+
 function buildBlsct() {
   console.log('Building libblsct for WASM...');
   const srcDir = path.join(NAVIO_CORE_DIR, 'src');
@@ -296,15 +316,17 @@ function buildBlsct() {
 
   const includeFlags = [
     `-I${srcDir}`,
+    `-I${srcDir}/config`,
     `-I${blsDir}/include`,
     `-I${mclDir}/include`,
     `-I${mclDir}/src`,
     `-I${srcDir}/univalue/include`,
   ].join(' ');
 
+  // Note: Do NOT use -DNDEBUG as navio-core requires assertions (util/check.h)
   const compilerFlags = [
     '-O3',
-    '-DNDEBUG',
+    '-DHAVE_CONFIG_H',
     '-DLIBBLSCT',
     '-DMCL_SIZEOF_UNIT=4',
     '-DMCL_MAX_BIT_SIZE=384',
@@ -319,7 +341,10 @@ function buildBlsct() {
   // Compile each source file
   const objectFiles = [];
 
-  for (const source of BLSCT_SOURCES) {
+  // Compile all sources (BLSCT + utilities)
+  const allSources = [...BLSCT_SOURCES, ...UTIL_SOURCES];
+
+  for (const source of allSources) {
     const sourcePath = path.join(srcDir, source);
     if (!fs.existsSync(sourcePath)) {
       console.warn(`  Warning: Source file not found: ${source}`);
@@ -390,6 +415,9 @@ async function main() {
   try {
     // Ensure navio-core is available
     ensureNavioCore();
+
+    // Install WASM-specific config header
+    setupConfigHeader();
 
     buildMcl();
     buildBls();

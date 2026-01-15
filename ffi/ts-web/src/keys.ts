@@ -18,7 +18,6 @@ import {
   deserializeKeyId,
   assertSuccess,
 } from './blsct.js';
-import { freeObj } from './wasm/index.js';
 
 /**
  * Represents a child key derived from a seed

@@ -2,7 +2,7 @@
  * Memory management utilities for WASM interop
  */
 
-import { getBlsctModule, type BlsctWasmModule } from './loader.js';
+import { getBlsctModule } from './loader.js';
 
 /**
  * Allocate a string in WASM memory and return its pointer
@@ -159,7 +159,8 @@ export function parseRetVal(ptr: number): BlsctResult<number> {
   // { uint8_t result; void* value; size_t value_size; }
   const result = module.getValue(ptr, 'i8');
   const valuePtr = module.getValue(ptr + 4, '*'); // Assuming 4-byte alignment
-  const valueSize = module.getValue(ptr + 8, 'i32');
+  // Note: valueSize is available but not currently used
+  // const _valueSize = module.getValue(ptr + 8, 'i32');
 
   if (result === 0) {
     // BLSCT_SUCCESS
