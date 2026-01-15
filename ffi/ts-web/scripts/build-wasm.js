@@ -236,6 +236,7 @@ function buildMcl() {
   console.log('Building mcl library for WASM...');
   const mclDir = path.join(NAVIO_CORE_DIR, 'src/bls/mcl');
 
+  // Use CYBOZU_MINIMUM_EXCEPTION as per mcl's own WASM build (not CYBOZU_DONT_USE_EXCEPTION)
   const mclBuildCmd = [
     'emcc',
     '-O3',
@@ -246,8 +247,9 @@ function buildMcl() {
     '-DMCL_VINT_FIXED_BUFFER',
     '-DMCL_DONT_USE_OPENSSL',
     '-DMCL_DONT_USE_XBYAK',
-    '-DCYBOZU_DONT_USE_EXCEPTION',
+    '-DCYBOZU_MINIMUM_EXCEPTION',
     `-I${mclDir}/include`,
+    `-I${mclDir}/src`,
     '-c',
     `${mclDir}/src/fp.cpp`,
     '-o', `${BUILD_DIR}/fp.o`
@@ -272,10 +274,11 @@ function buildBls() {
     '-DMCL_VINT_FIXED_BUFFER',
     '-DMCL_DONT_USE_OPENSSL',
     '-DMCL_DONT_USE_XBYAK',
-    '-DCYBOZU_DONT_USE_EXCEPTION',
+    '-DCYBOZU_MINIMUM_EXCEPTION',
     '-DBLS_ETH',
     `-I${blsDir}/include`,
     `-I${mclDir}/include`,
+    `-I${mclDir}/src`,
     '-c',
     `${blsDir}/src/bls_c384_256.cpp`,
     '-o', `${BUILD_DIR}/bls_c384_256.o`
@@ -295,6 +298,7 @@ function buildBlsct() {
     `-I${srcDir}`,
     `-I${blsDir}/include`,
     `-I${mclDir}/include`,
+    `-I${mclDir}/src`,
     `-I${srcDir}/univalue/include`,
   ].join(' ');
 
@@ -308,9 +312,8 @@ function buildBlsct() {
     '-DMCL_VINT_FIXED_BUFFER',
     '-DMCL_DONT_USE_OPENSSL',
     '-DMCL_DONT_USE_XBYAK',
-    '-DCYBOZU_DONT_USE_EXCEPTION',
+    '-DCYBOZU_MINIMUM_EXCEPTION',
     '-std=c++20',
-    '-fno-exceptions',
   ].join(' ');
 
   // Compile each source file
