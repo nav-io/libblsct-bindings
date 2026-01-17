@@ -6,7 +6,8 @@
  * - Browser/WASM: Uses WebAssembly module
  */
 
-export type { BlsctBindings, BlsctRetVal, BlsctBoolRetVal, BlsctCTxRetVal, BlsctAmountsRetVal } from './interface.js';
+export type { BlsctRetVal, BlsctBoolRetVal, BlsctCTxRetVal, BlsctAmountsRetVal } from './interface.js';
+export { BlsctChain, TxOutputType } from './interface.js';
 
 /**
  * Detect if running in Node.js environment

@@ -870,7 +870,7 @@ export function deleteRangeProofVec(rangeProofs: unknown): void {
 export function verifyRangeProofs(rangeProofs: unknown[]): BlsctBoolRetVal {
   const module = getBlsctModule();
   const result = module._verify_range_proofs(rangeProofs as unknown as number);
-  return { result: 0, value: result };
+  return { result: 0, value: result !== 0 };
 }
 
 // ============================================================================
