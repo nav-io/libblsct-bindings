@@ -11,11 +11,16 @@ module.exports = {
       'ts-jest',
       {
         useESM: true,
+        tsconfig: 'tsconfig.browser.json',
       },
     ],
   },
-  testMatch: ['**/__tests__/**/*.test.ts'],
+  // Browser tests look for *.browser.test.ts files
+  testMatch: ['**/__tests__/**/*.browser.test.ts'],
   collectCoverageFrom: ['src/**/*.ts', '!src/**/__tests__/**'],
-  coverageDirectory: 'coverage',
+  coverageDirectory: 'coverage/browser',
   verbose: true,
+  // Longer timeout for WASM initialization
+  testTimeout: 30000,
 };
+
