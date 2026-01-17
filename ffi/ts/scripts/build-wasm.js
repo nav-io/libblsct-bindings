@@ -517,7 +517,7 @@ function buildBlsct() {
       failedFiles.forEach(file => console.error(`  - ${file}`));
     }
 
-    console.log('');
+    console.log();
   }
 
   return objectFiles;
