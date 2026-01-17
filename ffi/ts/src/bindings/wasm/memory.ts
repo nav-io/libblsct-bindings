@@ -113,3 +113,57 @@ export function assertSuccess<T>(result: BlsctResult<T>, operation: string): T {
   return result.value;
 }
 
+/**
+ * Parse a BlsctCTxRetVal structure from WASM memory
+ * 
+ * Struct layout (C):
+ * typedef struct {
+ *   uint8_t result;              // 1 byte at offset 0
+ *   // padding: 3 bytes (to align pointer to 4-byte boundary in WASM32)
+ *   void* ctx;                   // 4 bytes at offset 4 (WASM32 pointer)
+ *   size_t in_amount_err_index;  // 4 bytes at offset 8 (WASM32 size_t)
+ *   size_t out_amount_err_index; // 4 bytes at offset 12 (WASM32 size_t)
+ * } BlsctCTxRetVal;
+ * 
+ * This function uses Emscripten's memory model to calculate offsets dynamically
+ * to ensure portability across different architectures.
+ */
+export function parseCTxRetVal(ptr: number): {
+  result: number;
+  ctx: number;
+  in_amount_err_index: number;
+  out_amount_err_index: number;
+} {
+  if (ptr === 0) {
+    throw new Error('Null pointer passed to parseCTxRetVal');
+  }
+
+  const module = getBlsctModule();
+  
+  // Read result field (uint8_t at offset 0)
+  const result = module.getValue(ptr, 'i8');
+  
+  // Calculate pointer offset accounting for alignment
+  // In WASM32, pointers are 4-byte aligned, so after 1-byte uint8_t, there's 3 bytes padding
+  const POINTER_SIZE = 4; // WASM32 uses 4-byte pointers
+  const SIZE_T_SIZE = 4;  // WASM32 uses 4-byte size_t
+  
+  // Align offset to pointer boundary (4 bytes in WASM32)
+  const ctxOffset = Math.ceil(1 / POINTER_SIZE) * POINTER_SIZE;
+  const ctx = module.getValue(ptr + ctxOffset, '*');
+  
+  // size_t fields follow immediately after the pointer (already aligned)
+  const inAmountErrIndexOffset = ctxOffset + POINTER_SIZE;
+  const outAmountErrIndexOffset = inAmountErrIndexOffset + SIZE_T_SIZE;
+  
+  const inAmountErrIndex = module.getValue(ptr + inAmountErrIndexOffset, 'i32');
+  const outAmountErrIndex = module.getValue(ptr + outAmountErrIndexOffset, 'i32');
+
+  return {
+    result,
+    ctx,
+    in_amount_err_index: inAmountErrIndex,
+    out_amount_err_index: outAmountErrIndex,
+  };
+}
+

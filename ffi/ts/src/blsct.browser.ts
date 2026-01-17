@@ -12,6 +12,7 @@ import {
   freePtr,
   freeObj,
   parseRetVal,
+  parseCTxRetVal,
   type BlsctResult,
 } from './bindings/wasm/index.js';
 
@@ -1021,18 +1022,9 @@ export function buildTxOut(
 export function buildCTx(txIns: unknown, txOuts: unknown): BlsctCTxRetVal {
   const module = getBlsctModule();
   const resultPtr = module._build_ctx(txIns as number, txOuts as number);
-  // Parse result struct
-  const result = module.getValue(resultPtr, 'i32');
-  const ctx = module.getValue(resultPtr + 4, '*');
-  const inAmountErrIndex = module.getValue(resultPtr + 8, 'i32');
-  const outAmountErrIndex = module.getValue(resultPtr + 12, 'i32');
+  const parsed = parseCTxRetVal(resultPtr);
   freePtr(resultPtr);
-  return {
-    result,
-    ctx,
-    in_amount_err_index: inAmountErrIndex,
-    out_amount_err_index: outAmountErrIndex,
-  };
+  return parsed;
 }
 
 export function deleteCTx(ctx: unknown): void {
