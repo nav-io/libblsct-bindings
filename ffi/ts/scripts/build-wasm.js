@@ -518,6 +518,11 @@ function buildBlsct() {
     }
 
     console.log();
+
+    // Exit with error if there are compilation failures
+    if (failedFiles.length > 0) {
+      throw new Error(`Build failed: ${failedFiles.length} file(s) failed to compile`);
+    }
   }
 
   return objectFiles;
