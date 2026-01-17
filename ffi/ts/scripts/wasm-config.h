@@ -11,7 +11,8 @@
 #define CLIENT_VERSION_MINOR 0
 #define CLIENT_VERSION_BUILD 0
 #define CLIENT_VERSION_IS_RELEASE true
-#define COPYRIGHT_YEAR 2024
+#define COPYRIGHT_YEAR_BUILD ( (__DATE__[7] - '0') * 1000 + (__DATE__[8] - '0') * 100 + (__DATE__[9] - '0') * 10 + (__DATE__[10] - '0') )
+#define COPYRIGHT_YEAR COPYRIGHT_YEAR_BUILD
 
 // Package info
 #define PACKAGE_NAME "navio-blsct-wasm"
