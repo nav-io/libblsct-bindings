@@ -145,10 +145,11 @@ export function parseCTxRetVal(ptr: number): {
   const SIZE_T_SIZE = 4;  // WASM32 uses 4-byte size_t
   
   // Read result field (uint8_t at offset 0)
-  const result = module.getValue(ptr, 'i8');
+  // Using 'i32' to read as unsigned, then mask to get uint8_t value
+  const result = module.getValue(ptr, 'i32') & 0xFF;
   
   // Calculate ctx pointer offset with proper alignment
-  // After 1-byte uint8_t, align to 4-byte boundary: (1 + 3) & ~3 = 4
+  // Align to POINTER_SIZE boundary: (offset + alignment - 1) & ~(alignment - 1)
   const ctxOffset = (1 + POINTER_SIZE - 1) & ~(POINTER_SIZE - 1);
   const ctx = module.getValue(ptr + ctxOffset, '*');
   
