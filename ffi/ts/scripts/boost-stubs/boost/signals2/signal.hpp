@@ -29,7 +29,10 @@ public:
     scoped_connection() = default;
     scoped_connection(const connection& c) : connection(c) {}
     ~scoped_connection() { disconnect(); }
-    scoped_connection& operator=(const connection& c) { return *this; }
+    scoped_connection& operator=(const connection& c) {
+        static_cast<connection&>(*this) = c;
+        return *this;
+    }
 };
 
 // Minimal signal class template
