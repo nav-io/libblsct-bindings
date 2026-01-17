@@ -63,8 +63,12 @@ export function parseRetVal(ptr: number): BlsctResult<number> {
   }
 
   const module = getBlsctModule();
+  // Must match the C-side struct layout for BlsctRetVal:
+  // struct BlsctRetVal { int8_t result; /* padding as needed */ void *value; };
+  // The value pointer is stored at an offset aligned to the pointer size.
+  const RETVAL_VALUE_PTR_OFFSET = module.HEAP32.BYTES_PER_ELEMENT;
   const result = module.getValue(ptr, 'i8');
-  const valuePtr = module.getValue(ptr + 4, '*');
+  const valuePtr = module.getValue(ptr + RETVAL_VALUE_PTR_OFFSET, '*');
 
   if (result === 0) {
     return { success: true, value: valuePtr };
