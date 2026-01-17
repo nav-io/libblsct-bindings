@@ -1,9 +1,15 @@
 blsct_wrap.cxx
 lib*.a
 build/
+build-wasm/
 core
 depends/
 dist/
 libs/
 node_modules/
 navio-core/
+emsdk/
+
+# WASM outputs (generated during build)
+wasm/*.js
+wasm/*.wasm

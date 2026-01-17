@@ -1,5 +1,5 @@
 /**
- * WASM module exports
+ * WASM bindings for browser environments
  */
 
 export {
@@ -14,17 +14,15 @@ export {
 export {
   allocString,
   readString,
-  allocBytes,
-  readBytes,
   freePtr,
   freeObj,
-  hexToBytes,
-  bytesToHex,
-  WasmPtr,
-  withStack,
   parseRetVal,
-  parseBoolRetVal,
   assertSuccess,
   type BlsctResult,
 } from './memory.js';
+
+/**
+ * Platform identifier
+ */
+export const platform = 'wasm' as const;
 

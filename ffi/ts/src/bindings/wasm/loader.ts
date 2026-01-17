@@ -72,59 +72,14 @@ export interface BlsctWasmModule {
   _verify_range_proofs(proofs: number): number;
   _serialize_range_proof(ptr: number, size: number): number;
   _deserialize_range_proof(hex: number, size: number): number;
-  _create_range_proof_vec(): number;
-  _add_to_range_proof_vec(vec: number, proof: number, size: number): void;
-  _delete_range_proof_vec(vec: number): void;
-  
-  // Amount recovery
-  _gen_amount_recovery_req(rangeProof: number, rangeProofSize: number, nonce: number): number;
-  _create_amount_recovery_req_vec(): number;
-  _add_to_amount_recovery_req_vec(vec: number, req: number): void;
-  _delete_amount_recovery_req_vec(vec: number): void;
-  _recover_amount(vec: number): number;
-  _get_amount_recovery_result_size(vec: number): number;
-  _get_amount_recovery_result_is_succ(vec: number, idx: number): boolean;
-  _get_amount_recovery_result_amount(vec: number, idx: number): bigint;
-  _get_amount_recovery_result_msg(vec: number, idx: number): number;
   
   // Transaction building
   _build_tx_in(amount: bigint, gamma: bigint, spendingKey: number, tokenId: number, outPoint: number, stakedCommitment: boolean, rbf: boolean): number;
   _build_tx_out(dest: number, amount: bigint, memo: number, tokenId: number, outputType: number, minStake: bigint): number;
-  _create_tx_in_vec(): number;
-  _add_to_tx_in_vec(vec: number, txIn: number): void;
-  _delete_tx_in_vec(vec: number): void;
-  _create_tx_out_vec(): number;
-  _add_to_tx_out_vec(vec: number, txOut: number): void;
-  _delete_tx_out_vec(vec: number): void;
   _build_ctx(txIns: number, txOuts: number): number;
   _get_ctx_id(ctx: number): number;
-  _delete_ctx(ctx: number): void;
-  
-  // Context accessors
-  _get_ctx_ins(ctx: number): number;
-  _get_ctx_ins_size(ins: number): number;
-  _get_ctx_in_at(ins: number, i: number): number;
-  _get_ctx_outs(ctx: number): number;
-  _get_ctx_outs_size(outs: number): number;
-  _get_ctx_out_at(outs: number, i: number): number;
-  
-  // CTxIn accessors
-  _get_ctx_in_prev_out_hash(ctxIn: number): number;
-  _get_ctx_in_prev_out_n(ctxIn: number): number;
-  _get_ctx_in_script_sig(ctxIn: number): number;
-  _get_ctx_in_sequence(ctxIn: number): number;
-  _get_ctx_in_script_witness(ctxIn: number): number;
-  
-  // CTxOut accessors
-  _get_ctx_out_value(ctxOut: number): bigint;
-  _get_ctx_out_script_pub_key(ctxOut: number): number;
-  _get_ctx_out_token_id(ctxOut: number): number;
-  _get_ctx_out_spending_key(ctxOut: number): number;
-  _get_ctx_out_ephemeral_key(ctxOut: number): number;
-  _get_ctx_out_blinding_key(ctxOut: number): number;
-  _get_ctx_out_range_proof(ctxOut: number): number;
-  _get_ctx_out_view_tag(ctxOut: number): number;
-  _get_ctx_out_vector_predicate(ctxOut: number): number;
+  _serialize_ctx(ctx: number): number;
+  _deserialize_ctx(hex: number): number;
   
   // Signature operations
   _sign_message(privKey: number, msg: number): number;
@@ -161,25 +116,9 @@ export interface BlsctWasmModule {
   _serialize_script(ptr: number): number;
   _deserialize_script(hex: number): number;
   
-  // Misc
-  _hex_to_malloced_buf(hex: number): number;
-  _buf_to_malloced_hex_c_str(buf: number, size: number): number;
-  _create_uint64_vec(): number;
-  _add_to_uint64_vec(vec: number, n: bigint): void;
-  _delete_uint64_vec(vec: number): void;
-  
   // Emscripten runtime methods
-  ccall: (
-    name: string,
-    returnType: string | null,
-    argTypes: string[],
-    args: unknown[]
-  ) => unknown;
-  cwrap: (
-    name: string,
-    returnType: string | null,
-    argTypes: string[]
-  ) => (...args: unknown[]) => unknown;
+  ccall: (name: string, returnType: string | null, argTypes: string[], args: unknown[]) => unknown;
+  cwrap: (name: string, returnType: string | null, argTypes: string[]) => (...args: unknown[]) => unknown;
   getValue: (ptr: number, type: string) => number;
   setValue: (ptr: number, value: number, type: string) => void;
   UTF8ToString: (ptr: number) => string;
@@ -222,13 +161,9 @@ export async function loadBlsctModule(
   }
 
   modulePromise = (async () => {
-    // Dynamic import of the Emscripten-generated module
-    // In production, this would be the actual compiled module
     let BlsctModuleFactory: BlsctModuleFactory;
 
     try {
-      // Try to import the WASM module
-      // This path will be configured based on the build output
       const moduleUrl = wasmPath || './wasm/blsct.js';
       const module = await import(/* webpackIgnore: true */ moduleUrl);
       BlsctModuleFactory = module.default || module;
@@ -250,10 +185,7 @@ export async function loadBlsctModule(
     };
 
     const instance = await BlsctModuleFactory(config);
-    
-    // Initialize the library
     instance._init();
-    
     moduleInstance = instance;
     return instance;
   })();
@@ -263,7 +195,6 @@ export async function loadBlsctModule(
 
 /**
  * Get the loaded module instance
- * Throws if module is not yet loaded
  */
 export function getBlsctModule(): BlsctWasmModule {
   if (!moduleInstance) {
@@ -282,7 +213,7 @@ export function isModuleLoaded(): boolean {
 }
 
 /**
- * Reset the module instance (useful for testing)
+ * Reset the module instance
  */
 export function resetModule(): void {
   moduleInstance = null;
