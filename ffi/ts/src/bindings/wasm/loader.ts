@@ -9,10 +9,9 @@ export interface BlsctWasmModule {
   // Memory management
   _malloc(size: number): number;
   _free(ptr: number): void;
-  
-  // Exported functions
   _init(): void;
   _free_obj(ptr: number): void;
+  _free_amounts_ret_val(ptr: number): void;
   
   // Scalar operations
   _gen_random_scalar(): number;
@@ -21,6 +20,7 @@ export interface BlsctWasmModule {
   _serialize_scalar(ptr: number): number;
   _deserialize_scalar(hex: number): number;
   _are_scalar_equal(a: number, b: number): number;
+  _scalar_to_pub_key(scalar: number): number;
   
   // Point operations
   _gen_random_point(): number;
@@ -34,13 +34,13 @@ export interface BlsctWasmModule {
   
   // Public key operations
   _gen_random_public_key(): number;
-  _scalar_to_pub_key(scalar: number): number;
   _get_public_key_point(pk: number): number;
   _point_to_public_key(point: number): number;
   
   // Double public key operations
   _gen_double_pub_key(pk1: number, pk2: number): number;
   _gen_dpk_with_keys_acct_addr(viewKey: number, spendingPubKey: number, account: bigint, address: bigint): number;
+  _dpk_to_sub_addr(dpk: number): number;
   _serialize_dpk(ptr: number): number;
   _deserialize_dpk(hex: number): number;
   
@@ -59,33 +59,120 @@ export interface BlsctWasmModule {
   
   // Sub address operations
   _gen_sub_addr_id(account: bigint, address: bigint): number;
+  _get_sub_addr_id_account(subAddrId: number): bigint;
+  _get_sub_addr_id_address(subAddrId: number): bigint;
   _derive_sub_address(viewKey: number, spendingPubKey: number, subAddrId: number): number;
   _sub_addr_to_dpk(subAddr: number): number;
-  _dpk_to_sub_addr(dpk: number): number;
   _serialize_sub_addr(ptr: number): number;
   _deserialize_sub_addr(hex: number): number;
   _serialize_sub_addr_id(ptr: number): number;
   _deserialize_sub_addr_id(hex: number): number;
   
   // Range proof operations
+  _create_range_proof_vec(): number;
+  _add_to_range_proof_vec(vec: number, rangeProof: number, size: number): void;
+  _delete_range_proof_vec(vec: number): void;
   _build_range_proof(amounts: number, nonce: number, msg: number, tokenId: number): number;
   _verify_range_proofs(proofs: number): number;
   _serialize_range_proof(ptr: number, size: number): number;
   _deserialize_range_proof(hex: number, size: number): number;
+  _get_range_proof_A(ptr: number, size: number): number;
+  _get_range_proof_A_wip(ptr: number, size: number): number;
+  _get_range_proof_B(ptr: number, size: number): number;
+  _get_range_proof_r_prime(ptr: number, size: number): number;
+  _get_range_proof_s_prime(ptr: number, size: number): number;
+  _get_range_proof_delta_prime(ptr: number, size: number): number;
+  _get_range_proof_alpha_hat(ptr: number, size: number): number;
+  _get_range_proof_tau_x(ptr: number, size: number): number;
+  
+  // Amount recovery operations
+  _gen_amount_recovery_req(rangeProof: number, size: number, nonce: number): number;
+  _create_amount_recovery_req_vec(): number;
+  _add_to_amount_recovery_req_vec(vec: number, req: number): void;
+  _delete_amount_recovery_req_vec(vec: number): void;
+  _recover_amount(vec: number): number;
+  _get_amount_recovery_result_size(vec: number): number;
+  _get_amount_recovery_result_is_succ(vec: number, i: number): boolean;
+  _get_amount_recovery_result_amount(vec: number, i: number): bigint;
+  _get_amount_recovery_result_msg(vec: number, i: number): number;
+  
+  // Out point operations
+  _gen_out_point(ctxId: number, n: number): number;
+  _get_out_point_n(ptr: number): number;
+  _serialize_out_point(ptr: number): number;
+  _deserialize_out_point(hex: number): number;
   
   // Transaction building
+  _create_tx_in_vec(): number;
+  _add_to_tx_in_vec(vec: number, txIn: number): void;
+  _delete_tx_in_vec(vec: number): void;
+  _create_tx_out_vec(): number;
+  _add_to_tx_out_vec(vec: number, txOut: number): void;
+  _delete_tx_out_vec(vec: number): void;
   _build_tx_in(amount: bigint, gamma: bigint, spendingKey: number, tokenId: number, outPoint: number, stakedCommitment: boolean, rbf: boolean): number;
   _build_tx_out(dest: number, amount: bigint, memo: number, tokenId: number, outputType: number, minStake: bigint): number;
   _build_ctx(txIns: number, txOuts: number): number;
   _get_ctx_id(ctx: number): number;
+  _get_ctx_ins(ctx: number): number;
+  _get_ctx_outs(ctx: number): number;
   _serialize_ctx(ctx: number): number;
   _deserialize_ctx(hex: number): number;
+  _serialize_ctx_id(ctxId: number): number;
+  _deserialize_ctx_id(hex: number): number;
+  _delete_ctx(ctx: number): void;
+  
+  // CTxIns accessors
+  _get_ctx_ins_size(ctxIns: number): number;
+  _get_ctx_in_at(ctxIns: number, i: number): number;
+  
+  // CTxIn accessors
+  _get_ctx_in_prev_out_hash(ctxIn: number): number;
+  _get_ctx_in_prev_out_n(ctxIn: number): number;
+  _get_ctx_in_script_sig(ctxIn: number): number;
+  _get_ctx_in_sequence(ctxIn: number): number;
+  _get_ctx_in_script_witness(ctxIn: number): number;
+  
+  // CTxOuts accessors
+  _get_ctx_outs_size(ctxOuts: number): number;
+  _get_ctx_out_at(ctxOuts: number, i: number): number;
+  
+  // CTxOut accessors
+  _get_ctx_out_value(ctxOut: number): bigint;
+  _get_ctx_out_script_pub_key(ctxOut: number): number;
+  _get_ctx_out_token_id(ctxOut: number): number;
+  _get_ctx_out_vector_predicate(ctxOut: number): number;
+  _get_ctx_out_spending_key(ctxOut: number): number;
+  _get_ctx_out_ephemeral_key(ctxOut: number): number;
+  _get_ctx_out_blinding_key(ctxOut: number): number;
+  _get_ctx_out_range_proof(ctxOut: number): number;
+  _get_ctx_out_view_tag(ctxOut: number): number;
+  
+  // TxIn accessors
+  _get_tx_in_amount(txIn: number): bigint;
+  _get_tx_in_gamma(txIn: number): bigint;
+  _get_tx_in_spending_key(txIn: number): number;
+  _get_tx_in_token_id(txIn: number): number;
+  _get_tx_in_out_point(txIn: number): number;
+  _get_tx_in_staked_commitment(txIn: number): boolean;
+  _get_tx_in_rbf(txIn: number): boolean;
+  
+  // TxOut accessors
+  _get_tx_out_destination(txOut: number): number;
+  _get_tx_out_amount(txOut: number): bigint;
+  _get_tx_out_memo(txOut: number): number;
+  _get_tx_out_token_id(txOut: number): number;
+  _get_tx_out_output_type(txOut: number): number;
+  _get_tx_out_min_stake(txOut: number): bigint;
   
   // Signature operations
   _sign_message(privKey: number, msg: number): number;
   _verify_msg_sig(pubKey: number, msg: number, signature: number): boolean;
   _serialize_signature(ptr: number): number;
   _deserialize_signature(hex: number): number;
+  
+  // Script operations
+  _serialize_script(ptr: number): number;
+  _deserialize_script(hex: number): number;
   
   // Key derivation
   _from_seed_to_child_key(seed: number): number;
@@ -96,25 +183,25 @@ export interface BlsctWasmModule {
   _from_tx_key_to_spending_key(txKey: number): number;
   _calc_priv_spending_key(blindingPubKey: number, viewKey: number, spendingKey: number, account: bigint, address: bigint): number;
   
-  // Helper functions
-  _calc_view_tag(blindingPubKey: number, viewKey: number): bigint;
-  _calc_nonce(blindingPubKey: number, viewKey: number): number;
+  // Key ID / Hash ID
   _calc_key_id(blindingPubKey: number, spendingPubKey: number, viewKey: number): number;
   _serialize_key_id(keyId: number): number;
   _deserialize_key_id(hex: number): number;
   
+  // Helper functions
+  _calc_view_tag(blindingPubKey: number, viewKey: number): bigint;
+  _calc_nonce(blindingPubKey: number, viewKey: number): number;
+  
+  // Misc utilities
+  _hex_to_malloced_buf(hex: number): number;
+  _buf_to_malloced_hex_c_str(buf: number, size: number): number;
+  _create_uint64_vec(): number;
+  _add_to_uint64_vec(vec: number, n: bigint): void;
+  _delete_uint64_vec(vec: number): void;
+  
   // Chain configuration
   _get_blsct_chain(): number;
   _set_blsct_chain(chain: number): void;
-  
-  // Out point operations
-  _gen_out_point(ctxId: number, n: number): number;
-  _serialize_out_point(ptr: number): number;
-  _deserialize_out_point(hex: number): number;
-  
-  // Script operations
-  _serialize_script(ptr: number): number;
-  _deserialize_script(hex: number): number;
   
   // Emscripten runtime methods
   ccall: (name: string, returnType: string | null, argTypes: string[], args: unknown[]) => unknown;

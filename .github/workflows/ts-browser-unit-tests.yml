@@ -1,4 +1,4 @@
-name: 'TypeScript: Run browser/WASM unit tests'
+name: 'TypeScript Browser: Run WASM unit tests'
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ on:
     paths:
       - 'ffi/ts/src/**'
       - 'ffi/ts/scripts/**'
-      - '.github/workflows/ts-web-unit-tests.yml'
+      - '.github/workflows/ts-browser-unit-tests.yml'
   pull_request:
     paths:
       - 'ffi/ts/src/**'
@@ -51,8 +51,6 @@ jobs:
         run: |
           cd ffi/ts
           npm run build:wasm
-        env:
-          BLSCT_PROD: 1
 
       - name: Build TypeScript (browser)
         run: |

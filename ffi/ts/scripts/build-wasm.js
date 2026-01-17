@@ -11,11 +11,9 @@ const { execSync, spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// Configuration
-const IS_PROD = process.env.BLSCT_PROD === '1';
-const DEV_BRANCH = 'add-missing-functionality';
-const NAVIO_CORE_REPO_PROD = 'https://github.com/nav-io/navio-core';
-const NAVIO_CORE_REPO_DEV = 'https://github.com/gogoex/navio-core';
+// Configuration - always use production navio-core master branch
+const NAVIO_CORE_REPO = 'https://github.com/nav-io/navio-core';
+const NAVIO_CORE_BRANCH = 'master';
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const NAVIO_CORE_DIR = path.resolve(ROOT_DIR, 'navio-core');
@@ -48,17 +46,14 @@ function ensureNavioCore() {
     fs.rmSync(NAVIO_CORE_DIR, { recursive: true, force: true });
   }
 
-  const repo = IS_PROD ? NAVIO_CORE_REPO_PROD : NAVIO_CORE_REPO_DEV;
-  const branch = IS_PROD ? 'master' : DEV_BRANCH;
-
-  console.log(`  Repository: ${repo}`);
-  console.log(`  Branch: ${branch}`);
+  console.log(`  Repository: ${NAVIO_CORE_REPO}`);
+  console.log(`  Branch: ${NAVIO_CORE_BRANCH}`);
 
   const cloneCmd = [
     'git', 'clone',
     '--depth', '1',
-    '--branch', branch,
-    repo,
+    '--branch', NAVIO_CORE_BRANCH,
+    NAVIO_CORE_REPO,
     NAVIO_CORE_DIR
   ];
 
@@ -156,55 +151,180 @@ const UTIL_SOURCES = [
 ];
 
 // Exported functions for the WASM module
+// These match the functions exported in ffi/ts/swig/blsct.i (from gogoex/navio-core fork)
 const EXPORTED_FUNCTIONS = [
+  // Memory management
   '_init',
   '_free_obj',
+  '_free_amounts_ret_val',
+
+  // Chain configuration
+  '_get_blsct_chain',
+  '_set_blsct_chain',
+
+  // Scalar operations
   '_gen_random_scalar',
   '_gen_scalar',
   '_scalar_to_uint64',
+  '_are_scalar_equal',
+  '_scalar_to_pub_key',
   '_serialize_scalar',
   '_deserialize_scalar',
+
+  // Point operations
   '_gen_random_point',
   '_gen_base_point',
+  '_is_valid_point',
+  '_are_point_equal',
+  '_point_from_scalar',
+  '_point_to_str',
   '_serialize_point',
   '_deserialize_point',
-  '_is_valid_point',
-  '_point_from_scalar',
+
+  // Public key operations
   '_gen_random_public_key',
-  '_scalar_to_pub_key',
+  '_get_public_key_point',
+  '_point_to_public_key',
+
+  // Double public key operations
   '_gen_double_pub_key',
+  '_gen_dpk_with_keys_acct_addr',
+  '_dpk_to_sub_addr',
   '_serialize_dpk',
   '_deserialize_dpk',
+
+  // Address operations
   '_encode_address',
   '_decode_address',
+
+  // Token ID operations
   '_gen_token_id',
+  '_gen_token_id_with_token_and_subid',
   '_gen_default_token_id',
+  '_get_token_id_token',
+  '_get_token_id_subid',
   '_serialize_token_id',
   '_deserialize_token_id',
+
+  // Sub address operations
   '_gen_sub_addr_id',
+  '_get_sub_addr_id_account',
+  '_get_sub_addr_id_address',
   '_derive_sub_address',
   '_sub_addr_to_dpk',
-  '_dpk_to_sub_addr',
   '_serialize_sub_addr',
   '_deserialize_sub_addr',
   '_serialize_sub_addr_id',
   '_deserialize_sub_addr_id',
+
+  // Range proof operations
+  '_create_range_proof_vec',
+  '_add_to_range_proof_vec',
+  '_delete_range_proof_vec',
   '_build_range_proof',
   '_verify_range_proofs',
   '_serialize_range_proof',
   '_deserialize_range_proof',
+  '_get_range_proof_A',
+  '_get_range_proof_A_wip',
+  '_get_range_proof_B',
+  '_get_range_proof_r_prime',
+  '_get_range_proof_s_prime',
+  '_get_range_proof_delta_prime',
+  '_get_range_proof_alpha_hat',
+  '_get_range_proof_tau_x',
+
+  // Amount recovery
   '_gen_amount_recovery_req',
+  '_create_amount_recovery_req_vec',
+  '_add_to_amount_recovery_req_vec',
+  '_delete_amount_recovery_req_vec',
   '_recover_amount',
+  '_get_amount_recovery_result_size',
+  '_get_amount_recovery_result_is_succ',
+  '_get_amount_recovery_result_amount',
+  '_get_amount_recovery_result_msg',
+
+  // Out point operations
+  '_gen_out_point',
+  '_get_out_point_n',
+  '_serialize_out_point',
+  '_deserialize_out_point',
+
+  // Transaction building
+  '_create_tx_in_vec',
+  '_add_to_tx_in_vec',
+  '_delete_tx_in_vec',
+  '_create_tx_out_vec',
+  '_add_to_tx_out_vec',
+  '_delete_tx_out_vec',
   '_build_tx_in',
   '_build_tx_out',
   '_build_ctx',
   '_get_ctx_id',
+  '_get_ctx_ins',
+  '_get_ctx_outs',
   '_serialize_ctx',
   '_deserialize_ctx',
+  '_delete_ctx',
+
+  // CTx ID
+  '_serialize_ctx_id',
+  '_deserialize_ctx_id',
+
+  // CTxIns accessors
+  '_get_ctx_ins_size',
+  '_get_ctx_in_at',
+
+  // CTxIn accessors
+  '_get_ctx_in_prev_out_hash',
+  '_get_ctx_in_prev_out_n',
+  '_get_ctx_in_script_sig',
+  '_get_ctx_in_sequence',
+  '_get_ctx_in_script_witness',
+
+  // CTxOuts accessors
+  '_get_ctx_outs_size',
+  '_get_ctx_out_at',
+
+  // CTxOut accessors
+  '_get_ctx_out_value',
+  '_get_ctx_out_script_pub_key',
+  '_get_ctx_out_token_id',
+  '_get_ctx_out_vector_predicate',
+  '_get_ctx_out_spending_key',
+  '_get_ctx_out_ephemeral_key',
+  '_get_ctx_out_blinding_key',
+  '_get_ctx_out_range_proof',
+  '_get_ctx_out_view_tag',
+
+  // TxIn accessors
+  '_get_tx_in_amount',
+  '_get_tx_in_gamma',
+  '_get_tx_in_spending_key',
+  '_get_tx_in_token_id',
+  '_get_tx_in_out_point',
+  '_get_tx_in_staked_commitment',
+  '_get_tx_in_rbf',
+
+  // TxOut accessors
+  '_get_tx_out_destination',
+  '_get_tx_out_amount',
+  '_get_tx_out_memo',
+  '_get_tx_out_output_type',
+  '_get_tx_out_min_stake',
+
+  // Signature operations
   '_sign_message',
   '_verify_msg_sig',
   '_serialize_signature',
   '_deserialize_signature',
+
+  // Script operations
+  '_serialize_script',
+  '_deserialize_script',
+
+  // Key derivation
   '_from_seed_to_child_key',
   '_from_child_key_to_blinding_key',
   '_from_child_key_to_token_key',
@@ -212,14 +332,24 @@ const EXPORTED_FUNCTIONS = [
   '_from_tx_key_to_view_key',
   '_from_tx_key_to_spending_key',
   '_calc_priv_spending_key',
+
+  // Key ID / Hash ID
+  '_calc_key_id',
+  '_serialize_key_id',
+  '_deserialize_key_id',
+
+  // Helper functions
   '_calc_view_tag',
   '_calc_nonce',
-  '_calc_key_id',
-  '_get_blsct_chain',
-  '_set_blsct_chain',
-  '_gen_out_point',
-  '_serialize_out_point',
-  '_deserialize_out_point',
+
+  // Misc utilities
+  '_hex_to_malloced_buf',
+  '_buf_to_malloced_hex_c_str',
+  '_create_uint64_vec',
+  '_add_to_uint64_vec',
+  '_delete_uint64_vec',
+
+  // Standard allocators
   '_malloc',
   '_free',
 ];
