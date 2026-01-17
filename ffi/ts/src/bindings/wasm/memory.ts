@@ -125,8 +125,8 @@ export function assertSuccess<T>(result: BlsctResult<T>, operation: string): T {
  *   size_t out_amount_err_index; // 4 bytes at offset 12 (WASM32 size_t)
  * } BlsctCTxRetVal;
  * 
- * This function uses Emscripten's memory model to calculate offsets dynamically
- * to ensure portability across different architectures.
+ * This function calculates field offsets based on WASM memory model
+ * to avoid hardcoded offsets that may not be portable.
  */
 export function parseCTxRetVal(ptr: number): {
   result: number;
@@ -140,16 +140,16 @@ export function parseCTxRetVal(ptr: number): {
 
   const module = getBlsctModule();
   
-  // Read result field (uint8_t at offset 0)
-  const result = module.getValue(ptr, 'i8');
-  
-  // Calculate pointer offset accounting for alignment
-  // In WASM32, pointers are 4-byte aligned, so after 1-byte uint8_t, there's 3 bytes padding
+  // WASM32 memory model
   const POINTER_SIZE = 4; // WASM32 uses 4-byte pointers
   const SIZE_T_SIZE = 4;  // WASM32 uses 4-byte size_t
   
-  // Align offset to pointer boundary (4 bytes in WASM32)
-  const ctxOffset = Math.ceil(1 / POINTER_SIZE) * POINTER_SIZE;
+  // Read result field (uint8_t at offset 0)
+  const result = module.getValue(ptr, 'i8');
+  
+  // Calculate ctx pointer offset with proper alignment
+  // After 1-byte uint8_t, align to 4-byte boundary: (1 + 3) & ~3 = 4
+  const ctxOffset = (1 + POINTER_SIZE - 1) & ~(POINTER_SIZE - 1);
   const ctx = module.getValue(ptr + ctxOffset, '*');
   
   // size_t fields follow immediately after the pointer (already aligned)
