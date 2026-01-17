@@ -53,7 +53,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Scalar } = await import('../scalar.js');
+      const { Scalar } = await import('../index.browser.js');
       const s1 = Scalar.random();
       const s2 = Scalar.random();
       expect(s1).toBeDefined();
@@ -65,7 +65,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Scalar } = await import('../scalar.js');
+      const { Scalar } = await import('../index.browser.js');
       const s = new Scalar(12345);
       expect(s.toNumber()).toBe(12345);
     });
@@ -74,7 +74,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Scalar } = await import('../scalar.js');
+      const { Scalar } = await import('../index.browser.js');
       const s1 = Scalar.random();
       const hex = s1.serialize();
       const s2 = Scalar.deserialize(hex);
@@ -85,7 +85,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Scalar } = await import('../scalar.js');
+      const { Scalar } = await import('../index.browser.js');
       const s1 = new Scalar(100);
       const s2 = new Scalar(200);
       expect(s1.equals(s1)).toBe(true);
@@ -98,7 +98,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Point } = await import('../point.js');
+      const { Point } = await import('../index.browser.js');
       const p1 = Point.random();
       const p2 = Point.random();
       expect(p1).toBeDefined();
@@ -110,7 +110,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Point } = await import('../point.js');
+      const { Point } = await import('../index.browser.js');
       const base = Point.base();
       expect(base).toBeDefined();
       expect(base.isValid()).toBe(true);
@@ -120,8 +120,8 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Point } = await import('../point.js');
-      const { Scalar } = await import('../scalar.js');
+      const { Point } = await import('../index.browser.js');
+      const { Scalar } = await import('../index.browser.js');
       const s = new Scalar(5);
       const p = Point.fromScalar(s);
       expect(p).toBeDefined();
@@ -132,7 +132,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Point } = await import('../point.js');
+      const { Point } = await import('../index.browser.js');
       const p1 = Point.random();
       const hex = p1.serialize();
       const p2 = Point.deserialize(hex);
@@ -143,7 +143,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Point } = await import('../point.js');
+      const { Point } = await import('../index.browser.js');
       const p = Point.random();
       expect(p.isValid()).toBe(true);
     });
@@ -154,7 +154,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { PublicKey } = await import('../keys/publicKey.js');
+      const { PublicKey } = await import('../index.browser.js');
       const pk1 = PublicKey.random();
       const pk2 = PublicKey.random();
       expect(pk1).toBeDefined();
@@ -166,8 +166,8 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Point } = await import('../point.js');
-      const { PublicKey } = await import('../keys/publicKey.js');
+      const { Point } = await import('../index.browser.js');
+      const { PublicKey } = await import('../index.browser.js');
       const p = Point.random();
       const pk = PublicKey.fromPoint(p);
       expect(pk.getPoint().equals(p)).toBe(true);
@@ -177,8 +177,8 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Scalar } = await import('../scalar.js');
-      const { PublicKey } = await import('../keys/publicKey.js');
+      const { Scalar } = await import('../index.browser.js');
+      const { PublicKey } = await import('../index.browser.js');
       const s = new Scalar(1);
       const pk = PublicKey.fromScalar(s);
       expect(pk).toBeDefined();
@@ -188,7 +188,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { PublicKey } = await import('../keys/publicKey.js');
+      const { PublicKey } = await import('../index.browser.js');
       const pk1 = PublicKey.random();
       const hex = pk1.serialize();
       const pk2 = PublicKey.deserialize(hex);
@@ -201,9 +201,9 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Scalar } = await import('../scalar.js');
-      const { PublicKey } = await import('../keys/publicKey.js');
-      const { Signature } = await import('../signature.js');
+      const { Scalar } = await import('../index.browser.js');
+      const { PublicKey } = await import('../index.browser.js');
+      const { Signature } = await import('../index.browser.js');
       
       const msg = 'navio';
       const privKey = Scalar.random();
@@ -218,9 +218,9 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Scalar } = await import('../scalar.js');
-      const { PublicKey } = await import('../keys/publicKey.js');
-      const { Signature } = await import('../signature.js');
+      const { Scalar } = await import('../index.browser.js');
+      const { PublicKey } = await import('../index.browser.js');
+      const { Signature } = await import('../index.browser.js');
       
       const msg = 'navio';
       const privKey = Scalar.random();
@@ -234,8 +234,8 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Scalar } = await import('../scalar.js');
-      const { Signature } = await import('../signature.js');
+      const { Scalar } = await import('../index.browser.js');
+      const { Signature } = await import('../index.browser.js');
       
       const msg = 'navio';
       const privKey = Scalar.random();
@@ -252,7 +252,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { TokenId } = await import('../tokenId.js');
+      const { TokenId } = await import('../index.browser.js');
       const tokenId = TokenId.default();
       expect(tokenId).toBeDefined();
     });
@@ -261,7 +261,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { TokenId } = await import('../tokenId.js');
+      const { TokenId } = await import('../index.browser.js');
       const token = 12345;
       const tokenId = TokenId.fromToken(token);
       expect(tokenId.getToken()).toBe(token);
@@ -272,7 +272,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { TokenId } = await import('../tokenId.js');
+      const { TokenId } = await import('../index.browser.js');
       const token = 12345;
       const subid = 67890;
       const tokenId = TokenId.fromTokenAndSubid(token, subid);
@@ -284,7 +284,7 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { TokenId } = await import('../tokenId.js');
+      const { TokenId } = await import('../index.browser.js');
       const tokenId1 = TokenId.fromToken(12345);
       const hex = tokenId1.serialize();
       const tokenId2 = TokenId.deserialize(hex);
@@ -298,9 +298,9 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Point } = await import('../point.js');
-      const { TokenId } = await import('../tokenId.js');
-      const { RangeProof } = await import('../rangeProof.js');
+      const { Point } = await import('../index.browser.js');
+      const { TokenId } = await import('../index.browser.js');
+      const { RangeProof } = await import('../index.browser.js');
       
       const amounts = [123];
       const nonce = Point.random();
@@ -315,9 +315,9 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Point } = await import('../point.js');
-      const { TokenId } = await import('../tokenId.js');
-      const { RangeProof } = await import('../rangeProof.js');
+      const { Point } = await import('../index.browser.js');
+      const { TokenId } = await import('../index.browser.js');
+      const { RangeProof } = await import('../index.browser.js');
       
       const amounts = [123];
       const nonce = Point.random();
@@ -333,9 +333,9 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { Point } = await import('../point.js');
-      const { TokenId } = await import('../tokenId.js');
-      const { RangeProof } = await import('../rangeProof.js');
+      const { Point } = await import('../index.browser.js');
+      const { TokenId } = await import('../index.browser.js');
+      const { RangeProof } = await import('../index.browser.js');
       
       const amounts = [123];
       const nonce = Point.random();
@@ -354,8 +354,8 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { DoublePublicKey } = await import('../keys/doublePublicKey.js');
-      const { Address } = await import('../address.js');
+      const { DoublePublicKey } = await import('../index.browser.js');
+      const { Address } = await import('../index.browser.js');
       const { Bech32 } = await import('../blsct.browser.js');
       
       const dpk = new DoublePublicKey();
@@ -368,8 +368,8 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { DoublePublicKey } = await import('../keys/doublePublicKey.js');
-      const { Address } = await import('../address.js');
+      const { DoublePublicKey } = await import('../index.browser.js');
+      const { Address } = await import('../index.browser.js');
       const { Bech32 } = await import('../blsct.browser.js');
       
       const dpk1 = new DoublePublicKey();
@@ -384,11 +384,11 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { TxIn } = await import('../txIn.js');
-      const { Scalar } = await import('../scalar.js');
-      const { TokenId } = await import('../tokenId.js');
-      const { OutPoint } = await import('../outPoint.js');
-      const { CTxId } = await import('../ctxId.js');
+      const { TxIn } = await import('../index.browser.js');
+      const { Scalar } = await import('../index.browser.js');
+      const { TokenId } = await import('../index.browser.js');
+      const { OutPoint } = await import('../index.browser.js');
+      const { CTxId } = await import('../index.browser.js');
       
       // Create a random CTxId using crypto if available
       let ctxIdHex;
@@ -416,9 +416,9 @@ describe('Browser WASM Module', () => {
       if (!wasmAvailable) {
         return;
       }
-      const { TxOut } = await import('../txOut.js');
-      const { SubAddr } = await import('../subAddr.js');
-      const { DoublePublicKey } = await import('../keys/doublePublicKey.js');
+      const { TxOut } = await import('../index.browser.js');
+      const { SubAddr } = await import('../index.browser.js');
+      const { DoublePublicKey } = await import('../index.browser.js');
       
       const subAddr = SubAddr.fromDoublePublicKey(new DoublePublicKey());
       const txOut = TxOut.generate(subAddr, 1000, 'navio');
