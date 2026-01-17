@@ -60,11 +60,11 @@ export function assertSuccess<T>(result: BlsctResult<T>, operation: string): T {
 
 // Stub functions for compatibility with WASM API
 export function allocString(_str: string): never {
-  throw new Error('allocString is not needed for Node.js bindings');
+  throw new Error('allocString is unsupported in Node.js bindings and should not be called in this environment');
 }
 
 export function readString(_ptr: number): never {
-  throw new Error('readString is not needed for Node.js bindings');
+  throw new Error('readString is unsupported in Node.js bindings and should not be called in this environment');
 }
 
 export function freePtr(_ptr: number): void {
