@@ -5,6 +5,9 @@ module.exports = {
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
+    // Map blsct imports to browser version for WASM tests
+    '^(\\.\\.?/.*/)blsct$': '$1blsct.browser',
+    '^\\./blsct$': './blsct.browser',
   },
   transform: {
     '^.+\\.tsx?$': [
