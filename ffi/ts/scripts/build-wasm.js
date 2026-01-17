@@ -506,17 +506,17 @@ function buildBlsct() {
   // Report summary of missing and failed files
   if (missingFiles.length > 0 || failedFiles.length > 0) {
     console.log('\n=== Compilation Summary ===');
-    
+
     if (missingFiles.length > 0) {
       console.log(`\nMissing source files (${missingFiles.length}):`);
       missingFiles.forEach(file => console.error(`  - ${file}`));
     }
-    
+
     if (failedFiles.length > 0) {
       console.log(`\nFailed to compile (${failedFiles.length}):`);
       failedFiles.forEach(file => console.error(`  - ${file}`));
     }
-    
+
     console.log('');
   }
 
