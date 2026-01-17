@@ -40,8 +40,6 @@ jobs:
         run: |
           cd ffi/ts
           npm run build:wasm
-        env:
-          BLSCT_PROD: 1
 
       - name: Build browser TypeScript
         run: |
