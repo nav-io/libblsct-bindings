@@ -17,6 +17,7 @@ export {
   freePtr,
   freeObj,
   parseRetVal,
+  parseCTxRetVal,
   assertSuccess,
   type BlsctResult,
 } from './memory.js';
