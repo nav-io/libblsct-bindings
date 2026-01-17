@@ -13,7 +13,23 @@ module.exports = {
       'ts-jest',
       {
         useESM: true,
-        tsconfig: 'tsconfig.browser.json',
+        tsconfig: {
+          target: 'ES2021',
+          module: 'ES2020',
+          moduleResolution: 'node',
+          isolatedModules: true,
+          lib: ['ES2021', 'DOM'],
+          strict: true,
+          noImplicitAny: true,
+          noImplicitReturns: true,
+          noImplicitThis: true,
+          esModuleInterop: true,
+          skipLibCheck: true,
+          baseUrl: '.',
+          paths: {
+            '*/blsct': ['*/blsct.browser']
+          }
+        },
       },
     ],
   },
