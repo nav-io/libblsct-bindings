@@ -508,12 +508,12 @@ function buildBlsct() {
     console.log('\n=== Compilation Summary ===');
 
     if (missingFiles.length > 0) {
-      console.log(`\nMissing source files (${missingFiles.length}):`);
+      console.error(`\nMissing source files (${missingFiles.length}):`);
       missingFiles.forEach(file => console.error(`  - ${file}`));
     }
 
     if (failedFiles.length > 0) {
-      console.log(`\nFailed to compile (${failedFiles.length}):`);
+      console.error(`\nFailed to compile (${failedFiles.length}):`);
       failedFiles.forEach(file => console.error(`  - ${file}`));
     }
 
