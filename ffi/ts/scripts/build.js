@@ -4,11 +4,11 @@ const path = require('path')
 const { spawnSync } = require('child_process')
 
 // TODO: turn this on for production builds
-const IS_PROD = false
-const DEV_BRANCH = 'add-missing-functionality'
+const IS_PROD = true
+const DEV_BRANCH = ''
 
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = '3f7805c30db897c787b9cae50a013f9c8cd20086' 
+const MASTER_SHA = 'edf9948e91c4b0d92a39b81c6de0b33ce8c9d149'
 
 const getCfg = (isProd) => {
   baseDir = path.resolve(__dirname, '..')
