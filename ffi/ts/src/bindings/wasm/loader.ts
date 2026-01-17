@@ -254,9 +254,14 @@ export async function loadBlsctModule(
       const moduleUrl = wasmPath || './wasm/blsct.js';
       const module = await import(/* webpackIgnore: true */ moduleUrl);
       BlsctModuleFactory = module.default || module;
-    } catch {
+    } catch (err) {
+      const originalMessage =
+        err instanceof Error
+          ? `${err.message}${err.stack ? `\nStack trace:\n${err.stack}` : ''}`
+          : String(err);
       throw new Error(
-        'Failed to load WASM module. Ensure the WASM files are built and accessible.'
+        'Failed to load WASM module. Ensure the WASM files are built and accessible. ' +
+          `Original error: ${originalMessage}`
       );
     }
 
