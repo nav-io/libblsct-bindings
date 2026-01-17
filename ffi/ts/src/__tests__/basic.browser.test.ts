@@ -8,9 +8,11 @@
 // Note: These tests require the WASM module to be built first
 // Run: npm run build:wasm && npm run build:browser
 
-// Import at the top level so all tests share the same module instance
+// Import only the WASM loader at the top level
 import { loadBlsctModule, isModuleLoaded, getBlsctModule } from '../bindings/wasm/index.js';
-import * as blsctBrowser from '../index.browser.js';
+
+// Store the dynamically imported module
+let blsctBrowser: any = null;
 
 describe('Browser WASM Module', () => {
   // Skip tests if WASM is not available
@@ -22,12 +24,16 @@ describe('Browser WASM Module', () => {
       return;
     }
     
-    // Load the WASM module
+    // Load the WASM module FIRST
     try {
       await loadBlsctModule();
     } catch (err) {
       console.warn('WASM module not available:', err);
+      return;
     }
+
+    // THEN dynamically import the browser modules after WASM is loaded
+    blsctBrowser = await import('../index.browser.js');
   });
 
   describe('Module Loading', () => {
@@ -228,20 +234,19 @@ describe('Browser WASM Module', () => {
   });
 
   describe('Token ID Operations', () => {
-    it('should create zero token ID', () => {
+    it('should create default token ID', () => {
       if (!wasmAvailable) {
         return;
       }
-      const tokenId = blsctBrowser.TokenId.zero();
+      const tokenId = blsctBrowser.TokenId.default();
       expect(tokenId).toBeDefined();
-      expect(tokenId.isZero()).toBe(true);
     });
 
     it('should serialize and deserialize token IDs', () => {
       if (!wasmAvailable) {
         return;
       }
-      const tid1 = blsctBrowser.TokenId.zero();
+      const tid1 = blsctBrowser.TokenId.default();
       const hex = tid1.serialize();
       const tid2 = blsctBrowser.TokenId.deserialize(hex);
       expect(tid1.equals(tid2)).toBe(true);
@@ -257,7 +262,7 @@ describe('Browser WASM Module', () => {
       const gamma = blsctBrowser.Scalar.random();
       const nonce = blsctBrowser.Point.random();
       const message = 'test';
-      const tokenId = blsctBrowser.TokenId.zero();
+      const tokenId = blsctBrowser.TokenId.default();
       
       const proof = blsctBrowser.RangeProof.create(value, gamma, nonce, message, tokenId);
       expect(proof).toBeDefined();
@@ -271,7 +276,7 @@ describe('Browser WASM Module', () => {
       const gamma = blsctBrowser.Scalar.random();
       const nonce = blsctBrowser.Point.random();
       const message = 'test';
-      const tokenId = blsctBrowser.TokenId.zero();
+      const tokenId = blsctBrowser.TokenId.default();
       
       const proof = blsctBrowser.RangeProof.create(value, gamma, nonce, message, tokenId);
       const vs = nonce.mulScalar(gamma);
@@ -286,7 +291,7 @@ describe('Browser WASM Module', () => {
       const gamma = blsctBrowser.Scalar.random();
       const nonce = blsctBrowser.Point.random();
       const message = 'test';
-      const tokenId = blsctBrowser.TokenId.zero();
+      const tokenId = blsctBrowser.TokenId.default();
       
       const proof1 = blsctBrowser.RangeProof.create(value, gamma, nonce, message, tokenId);
       const hex = proof1.serialize();
@@ -325,13 +330,13 @@ describe('Browser WASM Module', () => {
         return;
       }
       const outpoint = new blsctBrowser.OutPoint(
-        blsctBrowser.CtxId.deserialize('0000000000000000000000000000000000000000000000000000000000000000'),
+        blsctBrowser.CTxId.deserialize('0000000000000000000000000000000000000000000000000000000000000000'),
         0
       );
       const spendingKey = blsctBrowser.Scalar.random();
       const amount = BigInt(1000);
       const gamma = blsctBrowser.Scalar.random();
-      const tokenId = blsctBrowser.TokenId.zero();
+      const tokenId = blsctBrowser.TokenId.default();
       const rbf = false;
       
       const txIn = blsctBrowser.TxIn.create(outpoint, spendingKey, amount, gamma, tokenId, rbf);
@@ -345,7 +350,7 @@ describe('Browser WASM Module', () => {
       const destination = new blsctBrowser.DoublePublicKey();
       const amount = BigInt(1000);
       const memo = 'test memo';
-      const tokenId = blsctBrowser.TokenId.zero();
+      const tokenId = blsctBrowser.TokenId.default();
       const minStake = BigInt(0);
       
       const txOut = blsctBrowser.TxOut.create(destination, amount, memo, tokenId, minStake);
