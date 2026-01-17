@@ -5,12 +5,12 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use num_cpus;
 
-const IS_PROD: bool = false;
+const IS_PROD: bool = true;
 
 const NAVIO_REPO_URL_PROD: &str = "https://github.com/nav-io/navio-core";
 const NAIVO_REPO_URL_DEV: &str = "https://github.com/gogoex/navio-core";
-const NAVIO_REPO_PROD_SHA: &str = "3f7805c30db897c787b9cae50a013f9c8cd20086";
-const NAVIO_REPO_DEV_BRANCH: &str = "add-missing-functionality";
+const NAVIO_REPO_PROD_SHA: &str = "edf9948e91c4b0d92a39b81c6de0b33ce8c9d149";
+const NAVIO_REPO_DEV_BRANCH: &str = "";
 
 fn copy_dir(src_dir: &Path, dest_dir: &Path) -> io::Result<()> {
   fs::create_dir_all(dest_dir)?;
