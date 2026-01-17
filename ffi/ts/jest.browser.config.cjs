@@ -6,8 +6,7 @@ module.exports = {
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
     // Map blsct imports to browser version for WASM tests
-    '^(\\.\\.?/.*/)blsct$': '$1blsct.browser',
-    '^\\./blsct$': './blsct.browser',
+    '^(.*)/blsct$': '$1/blsct.browser',
   },
   transform: {
     '^.+\\.tsx?$': [
