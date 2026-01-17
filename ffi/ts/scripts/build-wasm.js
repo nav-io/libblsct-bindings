@@ -474,6 +474,8 @@ function buildBlsct() {
 
   // Compile each source file
   const objectFiles = [];
+  const missingFiles = [];
+  const failedFiles = [];
 
   // Compile all sources (BLSCT + utilities)
   const allSources = [...BLSCT_SOURCES, ...UTIL_SOURCES];
@@ -482,6 +484,7 @@ function buildBlsct() {
     const sourcePath = path.join(srcDir, source);
     if (!fs.existsSync(sourcePath)) {
       console.warn(`  Warning: Source file not found: ${source}`);
+      missingFiles.push(source);
       continue;
     }
 
@@ -496,6 +499,29 @@ function buildBlsct() {
       objectFiles.push(objPath);
     } catch (err) {
       console.error(`  Error compiling ${source}:`, err.stderr?.toString() || err.message);
+      failedFiles.push(source);
+    }
+  }
+
+  // Report summary of missing and failed files
+  if (missingFiles.length > 0 || failedFiles.length > 0) {
+    console.log('\n=== Compilation Summary ===');
+
+    if (missingFiles.length > 0) {
+      console.error(`\nMissing source files (${missingFiles.length}):`);
+      missingFiles.forEach(file => console.error(`  - ${file}`));
+    }
+
+    if (failedFiles.length > 0) {
+      console.error(`\nFailed to compile (${failedFiles.length}):`);
+      failedFiles.forEach(file => console.error(`  - ${file}`));
+    }
+
+    console.log();
+
+    // Exit with error if there are compilation failures
+    if (failedFiles.length > 0) {
+      throw new Error(`Build failed: ${failedFiles.length} file(s) failed to compile`);
     }
   }
 
