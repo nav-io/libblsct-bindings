@@ -45,6 +45,13 @@ function isRoot() {
   return typeof process.getuid === 'function' && process.getuid() === 0
 }
 
+// TODO: turn this on for production builds
+const IS_PROD = true
+const DEV_BRANCH = ''
+
+// git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
+const MASTER_SHA = 'edf9948e91c4b0d92a39b81c6de0b33ce8c9d149'
+
 function hasCmd(cmd) {
   try {
     execSync(`command -v ${cmd}`, { stdio: 'ignore' })
