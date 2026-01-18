@@ -1,6 +1,7 @@
 from . import blsct
 from .managed_obj import ManagedObj
 from .serializable import Serializable
+from .scalar import Scalar
 from .sub_addr import SubAddr
 from .token_id import TokenId
 from typing import Any, Optional, Literal, override, Self 
@@ -39,8 +40,12 @@ class TxOut(ManagedObj, Serializable):
     token_id: Optional[TokenId] = None,
     output_type: TxOutputType = 'Normal',
     min_stake: int = 0,
+    subtract_fee_from_amount: bool = False,
+    blinding_key: Optional[Scalar] = None,
   ):
     token_id = TokenId() if token_id is None else token_id
+    # Use provided blinding key or create a zero scalar
+    blinding_key_value = blinding_key.value() if blinding_key is not None else Scalar.zero().value()
 
     rv = blsct.build_tx_out(
       sub_addr.value(),
@@ -48,7 +53,9 @@ class TxOut(ManagedObj, Serializable):
       memo,
       token_id.value(),
       blsct.Normal if output_type == "Normal" else blsct.StakedCommitment,
-      min_stake
+      min_stake,
+      subtract_fee_from_amount,
+      blinding_key_value,
     )
     rv_result = int(rv.result)
     if rv_result != 0:

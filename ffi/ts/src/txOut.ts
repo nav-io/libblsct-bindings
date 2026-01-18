@@ -15,6 +15,7 @@ import {
 } from './blsct'
 
 import { ManagedObj } from './managedObj'
+import { Scalar } from './scalar'
 import { SubAddr } from './subAddr'
 import { TokenId } from './tokenId'
 
@@ -50,6 +51,8 @@ export class TxOut extends ManagedObj {
    * @param tokenId - The token ID associated with the output (optional).
    * @param outputType - The type of the output (default is `TxOutputType.Normal`).
    * @param minStake - The minimum stake for the output (default is 0).
+   * @param subtractFeeFromAmount - Whether to subtract fee from amount (default is false).
+   * @param blindingKey - The blinding key scalar (optional, defaults to zero scalar).
    * @returns A new `TxOut` instance.
    */
   static generate(
@@ -59,9 +62,16 @@ export class TxOut extends ManagedObj {
     tokenId?: TokenId,
     outputType: TxOutputType = TxOutputType.Normal,
     minStake: number = 0,
+    subtractFeeFromAmount: boolean = false,
+    blindingKey?: Scalar,
   ): TxOut {
     tokenId = tokenId === undefined ?
       TokenId.default() : tokenId
+
+    // Use provided blinding key or generate a zero scalar
+    const blindingKeyValue = blindingKey !== undefined 
+      ? blindingKey.value() 
+      : new Scalar(0).value()
 
     const rv = buildTxOut(
       subAddr.value(),
@@ -70,6 +80,8 @@ export class TxOut extends ManagedObj {
       tokenId.value(),
       outputType,
       minStake,
+      subtractFeeFromAmount,
+      blindingKeyValue,
     )
     if (rv.result !== 0) {
       const msg = `Failed to build TxOut. Error code = ${rv.result}`
