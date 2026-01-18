@@ -6,10 +6,10 @@ test('random', () => {
   DoublePublicKey.random()
 })
 
-test('fromPublicKeys', () => {
+test('fromViewAndSpendKeys', () => {
   const pk1 = PublicKey.random()
   const pk2 = PublicKey.random()
-  DoublePublicKey.fromPublicKeys(pk1, pk2)
+  DoublePublicKey.fromViewAndSpendKeys(pk1, pk2)
 })
 
 test('fromKeysAcctAddr', () => {

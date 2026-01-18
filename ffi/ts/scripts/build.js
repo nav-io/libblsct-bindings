@@ -4,8 +4,8 @@ const path = require('path')
 const { spawnSync } = require('child_process')
 
 // TODO: turn this on for production builds
-const IS_PROD = true
-const DEV_BRANCH = ''
+const IS_PROD = false
+const DEV_BRANCH = 'add-output-blinding-key'
 
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
 const MASTER_SHA = 'edf9948e91c4b0d92a39b81c6de0b33ce8c9d149'

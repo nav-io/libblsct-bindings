@@ -24,6 +24,8 @@ const genTxOut = (): TxOut => {
     tokenId,
     outputType,
     0,
+    false,
+    Scalar.random(),
   )
 }
 
@@ -59,6 +61,16 @@ test('getOutputType', () => {
 test('getMinStake', () => {
   const x = genTxOut()
   x.getMinStake()
+})
+
+test('getSubtractFeeFromAmount', () => {
+  const x = genTxOut()
+  x.getSubtractFeeFromAmount()
+})
+
+test('getBlindingKey', () => {
+  const x = genTxOut()
+  x.getBlindingKey()
 })
 
 test('serialize and deserialize', () => {

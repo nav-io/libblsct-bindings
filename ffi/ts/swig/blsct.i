@@ -302,6 +302,10 @@ export int are_point_equal(const BlsctPoint* a, const BlsctPoint* b);
 export BlsctRetVal* gen_base_point();
 export BlsctRetVal* gen_random_point();
 
+export BlsctPoint* scalar_muliply_point(
+    const BlsctPoint* blsct_point,
+    const BlsctScalar* blsct_scalar
+);
 export const char* point_to_str(const BlsctPoint* blsct_point);
 export BlsctPoint* point_from_scalar(const BlsctScalar* blsct_scalar);
 export int is_valid_point(const BlsctPoint* blsct_point);
@@ -466,7 +470,9 @@ export BlsctRetVal* build_tx_out(
     const char* in_memo_c_str,
     const BlsctTokenId* blsct_token_id,
     const TxOutputType output_type,
-    const uint64_t min_stake
+    const uint64_t min_stake,
+    const bool subtract_fee_from_amount,
+    const BlsctScalar* blsct_blinding_key
 );
 
 export const BlsctSubAddr* get_tx_out_destination(const BlsctTxOut* tx_out);
@@ -475,6 +481,8 @@ export const char* get_tx_out_memo(const BlsctTxOut* tx_out);
 export const BlsctTokenId* get_tx_out_token_id(const BlsctTxOut* tx_out);
 export TxOutputType get_tx_out_output_type(const BlsctTxOut* tx_out);
 export uint64_t get_tx_out_min_stake(const BlsctTxOut* tx_out);
+export bool get_tx_out_subtract_fee_from_amount(const BlsctTxOut* tx_out);
+export const BlsctScalar* get_tx_out_blinding_key(const BlsctTxOut* tx_out);
 
 // vector predicate
 export int are_vector_predicate_equal(

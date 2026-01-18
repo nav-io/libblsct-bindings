@@ -14,9 +14,9 @@ class DoublePublicKey(ManagedObj, Serializable):
   >>> from blsct import DoublePublicKey, PublicKey, Scalar
   >>> DoublePublicKey()
   DoublePublicKey(889636dce7b7706ad4...) # doctest: +SKIP
-  >>> pk1 = PublicKey()
-  >>> pk2 = PublicKey()
-  >>> DoublePublicKey.from_public_keys(pk1, pk2)
+  >>> view_key = PublicKey()
+  >>> spend_key = PublicKey()
+  >>> DoublePublicKey.from_view_and_spend_keys(view_key, spend_key)
   DoublePublicKey(8284d61a300241dcbe...) # doctest: +SKIP
   >>> vk = Scalar()
   >>> spending_pk = PublicKey()
@@ -32,13 +32,13 @@ class DoublePublicKey(ManagedObj, Serializable):
     super().__init__(obj)
 
   @classmethod
-  def from_public_keys(
+  def from_view_and_spend_keys(
     cls: Type[Self],
-    pk1: PublicKey,
-    pk2: PublicKey,
+    view_key: PublicKey,
+    spend_key: PublicKey,
   ) -> Self:
-    """Create a DoublePublicKey from two PublicKeys."""
-    rv = blsct.gen_double_pub_key(pk1.value(), pk2.value())
+    """Create a DoublePublicKey from view and spend PublicKeys."""
+    rv = blsct.gen_double_pub_key(view_key.value(), spend_key.value())
     dpk = cls(rv.value)
     blsct.free_obj(rv)
     return dpk
@@ -88,9 +88,9 @@ class DoublePublicKey(ManagedObj, Serializable):
   @override
   @classmethod
   def default_obj(cls: Type[Self]) -> Self:
-    pk1 = PublicKey()
-    pk2 = PublicKey()
-    tmp = DoublePublicKey.from_public_keys(pk1, pk2)
+    view_key = PublicKey()
+    spend_key = PublicKey()
+    tmp = DoublePublicKey.from_view_and_spend_keys(view_key, spend_key)
     obj = tmp.move()
     return obj
 

@@ -9,12 +9,15 @@ import {
   getTxOutTokenId,
   getTxOutOutputType,
   getTxOutMinStake,
+  getTxOutSubtractFeeFromAmount,
+  getTxOutBlindingKey,
   hexToMallocedBuf,
   toHex,
   TxOutputType,
 } from './blsct'
 
 import { ManagedObj } from './managedObj'
+import { Scalar } from './scalar'
 import { SubAddr } from './subAddr'
 import { TokenId } from './tokenId'
 
@@ -50,6 +53,8 @@ export class TxOut extends ManagedObj {
    * @param tokenId - The token ID associated with the output (optional).
    * @param outputType - The type of the output (default is `TxOutputType.Normal`).
    * @param minStake - The minimum stake for the output (default is 0).
+   * @param subtractFeeFromAmount - Whether to subtract the fee from the amount (default is false).
+   * @param blindingKey - An optional blinding key for the output.
    * @returns A new `TxOut` instance.
    */
   static generate(
@@ -59,9 +64,14 @@ export class TxOut extends ManagedObj {
     tokenId?: TokenId,
     outputType: TxOutputType = TxOutputType.Normal,
     minStake: number = 0,
+    subtractFeeFromAmount: boolean = false,
+    blindingKey?:Scalar,
   ): TxOut {
     tokenId = tokenId === undefined ?
       TokenId.default() : tokenId
+
+    blindingKey = blindingKey === undefined ?
+      Scalar.random() : blindingKey
 
     const rv = buildTxOut(
       subAddr.value(),
@@ -70,6 +80,8 @@ export class TxOut extends ManagedObj {
       tokenId.value(),
       outputType,
       minStake,
+      subtractFeeFromAmount,
+      blindingKey.value(),
     )
     if (rv.result !== 0) {
       const msg = `Failed to build TxOut. Error code = ${rv.result}`
@@ -128,6 +140,21 @@ export class TxOut extends ManagedObj {
    */
   getMinStake(): number {
     return getTxOutMinStake(this.value())
+  }
+
+  /** Returns whether the fee is subtracted from the amount of the transaction output.
+   * @returns `true` if the fee is subtracted from the amount, `false` otherwise. 
+   */
+  getSubtractFeeFromAmount(): boolean {
+    return getTxOutSubtractFeeFromAmount(this.value())
+  }
+
+  /** Returns the blinding key associated with the transaction output.
+   * @returns The blinding key associated with the transaction output.
+   */
+  getBlindingKey(): Scalar {
+    const obj = getTxOutBlindingKey(this.value())
+    return Scalar.fromObj(obj)
   }
 
   /** Returns a deep copy of the instance.

@@ -49,12 +49,12 @@ impl From<SubAddr> for DoublePublicKey {
 impl DoublePublicKey {
   impl_value!(BlsctDoublePubKey);
 
-  pub fn from_public_keys<'a>(
-    pk1: &PublicKey,
-    pk2: &PublicKey,
+  pub fn from_view_and_spend_keys<'a>(
+    view_key: &PublicKey,
+    spend_key: &PublicKey,
   ) -> Result<Self, blsct_obj::Error<'a>> {
     let rv = unsafe {
-      gen_double_pub_key(pk1.value(), pk2.value())
+      gen_double_pub_key(view_key.value(), spend_key.value())
     };
     let obj = BlsctObj::from_retval(rv)?;
     Ok(obj.into())
@@ -79,9 +79,9 @@ impl DoublePublicKey {
   }
 
   pub fn random<'a>() -> Result<Self, blsct_obj::Error<'a>> { 
-    let pk1 = PublicKey::random()?;
-    let pk2 = PublicKey::random()?;
-    Self::from_public_keys(&pk1, &pk2)
+    let view_key = PublicKey::random()?;
+    let spend_key = PublicKey::random()?;
+    Self::from_view_and_spend_key(&view_key, &spend_key)
   }
 }
 
@@ -110,12 +110,12 @@ mod tests {
   }
 
   #[test]
-  fn test_from_public_keys() {
+  fn test_from_view_and_spend_keys() {
     init();
     let a = PublicKey::random().unwrap();
     let b = PublicKey::random().unwrap();
     let _: DoublePublicKey = 
-      DoublePublicKey::from_public_keys(&a, &b).unwrap();
+      DoublePublicKey::from_view_and_spend_keys(&a, &b).unwrap();
   }
 
   #[test]
