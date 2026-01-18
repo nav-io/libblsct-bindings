@@ -48,6 +48,8 @@ class TxOut(ManagedObj, Serializable):
     blinding_key: Scalar = Scalar.random(),
   ):
     token_id = TokenId() if token_id is None else token_id
+    # Use provided blinding key or create a zero scalar
+    blinding_key_value = blinding_key.value() if blinding_key is not None else Scalar.zero().value()
 
     rv = blsct.build_tx_out(
       sub_addr.value(),
