@@ -23,7 +23,11 @@ TypeScript bindings for the `libblsct` library used by the [Navio](https://nav.i
 npm install navio-blsct
 ```
 
-For Node.js, installation includes building native C++ libraries from source (may take a few minutes).
+The npm package includes:
+- **Pre-built WASM files** for browser/WebAssembly use (no additional build required)
+- **Source code** for Node.js native bindings (automatically built during installation)
+
+For Node.js, installation includes building native C++ libraries from source (may take a few minutes). Browser/WASM usage works immediately without any build step.
 
 ## Usage
 
@@ -46,12 +50,13 @@ console.log('Point:', point.toHex());
 
 ### Browser
 
-For browser usage, import from the `/browser` subpath and initialize the WASM module first:
+For browser usage, import from the `/browser` subpath and initialize the WASM module first. **The WASM files are pre-built and included in the npm package**, so no additional build steps are needed:
 
 ```typescript
 import { loadBlsctModule, Scalar, Point, BlsctChain, setChain } from 'navio-blsct/browser';
 
 // Initialize WASM module (required before using any functions)
+// This loads the pre-built WASM files from the package
 await loadBlsctModule();
 
 // Now use the library as normal
@@ -78,6 +83,8 @@ Full API reference and usage examples are available in the [documentation](https
 
 ## Building from Source
 
+**Note:** Building from source is only needed for development or if you want to modify the library. Users installing from npm get pre-built WASM files and don't need to build them.
+
 ### Node.js (Native)
 
 ```bash
@@ -87,7 +94,9 @@ npm install
 
 ### Browser (WASM)
 
-Requires [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) to be installed and activated.
+**Pre-built WASM files are included in the npm package** for browser usage. Building from source is only needed if you're developing or modifying the library.
+
+To build WASM files from source, [Emscripten](https://emscripten.org/docs/getting_started/downloads.html) must be installed and activated:
 
 ```bash
 cd ffi/ts
@@ -95,6 +104,12 @@ npm install --ignore-scripts
 npm run build:wasm
 npm run build:browser
 ```
+
+The WASM build process:
+1. Clones the navio-core repository (if not already present)
+2. Compiles the C++ source files to WebAssembly using Emscripten
+3. Outputs `blsct.js` and `blsct.wasm` to the `wasm/` directory
+4. These files are included when publishing to npm but are gitignored during development
 
 ## License
 
