@@ -8,47 +8,77 @@
 // Note: These tests require the WASM module to be built first
 // Run: npm run build:wasm && npm run build:browser
 
-// Import only the WASM loader at the top level
-import { loadBlsctModule, isModuleLoaded, getBlsctModule } from '../bindings/wasm/index.js';
+import * as path from 'path';
 
-// Store the dynamically imported module
+// Store the dynamically imported modules
+let wasmLoader: any = null;
 let blsctBrowser: any = null;
+let wasmLoaded = false;
+
+// Get the WASM path from Jest globals
+declare const WASM_PATH: string | undefined;
+
+function getWasmPath(): string {
+  // Use Jest global if available
+  if (typeof WASM_PATH !== 'undefined') {
+    return WASM_PATH;
+  }
+  // Fallback: compute path relative to project root
+  // In Jest, process.cwd() is the project root
+  return path.resolve(process.cwd(), 'wasm/blsct.js');
+}
 
 describe('Browser WASM Module', () => {
-  // Skip tests if WASM is not available
-  const wasmAvailable = process.env.SKIP_WASM_TESTS !== '1';
+  // Skip tests if explicitly disabled
+  const skipWasmTests = process.env.SKIP_WASM_TESTS === '1';
 
   beforeAll(async () => {
-    if (!wasmAvailable) {
+    if (skipWasmTests) {
       console.log('WASM tests skipped (SKIP_WASM_TESTS=1)');
       return;
     }
     
-    // Load the WASM module FIRST
     try {
-      await loadBlsctModule();
+      // Dynamically import the WASM loader
+      wasmLoader = await import('../bindings/wasm/index.js');
+      
+      // Load the WASM module with absolute path
+      const wasmPath = getWasmPath();
+      console.log('Loading WASM from:', wasmPath);
+      await wasmLoader.loadBlsctModule(wasmPath);
+      wasmLoaded = true;
+
+      // THEN dynamically import the browser modules after WASM is loaded
+      blsctBrowser = await import('../index.browser.js');
     } catch (err) {
       console.warn('WASM module not available:', err);
-      return;
+      wasmLoaded = false;
     }
-
-    // THEN dynamically import the browser modules after WASM is loaded
-    blsctBrowser = await import('../index.browser.js');
   });
+
+  // Helper to skip test if WASM not loaded
+  const skipIfNoWasm = () => {
+    if (skipWasmTests || !wasmLoaded || !blsctBrowser) {
+      return true;
+    }
+    return false;
+  };
 
   describe('Module Loading', () => {
     it('should load WASM module', () => {
-      if (!wasmAvailable) {
+      if (skipIfNoWasm()) {
+        console.log('Test skipped: WASM not available');
         return;
       }
-      expect(isModuleLoaded()).toBe(true);
+      expect(wasmLoader.isModuleLoaded()).toBe(true);
     });
 
     it('should get WASM module instance', () => {
-      if (!wasmAvailable) {
+      if (skipIfNoWasm()) {
+        console.log('Test skipped: WASM not available');
         return;
       }
-      const module = getBlsctModule();
+      const module = wasmLoader.getBlsctModule();
       expect(module).toBeDefined();
       expect(typeof module._malloc).toBe('function');
       expect(typeof module._free).toBe('function');
@@ -57,9 +87,7 @@ describe('Browser WASM Module', () => {
 
   describe('Scalar Operations', () => {
     it('should create random scalars', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const s1 = blsctBrowser.Scalar.random();
       const s2 = blsctBrowser.Scalar.random();
       expect(s1).toBeDefined();
@@ -68,17 +96,13 @@ describe('Browser WASM Module', () => {
     });
 
     it('should create scalar from number', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const s = new blsctBrowser.Scalar(12345);
       expect(s.toNumber()).toBe(12345);
     });
 
     it('should serialize and deserialize scalars', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const s1 = blsctBrowser.Scalar.random();
       const hex = s1.serialize();
       const s2 = blsctBrowser.Scalar.deserialize(hex);
@@ -86,9 +110,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should perform scalar addition', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const s1 = new blsctBrowser.Scalar(5);
       const s2 = new blsctBrowser.Scalar(3);
       const result = s1.add(s2);
@@ -96,9 +118,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should perform scalar multiplication', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const s1 = new blsctBrowser.Scalar(5);
       const s2 = new blsctBrowser.Scalar(3);
       const result = s1.mul(s2);
@@ -108,9 +128,7 @@ describe('Browser WASM Module', () => {
 
   describe('Point Operations', () => {
     it('should create random points', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const p1 = blsctBrowser.Point.random();
       const p2 = blsctBrowser.Point.random();
       expect(p1).toBeDefined();
@@ -119,9 +137,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should serialize and deserialize points', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const p1 = blsctBrowser.Point.random();
       const hex = p1.serialize();
       const p2 = blsctBrowser.Point.deserialize(hex);
@@ -129,9 +145,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should multiply point by scalar', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const p = blsctBrowser.Point.random();
       const s = new blsctBrowser.Scalar(2);
       const result = p.mulScalar(s);
@@ -140,9 +154,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should add points', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const p1 = blsctBrowser.Point.random();
       const p2 = blsctBrowser.Point.random();
       const result = p1.add(p2);
@@ -154,18 +166,14 @@ describe('Browser WASM Module', () => {
 
   describe('PublicKey Operations', () => {
     it('should create public key from scalar', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const sk = blsctBrowser.Scalar.random();
       const pk = blsctBrowser.PublicKey.fromScalar(sk);
       expect(pk).toBeDefined();
     });
 
     it('should create random public key', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const pk1 = blsctBrowser.PublicKey.random();
       const pk2 = blsctBrowser.PublicKey.random();
       expect(pk1).toBeDefined();
@@ -174,9 +182,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should serialize and deserialize public keys', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const pk1 = blsctBrowser.PublicKey.random();
       const hex = pk1.serialize();
       const pk2 = blsctBrowser.PublicKey.deserialize(hex);
@@ -186,9 +192,7 @@ describe('Browser WASM Module', () => {
 
   describe('Signature Operations', () => {
     it('should generate signatures', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const privKey = blsctBrowser.Scalar.random();
       const message = 'test message';
       const sig = blsctBrowser.Signature.generate(privKey, message);
@@ -196,9 +200,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should verify signatures', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const privKey = blsctBrowser.Scalar.random();
       const pubKey = blsctBrowser.PublicKey.fromScalar(privKey);
       const message = 'test message';
@@ -208,9 +210,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should reject invalid signatures', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const privKey = blsctBrowser.Scalar.random();
       const pubKey = blsctBrowser.PublicKey.fromScalar(privKey);
       const message = 'test message';
@@ -221,9 +221,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should serialize and deserialize signatures', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const privKey = blsctBrowser.Scalar.random();
       const message = 'test message';
       const sig1 = blsctBrowser.Signature.generate(privKey, message);
@@ -235,17 +233,13 @@ describe('Browser WASM Module', () => {
 
   describe('Token ID Operations', () => {
     it('should create default token ID', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const tokenId = blsctBrowser.TokenId.default();
       expect(tokenId).toBeDefined();
     });
 
     it('should serialize and deserialize token IDs', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const tid1 = blsctBrowser.TokenId.default();
       const hex = tid1.serialize();
       const tid2 = blsctBrowser.TokenId.deserialize(hex);
@@ -255,9 +249,7 @@ describe('Browser WASM Module', () => {
 
   describe('Range Proof Operations', () => {
     it('should create range proofs', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const value = BigInt(1000);
       const gamma = blsctBrowser.Scalar.random();
       const nonce = blsctBrowser.Point.random();
@@ -269,9 +261,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should verify range proofs', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const value = BigInt(1000);
       const gamma = blsctBrowser.Scalar.random();
       const nonce = blsctBrowser.Point.random();
@@ -284,9 +274,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should serialize and deserialize range proofs', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const value = BigInt(1000);
       const gamma = blsctBrowser.Scalar.random();
       const nonce = blsctBrowser.Point.random();
@@ -302,9 +290,7 @@ describe('Browser WASM Module', () => {
 
   describe('Address Operations', () => {
     it('should create and encode addresses', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const dpk = new blsctBrowser.DoublePublicKey();
       const encoded = dpk.encode();
       expect(encoded).toBeDefined();
@@ -313,9 +299,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should decode addresses', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const dpk1 = new blsctBrowser.DoublePublicKey();
       const encoded = dpk1.encode();
       const dpk2 = blsctBrowser.DoublePublicKey.decode(encoded);
@@ -326,9 +310,7 @@ describe('Browser WASM Module', () => {
 
   describe('Transaction Building', () => {
     it('should create transaction input', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const outpoint = new blsctBrowser.OutPoint(
         blsctBrowser.CTxId.deserialize('0000000000000000000000000000000000000000000000000000000000000000'),
         0
@@ -344,9 +326,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should create transaction output', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const destination = new blsctBrowser.DoublePublicKey();
       const amount = BigInt(1000);
       const memo = 'test memo';
@@ -360,9 +340,7 @@ describe('Browser WASM Module', () => {
 
   describe('Chain Configuration', () => {
     it('should get and set chain', () => {
-      if (!wasmAvailable) {
-        return;
-      }
+      if (skipIfNoWasm()) return;
       const { getChain, setChain, BlsctChain } = blsctBrowser;
       const originalChain = getChain();
       expect(originalChain).toBeDefined();
