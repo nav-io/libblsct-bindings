@@ -251,7 +251,16 @@ export async function loadBlsctModule(
     let BlsctModuleFactory: BlsctModuleFactory;
 
     try {
-      const moduleUrl = wasmPath || './wasm/blsct.js';
+      let moduleUrl = wasmPath || './wasm/blsct.js';
+      
+      // In Node.js, convert absolute paths to file:// URLs for dynamic import
+      const isNode = typeof process !== 'undefined' && process.versions?.node;
+      if (isNode && moduleUrl.startsWith('/')) {
+        // Use pathToFileURL for proper file:// URL conversion
+        const { pathToFileURL } = await import('url');
+        moduleUrl = pathToFileURL(moduleUrl).href;
+      }
+      
       const module = await import(/* webpackIgnore: true */ moduleUrl);
       BlsctModuleFactory = module.default || module;
     } catch (err) {
