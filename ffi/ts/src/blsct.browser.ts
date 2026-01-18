@@ -1001,7 +1001,9 @@ export function buildTxOut(
   memo: string,
   tokenId: unknown,
   outputType: TxOutputType,
-  minStake: number
+  minStake: number,
+  subtractFeeFromAmount: boolean = false,
+  blindingKey: unknown = 0
 ): unknown {
   const module = getBlsctModule();
   const memoPtr = allocString(memo);
@@ -1012,7 +1014,9 @@ export function buildTxOut(
       memoPtr,
       tokenId as number,
       outputType,
-      BigInt(minStake)
+      BigInt(minStake),
+      subtractFeeFromAmount,
+      blindingKey as number
     );
   } finally {
     freePtr(memoPtr);
