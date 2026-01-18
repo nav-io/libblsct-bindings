@@ -15,7 +15,11 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "*/blsct": ["*/blsct.browser"]
+    }
   },
   "include": [
     "src/index.browser.ts",

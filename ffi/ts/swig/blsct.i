@@ -466,7 +466,9 @@ export BlsctRetVal* build_tx_out(
     const char* in_memo_c_str,
     const BlsctTokenId* blsct_token_id,
     const TxOutputType output_type,
-    const uint64_t min_stake
+    const uint64_t min_stake,
+    const bool subtract_fee_from_amount,
+    const BlsctScalar* blsct_blinding_key
 );
 
 export const BlsctSubAddr* get_tx_out_destination(const BlsctTxOut* tx_out);

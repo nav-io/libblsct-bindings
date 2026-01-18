@@ -110,7 +110,7 @@ export interface BlsctWasmModule {
   _add_to_tx_out_vec(vec: number, txOut: number): void;
   _delete_tx_out_vec(vec: number): void;
   _build_tx_in(amount: bigint, gamma: bigint, spendingKey: number, tokenId: number, outPoint: number, stakedCommitment: boolean, rbf: boolean): number;
-  _build_tx_out(dest: number, amount: bigint, memo: number, tokenId: number, outputType: number, minStake: bigint): number;
+  _build_tx_out(dest: number, amount: bigint, memo: number, tokenId: number, outputType: number, minStake: bigint, subtractFeeFromAmount: boolean, blindingKey: number): number;
   _build_ctx(txIns: number, txOuts: number): number;
   _get_ctx_id(ctx: number): number;
   _get_ctx_ins(ctx: number): number;
@@ -251,7 +251,16 @@ export async function loadBlsctModule(
     let BlsctModuleFactory: BlsctModuleFactory;
 
     try {
-      const moduleUrl = wasmPath || './wasm/blsct.js';
+      let moduleUrl = wasmPath || './wasm/blsct.js';
+      
+      // In Node.js, convert absolute paths to file:// URLs for dynamic import
+      const isNode = typeof process !== 'undefined' && process.versions?.node;
+      if (isNode && moduleUrl.startsWith('/')) {
+        // Use pathToFileURL for proper file:// URL conversion
+        const { pathToFileURL } = await import('url');
+        moduleUrl = pathToFileURL(moduleUrl).href;
+      }
+      
       const module = await import(/* webpackIgnore: true */ moduleUrl);
       BlsctModuleFactory = module.default || module;
     } catch (err) {

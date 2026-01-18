@@ -645,6 +645,8 @@ export const buildTxOut = (
   tokenId: any,
   outputType: TxOutputType,
   minStake: number,
+  subtractFeeFromAmount: boolean = false,
+  blindingKey: any = null,
 ): any => {
   let blsctOutputType
   switch (outputType) {
@@ -667,6 +669,8 @@ export const buildTxOut = (
     tokenId,
     blsctOutputType,
     minStake,
+    subtractFeeFromAmount,
+    blindingKey,
   )
 }
 
