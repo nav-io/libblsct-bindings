@@ -304,7 +304,7 @@ export const pointToStr = (point: any): any => {
   return blsct.point_to_str(point)
 }
 export const scalarMultiplyPoint = (point: any, scalar: any) => {
-  return blsct.scalar_muliply_point(point, scalar)
+  return blsct.scalar_muliply_point(point, scalar) // TODO fix typo when the next navio-core is released
 }
 export const serializePoint = (point: any): string => {
   return blsct.serialize_point(point)

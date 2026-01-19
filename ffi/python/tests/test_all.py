@@ -22,6 +22,7 @@ from blsct import (
   TokenId,
   TxIn,
   TxOut,
+  TxOutputType,
   TxKey,
   ViewTag,
 )
@@ -78,18 +79,18 @@ def test_public_key():
   assert(pk1 == pk3), "Deserializing serialized value should produce the original value"
 
 def test_double_public_key():
-  pk1 = PublicKey()
-  pk2 = PublicKey()
-  dpk = DoublePublicKey.from_public_keys(pk1, pk2)
+  view_key = PublicKey()
+  spend_key = PublicKey()
+  dpk = DoublePublicKey.from_view_and_spend_keys(view_key, spend_key)
   print(dpk)
 
-  with DoublePublicKey.from_public_keys(PublicKey.random(), PublicKey.random()) as dpk:
+  with DoublePublicKey.from_view_and_spend_keys(PublicKey.random(), PublicKey.random()) as dpk:
     print(dpk)
 
 def test_address():
-  pk1 = PublicKey()
-  pk2 = PublicKey()
-  dpk = DoublePublicKey.from_public_keys(pk1, pk2)
+  view_key = PublicKey()
+  spend_key = PublicKey()
+  dpk = DoublePublicKey.from_view_and_spend_keys(view_key, spend_key)
 
   enc_addr = Address.encode(dpk, AddressEncoding.Bech32)
   print(f"Address: {enc_addr}")
@@ -127,31 +128,6 @@ def test_range_proof():
   assert(rec_res1[0].is_succ == True)
   assert(rec_res1[0].message == "navcoin")
   assert(rec_res1[0].amount == 456)
-
-  # TODO fix:
-  # - amount recovery fails for multiple requests. always the last request is set to [0] and the remaining elements all becomes False
-  # - verification fails for non-default tokens 
-
-  # nonce2 = Point.random()
-  # token_id_2 = TokenId.from_token(2)
-  #
-  # rp2 = RangeProof.build([123], nonce2, 'navio', token_id_2)
-  # assert(RangeProof.verify_proofs([rp2]) == True)
-  #
-  # req2 = AmountRecoveryReq(rp2, nonce2)
-  # rec_res2 = RangeProof.recover_amounts([req2, req1])
-  # for i, x in enumerate(rec_res2):
-  #   print(f"Recovered amount {i}: {x}")
-  #
-  # assert(rec_res2[0].is_succ == True)
-  # assert(rec_res2[0].message == "navcoin")
-  # assert(rec_res2[0].amount == 456)
-  # assert(rec_res2[1].is_succ == True)
-  # assert(rec_res2[1].message == "navio")
-  # assert(rec_res2[1].amount == 123)
-  #
-  # for i, x in enumerate(res):
-  #   print(f"Recovered amount {i}: {x}")
 
 def test_sig_gen_verify():
   msg = "navio"
@@ -250,6 +226,7 @@ def test_tx():
   out_amount = 10000
   in_amount = fee + out_amount
   out_amount = out_amount
+  message = 'space_x'
 
   # tx in
   ctx_id = CTxId.deserialize(secrets.token_hex(32))
@@ -276,21 +253,29 @@ def test_tx():
   print(f"tx_in.rbf: {tx_in.get_rbf()}")
 
   # tx out
-  pk1 = PublicKey()
-  pk2 = PublicKey()
-  dpk = DoublePublicKey.from_public_keys(pk1, pk2)
+  view_key = PublicKey()
+  spend_key = PublicKey()
+  dpk = DoublePublicKey.from_view_and_spend_keys(view_key, spend_key)
   sub_addr = SubAddr.from_double_public_key(dpk)
+  blinding_key = Scalar.random()
 
   tx_out = TxOut(
     sub_addr,
     out_amount,
-    'test-txout',
+    message,
+    TokenId(),
+    "Normal",
+    0,
+    False,
+    blinding_key,
   )
   print(f"tx_out.destination: {tx_out.get_destination()}")
   print(f"tx_out.amount: {tx_out.get_amount()}")
   print(f"tx_out.memo: {tx_out.get_memo()}")
   print(f"tx_out.token_id: {tx_out.get_token_id()}")
   print(f"tx_out.min_stake: {tx_out.get_min_stake()}")
+  print(f"tx_out.subtract_fee_from_amount: {tx_out.get_subtract_fee_from_amount()}")
+  print(f"tx_out.blinding_key: {tx_out.get_blinding_key()}")
 
   # tx
   ctx = CTx(
@@ -311,7 +296,7 @@ def test_tx():
   ctx2_hex = ctx2.serialize()
   print(f"ctx2_hex: {ctx2_hex}")
 
-  assert(ctx_hex == ctx2_hex)
+  assert ctx_hex == ctx2_hex 
 
   deser_ctx_id = ctx2.get_ctx_id()
   print(f"ctx_id (deser): {deser_ctx_id}")
@@ -351,4 +336,16 @@ def test_tx():
     print(f"range_proof.delta_prime: {rp.get_delta_prime()}")
     print(f"range_proof.alpha_hat: {rp.get_alpha_hat()}")
     print(f"range_proof.tau_x: {rp.get_tau_x()}")
+
+  # test amount recovery
+  nonce = view_key.get_point().scalar_multiply(blinding_key)  
+
+  rp = ctx_outs.at(0).get_range_proof()
+  req = AmountRecoveryReq(rp, nonce)
+  amounts = RangeProof.recover_amounts([req])
+
+  assert len(amounts) == 1
+  assert amounts[0].is_succ == True
+  assert amounts[0].amount == out_amount
+  assert amounts[0].message == message
 

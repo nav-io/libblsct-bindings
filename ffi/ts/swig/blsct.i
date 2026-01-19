@@ -302,7 +302,7 @@ export int are_point_equal(const BlsctPoint* a, const BlsctPoint* b);
 export BlsctRetVal* gen_base_point();
 export BlsctRetVal* gen_random_point();
 
-export BlsctPoint* scalar_muliply_point(
+export BlsctPoint* scalar_muliply_point( # fix type after next navio-core is released
     const BlsctPoint* blsct_point,
     const BlsctScalar* blsct_scalar
 );

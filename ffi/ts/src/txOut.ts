@@ -36,6 +36,8 @@ import { TokenId } from './tokenId'
  * txOut.getMemo() // "apple"
  * txOut.getTokenId()
  * txOut.getMinStake() // 0
+ * txOut.getSubtractFeeFromAmount() // false
+ * txOut.getBlindingKey()
  * const ser = txOut.serialize()
  * const deser = TxOut.deserialize(ser)
  * ser === deser.serialize() // true
