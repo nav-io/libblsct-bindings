@@ -8,11 +8,11 @@ const IS_PROD = true
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = '3f7805c30db897c787b9cae50a013f9c8cd20086'
+const MASTER_SHA = 'c9a197570443aea09d434c4542b3231bc5410815'
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core'
-const NAVIO_CORE_BRANCH = IS_PROD ? '' : 'development-branch-name'
+const NAVIO_CORE_BRANCH = IS_PROD ? 'master' : 'development-branch-name'
 
 // Linux apt packages required for building
 const LINUX_APT_PACKAGES = [

@@ -20,7 +20,7 @@ const MASTER_SHA = 'c9a197570443aea09d434c4542b3231bc5410815';
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core';
-const NAVIO_CORE_BRANCH = IS_PROD ? 'master' : 'master';
+const NAVIO_CORE_BRANCH = IS_PROD ? 'master' : 'development-branch-name'
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const NAVIO_CORE_DIR = path.resolve(ROOT_DIR, 'navio-core');
