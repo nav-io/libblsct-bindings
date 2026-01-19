@@ -3,9 +3,16 @@ const os = require('os')
 const path = require('path')
 const { execSync, spawnSync } = require('child_process')
 
-// Configuration - always use production navio-core master branch
-const NAVIO_CORE_REPO = 'https://github.com/nav-io/navio-core'
-const NAVIO_CORE_BRANCH = 'master'
+// Configuration
+const IS_PROD = true
+
+// Production: clone by specific SHA from nav-io/navio-core
+// git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
+const MASTER_SHA = '3f7805c30db897c787b9cae50a013f9c8cd20086'
+const NAVIO_CORE_REPO = IS_PROD
+  ? 'https://github.com/nav-io/navio-core'
+  : 'https://github.com/gogoex/navio-core'
+const NAVIO_CORE_BRANCH = IS_PROD ? '' : 'development-branch-name'
 
 // Linux apt packages required for building
 const LINUX_APT_PACKAGES = [
@@ -184,6 +191,7 @@ const getCfg = () => {
     swigDir,
     stdCpp: '-std=c++20',
     navioCoreRepo: NAVIO_CORE_REPO,
+    navioCoreMasterSha: IS_PROD ? MASTER_SHA : '',
     navioCoreBranch: NAVIO_CORE_BRANCH,
     navioCoreDir,
     dependsDir,
@@ -230,14 +238,42 @@ const gitCloneNavioCore = (cfg) => {
     console.log(`No existing navio-core dir found`)
   }
 
-  const cmd = ['git', 'clone', '--depth', '1', '--branch', cfg.navioCoreBranch, cfg.navioCoreRepo, cfg.navioCoreDir]
-  console.log(`Cloning navio-core from ${cfg.navioCoreRepo} (${cfg.navioCoreBranch})...`)
+  const cmd = ['git', 'clone', '--depth', '1']
+  if (cfg.navioCoreBranch !== '') {
+    cmd.push('--branch', cfg.navioCoreBranch)
+    console.log(`Using navio-core ${cfg.navioCoreBranch} branch...`)
+  } else {
+    console.log(`Using navio-core master branch...`)
+  }
+  cmd.push(cfg.navioCoreRepo, cfg.navioCoreDir)
 
+  console.log(`Cloning navio-core from ${cfg.navioCoreRepo}...`)
   const res = spawnSync(cmd[0], cmd.slice(1), { stdio: 'inherit' })
   if (res.status !== 0) {
     throw new Error(`${cmd.join(' ')} failed: exit code ${res.status}`)
   }
   console.log(`✓ navio-core cloned successfully`)
+
+  // For production, checkout specific SHA
+  if (cfg.navioCoreMasterSha !== '') {
+    const cwd = cfg.navioCoreDir
+    {
+      const fetchCmd = ['git', 'fetch', '--depth', '1', 'origin', cfg.navioCoreMasterSha]
+      const fetchRes = spawnSync(fetchCmd[0], fetchCmd.slice(1), { cwd, stdio: 'inherit' })
+      if (fetchRes.status !== 0) {
+        throw new Error(`${fetchCmd.join(' ')} failed: exit code ${fetchRes.status}`)
+      }
+      console.log(`Fetched navio-core commit ${cfg.navioCoreMasterSha}`)
+    }
+    {
+      const checkoutCmd = ['git', 'checkout', cfg.navioCoreMasterSha]
+      const checkoutRes = spawnSync(checkoutCmd[0], checkoutCmd.slice(1), { cwd, stdio: 'inherit' })
+      if (checkoutRes.status !== 0) {
+        throw new Error(`${checkoutCmd.join(' ')} failed: exit code ${checkoutRes.status}`)
+      }
+      console.log(`Checked out navio-core commit ${cfg.navioCoreMasterSha}`)
+    }
+  }
 }
 
 const buildDepends = (cfg, numCpus) => {

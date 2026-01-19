@@ -11,9 +11,16 @@ const { execSync, spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// Configuration - always use production navio-core master branch
-const NAVIO_CORE_REPO = 'https://github.com/nav-io/navio-core';
-const NAVIO_CORE_BRANCH = 'master';
+// Configuration
+const IS_PROD = true;
+
+// Production: clone by specific SHA from nav-io/navio-core
+// git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
+const MASTER_SHA = 'c9a197570443aea09d434c4542b3231bc5410815';
+const NAVIO_CORE_REPO = IS_PROD
+  ? 'https://github.com/nav-io/navio-core'
+  : 'https://github.com/gogoex/navio-core';
+const NAVIO_CORE_BRANCH = IS_PROD ? 'master' : 'master';
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const NAVIO_CORE_DIR = path.resolve(ROOT_DIR, 'navio-core');
@@ -47,15 +54,15 @@ function ensureNavioCore() {
   }
 
   console.log(`  Repository: ${NAVIO_CORE_REPO}`);
-  console.log(`  Branch: ${NAVIO_CORE_BRANCH}`);
 
-  const cloneCmd = [
-    'git', 'clone',
-    '--depth', '1',
-    '--branch', NAVIO_CORE_BRANCH,
-    NAVIO_CORE_REPO,
-    NAVIO_CORE_DIR
-  ];
+  const cloneCmd = ['git', 'clone', '--depth', '1'];
+  if (NAVIO_CORE_BRANCH !== '') {
+    cloneCmd.push('--branch', NAVIO_CORE_BRANCH);
+    console.log(`  Branch: ${NAVIO_CORE_BRANCH}`);
+  } else {
+    console.log('  Using master branch');
+  }
+  cloneCmd.push(NAVIO_CORE_REPO, NAVIO_CORE_DIR);
 
   const result = spawnSync(cloneCmd[0], cloneCmd.slice(1), { stdio: 'inherit' });
   if (result.status !== 0) {
@@ -63,6 +70,27 @@ function ensureNavioCore() {
   }
 
   console.log('✓ navio-core cloned successfully');
+
+  // For production, checkout specific SHA
+  const navioCoreMasterSha = IS_PROD ? MASTER_SHA : '';
+  if (navioCoreMasterSha !== '') {
+    {
+      const fetchCmd = ['git', 'fetch', '--depth', '1', 'origin', navioCoreMasterSha];
+      const fetchRes = spawnSync(fetchCmd[0], fetchCmd.slice(1), { cwd: NAVIO_CORE_DIR, stdio: 'inherit' });
+      if (fetchRes.status !== 0) {
+        throw new Error(`${fetchCmd.join(' ')} failed: exit code ${fetchRes.status}`);
+      }
+      console.log(`Fetched navio-core commit ${navioCoreMasterSha}`);
+    }
+    {
+      const checkoutCmd = ['git', 'checkout', navioCoreMasterSha];
+      const checkoutRes = spawnSync(checkoutCmd[0], checkoutCmd.slice(1), { cwd: NAVIO_CORE_DIR, stdio: 'inherit' });
+      if (checkoutRes.status !== 0) {
+        throw new Error(`${checkoutCmd.join(' ')} failed: exit code ${checkoutRes.status}`);
+      }
+      console.log(`Checked out navio-core commit ${navioCoreMasterSha}`);
+    }
+  }
 }
 
 // Check if emcc is available
