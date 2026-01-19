@@ -73,7 +73,7 @@ export class TxOut extends ManagedObj {
       TokenId.default() : tokenId
 
     blindingKey = blindingKey === undefined ?
-      Scalar.random() : blindingKey
+      new Scalar(0) : blindingKey
 
     const rv = buildTxOut(
       subAddr.value(),

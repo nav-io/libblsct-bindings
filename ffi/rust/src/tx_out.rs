@@ -85,10 +85,14 @@ impl TxOut {
     output_type: TxOutputType,
     min_stake: u64,
     subtract_fee_from_amount: bool,
-    blinding_key: &Scalar,
+    opt_blinding_key: Option<&Scalar>,
   ) -> Result<Self, Error<'a>> {
     let memo_c_str = CString::new(memo)
       .map_err(|e| Error::FailedToCreateCString(e))?;
+  
+    let zero = Scalar::new(0).unwrap();
+    let blinding_key = opt_blinding_key
+      .unwrap_or_else(|| &zero);
 
     let rv = unsafe { build_tx_out(
       destination.value(),
@@ -226,7 +230,7 @@ mod tests {
       TxOutputType::Normal,
       5,
       false,
-      &blinding_key,
+      Some(&blinding_key),
     ).unwrap()
   }
 
