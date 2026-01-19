@@ -1,25 +1,29 @@
-import {
-  CTX_ID_SIZE,
-} from '../blsct'
-
 import { CTx } from '../ctx'
 import { CTxId } from '../ctxId'
+import { DoublePublicKey } from '../keys/doublePublicKey' 
 import { OutPoint } from '../outPoint'
+import { PublicKey } from '../keys/publicKey'
 import { Scalar } from '../scalar'
 import { SubAddr } from '../subAddr'
+import { TokenId } from '../tokenId'
 import { TxIn } from '../txIn'
 import { TxOut } from '../txOut'
-import { TokenId } from '../tokenId'
-import { DoublePublicKey } from '../keys/doublePublicKey'
-
 import * as crypto from 'crypto'
+import {
+  CTX_ID_SIZE,
+  TxOutputType,
+} from '../blsct'
 
-export const genCTx = (): CTx => {
+export const genCTx = (
+  outAmount: number = 10000,
+  pkViewKey: PublicKey = PublicKey.random(),
+  blindingKey: Scalar = Scalar.random(),
+  msg: string = 'navio',
+): CTx => {
   const numTxIn = 1
   const numTxOut = 1
   const defaultFee = 200000
   const fee = (numTxIn + numTxOut) * defaultFee
-  const outAmount = 10000
   const inAmount = fee + outAmount
 
   const ctxIdHex = crypto.randomBytes(CTX_ID_SIZE).toString('hex')
@@ -37,40 +41,20 @@ export const genCTx = (): CTx => {
     tokenId,
     outPoint,
   )
-  const subAddr = SubAddr.fromDoublePublicKey(new DoublePublicKey())
+  const pkSpendKey = PublicKey.random()
+  const dpk = DoublePublicKey.fromViewAndSpendKeys(pkViewKey, pkSpendKey)
+  const subAddr = SubAddr.fromDoublePublicKey(dpk)
+
   const txOut = TxOut.generate(
     subAddr,
     outAmount,
-    'navio',
+    msg,
+    tokenId,
+    TxOutputType.Normal,
+    0,
+    false,
+    blindingKey,
   )
   return CTx.generate([txIn], [txOut])
 }
-
-test('generate', () => {
-  const ctx = genCTx()
-})
-
-test('getCTxId', () => {
-  const x = genCTx()
-  x.getCTxId()
-})
-
-test('getCTxIns', () => {
-  const x = genCTx()
-  x.getCTxIns()
-})
-
-test('getCTxOuts', () => {
-  const x = genCTx()
-  x.getCTxOuts()
-})
-
-test('serialize and deserialize', () => {
-  const a = genCTx()
-  const a_hex = a.serialize()
-  const b = CTx.deserialize(a_hex)
-  const b_hex = b.serialize()
-
-  expect(a_hex).toBe(b_hex)
-})
 

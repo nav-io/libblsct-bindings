@@ -66,7 +66,7 @@ test('get_alpha_hat', () => {
 })
 
 test('get_tau_x', () => {
-      const rp = genRangeProof()
+  const rp = genRangeProof()
   rp.get_tau_x()
 })
 
@@ -91,15 +91,13 @@ test('amount recovery', () => {
     'space_x',
   )
 
-  const rp = ctx.getCTxOuts()[0].getRangeProof()
+  const ctxOuts = ctx.getCTxOuts()
+  const rp = ctxOuts.at(0).getRangeProof()
   const req = new AmountRecoveryReq(rp, nonce)
-  
   const amounts = RangeProof.recoverAmounts([req])
-  console.log(`amounts: ${amounts}`)
 
   expect(amounts.length).toBe(1)
   expect(amounts[0].isSucc).toBe(true)
   expect(amounts[0].amount).toBe(123)
-  expect(amounts[0].msg).toBe('navio')
-
+  expect(amounts[0].msg).toBe('space_x')
 })

@@ -8,6 +8,7 @@ import {
   isValidPoint,
   pointFromScalar,
   pointToStr,
+  scalarMultiplyPoint,
   serializePoint,
 } from './blsct'
 import { ManagedObj } from './managedObj'
@@ -78,6 +79,15 @@ export class Point extends ManagedObj {
    */
   static fromScalar(scalar: Scalar): Point {
     const obj = pointFromScalar(scalar.value())
+    return Point.fromObj(obj)
+  }
+
+  /** Multiplies the point by a scalar.
+   * @param scalar - The scalar to multiply the point by.
+   * @returns A new `Point` that is the result of the multiplication.
+   */
+  scalarMultiply(scalar: Scalar): Point {
+    const obj = scalarMultiplyPoint(this.value(), scalar.value())
     return Point.fromObj(obj)
   }
 

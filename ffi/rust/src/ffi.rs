@@ -231,13 +231,18 @@ pub fn serialize_out_point(blsct_out_point: *const BlsctOutPoint) -> *const c_ch
 pub fn deserialize_out_point(hex: *const c_char) -> *mut BlsctRetVal;
 
 // Point
+pub fn are_point_equal(a: *const BlsctPoint, b: *const BlsctPoint) -> c_int;
+pub fn deserialize_point(hex: *const c_char) -> *mut BlsctRetVal;
 pub fn gen_base_point() -> *mut BlsctRetVal;
 pub fn gen_random_point() -> *mut BlsctRetVal;
-pub fn deserialize_point(hex: *const c_char) -> *mut BlsctRetVal;
-pub fn are_point_equal(a: *const BlsctPoint, b: *const BlsctPoint) -> c_int;
 pub fn is_valid_point(blsct_point: *const BlsctPoint) -> c_int;
 pub fn point_from_scalar(scalar: *const BlsctScalar) -> *mut BlsctPoint;
 pub fn serialize_point(blsct_point: *const BlsctPoint) -> *const c_char;
+pub fn scalar_muliply_point(
+  /* fix typo after next navio-core is released */
+  blsct_point: *const BlsctPoint,
+  blsct_scalar: *const BlsctScalar,
+) -> *mut BlsctPoint;
 
 // PrivSpendingKey
 pub fn calc_priv_spending_key(
@@ -401,6 +406,8 @@ pub fn build_tx_out(
   blsct_token_id: *const BlsctTokenId,  
   output_type: TxOutputType,
   min_stake: u64,
+  subtract_fee_from_amount: bool,
+  blsct_blinding_key: *const BlsctScalar,
 ) -> *mut BlsctRetVal;
 
 pub fn get_tx_out_destination(tx_out: *const BlsctTxOut) -> *const BlsctSubAddr;
@@ -409,6 +416,8 @@ pub fn get_tx_out_memo(tx_out: *const BlsctTxOut) -> *const c_char;
 pub fn get_tx_out_token_id(tx_out: *const BlsctTxOut) -> *const BlsctTokenId;
 pub fn get_tx_out_output_type(tx_out: *const BlsctTxOut) -> TxOutputType;
 pub fn get_tx_out_min_stake(tx_out: *const BlsctTxOut) -> u64;
+pub fn get_tx_out_subtract_fee_from_amount(tx_out: *const BlsctTxOut) -> bool;
+pub fn get_tx_out_blinding_key(tx_out: *const BlsctTxOut) -> *const BlsctScalar;
 
 // TxKey
 pub fn from_tx_key_to_view_key(tx_key: *const BlsctScalar) -> *mut BlsctScalar;

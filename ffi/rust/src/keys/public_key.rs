@@ -53,6 +53,12 @@ impl PublicKey {
     (&point).into()
   }
 
+  pub fn get_point(&self) -> Point {
+    let blsct_point = unsafe { get_public_key_point(self.value()) };
+    let obj = BlsctObj::from_c_obj(blsct_point);
+    obj.into()
+  }
+
   impl_value!(BlsctPubKey);
 }
 

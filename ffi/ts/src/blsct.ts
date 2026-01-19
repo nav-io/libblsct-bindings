@@ -303,6 +303,9 @@ export const pointFromScalar = (scalar: any): any => {
 export const pointToStr = (point: any): any => {
   return blsct.point_to_str(point)
 }
+export const scalarMultiplyPoint = (point: any, scalar: any) => {
+  return blsct.scalar_muliply_point(point, scalar) // TODO fix typo when the next navio-core is released
+}
 export const serializePoint = (point: any): string => {
   return blsct.serialize_point(point)
 }
@@ -645,6 +648,8 @@ export const buildTxOut = (
   tokenId: any,
   outputType: TxOutputType,
   minStake: number,
+  subtract_fee_from_amount: boolean,
+  blinding_key: any,
 ): any => {
   let blsctOutputType
   switch (outputType) {
@@ -667,6 +672,8 @@ export const buildTxOut = (
     tokenId,
     blsctOutputType,
     minStake,
+    subtract_fee_from_amount,
+    blinding_key,
   )
 }
 
@@ -703,6 +710,14 @@ export const getTxOutOutputType = (obj: any): TxOutputType => {
 
 export const getTxOutMinStake = (obj: any): number => {
   return blsct.get_tx_out_min_stake(obj)
+}
+
+export const getTxOutSubtractFeeFromAmount = (obj: any): boolean => {
+  return blsct.get_tx_out_subtract_fee_from_amount(obj)
+}
+
+export const getTxOutBlindingKey = (obj: any): any => {
+  return blsct.get_tx_out_blinding_key(obj)
 }
 
 // typecast

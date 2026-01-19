@@ -135,7 +135,7 @@ export class RangeProof extends ManagedObj {
    * @param reqs - An array of `AmountRecoveryReq` instances containing range proofs and nonces.
    * @returns An array of `AmountRecoveryRes` instances containing the recovery results.
    */
-  recoverAmounts(reqs: AmountRecoveryReq[]): AmountRecoveryRes[] {
+  static recoverAmounts(reqs: AmountRecoveryReq[]): AmountRecoveryRes[] {
     const reqVec = createAmountRecoveryReqVec()
 
     for (const req of reqs) {

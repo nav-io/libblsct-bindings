@@ -1,6 +1,7 @@
 from . import blsct
 from .managed_obj import ManagedObj
 from .serializable import Serializable
+from .scalar import Scalar
 from .sub_addr import SubAddr
 from .token_id import TokenId
 from typing import Any, Optional, Literal, override, Self 
@@ -26,6 +27,10 @@ class TxOut(ManagedObj, Serializable):
   TokenId(0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff)
   >>> tx_out.get_min_stake()
   0
+  >>> tx_out.get_subtract_fee_from_amount()
+  False
+  >>> tx_out.get_blinding_key()
+  Scalar(827cc8283b488e5...) # doctest: +SKIP
   >>> ser = tx_out.serialize()
   >>> deser = TxOut.deserialize(ser)
   >>> ser == deser.serialize()
@@ -39,6 +44,8 @@ class TxOut(ManagedObj, Serializable):
     token_id: Optional[TokenId] = None,
     output_type: TxOutputType = 'Normal',
     min_stake: int = 0,
+    subtract_fee_from_amount: bool = False,
+    blinding_key: Scalar = Scalar.random(),
   ):
     token_id = TokenId() if token_id is None else token_id
 
@@ -48,7 +55,9 @@ class TxOut(ManagedObj, Serializable):
       memo,
       token_id.value(),
       blsct.Normal if output_type == "Normal" else blsct.StakedCommitment,
-      min_stake
+      min_stake,
+      subtract_fee_from_amount,
+      blinding_key.value(),
     )
     rv_result = int(rv.result)
     if rv_result != 0:
@@ -87,6 +96,15 @@ class TxOut(ManagedObj, Serializable):
   def get_min_stake(self) -> int:
     """Get the min stake of the transaction output."""
     return blsct.get_tx_out_min_stake(self.value())
+
+  def get_subtract_fee_from_amount(self) -> bool:
+    """Get the subtract fee from amount flag of the the transaction output."""
+    return blsct.get_tx_out_subtract_fee_from_amount(self.value())
+
+  def get_blinding_key(self) -> Scalar:
+    """Get the blinding key of the transaction output."""
+    obj = blsct.get_tx_out_blinding_key(self.value())
+    return Scalar.from_obj(obj)
 
   @override
   def value(self) -> Any:

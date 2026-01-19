@@ -1,4 +1,4 @@
-import { genCTx } from './ctx'
+import { genCTx } from './util'
 import { CTxIn } from '../ctxIn'
 
 const genCTxIn = (): CTxIn => {

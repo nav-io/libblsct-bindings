@@ -42,7 +42,7 @@ pub struct CTxOuts {
 }
 
 impl CTxOuts {
-  pub fn get_ctx_out_at(&self, i: usize) -> Result<CTxOut, Error> {
+  pub fn at(&self, i: usize) -> Result<CTxOut, Error> {
     if i >= self.len() {
       return Err(Error::IndexOutOfRange {
         index: i,

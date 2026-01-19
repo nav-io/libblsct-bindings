@@ -4,6 +4,7 @@ use crate::{
   ffi::{
     BLSCT_FAILURE,
     BlsctRetVal,
+    BlsctScalar,
     BlsctSubAddr,
     BlsctTxOut,
     BlsctTokenId,
@@ -16,6 +17,8 @@ use crate::{
     get_tx_out_token_id,
     get_tx_out_output_type,
     get_tx_out_min_stake,
+    get_tx_out_subtract_fee_from_amount,
+    get_tx_out_blinding_key,
     hex_to_malloced_buf,
     succ,
     TxOutputType,
@@ -26,6 +29,7 @@ use crate::{
     impl_from_retval,
     impl_value,
   },
+  scalar::Scalar,
   sub_addr::SubAddr,
   token_id::TokenId,
 };
@@ -80,6 +84,8 @@ impl TxOut {
     token_id: &TokenId,  
     output_type: TxOutputType,
     min_stake: u64,
+    subtract_fee_from_amount: bool,
+    blinding_key: &Scalar,
   ) -> Result<Self, Error<'a>> {
     let memo_c_str = CString::new(memo)
       .map_err(|e| Error::FailedToCreateCString(e))?;
@@ -91,6 +97,8 @@ impl TxOut {
       token_id.value(),
       output_type,
       min_stake,
+      subtract_fee_from_amount,
+      blinding_key.value(),
     )};
     let obj = BlsctObj::from_retval(rv)
       .map_err(|e| Error::BlsctObjError(e))?;
@@ -129,8 +137,20 @@ impl TxOut {
   pub fn output_type(&self) -> TxOutputType {
     unsafe { get_tx_out_output_type(self.value()) }
   }
+
   pub fn min_stake(&self) -> u64 {
     unsafe { get_tx_out_min_stake(self.value()) }
+  }
+
+  pub fn subtract_fee_from_amount(&self) -> bool {
+    unsafe { get_tx_out_subtract_fee_from_amount(self.value()) }
+  }
+
+  pub fn blinding_key(&self) -> Scalar {
+    let obj = unsafe {
+      get_tx_out_blinding_key(self.value())
+    } as *mut BlsctScalar;
+    BlsctObj::<Scalar, BlsctScalar>::from_c_obj(obj).into()
   }
 
   impl_value!(BlsctTxOut);
@@ -197,6 +217,7 @@ mod tests {
     };
     let token_id = TokenId::default().unwrap();
 
+    let blinding_key = Scalar::random().unwrap();
     TxOut::new(
       &destination,
       123,
@@ -204,6 +225,8 @@ mod tests {
       &token_id,  
       TxOutputType::Normal,
       5,
+      false,
+      &blinding_key,
     ).unwrap()
   }
 
@@ -212,7 +235,7 @@ mod tests {
     init();
     let sub_addr_id = SubAddrId::new(123, 456);
     let tx_out = gen_tx_out(&sub_addr_id);
-    let _dest = tx_out.destination();
+    let _ = tx_out.destination();
   }
 
   #[test]
@@ -258,6 +281,23 @@ mod tests {
     let tx_out = gen_tx_out(&sub_addr_id);
     let min_stake = tx_out.min_stake();
     assert_eq!(min_stake, 5);
+  }
+
+  #[test]
+  fn test_subtract_fee_from_amount() {
+    init();
+    let sub_addr_id = SubAddrId::new(123, 456);
+    let tx_out = gen_tx_out(&sub_addr_id);
+    let b = tx_out.subtract_fee_from_amount();
+    assert_eq!(b, false);
+  }
+
+  #[test]
+  fn test_blinding_key() {
+    init();
+    let sub_addr_id = SubAddrId::new(123, 456);
+    let tx_out = gen_tx_out(&sub_addr_id);
+    let _ = tx_out.blinding_key();
   }
 
   #[test]

@@ -38,7 +38,7 @@ from .sub_addr import SubAddr
 from .sub_addr_id import SubAddrId
 from .token_id import TokenId
 from .tx_in import TxIn
-from .tx_out import TxOut
+from .tx_out import TxOut, TxOutputType
 from .view_tag import ViewTag
 
 # inject the swig module constants, functions and etc into the current namespace 

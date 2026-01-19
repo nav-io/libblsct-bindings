@@ -57,7 +57,7 @@ Note that to reflect the changes to the python wrapper in tests, a new package n
 
 ```bash
 python -m build
-pip install dist/*.whl
+pip install dist/*.whl --force-reinstall
 pytest tests -vv -s
 ```
 

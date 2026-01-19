@@ -53,21 +53,21 @@ export class DoublePublicKey extends ManagedObj {
    * @returns A new DoublePublicKey instance with two random `PublicKey`s.
    */
   static random(): DoublePublicKey {
-    const pk1 = PublicKey.random()
-    const pk2 = PublicKey.random()
-    return DoublePublicKey.fromPublicKeys(pk1, pk2)
+    const vk = PublicKey.random()
+    const sk = PublicKey.random()
+    return DoublePublicKey.fromViewAndSpendKeys(vk, sk)
   }
 
-  /** Generates a `DoublePublicKey` from the provided `PublicKey`s.
-   * @param pk1 - The first `PublicKey`. 
-   * @param pk2 - The second `PublicKey`.
+  /** Generates a `DoublePublicKey` from the provided view key and spend keys.
+   * @param vk - the view key.
+   * @param sk - The spend key.
    * @returns A new `DoublePublicKey` instance.
    */
-  static fromPublicKeys(
-    pk1: PublicKey,
-    pk2: PublicKey,
+  static fromViewAndSpendKeys(
+    vk: PublicKey,
+    sk: PublicKey,
   ): DoublePublicKey {
-    const rv = genDoublePubKey(pk1.value(), pk2.value())
+    const rv = genDoublePubKey(vk.value(), sk.value())
     const dpk = DoublePublicKey.fromObj(rv.value)
     freeObj(rv)
     return dpk

@@ -32,6 +32,13 @@ test('isValid', () => {
   expect(a.isValid()).toBe(true)
 })
 
+test('scalarMultiplyPoint', () => {
+  const a = Point.random()
+  const s = Scalar.random()
+  const b = a.scalarMultiply(s)
+  expect(b.isValid()).toBe(true)
+})
+
 test('equals', () => {
   const a = Point.fromScalar(new Scalar(5))
   const b = Point.base()

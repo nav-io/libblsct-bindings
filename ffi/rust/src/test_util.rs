@@ -6,6 +6,7 @@ use crate::{
   keys::child_key::ChildKey,
   out_point::OutPoint,
   keys::public_key::PublicKey,
+  scalar::Scalar,
   sub_addr::SubAddr,
   sub_addr_id::SubAddrId,
   token_id::TokenId,
@@ -14,7 +15,12 @@ use crate::{
 };
 
 #[cfg(test)]
-pub fn gen_ctx() -> CTx {
+pub fn gen_ctx_actual(
+  out_amount: u64,
+  msg: &str,
+  destination: &SubAddr,
+  blinding_key: &Scalar,
+) -> CTx {
   let spending_key = ChildKey::random().unwrap()
     .to_tx_key().to_spending_key();
   let out_point = {
@@ -25,7 +31,6 @@ pub fn gen_ctx() -> CTx {
   let num_tx_out = 1;
   let default_fee = 200000;
   let fee = (num_tx_in + num_tx_out) * default_fee;
-  let out_amount = 10000;
   let in_amount = fee + out_amount;
 
   let tx_in = TxIn::new(
@@ -38,6 +43,24 @@ pub fn gen_ctx() -> CTx {
     false
   ).unwrap();
 
+  let tx_out = TxOut::new(
+    &destination, 
+    out_amount, 
+    msg,
+    &TokenId::default().unwrap(), 
+    TxOutputType::Normal,
+    0,
+    false,
+    &blinding_key,
+  ).unwrap();
+
+  let tx_ins = vec![tx_in];
+  let tx_outs = vec![tx_out];
+  CTx::new(&tx_ins, &tx_outs).unwrap()
+}
+
+#[cfg(test)]
+pub fn gen_ctx() -> CTx {
   let destination = {
     let view_key = ChildKey::random().unwrap()
       .to_tx_key().to_view_key();
@@ -49,17 +72,13 @@ pub fn gen_ctx() -> CTx {
       &sub_addr_id,
     )
   };
-  let tx_out = TxOut::new(
-    &destination, 
-    out_amount, 
-    "navio",
-    &TokenId::default().unwrap(), 
-    TxOutputType::Normal,
-    0,
-  ).unwrap();
+  let blinding_key = Scalar::random().unwrap();
 
-  let tx_ins = vec![tx_in];
-  let tx_outs = vec![tx_out];
-  CTx::new(&tx_ins, &tx_outs).unwrap()
+  gen_ctx_actual(
+    10000,
+    "navio",
+    &destination,
+    &blinding_key,
+  )
 }
 

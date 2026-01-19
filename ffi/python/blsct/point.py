@@ -61,6 +61,11 @@ class Point(ManagedObj, Serializable, PrettyPrintable):
     obj = blsct.point_from_scalar(scalar.value())
     return cls.from_obj(obj)
 
+  def scalar_multiply(self, n: Scalar) -> Self:
+    """Multiply the point by a scalar"""
+    obj = blsct.scalar_muliply_point(self.value(), n.value()) # fix typo after next navio-core is released
+    return self.from_obj(obj)
+
   def is_valid(self) -> bool:
     """Check if the point is valid"""
     return blsct.is_valid_point(self.value())
