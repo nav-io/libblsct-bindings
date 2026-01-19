@@ -185,12 +185,20 @@ impl PartialEq for CTx {
 mod tests {
   use super::*;
   use crate::{
+    amount_recovery_req::AmountRecoveryReq,
     ffi::{
       get_ctx_ins_size,
       get_ctx_outs_size,
     },
     initializer::init,
-    test_util::gen_ctx,
+    keys::{
+      double_public_key::DoublePublicKey,
+      public_key::PublicKey,
+    },
+    range_proof::RangeProof,
+    scalar::Scalar,
+    sub_addr::SubAddr,
+    test_util::{gen_ctx, gen_ctx_actual},
   };
 
   #[test]
@@ -216,6 +224,41 @@ mod tests {
     let ctx_outs = ctx.get_ctx_outs();
     let ctx_outs_size = unsafe { get_ctx_outs_size(ctx_outs.value()) };
     assert_eq!(ctx_outs_size, 3);
+  }
+
+  #[test]
+  fn test_amount_recovery() {
+    init();
+    let pk_view_key = PublicKey::random().unwrap();
+    let pk_spend_key = PublicKey::random().unwrap();
+    let dpk = DoublePublicKey::from_view_and_spend_keys(
+      &pk_view_key,
+      &pk_spend_key,
+    ).unwrap();
+    let destination: SubAddr = dpk.into();
+    let blinding_key = Scalar::random().unwrap();
+    let out_amount = 12345;
+    let msg = "space_x";
+    let ctx = gen_ctx_actual(
+      out_amount,
+      msg,
+      &destination,
+      &blinding_key,
+    );
+    let ctx_outs = ctx.get_ctx_outs();
+    let ctx_outs_size = unsafe { get_ctx_outs_size(ctx_outs.value()) };
+    assert_eq!(ctx_outs_size, 3);
+    let out0 = ctx_outs.at(0).unwrap();
+
+    let rp = out0.blsct_data_range_proof().unwrap();
+    let nonce = pk_view_key.get_point().scalar_multiply(&blinding_key);
+    let req = AmountRecoveryReq::new(&rp, &nonce); 
+    let amounts = RangeProof::recover_amounts(vec![req]).unwrap(); 
+
+    assert_eq!(amounts.len(), 1);
+    assert_eq!(amounts[0].is_succ, true);
+    assert_eq!(amounts[0].amount, out_amount);
+    assert_eq!(amounts[0].msg, msg);
   }
 
   #[test]

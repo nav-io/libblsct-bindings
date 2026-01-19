@@ -81,7 +81,7 @@ impl DoublePublicKey {
   pub fn random<'a>() -> Result<Self, blsct_obj::Error<'a>> { 
     let view_key = PublicKey::random()?;
     let spend_key = PublicKey::random()?;
-    Self::from_view_and_spend_key(&view_key, &spend_key)
+    Self::from_view_and_spend_keys(&view_key, &spend_key)
   }
 }
 

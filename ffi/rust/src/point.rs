@@ -2,14 +2,15 @@ use crate::{
   blsct_obj::{BlsctObj, self},
   blsct_serde::BlsctSerde,
   ffi::{
+    are_point_equal,
     BlsctPoint,
     BlsctRetVal,
     deserialize_point,
     gen_base_point,
     gen_random_point,
-    are_point_equal,
     is_valid_point,
     point_from_scalar,
+    scalar_muliply_point,
     serialize_point,
   },
 };
@@ -43,6 +44,15 @@ impl Point {
   pub fn is_valid(&self) -> bool {
     let b = unsafe { is_valid_point(self.obj.as_ptr()) };
     return b != 0;
+  }
+
+  pub fn scalar_multiply(&self, n: &Scalar) -> Self {
+    let blsct_point = unsafe {
+      // fix typo after next navio-core is released
+      scalar_muliply_point(self.value(), n.value())
+    };
+    let obj = BlsctObj::from_c_obj(blsct_point);
+    obj.into()
   }
 
   impl_value!(BlsctPoint);
