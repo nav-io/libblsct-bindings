@@ -1,0 +1,57 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "ES2020",
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "lib": ["ES2021", "DOM"],
+
+    "outDir": "./dist/browser",
+    "declaration": true,
+    "declarationDir": "./dist/browser",
+
+    "strict": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "*/blsct": ["*/blsct.browser"]
+    }
+  },
+  "include": [
+    "src/index.browser.ts",
+    "src/blsct.browser.ts",
+    "src/bindings/wasm/**/*",
+    "src/bindings/index.ts",
+    "src/bindings/interface.ts",
+    "src/address.ts",
+    "src/amountRecoveryReq.ts",
+    "src/amountRecoveryRes.ts",
+    "src/ctx.ts",
+    "src/ctxId.ts",
+    "src/ctxIn.ts",
+    "src/ctxIns.ts",
+    "src/ctxOut.ts",
+    "src/ctxOuts.ts",
+    "src/hashId.ts",
+    "src/managedObj.ts",
+    "src/outPoint.ts",
+    "src/point.ts",
+    "src/rangeProof.ts",
+    "src/scalar.ts",
+    "src/script.ts",
+    "src/signature.ts",
+    "src/subAddr.ts",
+    "src/subAddrId.ts",
+    "src/tokenId.ts",
+    "src/txIn.ts",
+    "src/txOut.ts",
+    "src/viewTag.ts",
+    "src/keys/**/*"
+  ],
+  "exclude": ["node_modules", "dist", "src/__tests__", "src/bindings/node"]
+}
+

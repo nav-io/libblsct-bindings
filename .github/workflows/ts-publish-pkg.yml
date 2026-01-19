@@ -4,27 +4,52 @@ on:
   workflow_dispatch:
 
 jobs:
-  build_wheels:
+  build_and_publish:
     runs-on: macos-15
 
     steps:
       - name: Install system dependencies
         run: |
-            brew install swig autoconf automake libtool pkg-config 
+          brew install swig autoconf automake libtool pkg-config git
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org/'
 
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: '3.1.51'
+          actions-cache-folder: 'emsdk-cache'
+
+      - name: Verify Emscripten installation
+        run: emcc --version
+
       - uses: actions/checkout@v4
         with:
           clean: true
 
-      - name: Build package 
+      - name: Install dependencies and build native module
         run: |
           cd ffi/ts
           npm install
+
+      - name: Build WASM module
+        run: |
+          cd ffi/ts
+          npm run build:wasm
+
+      - name: Build browser TypeScript
+        run: |
+          cd ffi/ts
+          npm run build:browser
+
+      - name: Run native tests
+        run: |
+          cd ffi/ts
+          npm test
 
       - name: Publish to npm
         run: |
@@ -32,4 +57,3 @@ jobs:
           npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-

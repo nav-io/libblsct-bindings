@@ -1,0 +1,630 @@
+#!/usr/bin/env node
+/**
+ * Build script for compiling libblsct to WebAssembly using Emscripten
+ * 
+ * Prerequisites:
+ * - Emscripten SDK installed and activated (https://emscripten.org/docs/getting_started/downloads.html)
+ * - Run `source /path/to/emsdk/emsdk_env.sh` before running this script
+ */
+
+const { execSync, spawnSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+
+// Configuration
+const IS_PROD = true;
+
+// Production: clone by specific SHA from nav-io/navio-core
+// git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
+const MASTER_SHA = 'c9a197570443aea09d434c4542b3231bc5410815';
+const NAVIO_CORE_REPO = IS_PROD
+  ? 'https://github.com/nav-io/navio-core'
+  : 'https://github.com/gogoex/navio-core';
+const NAVIO_CORE_BRANCH = IS_PROD ? 'master' : 'development-branch-name'
+
+const ROOT_DIR = path.resolve(__dirname, '..');
+const NAVIO_CORE_DIR = path.resolve(ROOT_DIR, 'navio-core');
+const WASM_OUTPUT_DIR = path.resolve(ROOT_DIR, 'wasm');
+const BUILD_DIR = path.resolve(ROOT_DIR, 'build-wasm');
+
+// Ensure output directories exist
+if (!fs.existsSync(WASM_OUTPUT_DIR)) {
+  fs.mkdirSync(WASM_OUTPUT_DIR, { recursive: true });
+}
+if (!fs.existsSync(BUILD_DIR)) {
+  fs.mkdirSync(BUILD_DIR, { recursive: true });
+}
+
+/**
+ * Clone navio-core repository if it doesn't exist
+ */
+function ensureNavioCore() {
+  const srcDir = path.join(NAVIO_CORE_DIR, 'src');
+
+  if (fs.existsSync(srcDir)) {
+    console.log('✓ navio-core already exists');
+    return;
+  }
+
+  console.log('Cloning navio-core repository...');
+
+  // Remove any partial clone
+  if (fs.existsSync(NAVIO_CORE_DIR)) {
+    fs.rmSync(NAVIO_CORE_DIR, { recursive: true, force: true });
+  }
+
+  console.log(`  Repository: ${NAVIO_CORE_REPO}`);
+
+  const cloneCmd = ['git', 'clone', '--depth', '1'];
+  if (NAVIO_CORE_BRANCH !== '') {
+    cloneCmd.push('--branch', NAVIO_CORE_BRANCH);
+    console.log(`  Branch: ${NAVIO_CORE_BRANCH}`);
+  } else {
+    console.log('  Using master branch');
+  }
+  cloneCmd.push(NAVIO_CORE_REPO, NAVIO_CORE_DIR);
+
+  const result = spawnSync(cloneCmd[0], cloneCmd.slice(1), { stdio: 'inherit' });
+  if (result.status !== 0) {
+    throw new Error(`Failed to clone navio-core: exit code ${result.status}`);
+  }
+
+  console.log('✓ navio-core cloned successfully');
+
+  // For production, checkout specific SHA
+  const navioCoreMasterSha = IS_PROD ? MASTER_SHA : '';
+  if (navioCoreMasterSha !== '') {
+    {
+      const fetchCmd = ['git', 'fetch', '--depth', '1', 'origin', navioCoreMasterSha];
+      const fetchRes = spawnSync(fetchCmd[0], fetchCmd.slice(1), { cwd: NAVIO_CORE_DIR, stdio: 'inherit' });
+      if (fetchRes.status !== 0) {
+        throw new Error(`${fetchCmd.join(' ')} failed: exit code ${fetchRes.status}`);
+      }
+      console.log(`Fetched navio-core commit ${navioCoreMasterSha}`);
+    }
+    {
+      const checkoutCmd = ['git', 'checkout', navioCoreMasterSha];
+      const checkoutRes = spawnSync(checkoutCmd[0], checkoutCmd.slice(1), { cwd: NAVIO_CORE_DIR, stdio: 'inherit' });
+      if (checkoutRes.status !== 0) {
+        throw new Error(`${checkoutCmd.join(' ')} failed: exit code ${checkoutRes.status}`);
+      }
+      console.log(`Checked out navio-core commit ${navioCoreMasterSha}`);
+    }
+  }
+}
+
+// Check if emcc is available
+function checkEmscripten() {
+  try {
+    execSync('emcc --version', { stdio: 'pipe' });
+    console.log('✓ Emscripten found');
+    return true;
+  } catch {
+    console.error('✗ Emscripten not found. Please install and activate emsdk:');
+    console.error('  1. git clone https://github.com/emscripten-core/emsdk.git');
+    console.error('  2. cd emsdk && ./emsdk install latest && ./emsdk activate latest');
+    console.error('  3. source ./emsdk_env.sh');
+    return false;
+  }
+}
+
+// Source files needed for libblsct WASM build
+const BLSCT_SOURCES = [
+  'blsct/external_api/blsct.cpp',
+  'blsct/arith/elements.cpp',
+  'blsct/arith/mcl/mcl_g1point.cpp',
+  'blsct/arith/mcl/mcl_scalar.cpp',
+  'blsct/bech32_mod.cpp',
+  'blsct/building_block/g_h_gi_hi_zero_verifier.cpp',
+  'blsct/building_block/generator_deriver.cpp',
+  'blsct/building_block/imp_inner_prod_arg.cpp',
+  'blsct/building_block/lazy_point.cpp',
+  'blsct/building_block/lazy_points.cpp',
+  'blsct/building_block/weighted_inner_prod_arg.cpp',
+  'blsct/chain.cpp',
+  'blsct/common.cpp',
+  'blsct/double_public_key.cpp',
+  'blsct/eip_2333/bls12_381_keygen.cpp',
+  'blsct/key_io.cpp',
+  'blsct/pos/helpers.cpp',
+  'blsct/pos/pos.cpp',
+  'blsct/pos/proof_logic.cpp',
+  'blsct/pos/proof.cpp',
+  'blsct/private_key.cpp',
+  'blsct/public_key.cpp',
+  'blsct/public_keys.cpp',
+  'blsct/range_proof/common.cpp',
+  'blsct/range_proof/generators.cpp',
+  'blsct/range_proof/msg_amt_cipher.cpp',
+  'blsct/range_proof/proof_base.cpp',
+  'blsct/range_proof/bulletproofs_plus/amount_recovery_request.cpp',
+  'blsct/range_proof/bulletproofs_plus/amount_recovery_result.cpp',
+  'blsct/range_proof/bulletproofs_plus/range_proof.cpp',
+  'blsct/range_proof/bulletproofs_plus/range_proof_logic.cpp',
+  'blsct/range_proof/bulletproofs_plus/range_proof_with_transcript.cpp',
+  'blsct/range_proof/bulletproofs_plus/util.cpp',
+  'blsct/set_mem_proof/set_mem_proof_prover.cpp',
+  'blsct/set_mem_proof/set_mem_proof_setup.cpp',
+  'blsct/set_mem_proof/set_mem_proof.cpp',
+  'blsct/signature.cpp',
+  'blsct/tokens/info.cpp',
+  'blsct/tokens/predicate_exec.cpp',
+  'blsct/tokens/predicate_parser.cpp',
+  'blsct/wallet/address.cpp',
+  'blsct/wallet/helpers.cpp',
+  'blsct/wallet/keyman.cpp',
+  'blsct/wallet/keyring.cpp',
+  'blsct/wallet/txfactory_base.cpp',
+  'blsct/wallet/txfactory_global.cpp',
+  'blsct/wallet/txfactory.cpp',
+  'blsct/wallet/verification.cpp',
+];
+
+// Additional source files needed from navio-core
+const UTIL_SOURCES = [
+  'crypto/hmac_sha256.cpp',
+  'crypto/hmac_sha512.cpp',
+  'crypto/ripemd160.cpp',
+  'crypto/sha256.cpp',
+  'crypto/sha512.cpp',
+  'hash.cpp',
+  'primitives/transaction.cpp',
+  'script/interpreter.cpp',
+  'script/script.cpp',
+  'script/script_error.cpp',
+  'support/cleanse.cpp',
+  'support/lockedpool.cpp',
+  'uint256.cpp',
+  'util/strencodings.cpp',
+];
+
+// Exported functions for the WASM module
+// These match the functions exported in ffi/ts/swig/blsct.i (from gogoex/navio-core fork)
+const EXPORTED_FUNCTIONS = [
+  // Memory management
+  '_init',
+  '_free_obj',
+  '_free_amounts_ret_val',
+
+  // Chain configuration
+  '_get_blsct_chain',
+  '_set_blsct_chain',
+
+  // Scalar operations
+  '_gen_random_scalar',
+  '_gen_scalar',
+  '_scalar_to_uint64',
+  '_are_scalar_equal',
+  '_scalar_to_pub_key',
+  '_serialize_scalar',
+  '_deserialize_scalar',
+
+  // Point operations
+  '_gen_random_point',
+  '_gen_base_point',
+  '_is_valid_point',
+  '_are_point_equal',
+  '_point_from_scalar',
+  '_point_to_str',
+  '_serialize_point',
+  '_deserialize_point',
+
+  // Public key operations
+  '_gen_random_public_key',
+  '_get_public_key_point',
+  '_point_to_public_key',
+
+  // Double public key operations
+  '_gen_double_pub_key',
+  '_gen_dpk_with_keys_acct_addr',
+  '_dpk_to_sub_addr',
+  '_serialize_dpk',
+  '_deserialize_dpk',
+
+  // Address operations
+  '_encode_address',
+  '_decode_address',
+
+  // Token ID operations
+  '_gen_token_id',
+  '_gen_token_id_with_token_and_subid',
+  '_gen_default_token_id',
+  '_get_token_id_token',
+  '_get_token_id_subid',
+  '_serialize_token_id',
+  '_deserialize_token_id',
+
+  // Sub address operations
+  '_gen_sub_addr_id',
+  '_get_sub_addr_id_account',
+  '_get_sub_addr_id_address',
+  '_derive_sub_address',
+  '_sub_addr_to_dpk',
+  '_serialize_sub_addr',
+  '_deserialize_sub_addr',
+  '_serialize_sub_addr_id',
+  '_deserialize_sub_addr_id',
+
+  // Range proof operations
+  '_create_range_proof_vec',
+  '_add_to_range_proof_vec',
+  '_delete_range_proof_vec',
+  '_build_range_proof',
+  '_verify_range_proofs',
+  '_serialize_range_proof',
+  '_deserialize_range_proof',
+  '_get_range_proof_A',
+  '_get_range_proof_A_wip',
+  '_get_range_proof_B',
+  '_get_range_proof_r_prime',
+  '_get_range_proof_s_prime',
+  '_get_range_proof_delta_prime',
+  '_get_range_proof_alpha_hat',
+  '_get_range_proof_tau_x',
+
+  // Amount recovery
+  '_gen_amount_recovery_req',
+  '_create_amount_recovery_req_vec',
+  '_add_to_amount_recovery_req_vec',
+  '_delete_amount_recovery_req_vec',
+  '_recover_amount',
+  '_get_amount_recovery_result_size',
+  '_get_amount_recovery_result_is_succ',
+  '_get_amount_recovery_result_amount',
+  '_get_amount_recovery_result_msg',
+
+  // Out point operations
+  '_gen_out_point',
+  '_get_out_point_n',
+  '_serialize_out_point',
+  '_deserialize_out_point',
+
+  // Transaction building
+  '_create_tx_in_vec',
+  '_add_to_tx_in_vec',
+  '_delete_tx_in_vec',
+  '_create_tx_out_vec',
+  '_add_to_tx_out_vec',
+  '_delete_tx_out_vec',
+  '_build_tx_in',
+  '_build_tx_out',
+  '_build_ctx',
+  '_get_ctx_id',
+  '_get_ctx_ins',
+  '_get_ctx_outs',
+  '_serialize_ctx',
+  '_deserialize_ctx',
+  '_delete_ctx',
+
+  // CTx ID
+  '_serialize_ctx_id',
+  '_deserialize_ctx_id',
+
+  // CTxIns accessors
+  '_get_ctx_ins_size',
+  '_get_ctx_in_at',
+
+  // CTxIn accessors
+  '_get_ctx_in_prev_out_hash',
+  '_get_ctx_in_prev_out_n',
+  '_get_ctx_in_script_sig',
+  '_get_ctx_in_sequence',
+  '_get_ctx_in_script_witness',
+
+  // CTxOuts accessors
+  '_get_ctx_outs_size',
+  '_get_ctx_out_at',
+
+  // CTxOut accessors
+  '_get_ctx_out_value',
+  '_get_ctx_out_script_pub_key',
+  '_get_ctx_out_token_id',
+  '_get_ctx_out_vector_predicate',
+  '_get_ctx_out_spending_key',
+  '_get_ctx_out_ephemeral_key',
+  '_get_ctx_out_blinding_key',
+  '_get_ctx_out_range_proof',
+  '_get_ctx_out_view_tag',
+
+  // TxIn accessors
+  '_get_tx_in_amount',
+  '_get_tx_in_gamma',
+  '_get_tx_in_spending_key',
+  '_get_tx_in_token_id',
+  '_get_tx_in_out_point',
+  '_get_tx_in_staked_commitment',
+  '_get_tx_in_rbf',
+
+  // TxOut accessors
+  '_get_tx_out_destination',
+  '_get_tx_out_amount',
+  '_get_tx_out_memo',
+  '_get_tx_out_output_type',
+  '_get_tx_out_min_stake',
+
+  // Signature operations
+  '_sign_message',
+  '_verify_msg_sig',
+  '_serialize_signature',
+  '_deserialize_signature',
+
+  // Script operations
+  '_serialize_script',
+  '_deserialize_script',
+
+  // Key derivation
+  '_from_seed_to_child_key',
+  '_from_child_key_to_blinding_key',
+  '_from_child_key_to_token_key',
+  '_from_child_key_to_tx_key',
+  '_from_tx_key_to_view_key',
+  '_from_tx_key_to_spending_key',
+  '_calc_priv_spending_key',
+
+  // Key ID / Hash ID
+  '_calc_key_id',
+  '_serialize_key_id',
+  '_deserialize_key_id',
+
+  // Helper functions
+  '_calc_view_tag',
+  '_calc_nonce',
+
+  // Misc utilities
+  '_hex_to_malloced_buf',
+  '_buf_to_malloced_hex_c_str',
+  '_create_uint64_vec',
+  '_add_to_uint64_vec',
+  '_delete_uint64_vec',
+
+  // Standard allocators
+  '_malloc',
+  '_free',
+];
+
+const EXPORTED_RUNTIME_METHODS = [
+  'ccall',
+  'cwrap',
+  'getValue',
+  'setValue',
+  'UTF8ToString',
+  'stringToUTF8',
+  'lengthBytesUTF8',
+  'stackSave',
+  'stackRestore',
+  'stackAlloc',
+];
+
+function buildMcl() {
+  console.log('Building mcl library for WASM...');
+  const mclDir = path.join(NAVIO_CORE_DIR, 'src/bls/mcl');
+
+  // Use CYBOZU_MINIMUM_EXCEPTION as per mcl's own WASM build (not CYBOZU_DONT_USE_EXCEPTION)
+  const mclBuildCmd = [
+    'emcc',
+    '-O3',
+    '-DNDEBUG',
+    '-DMCL_SIZEOF_UNIT=4',
+    '-DMCL_MAX_BIT_SIZE=384',
+    '-DMCL_USE_VINT',
+    '-DMCL_VINT_FIXED_BUFFER',
+    '-DMCL_DONT_USE_OPENSSL',
+    '-DMCL_DONT_USE_XBYAK',
+    '-DCYBOZU_MINIMUM_EXCEPTION',
+    `-I${mclDir}/include`,
+    `-I${mclDir}/src`,
+    '-c',
+    `${mclDir}/src/fp.cpp`,
+    '-o', `${BUILD_DIR}/fp.o`
+  ].join(' ');
+
+  execSync(mclBuildCmd, { stdio: 'inherit', cwd: BUILD_DIR });
+  console.log('✓ mcl built');
+}
+
+function buildBls() {
+  console.log('Building bls library for WASM...');
+  const blsDir = path.join(NAVIO_CORE_DIR, 'src/bls');
+  const mclDir = path.join(blsDir, 'mcl');
+
+  const blsBuildCmd = [
+    'emcc',
+    '-O3',
+    '-DNDEBUG',
+    '-DMCL_SIZEOF_UNIT=4',
+    '-DMCL_MAX_BIT_SIZE=384',
+    '-DMCL_USE_VINT',
+    '-DMCL_VINT_FIXED_BUFFER',
+    '-DMCL_DONT_USE_OPENSSL',
+    '-DMCL_DONT_USE_XBYAK',
+    '-DCYBOZU_MINIMUM_EXCEPTION',
+    '-DBLS_ETH',
+    `-I${blsDir}/include`,
+    `-I${mclDir}/include`,
+    `-I${mclDir}/src`,
+    '-c',
+    `${blsDir}/src/bls_c384_256.cpp`,
+    '-o', `${BUILD_DIR}/bls_c384_256.o`
+  ].join(' ');
+
+  execSync(blsBuildCmd, { stdio: 'inherit', cwd: BUILD_DIR });
+  console.log('✓ bls built');
+}
+
+function setupConfigHeader() {
+  // Copy wasm-config.h to navio-core/src as bitcoin-config.h
+  const configSrc = path.join(__dirname, 'wasm-config.h');
+  const configDest = path.join(NAVIO_CORE_DIR, 'src/config/bitcoin-config.h');
+
+  // Ensure config directory exists
+  const configDir = path.dirname(configDest);
+  if (!fs.existsSync(configDir)) {
+    fs.mkdirSync(configDir, { recursive: true });
+  }
+
+  fs.copyFileSync(configSrc, configDest);
+  console.log('✓ Config header installed');
+}
+
+function buildBlsct() {
+  console.log('Building libblsct for WASM...');
+  const srcDir = path.join(NAVIO_CORE_DIR, 'src');
+  const blsDir = path.join(srcDir, 'bls');
+  const mclDir = path.join(blsDir, 'mcl');
+
+  // Include boost stubs for WASM builds (avoids needing real Boost installation)
+  const boostStubsDir = path.join(__dirname, 'boost-stubs');
+
+  const includeFlags = [
+    `-I${boostStubsDir}`,
+    `-I${srcDir}`,
+    `-I${srcDir}/config`,
+    `-I${blsDir}/include`,
+    `-I${mclDir}/include`,
+    `-I${mclDir}/src`,
+    `-I${srcDir}/univalue/include`,
+  ].join(' ');
+
+  // Note: Do NOT use -DNDEBUG as navio-core requires assertions (util/check.h)
+  const compilerFlags = [
+    '-O3',
+    '-DHAVE_CONFIG_H',
+    '-DLIBBLSCT',
+    '-DMCL_SIZEOF_UNIT=4',
+    '-DMCL_MAX_BIT_SIZE=384',
+    '-DMCL_USE_VINT',
+    '-DMCL_VINT_FIXED_BUFFER',
+    '-DMCL_DONT_USE_OPENSSL',
+    '-DMCL_DONT_USE_XBYAK',
+    '-DCYBOZU_MINIMUM_EXCEPTION',
+    '-std=c++20',
+  ].join(' ');
+
+  // Compile each source file
+  const objectFiles = [];
+  const missingFiles = [];
+  const failedFiles = [];
+
+  // Compile all sources (BLSCT + utilities)
+  const allSources = [...BLSCT_SOURCES, ...UTIL_SOURCES];
+
+  for (const source of allSources) {
+    const sourcePath = path.join(srcDir, source);
+    if (!fs.existsSync(sourcePath)) {
+      console.warn(`  Warning: Source file not found: ${source}`);
+      missingFiles.push(source);
+      continue;
+    }
+
+    const objName = source.replace(/\//g, '_').replace('.cpp', '.o');
+    const objPath = path.join(BUILD_DIR, objName);
+
+    console.log(`  Compiling ${source}...`);
+    const cmd = `emcc ${compilerFlags} ${includeFlags} -c ${sourcePath} -o ${objPath}`;
+
+    try {
+      execSync(cmd, { stdio: 'pipe', cwd: BUILD_DIR });
+      objectFiles.push(objPath);
+    } catch (err) {
+      console.error(`  Error compiling ${source}:`, err.stderr?.toString() || err.message);
+      failedFiles.push(source);
+    }
+  }
+
+  // Report summary of missing and failed files
+  if (missingFiles.length > 0 || failedFiles.length > 0) {
+    console.log('\n=== Compilation Summary ===');
+
+    if (missingFiles.length > 0) {
+      console.error(`\nMissing source files (${missingFiles.length}):`);
+      missingFiles.forEach(file => console.error(`  - ${file}`));
+    }
+
+    if (failedFiles.length > 0) {
+      console.error(`\nFailed to compile (${failedFiles.length}):`);
+      failedFiles.forEach(file => console.error(`  - ${file}`));
+    }
+
+    console.log();
+
+    // Exit with error if there are compilation failures
+    if (failedFiles.length > 0) {
+      throw new Error(`Build failed: ${failedFiles.length} file(s) failed to compile`);
+    }
+  }
+
+  return objectFiles;
+}
+
+function linkWasm(objectFiles) {
+  console.log('Linking WASM module...');
+
+  const linkFlags = [
+    '-O3',
+    '-s', 'WASM=1',
+    '-s', 'MODULARIZE=1',
+    '-s', 'EXPORT_NAME="BlsctModule"',
+    '-s', `EXPORTED_FUNCTIONS='${JSON.stringify(EXPORTED_FUNCTIONS)}'`,
+    '-s', `EXPORTED_RUNTIME_METHODS='${JSON.stringify(EXPORTED_RUNTIME_METHODS)}'`,
+    '-s', 'ALLOW_MEMORY_GROWTH=1',
+    '-s', 'INITIAL_MEMORY=16777216',
+    '-s', 'MAXIMUM_MEMORY=1073741824',
+    '-s', 'STACK_SIZE=1048576',
+    '-s', 'ENVIRONMENT=web,worker',
+    '-s', 'FILESYSTEM=0',
+    '-s', 'SINGLE_FILE=0',
+    '--no-entry',
+  ].join(' ');
+
+  const allObjects = [
+    ...objectFiles,
+    `${BUILD_DIR}/fp.o`,
+    `${BUILD_DIR}/bls_c384_256.o`,
+  ].join(' ');
+
+  const outputJs = path.join(WASM_OUTPUT_DIR, 'blsct.js');
+  const cmd = `emcc ${linkFlags} ${allObjects} -o ${outputJs}`;
+
+  execSync(cmd, { stdio: 'inherit', cwd: BUILD_DIR });
+  console.log(`✓ WASM module created: ${outputJs}`);
+}
+
+async function main() {
+  console.log('=== Building libblsct for WebAssembly ===\n');
+
+  if (!checkEmscripten()) {
+    process.exit(1);
+  }
+
+  console.log(`\nNavio Core directory: ${NAVIO_CORE_DIR}`);
+  console.log(`WASM output directory: ${WASM_OUTPUT_DIR}`);
+  console.log(`Build directory: ${BUILD_DIR}\n`);
+
+  try {
+    // Ensure navio-core is available
+    ensureNavioCore();
+
+    // Install WASM-specific config header
+    setupConfigHeader();
+
+    buildMcl();
+    buildBls();
+    const objectFiles = buildBlsct();
+
+    if (objectFiles.length === 0) {
+      console.error('No object files were compiled. Check the source paths.');
+      process.exit(1);
+    }
+
+    linkWasm(objectFiles);
+
+    console.log('\n=== Build complete! ===');
+    console.log(`WASM files are in: ${WASM_OUTPUT_DIR}`);
+  } catch (err) {
+    console.error('\nBuild failed:', err.message);
+    process.exit(1);
+  }
+}
+
+main();
+
