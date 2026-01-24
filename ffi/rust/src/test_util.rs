@@ -51,7 +51,7 @@ pub fn gen_ctx_actual(
     TxOutputType::Normal,
     0,
     false,
-    &blinding_key,
+    Some(blinding_key),
   ).unwrap();
 
   let tx_ins = vec![tx_in];
