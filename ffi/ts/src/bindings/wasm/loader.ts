@@ -31,6 +31,7 @@ export interface BlsctWasmModule {
   _point_from_scalar(scalar: number): number;
   _are_point_equal(a: number, b: number): number;
   _point_to_str(ptr: number): number;
+  _scalar_muliply_point(point: number, scalar: number): number;
   
   // Public key operations
   _gen_random_public_key(): number;
@@ -163,6 +164,8 @@ export interface BlsctWasmModule {
   _get_tx_out_token_id(txOut: number): number;
   _get_tx_out_output_type(txOut: number): number;
   _get_tx_out_min_stake(txOut: number): bigint;
+  _get_tx_out_subtract_fee_from_amount(txOut: number): boolean;
+  _get_tx_out_blinding_key(txOut: number): number;
   
   // Signature operations
   _sign_message(privKey: number, msg: number): number;

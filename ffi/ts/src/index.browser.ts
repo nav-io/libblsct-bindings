@@ -19,7 +19,7 @@ export * from './ctxIns.js';
 export * from './ctxOut.js';
 export * from './ctxOuts.js';
 export * from './hashId.js';
-export * from './managedObj.js';
+export * from './managedObj.browser.js';
 export * from './outPoint.js';
 export * from './point.js';
 export * from './rangeProof.js';

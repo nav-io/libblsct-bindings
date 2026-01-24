@@ -264,6 +264,11 @@ export function pointToStr(point: unknown): string {
   return str;
 }
 
+export function scalarMultiplyPoint(point: unknown, scalar: unknown): unknown {
+  const module = getBlsctModule();
+  return module._scalar_muliply_point(point as number, scalar as number);
+}
+
 // ============================================================================
 // Public Key Functions
 // ============================================================================
@@ -1228,6 +1233,16 @@ export function getTxOutOutputType(obj: unknown): TxOutputType {
 export function getTxOutMinStake(obj: unknown): number {
   const module = getBlsctModule();
   return Number(module._get_tx_out_min_stake(obj as number));
+}
+
+export function getTxOutSubtractFeeFromAmount(obj: unknown): boolean {
+  const module = getBlsctModule();
+  return module._get_tx_out_subtract_fee_from_amount(obj as number);
+}
+
+export function getTxOutBlindingKey(obj: unknown): unknown {
+  const module = getBlsctModule();
+  return module._get_tx_out_blinding_key(obj as number);
 }
 
 // Range proof field accessors

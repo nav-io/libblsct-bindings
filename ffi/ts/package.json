@@ -6,7 +6,7 @@
     "install": "node scripts/build.js && node-gyp configure build && npm run build:ts",
     "build:ts": "tsc",
     "build:wasm": "node scripts/build-wasm.js",
-    "build:browser": "npm run build:wasm && tsc -p tsconfig.browser.json",
+    "build:browser": "npm run build:wasm && tsc -p tsconfig.browser.json && node scripts/fix-browser-build.js",
     "docs": "typedoc",
     "docs:watch": "nodemon --watch src --ext ts --exec \"npx typedoc\"",
     "test": "tsc && NODE_OPTIONS=--expose-gc jest --runInBand --verbose",
@@ -38,7 +38,8 @@
   },
   "browser": {
     "./dist/index.js": "./dist/browser/index.browser.js",
-    "./dist/blsct.js": "./dist/browser/blsct.browser.js"
+    "./dist/blsct.js": "./dist/browser/blsct.browser.js",
+    "./dist/managedObj.js": "./dist/browser/managedObj.browser.js"
   },
   "files": [
     "dist",

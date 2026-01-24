@@ -1,7 +1,7 @@
 import {
   BlsctRetVal,
   freeObj,
-} from './blsct'
+} from './blsct.browser.js'
 
 export type FinalizerInfo = {
   cls: string,
@@ -128,12 +128,16 @@ export abstract class ManagedObj {
     const rv = deserializer(hex)
     if (rv.result !== 0) {
       const msg = `Deserialization failed. Error code = ${rv.result}`
-      freeObj(rv)
+      // In browser/WASM, we free the value pointer, not the result object
+      if (typeof rv.value === 'number' && rv.value !== 0) {
+        freeObj(rv.value)
+      }
       throw new Error(msg)
     }
     const x = new this(rv.value)
     x.objSize = rv.value_size
-    freeObj(rv)
+    // Note: We don't free rv.value here as it's now owned by the ManagedObj instance
+    // The FinalizationRegistry will handle cleanup when the instance is garbage collected
     return x
   }
 }
@@ -145,3 +149,4 @@ if (inspectSymbol) {
     return this.toString()
   }
 }
+
