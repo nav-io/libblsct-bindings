@@ -153,6 +153,8 @@ async function runTests() {
         loadingDiv.innerHTML = '<strong>⏳ Compiling WASM module...</strong>';
 
         // Initialize the WASM module directly using the global factory
+        // MCL_USE_WEB_CRYPTO_API requires Module.cryptoGetRandomValues for random number generation
+        // The MCL library calls: EM_ASM({Module.cryptoGetRandomValues($0, $1)}, buf, byteSize)
         const config = {
             locateFile: (path, prefix) => {
                 if (path.endsWith('.wasm')) {
@@ -166,9 +168,26 @@ async function runTests() {
 
         console.log('  Starting WASM compilation...');
         const wasmModule = await window.BlsctModule(config);
+
+        // Add cryptoGetRandomValues to the module for MCL's web crypto API support
+        // This must be added after module is created so we can access HEAPU8
+        wasmModule.cryptoGetRandomValues = (bufPtr, byteSize) => {
+            const buffer = wasmModule.HEAPU8.subarray(bufPtr, bufPtr + byteSize);
+            crypto.getRandomValues(buffer);
+        };
+
         console.log('  WASM compiled, calling _init...');
-        wasmModule._init();
-        console.log('  WASM initialized!');
+
+        try {
+            wasmModule._init();
+            console.log('  WASM initialized!');
+        } catch (e) {
+            // WASM exceptions are often returned as integer pointers
+            const errorInfo = typeof e === 'number'
+                ? `WASM exception pointer: ${e}. This usually indicates blsInit() failed due to MCLBN_COMPILED_TIME_VAR mismatch.`
+                : String(e);
+            throw new Error(`Library initialization failed: ${errorInfo}`);
+        }
 
         // Store in a way that other tests can access
         window._blsctWasmModule = wasmModule;
@@ -198,6 +217,116 @@ async function runTests() {
         } else {
             addResult('WASM module functions', false,
                 `Found ${wasmFuncs.length} functions, expected >200`);
+            allPassed = false;
+        }
+    }
+
+    // Test 10: Actually execute a cryptographic operation (generate random scalar)
+    if (window._blsctWasmModule) {
+        try {
+            const wasmModule = window._blsctWasmModule;
+            console.log('Test 10: Calling _gen_random_scalar()...');
+
+            // This is the critical test - actually call a cryptographic function
+            const scalarPtr = wasmModule._gen_random_scalar();
+
+            if (scalarPtr === 0) {
+                addResult('Generate random scalar', false,
+                    '_gen_random_scalar() returned null pointer');
+                allPassed = false;
+            } else if (typeof scalarPtr === 'number' && scalarPtr > 0) {
+                // Check that the return value is a BlsctRetVal struct
+                // The first byte should be BLSCT_SUCCESS (0) if successful
+                const result = wasmModule.getValue(scalarPtr, 'i8');
+
+                if (result === 0) {
+                    addResult('Generate random scalar', true,
+                        `Successfully generated random scalar (ptr: ${scalarPtr}, result: BLSCT_SUCCESS)`);
+
+                    // Clean up
+                    wasmModule._free_obj(scalarPtr);
+                } else {
+                    addResult('Generate random scalar', false,
+                        `_gen_random_scalar() returned error code: ${result}`);
+                    allPassed = false;
+                }
+            } else {
+                addResult('Generate random scalar', false,
+                    `Unexpected return value: ${scalarPtr} (type: ${typeof scalarPtr})`);
+                allPassed = false;
+            }
+        } catch (error) {
+            addResult('Generate random scalar', false,
+                `WASM exception thrown: ${error}\n\n` +
+                `This usually indicates MCL/BLS library is not properly initialized. ` +
+                `Common causes:\n` +
+                `- MCLBN_COMPILED_TIME_VAR mismatch between compile-time and runtime\n` +
+                `- BLS_ETH flag not consistently defined across compilation units\n` +
+                `- Exception: ${error.stack || error}`);
+            allPassed = false;
+        }
+    }
+
+    // Test 11: Generate a random point
+    if (window._blsctWasmModule && allPassed) {
+        try {
+            const wasmModule = window._blsctWasmModule;
+            console.log('Test 11: Calling _gen_random_point()...');
+
+            const pointPtr = wasmModule._gen_random_point();
+
+            if (pointPtr && typeof pointPtr === 'number' && pointPtr > 0) {
+                const result = wasmModule.getValue(pointPtr, 'i8');
+
+                if (result === 0) {
+                    addResult('Generate random point', true,
+                        `Successfully generated random point (ptr: ${pointPtr})`);
+                    wasmModule._free_obj(pointPtr);
+                } else {
+                    addResult('Generate random point', false,
+                        `_gen_random_point() returned error code: ${result}`);
+                    allPassed = false;
+                }
+            } else {
+                addResult('Generate random point', false,
+                    `Unexpected return value: ${pointPtr}`);
+                allPassed = false;
+            }
+        } catch (error) {
+            addResult('Generate random point', false,
+                `WASM exception thrown: ${error}`);
+            allPassed = false;
+        }
+    }
+
+    // Test 12: Generate a random public key
+    if (window._blsctWasmModule && allPassed) {
+        try {
+            const wasmModule = window._blsctWasmModule;
+            console.log('Test 12: Calling _gen_random_public_key()...');
+
+            const pubKeyPtr = wasmModule._gen_random_public_key();
+
+            if (pubKeyPtr && typeof pubKeyPtr === 'number' && pubKeyPtr > 0) {
+                const result = wasmModule.getValue(pubKeyPtr, 'i8');
+
+                if (result === 0) {
+                    addResult('Generate random public key', true,
+                        `Successfully generated random public key (ptr: ${pubKeyPtr})`);
+                    wasmModule._free_obj(pubKeyPtr);
+                } else {
+                    addResult('Generate random public key', false,
+                        `_gen_random_public_key() returned error code: ${result}`);
+                    allPassed = false;
+                }
+            } else {
+                addResult('Generate random public key', false,
+                    `Unexpected return value: ${pubKeyPtr}`);
+                allPassed = false;
+            }
+        } catch (error) {
+            addResult('Generate random public key', false,
+                `WASM exception thrown: ${error}`);
             allPassed = false;
         }
     }

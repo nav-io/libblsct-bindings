@@ -394,7 +394,34 @@ export async function loadBlsctModule(
     }
 
     const instance = await BlsctModuleFactory(config);
-    instance._init();
+    
+    // MCL_USE_WEB_CRYPTO_API requires Module.cryptoGetRandomValues for random number generation
+    // The MCL library calls: EM_ASM({Module.cryptoGetRandomValues($0, $1)}, buf, byteSize)
+    // We add this function to the module after creation so it can access HEAPU8
+    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
+      (instance as unknown as { cryptoGetRandomValues: (bufPtr: number, byteSize: number) => void }).cryptoGetRandomValues = 
+        (bufPtr: number, byteSize: number) => {
+          const buffer = instance.HEAPU8.subarray(bufPtr, bufPtr + byteSize);
+          crypto.getRandomValues(buffer);
+        };
+    }
+    
+    // Initialize the library
+    // Note: With correct build flags (BLS_ETH, MCLBN_FP_UNIT_SIZE=6, MCLBN_FR_UNIT_SIZE=4),
+    // blsInit should succeed. If it fails, a WASM exception will be thrown.
+    try {
+      instance._init();
+    } catch (e) {
+      // WASM exceptions are often returned as integer pointers
+      const errorInfo = typeof e === 'number' 
+        ? `WASM exception pointer: ${e}. This usually indicates blsInit() failed due to MCLBN_COMPILED_TIME_VAR mismatch.`
+        : String(e);
+      throw new Error(
+        `Failed to initialize BLSCT library. ${errorInfo}\n` +
+        `Ensure the WASM module was built with consistent BLS_ETH and MCLBN_*_UNIT_SIZE flags.`
+      );
+    }
+    
     moduleInstance = instance;
     return instance;
   })();

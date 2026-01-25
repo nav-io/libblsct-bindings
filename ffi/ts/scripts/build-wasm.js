@@ -400,16 +400,21 @@ function buildMcl() {
   const mclDir = path.join(NAVIO_CORE_DIR, 'src/bls/mcl');
 
   // Use CYBOZU_MINIMUM_EXCEPTION as per mcl's own WASM build (not CYBOZU_DONT_USE_EXCEPTION)
+  // MCLBN_FP_UNIT_SIZE=6 and MCLBN_FR_UNIT_SIZE=4 are required for BLS12-381
+  // MCL_USE_WEB_CRYPTO_API enables browser crypto.getRandomValues() instead of /dev/urandom
   const mclBuildCmd = [
     'emcc',
     '-O3',
     '-DNDEBUG',
+    '-DMCLBN_FP_UNIT_SIZE=6',
+    '-DMCLBN_FR_UNIT_SIZE=4',
     '-DMCL_SIZEOF_UNIT=4',
     '-DMCL_MAX_BIT_SIZE=384',
     '-DMCL_USE_VINT',
     '-DMCL_VINT_FIXED_BUFFER',
     '-DMCL_DONT_USE_OPENSSL',
     '-DMCL_DONT_USE_XBYAK',
+    '-DMCL_USE_WEB_CRYPTO_API',
     '-DCYBOZU_MINIMUM_EXCEPTION',
     `-I${mclDir}/include`,
     `-I${mclDir}/src`,
@@ -427,18 +432,24 @@ function buildBls() {
   const blsDir = path.join(NAVIO_CORE_DIR, 'src/bls');
   const mclDir = path.join(blsDir, 'mcl');
 
+  // BLS_ETH adds 200 to MCLBN_COMPILED_TIME_VAR for correct initialization
+  // MCLBN_FP_UNIT_SIZE=6 and MCLBN_FR_UNIT_SIZE=4 are required for BLS12-381
+  // MCL_USE_WEB_CRYPTO_API enables browser crypto.getRandomValues() instead of /dev/urandom
   const blsBuildCmd = [
     'emcc',
     '-O3',
     '-DNDEBUG',
+    '-DBLS_ETH',
+    '-DMCLBN_FP_UNIT_SIZE=6',
+    '-DMCLBN_FR_UNIT_SIZE=4',
     '-DMCL_SIZEOF_UNIT=4',
     '-DMCL_MAX_BIT_SIZE=384',
     '-DMCL_USE_VINT',
     '-DMCL_VINT_FIXED_BUFFER',
     '-DMCL_DONT_USE_OPENSSL',
     '-DMCL_DONT_USE_XBYAK',
+    '-DMCL_USE_WEB_CRYPTO_API',
     '-DCYBOZU_MINIMUM_EXCEPTION',
-    '-DBLS_ETH',
     `-I${blsDir}/include`,
     `-I${mclDir}/include`,
     `-I${mclDir}/src`,
@@ -486,16 +497,22 @@ function buildBlsct() {
   ].join(' ');
 
   // Note: Do NOT use -DNDEBUG as navio-core requires assertions (util/check.h)
+  // BLS_ETH is critical: it adds 200 to MCLBN_COMPILED_TIME_VAR for correct BLS12-381 initialization
+  // MCL_USE_WEB_CRYPTO_API enables browser crypto.getRandomValues() instead of /dev/urandom
   const compilerFlags = [
     '-O3',
     '-DHAVE_CONFIG_H',
     '-DLIBBLSCT',
+    '-DBLS_ETH',
+    '-DMCLBN_FP_UNIT_SIZE=6',
+    '-DMCLBN_FR_UNIT_SIZE=4',
     '-DMCL_SIZEOF_UNIT=4',
     '-DMCL_MAX_BIT_SIZE=384',
     '-DMCL_USE_VINT',
     '-DMCL_VINT_FIXED_BUFFER',
     '-DMCL_DONT_USE_OPENSSL',
     '-DMCL_DONT_USE_XBYAK',
+    '-DMCL_USE_WEB_CRYPTO_API',
     '-DCYBOZU_MINIMUM_EXCEPTION',
     '-std=c++20',
   ].join(' ');
