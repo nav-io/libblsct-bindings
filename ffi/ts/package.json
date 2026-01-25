@@ -43,7 +43,10 @@
   },
   "files": [
     "dist",
-    "wasm"
+    "wasm",
+    "scripts",
+    "swig",
+    "binding.gyp"
   ],
   "devDependencies": {
     "@types/jest": "^29.5.14",
