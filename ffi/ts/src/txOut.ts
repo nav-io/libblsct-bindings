@@ -109,9 +109,9 @@ export class TxOut extends ManagedObj {
   }
 
   /** Returns the amount of the transaction output.
-   * @returns The amount of the transaction output.
+   * @returns The amount of the transaction output as bigint.
    */
-  getAmount(): number {
+  getAmount(): bigint {
     return getTxOutAmount(this.value())
   }
 
@@ -138,9 +138,9 @@ export class TxOut extends ManagedObj {
   }
 
   /** Returns the minimum stake required for the transaction output.
-   * @returns The minimum stake required for the transaction output.
+   * @returns The minimum stake required for the transaction output as bigint.
    */
-  getMinStake(): number {
+  getMinStake(): bigint {
     return getTxOutMinStake(this.value())
   }
 

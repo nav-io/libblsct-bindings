@@ -5,6 +5,7 @@
 export {
   loadBlsctModule,
   getBlsctModule,
+  setBlsctModule,
   isModuleLoaded,
   resetModule,
   type BlsctWasmModule,

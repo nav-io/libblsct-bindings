@@ -168,8 +168,8 @@ export const getCTxInScriptWitness = (obj: any): any => {
 }
 
 // ctx out
-export const getCTxOutValue = (obj: any): number => {
-  return blsct.get_ctx_out_value(obj)
+export const getCTxOutValue = (obj: any): bigint => {
+  return BigInt(blsct.get_ctx_out_value(obj))
 }
 
 export const getCTxOutScriptPubkey = (obj: any): any => {
@@ -418,8 +418,8 @@ export const genAmountRecoveryReq = (
 export const getAmountRecoveryResultAmount = (
   req: any,
   i: number,
-): number => {
-  return blsct.get_amount_recovery_result_amount(req, i)
+): bigint => {
+  return BigInt(blsct.get_amount_recovery_result_amount(req, i))
 }
 export const getAmountRecoveryResultIsSucc = (
   req: any,
@@ -485,8 +485,8 @@ export const genScalar = (value: number): BlsctRetVal => {
 export const areScalarEqual = (a: any, b: any): boolean => {
   return blsct.are_scalar_equal(a, b) !== 0
 }
-export const scalarToUint64 = (scalar: any): number => {
-  return blsct.scalar_to_uint64(scalar)
+export const scalarToUint64 = (scalar: any): bigint => {
+  return BigInt(blsct.scalar_to_uint64(scalar))
 }
 export const serializeScalar = (scalar: any): string => {
   return blsct.serialize_scalar(scalar)
@@ -573,11 +573,11 @@ export const genTokenIdWithSubid = (token: number, subid: number): BlsctRetVal =
 export const genDefaultTokenId = (): BlsctRetVal => {
   return blsct.gen_default_token_id()
 }
-export const getTokenIdSubid = (tokenId: any): number => {
-  return blsct.get_token_id_subid(tokenId)
+export const getTokenIdSubid = (tokenId: any): bigint => {
+  return BigInt(blsct.get_token_id_subid(tokenId))
 }
-export const getTokenIdToken = (tokenId: any): number => {
-  return blsct.get_token_id_token(tokenId)
+export const getTokenIdToken = (tokenId: any): bigint => {
+  return BigInt(blsct.get_token_id_token(tokenId))
 }
 export const serializeTokenId = (tokenId: any): string => {
   return blsct.serialize_token_id(tokenId)
@@ -612,12 +612,12 @@ export const buildTxIn = (
   )
 }
 
-export const getTxInAmount = (obj: any): number => {
-  return blsct.get_tx_in_amount(obj)
+export const getTxInAmount = (obj: any): bigint => {
+  return BigInt(blsct.get_tx_in_amount(obj))
 }
 
-export const getTxInGamma = (obj: any): number => {
-  return blsct.get_tx_in_gamma(obj)
+export const getTxInGamma = (obj: any): bigint => {
+  return BigInt(blsct.get_tx_in_gamma(obj))
 }
 
 export const getTxInSpendingKey = (obj: any): any => {
@@ -681,8 +681,8 @@ export const getTxOutDestination = (obj: any): any => {
   return blsct.get_tx_out_destination(obj)
 }
 
-export const getTxOutAmount = (obj: any): number => {
-  return blsct.get_tx_out_amount(obj)
+export const getTxOutAmount = (obj: any): bigint => {
+  return BigInt(blsct.get_tx_out_amount(obj))
 }
 
 export const getTxOutMemo = (obj: any): string => {
@@ -708,8 +708,8 @@ export const getTxOutOutputType = (obj: any): TxOutputType => {
   }
 }
 
-export const getTxOutMinStake = (obj: any): number => {
-  return blsct.get_tx_out_min_stake(obj)
+export const getTxOutMinStake = (obj: any): bigint => {
+  return BigInt(blsct.get_tx_out_min_stake(obj))
 }
 
 export const getTxOutSubtractFeeFromAmount = (obj: any): boolean => {
@@ -780,7 +780,7 @@ export const castToUint8_tPtr = (obj: any): any => {
 export const calcViewTag = (
   blindingPubKey: any,
   viewKey: any
-): any => {
-  return blsct.calc_view_tag(blindingPubKey, viewKey)
+): bigint => {
+  return BigInt(blsct.calc_view_tag(blindingPubKey, viewKey))
 }
 

@@ -241,6 +241,24 @@ let moduleInstance: BlsctWasmModule | null = null;
 let modulePromise: Promise<BlsctWasmModule> | null = null;
 
 /**
+ * Add cryptoGetRandomValues to a module instance if not already present.
+ * MCL_USE_WEB_CRYPTO_API requires Module.cryptoGetRandomValues for random number generation.
+ * The MCL library calls: EM_ASM({Module.cryptoGetRandomValues($0, $1)}, buf, byteSize)
+ */
+function ensureCryptoGetRandomValues(instance: BlsctWasmModule): void {
+  const instanceWithCrypto = instance as unknown as { 
+    cryptoGetRandomValues?: (bufPtr: number, byteSize: number) => void 
+  };
+  
+  if (!instanceWithCrypto.cryptoGetRandomValues && typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    instanceWithCrypto.cryptoGetRandomValues = (bufPtr: number, byteSize: number) => {
+      const buffer = instance.HEAPU8.subarray(bufPtr, bufPtr + byteSize);
+      crypto.getRandomValues(buffer);
+    };
+  }
+}
+
+/**
  * Options for loading the BLSCT WASM module
  */
 export interface LoadBlsctModuleOptions {
@@ -354,23 +372,36 @@ export async function loadBlsctModule(
         }
       }
       
+      // If factory still not found, try global fallback (set by script tag loading)
       if (typeof BlsctModuleFactory !== 'function') {
-        throw new Error(
-          `WASM module loaded but factory function not found. ` +
-          `Module type: ${typeof module}, keys: ${Object.keys(module || {}).join(', ')}`
-        );
+        const globalAny = globalThis as unknown as { BlsctModule?: BlsctModuleFactory };
+        if (typeof globalThis !== 'undefined' && typeof globalAny.BlsctModule === 'function') {
+          BlsctModuleFactory = globalAny.BlsctModule;
+        } else {
+          throw new Error(
+            `WASM module loaded but factory function not found. ` +
+            `Module type: ${typeof module}, keys: ${Object.keys(module || {}).join(', ')}`
+          );
+        }
       }
     } catch (err) {
-      const originalMessage =
-        err instanceof Error
-          ? `${err.message}${err.stack ? `\nStack trace:\n${err.stack}` : ''}`
-          : String(err);
-      throw new Error(
-        `Failed to load WASM module from "${moduleUrl}". ` +
-        `Ensure the WASM files are built and accessible. ` +
-        `If using a bundler, you may need to configure it to handle WASM files. ` +
-        `Original error: ${originalMessage}`
-      );
+      // If dynamic import failed, try global fallback (set by script tag loading)
+      const globalAny = globalThis as unknown as { BlsctModule?: BlsctModuleFactory };
+      if (typeof globalThis !== 'undefined' && typeof globalAny.BlsctModule === 'function') {
+        BlsctModuleFactory = globalAny.BlsctModule;
+      } else {
+        const originalMessage =
+          err instanceof Error
+            ? `${err.message}${err.stack ? `\nStack trace:\n${err.stack}` : ''}`
+            : String(err);
+        throw new Error(
+          `Failed to load WASM module from "${moduleUrl}". ` +
+          `Ensure the WASM files are built and accessible. ` +
+          `If using a bundler, you may need to configure it to handle WASM files. ` +
+          `You can also load the WASM via script tag and call setBlsctModule(). ` +
+          `Original error: ${originalMessage}`
+        );
+      }
     }
 
     // Calculate WASM binary path for locateFile
@@ -395,16 +426,8 @@ export async function loadBlsctModule(
 
     const instance = await BlsctModuleFactory(config);
     
-    // MCL_USE_WEB_CRYPTO_API requires Module.cryptoGetRandomValues for random number generation
-    // The MCL library calls: EM_ASM({Module.cryptoGetRandomValues($0, $1)}, buf, byteSize)
-    // We add this function to the module after creation so it can access HEAPU8
-    if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-      (instance as unknown as { cryptoGetRandomValues: (bufPtr: number, byteSize: number) => void }).cryptoGetRandomValues = 
-        (bufPtr: number, byteSize: number) => {
-          const buffer = instance.HEAPU8.subarray(bufPtr, bufPtr + byteSize);
-          crypto.getRandomValues(buffer);
-        };
-    }
+    // Add cryptoGetRandomValues for MCL web crypto support
+    ensureCryptoGetRandomValues(instance);
     
     // Initialize the library
     // Note: With correct build flags (BLS_ETH, MCLBN_FP_UNIT_SIZE=6, MCLBN_FR_UNIT_SIZE=4),
@@ -454,5 +477,52 @@ export function isModuleLoaded(): boolean {
 export function resetModule(): void {
   moduleInstance = null;
   modulePromise = null;
+}
+
+/**
+ * Set a pre-initialized WASM module instance.
+ * 
+ * This is useful when the dynamic import fails (e.g., due to bundler ESM/CJS issues)
+ * and you need to load the module via script tag and initialize it manually.
+ * 
+ * @param module - The initialized WASM module instance
+ * @param skipInit - If true, skip calling _init() (use if already initialized)
+ * 
+ * @example
+ * // Load via script tag
+ * await new Promise((resolve, reject) => {
+ *   const script = document.createElement('script');
+ *   script.src = '/wasm/blsct.js';
+ *   script.onload = resolve;
+ *   script.onerror = reject;
+ *   document.head.appendChild(script);
+ * });
+ * 
+ * // Initialize manually
+ * const wasmModule = await window.BlsctModule({
+ *   locateFile: (path) => path.endsWith('.wasm') ? '/wasm/blsct.wasm' : path
+ * });
+ * 
+ * // Set it so the library uses this instance
+ * setBlsctModule(wasmModule);
+ */
+export function setBlsctModule(module: BlsctWasmModule, skipInit = false): void {
+  // Add cryptoGetRandomValues if not present
+  ensureCryptoGetRandomValues(module);
+  
+  // Initialize if not skipped
+  if (!skipInit) {
+    try {
+      module._init();
+    } catch (e) {
+      const errorInfo = typeof e === 'number' 
+        ? `WASM exception pointer: ${e}. This usually indicates blsInit() failed.`
+        : String(e);
+      throw new Error(`Failed to initialize BLSCT library. ${errorInfo}`);
+    }
+  }
+  
+  moduleInstance = module;
+  modulePromise = Promise.resolve(module);
 }
 

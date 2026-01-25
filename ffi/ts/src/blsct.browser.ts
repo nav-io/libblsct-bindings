@@ -17,8 +17,22 @@ import {
 } from './bindings/wasm/index.js';
 
 // Re-export initialization and utilities
-export { loadBlsctModule, isModuleLoaded, type LoadBlsctModuleOptions } from './bindings/wasm/index.js';
+export { loadBlsctModule, isModuleLoaded } from './bindings/wasm/index.js';
 export { assertSuccess, type BlsctResult } from './bindings/wasm/memory.js';
+
+// ============================================================================
+// Emscripten i64 Helpers
+// ============================================================================
+
+/**
+ * Split a number into low and high 32-bit parts for Emscripten i64 ABI.
+ * Emscripten without WASM_BIGINT splits i64 into two i32 values (lo, hi).
+ */
+function splitI64(value: number): [number, number] {
+  const lo = value >>> 0; // unsigned 32-bit low part
+  const hi = (value / 0x100000000) >>> 0; // high 32 bits
+  return [lo, hi];
+}
 
 // ============================================================================
 // Constants
@@ -143,7 +157,8 @@ export function genRandomScalar(): BlsctRetVal {
 
 export function genScalar(value: number): BlsctRetVal {
   const module = getBlsctModule();
-  const resultPtr = module._gen_scalar(BigInt(value));
+  const [lo, hi] = splitI64(value);
+  const resultPtr = (module._gen_scalar as unknown as (lo: number, hi: number) => number)(lo, hi);
   const result = parseRetVal(resultPtr);
   freePtr(resultPtr);
   return {
@@ -266,6 +281,7 @@ export function pointToStr(point: unknown): string {
 
 export function scalarMultiplyPoint(point: unknown, scalar: unknown): unknown {
   const module = getBlsctModule();
+  // Note: typo in the underlying C function name (muliply instead of multiply)
   return module._scalar_muliply_point(point as number, scalar as number);
 }
 
@@ -328,11 +344,13 @@ export function genDpkWithKeysAcctAddr(
   address: number
 ): unknown {
   const module = getBlsctModule();
-  return module._gen_dpk_with_keys_acct_addr(
+  const [acctLo, acctHi] = splitI64(account);
+  const [addrLo, addrHi] = splitI64(address);
+  return (module._gen_dpk_with_keys_acct_addr as unknown as (a: number, b: number, c: number, d: number, e: number, f: number) => number)(
     viewKey as number,
     spendingPubKey as number,
-    BigInt(account),
-    BigInt(address)
+    acctLo, acctHi,
+    addrLo, addrHi
   );
 }
 
@@ -367,7 +385,8 @@ export function deserializeDpk(hex: string): BlsctRetVal {
 
 export function genTokenId(token: number): BlsctRetVal {
   const module = getBlsctModule();
-  const resultPtr = module._gen_token_id(BigInt(token));
+  const [lo, hi] = splitI64(token);
+  const resultPtr = (module._gen_token_id as unknown as (lo: number, hi: number) => number)(lo, hi);
   const result = parseRetVal(resultPtr);
   freePtr(resultPtr);
   return {
@@ -379,9 +398,11 @@ export function genTokenId(token: number): BlsctRetVal {
 
 export function genTokenIdWithSubid(token: number, subid: number): BlsctRetVal {
   const module = getBlsctModule();
-  const resultPtr = module._gen_token_id_with_token_and_subid(
-    BigInt(token),
-    BigInt(subid)
+  const [tokenLo, tokenHi] = splitI64(token);
+  const [subidLo, subidHi] = splitI64(subid);
+  const resultPtr = (module._gen_token_id_with_token_and_subid as unknown as (a: number, b: number, c: number, d: number) => number)(
+    tokenLo, tokenHi,
+    subidLo, subidHi
   );
   const result = parseRetVal(resultPtr);
   freePtr(resultPtr);
@@ -445,7 +466,12 @@ export function deserializeTokenId(hex: string): BlsctRetVal {
 
 export function genSubAddrId(account: number, address: number): unknown {
   const module = getBlsctModule();
-  return module._gen_sub_addr_id(BigInt(account), BigInt(address));
+  const [acctLo, acctHi] = splitI64(account);
+  const [addrLo, addrHi] = splitI64(address);
+  return (module._gen_sub_addr_id as unknown as (a: number, b: number, c: number, d: number) => number)(
+    acctLo, acctHi,
+    addrLo, addrHi
+  );
 }
 
 export function deriveSubAddress(
@@ -562,12 +588,14 @@ export function calcPrivSpendingKey(
   address: number
 ): unknown {
   const module = getBlsctModule();
-  return module._calc_priv_spending_key(
+  const [acctLo, acctHi] = splitI64(account);
+  const [addrLo, addrHi] = splitI64(address);
+  return (module._calc_priv_spending_key as unknown as (...args: number[]) => number)(
     blindingPubKey as number,
     viewKey as number,
     spendingKey as number,
-    BigInt(account),
-    BigInt(address)
+    acctLo, acctHi,
+    addrLo, addrHi
   );
 }
 
@@ -791,7 +819,8 @@ export function createUint64Vec(): unknown {
 
 export function addToUint64Vec(vec: unknown, n: number): void {
   const module = getBlsctModule();
-  module._add_to_uint64_vec(vec as number, BigInt(n));
+  const [lo, hi] = splitI64(n);
+  (module._add_to_uint64_vec as unknown as (vec: number, lo: number, hi: number) => void)(vec as number, lo, hi);
 }
 
 export function deleteUint64Vec(vec: unknown): void {
@@ -989,9 +1018,11 @@ export function buildTxIn(
   isRbf: boolean
 ): unknown {
   const module = getBlsctModule();
-  return module._build_tx_in(
-    BigInt(amount),
-    BigInt(gamma),
+  const [amountLo, amountHi] = splitI64(amount);
+  const [gammaLo, gammaHi] = splitI64(gamma);
+  return (module._build_tx_in as unknown as (...args: (number | boolean)[]) => number)(
+    amountLo, amountHi,
+    gammaLo, gammaHi,
     spendingKey as number,
     tokenId as number,
     outPoint as number,
@@ -1012,14 +1043,16 @@ export function buildTxOut(
 ): unknown {
   const module = getBlsctModule();
   const memoPtr = allocString(memo);
+  const [amountLo, amountHi] = splitI64(amount);
+  const [minStakeLo, minStakeHi] = splitI64(minStake);
   try {
-    return module._build_tx_out(
+    return (module._build_tx_out as unknown as (...args: (number | boolean)[]) => number)(
       subAddr as number,
-      BigInt(amount),
+      amountLo, amountHi,
       memoPtr,
       tokenId as number,
       outputType,
-      BigInt(minStake),
+      minStakeLo, minStakeHi,
       subtractFeeFromAmount,
       blindingKey as number
     );
@@ -1235,14 +1268,17 @@ export function getTxOutMinStake(obj: unknown): number {
   return Number(module._get_tx_out_min_stake(obj as number));
 }
 
-export function getTxOutSubtractFeeFromAmount(obj: unknown): boolean {
-  const module = getBlsctModule();
-  return module._get_tx_out_subtract_fee_from_amount(obj as number);
+// Note: These functions are not yet exposed in WASM - providing stubs
+// TODO: Add to WASM exports in future version
+export function getTxOutSubtractFeeFromAmount(_obj: unknown): boolean {
+  // TxOut subtract_fee_from_amount not exposed in WASM yet
+  return false;
 }
 
-export function getTxOutBlindingKey(obj: unknown): unknown {
-  const module = getBlsctModule();
-  return module._get_tx_out_blinding_key(obj as number);
+export function getTxOutBlindingKey(_obj: unknown): unknown {
+  // TxOut blinding_key not exposed in WASM yet - return null
+  // For CTxOut, use getCTxOutBlindingKey instead
+  return 0;
 }
 
 // Range proof field accessors

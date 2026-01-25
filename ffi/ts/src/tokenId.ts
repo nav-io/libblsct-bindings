@@ -69,17 +69,17 @@ export class TokenId extends ManagedObj {
 
   /** Returns the token number of the `TokenId`.
    *
-   * @return The token number of the `TokenId`.
+   * @return The token number of the `TokenId` as bigint.
    */
-  getToken(): number {
-    return getTokenIdToken(this.value())
+  getToken(): bigint {
+    return BigInt(getTokenIdToken(this.value()))
   }
 
   /** Returns the subid number of the `TokenId`.
    *
-   * @return The subid number of the `TokenId`.
+   * @return The subid number of the `TokenId` as bigint.
    */
-  getSubid(): number {
+  getSubid(): bigint {
     return getTokenIdSubid(this.value())
   }
 

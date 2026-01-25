@@ -28,10 +28,11 @@ export class ViewTag {
     blindingPubKey: PublicKey,
     viewKey: Scalar
   ) {
-    this.value = calcViewTag(
+    // calcViewTag returns bigint from WASM, but view tags are 16-bit so Number() is safe
+    this.value = Number(calcViewTag(
       blindingPubKey.value(),
       viewKey.value()
-    )
+    ))
   }
 
   /** Generates a random view tag.
