@@ -9,6 +9,7 @@ export {
   resetModule,
   type BlsctWasmModule,
   type BlsctModuleConfig,
+  type LoadBlsctModuleOptions,
 } from './loader.js';
 
 export {

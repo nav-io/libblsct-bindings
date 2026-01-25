@@ -6,7 +6,7 @@
  */
 
 // Re-export WASM initialization
-export { loadBlsctModule, isModuleLoaded } from './bindings/wasm/index.js';
+export { loadBlsctModule, isModuleLoaded, type LoadBlsctModuleOptions } from './bindings/wasm/index.js';
 
 // Re-export all public API
 export * from './address.js';

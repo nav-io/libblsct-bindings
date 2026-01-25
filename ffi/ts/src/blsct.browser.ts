@@ -17,7 +17,7 @@ import {
 } from './bindings/wasm/index.js';
 
 // Re-export initialization and utilities
-export { loadBlsctModule, isModuleLoaded } from './bindings/wasm/index.js';
+export { loadBlsctModule, isModuleLoaded, type LoadBlsctModuleOptions } from './bindings/wasm/index.js';
 export { assertSuccess, type BlsctResult } from './bindings/wasm/memory.js';
 
 // ============================================================================
