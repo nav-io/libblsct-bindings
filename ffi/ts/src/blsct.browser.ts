@@ -198,9 +198,9 @@ export function areScalarEqual(a: unknown, b: unknown): boolean {
   return module._are_scalar_equal(a as number, b as number) !== 0;
 }
 
-export function scalarToUint64(scalar: unknown): number {
+export function scalarToUint64(scalar: unknown): bigint {
   const module = getBlsctModule();
-  return Number(module._scalar_to_uint64(scalar as number));
+  return module._scalar_to_uint64(scalar as number);
 }
 
 // ============================================================================
@@ -425,14 +425,14 @@ export function genDefaultTokenId(): BlsctRetVal {
   };
 }
 
-export function getTokenIdToken(tokenId: unknown): number {
+export function getTokenIdToken(tokenId: unknown): bigint {
   const module = getBlsctModule();
-  return Number(module._get_token_id_token(tokenId as number));
+  return module._get_token_id_token(tokenId as number);
 }
 
-export function getTokenIdSubid(tokenId: unknown): number {
+export function getTokenIdSubid(tokenId: unknown): bigint {
   const module = getBlsctModule();
-  return Number(module._get_token_id_subid(tokenId as number));
+  return module._get_token_id_subid(tokenId as number);
 }
 
 export function serializeTokenId(tokenId: unknown): string {
@@ -656,9 +656,9 @@ export function deserializeSignature(hex: string): unknown {
 // Helper Functions
 // ============================================================================
 
-export function calcViewTag(blindingPubKey: unknown, viewKey: unknown): number {
+export function calcViewTag(blindingPubKey: unknown, viewKey: unknown): bigint {
   const module = getBlsctModule();
-  return Number(module._calc_view_tag(blindingPubKey as number, viewKey as number));
+  return module._calc_view_tag(blindingPubKey as number, viewKey as number);
 }
 
 export function calcKeyId(
@@ -956,9 +956,9 @@ export function getAmountRecoveryResultIsSucc(req: unknown, i: number): boolean 
   return module._get_amount_recovery_result_is_succ(req as number, i);
 }
 
-export function getAmountRecoveryResultAmount(req: unknown, i: number): number {
+export function getAmountRecoveryResultAmount(req: unknown, i: number): bigint {
   const module = getBlsctModule();
-  return Number(module._get_amount_recovery_result_amount(req as number, i));
+  return module._get_amount_recovery_result_amount(req as number, i);
 }
 
 export function getAmountRecoveryResultMsg(req: unknown, i: number): string {
@@ -1139,9 +1139,9 @@ export function getCTxInScriptWitness(obj: unknown): unknown {
 }
 
 // CTxOut accessors
-export function getCTxOutValue(obj: unknown): number {
+export function getCTxOutValue(obj: unknown): bigint {
   const module = getBlsctModule();
-  return Number(module._get_ctx_out_value(obj as number));
+  return module._get_ctx_out_value(obj as number);
 }
 
 export function getCTxOutScriptPubkey(obj: unknown): unknown {
@@ -1199,14 +1199,14 @@ export function getCTxOutViewTag(obj: unknown): number {
 }
 
 // TxIn accessors
-export function getTxInAmount(obj: unknown): number {
+export function getTxInAmount(obj: unknown): bigint {
   const module = getBlsctModule();
-  return Number(module._get_tx_in_amount(obj as number));
+  return module._get_tx_in_amount(obj as number);
 }
 
-export function getTxInGamma(obj: unknown): number {
+export function getTxInGamma(obj: unknown): bigint {
   const module = getBlsctModule();
-  return Number(module._get_tx_in_gamma(obj as number));
+  return module._get_tx_in_gamma(obj as number);
 }
 
 export function getTxInSpendingKey(obj: unknown): unknown {
@@ -1240,9 +1240,9 @@ export function getTxOutDestination(obj: unknown): unknown {
   return module._get_tx_out_destination(obj as number);
 }
 
-export function getTxOutAmount(obj: unknown): number {
+export function getTxOutAmount(obj: unknown): bigint {
   const module = getBlsctModule();
-  return Number(module._get_tx_out_amount(obj as number));
+  return module._get_tx_out_amount(obj as number);
 }
 
 export function getTxOutMemo(obj: unknown): string {
@@ -1263,9 +1263,9 @@ export function getTxOutOutputType(obj: unknown): TxOutputType {
   return module._get_tx_out_output_type(obj as number);
 }
 
-export function getTxOutMinStake(obj: unknown): number {
+export function getTxOutMinStake(obj: unknown): bigint {
   const module = getBlsctModule();
-  return Number(module._get_tx_out_min_stake(obj as number));
+  return module._get_tx_out_min_stake(obj as number);
 }
 
 // Note: These functions are not yet exposed in WASM - providing stubs

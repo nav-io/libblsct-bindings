@@ -99,7 +99,7 @@ test('amount recovery', () => {
 
   expect(amounts.length).toBe(1)
   expect(amounts[0].isSucc).toBe(true)
-  expect(amounts[0].amount).toBe(123)
+  expect(amounts[0].amount).toBe(123n)
   expect(amounts[0].msg).toBe('navio')
 
 })
