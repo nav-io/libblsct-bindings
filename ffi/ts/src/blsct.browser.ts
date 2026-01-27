@@ -10,7 +10,7 @@ import {
   allocString,
   readString,
   freePtr,
-  freeObj,
+  freeObj as freeObjPtr,
   parseRetVal,
   parseCTxRetVal,
   type BlsctResult,
@@ -130,12 +130,18 @@ export function encodeAddress(dpk: unknown, encoding: number): BlsctRetVal {
   const module = getBlsctModule();
   const resultPtr = module._encode_address(dpk as number, encoding);
   const result = parseRetVal(resultPtr);
-  freePtr(resultPtr);
   
-  if (result.success && result.value !== null) {
+  if (result.success && result.value !== null && result.value !== 0) {
+    // Read the string BEFORE freeing the struct
     const str = readString(result.value);
+    // Free the string pointer (allocated by C++ MALLOC_BYTES)
+    freePtr(result.value);
+    // Free the BlsctRetVal struct
+    freePtr(resultPtr);
     return { result: 0, value: str, value_size: str.length };
   }
+  // Free the BlsctRetVal struct even on failure
+  freePtr(resultPtr);
   return { result: result.errorCode ?? 1, value: null, value_size: 0 };
 }
 
@@ -779,7 +785,17 @@ export function serializeCTxId(ctxId: unknown): string {
 // Memory Management
 // ============================================================================
 
-export { freeObj };
+/**
+ * Free a BLSCT object. Handles both:
+ * - Pointer values (numbers) - calls the WASM _free_obj function
+ * - BlsctRetVal objects - no-op (these are plain JS objects, nothing to free)
+ */
+export function freeObj(obj: unknown): void {
+  if (typeof obj === 'number' && obj !== 0) {
+    freeObjPtr(obj);
+  }
+  // For objects (like BlsctRetVal), strings, null, etc. - nothing to free
+}
 
 export async function runGc(): Promise<void> {
   // In the browser, we rely on automatic garbage collection
@@ -805,6 +821,10 @@ export function toHex(buf: unknown, size: number): string {
 }
 
 export function getValueAsCStr(rv: BlsctRetVal): string {
+  // Handle case where value is already a string (e.g., from encodeAddress)
+  if (typeof rv.value === 'string') {
+    return rv.value;
+  }
   return readString(rv.value as number);
 }
 

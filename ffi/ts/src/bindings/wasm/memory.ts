@@ -56,6 +56,14 @@ export interface BlsctResult<T> {
 
 /**
  * Parse a BlsctRetVal structure from WASM memory
+ * 
+ * C struct layout:
+ * typedef struct {
+ *   BLSCT_RESULT result;   // uint8_t at offset 0
+ *   // 3 bytes padding for 4-byte alignment
+ *   void* value;           // pointer at offset 4
+ *   size_t value_size;     // size_t at offset 8
+ * } BlsctRetVal;
  */
 export function parseRetVal(ptr: number): BlsctResult<number> {
   if (ptr === 0) {
@@ -63,12 +71,18 @@ export function parseRetVal(ptr: number): BlsctResult<number> {
   }
 
   const module = getBlsctModule();
-  // Must match the C-side struct layout for BlsctRetVal:
-  // struct BlsctRetVal { int8_t result; /* padding as needed */ void *value; };
-  // The value pointer is stored at an offset aligned to the pointer size.
-  const RETVAL_VALUE_PTR_OFFSET = module.HEAP32.BYTES_PER_ELEMENT;
-  const result = module.getValue(ptr, 'i8');
-  const valuePtr = module.getValue(ptr + RETVAL_VALUE_PTR_OFFSET, '*');
+  
+  // WASM32 struct layout offsets (with 4-byte pointer alignment)
+  const RESULT_OFFSET = 0;
+  const VALUE_PTR_OFFSET = 4;  // After 1-byte result + 3-byte padding
+  
+  // Read result as unsigned 8-bit (BLSCT_RESULT is uint8_t)
+  const result = module.HEAPU8[ptr + RESULT_OFFSET];
+  
+  // Read value pointer as 32-bit integer (WASM32 pointer)
+  // Using HEAPU32 for direct access is more reliable than getValue
+  const valuePtrIndex = (ptr + VALUE_PTR_OFFSET) >> 2;  // Divide by 4 for i32 index
+  const valuePtr = module.HEAPU32[valuePtrIndex];
 
   if (result === 0) {
     return { success: true, value: valuePtr };
