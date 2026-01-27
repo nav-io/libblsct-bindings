@@ -65,10 +65,18 @@ export class Scalar extends ManagedObj {
   }
 
   /** Converts the scalar to an integer.
-   * * @returns The scalar as a number.
+   * @returns The scalar as a bigint.
+   */
+  toBigInt(): bigint {
+    return BigInt(scalarToUint64(this.value()))
+  }
+
+  /** Converts the scalar to an integer.
+   * @returns The scalar as a number.
+   * @deprecated Use toBigInt() instead to avoid precision loss for large values.
    */
   toNumber(): number {
-    return scalarToUint64(this.value())
+    return Number(scalarToUint64(this.value()))
   }
 
   /** Returns if the scalar is equal to the provided scalar.

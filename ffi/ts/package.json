@@ -1,12 +1,12 @@
 {
   "name": "navio-blsct",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "BLS Confidential Transaction library for Navio blockchain",
   "scripts": {
     "install": "node scripts/build.js && node-gyp configure build && npm run build:ts",
     "build:ts": "tsc",
     "build:wasm": "node scripts/build-wasm.js",
-    "build:browser": "npm run build:wasm && tsc -p tsconfig.browser.json",
+    "build:browser": "npm run build:wasm && tsc -p tsconfig.browser.json && node scripts/fix-browser-build.js",
     "docs": "typedoc",
     "docs:watch": "nodemon --watch src --ext ts --exec \"npx typedoc\"",
     "test": "tsc && NODE_OPTIONS=--expose-gc jest --runInBand --verbose",
@@ -17,14 +17,14 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "browser": {
+        "types": "./dist/browser/index.browser.d.ts",
+        "import": "./dist/browser/index.browser.js"
+      },
       "node": {
         "types": "./dist/index.d.ts",
         "import": "./dist/index.js",
         "require": "./dist/index.js"
-      },
-      "browser": {
-        "types": "./dist/browser/index.browser.d.ts",
-        "import": "./dist/browser/index.browser.js"
       },
       "default": {
         "types": "./dist/index.d.ts",
@@ -34,15 +34,27 @@
     "./browser": {
       "types": "./dist/browser/index.browser.d.ts",
       "import": "./dist/browser/index.browser.js"
-    }
+    },
+    "./wasm/blsct.mjs": {
+      "types": "./wasm/blsct.d.mts",
+      "import": "./wasm/blsct.mjs"
+    },
+    "./wasm/blsct.js": "./wasm/blsct.js",
+    "./wasm/blsct.wasm": "./wasm/blsct.wasm",
+    "./wasm/*": "./wasm/*"
   },
+  "sideEffects": false,
   "browser": {
     "./dist/index.js": "./dist/browser/index.browser.js",
-    "./dist/blsct.js": "./dist/browser/blsct.browser.js"
+    "./dist/blsct.js": "./dist/browser/blsct.browser.js",
+    "./dist/managedObj.js": "./dist/browser/managedObj.browser.js"
   },
   "files": [
     "dist",
-    "wasm"
+    "wasm",
+    "scripts",
+    "swig",
+    "binding.gyp"
   ],
   "devDependencies": {
     "@types/jest": "^29.5.14",

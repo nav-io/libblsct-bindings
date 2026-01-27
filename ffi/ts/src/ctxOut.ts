@@ -36,7 +36,7 @@ export class CTxOut {
   /** Returns the value of the transaction output.
    * * @returns The value of the output.
    */
-  getValue(): number {
+  getValue(): bigint {
     return getCTxOutValue(this.obj)
   }
 
