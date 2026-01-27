@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - '**'
     paths:
       - 'ffi/ts/src/**'
       - 'ffi/ts/scripts/**'
@@ -15,7 +15,7 @@ on:
       - 'ffi/ts/scripts/**'
 
 jobs:
-  run-unit-tests:
+  run-ts-browser-unit-tests:
     strategy:
       matrix:
         os: ["ubuntu-24.04", "macos-15"]

@@ -13,7 +13,7 @@ permissions:
   contents: write
 
 jobs:
-  build-docs:
+  python-publick-docs:
     runs-on: ubuntu-latest
 
     steps:
