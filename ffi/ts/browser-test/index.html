@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>navio-blsct Browser Test</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: #1a1a2e;
+      color: #eee;
+    }
+    h1 { color: #4ecca3; }
+    .test { 
+      padding: 15px; 
+      margin: 10px 0; 
+      border-radius: 8px;
+      background: #16213e;
+    }
+    .pass { border-left: 4px solid #4ecca3; }
+    .fail { border-left: 4px solid #e94560; }
+    .pending { border-left: 4px solid #f39c12; }
+    pre { 
+      background: #0f0f23; 
+      padding: 10px; 
+      border-radius: 4px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    code { color: #4ecca3; }
+  </style>
+</head>
+<body>
+  <h1>🧪 navio-blsct Browser Test</h1>
+  <p>Testing that the library loads correctly in a browser environment...</p>
+  
+  <div id="results">
+    <div class="test pending">⏳ Running tests...</div>
+  </div>
+
+  <script type="module" src="/main.js"></script>
+</body>
+</html>
+

@@ -16,14 +16,12 @@
     "noImplicitThis": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
-    "paths": {
-      "*/blsct": ["*/blsct.browser"]
-    }
+    "baseUrl": "."
   },
   "include": [
     "src/index.browser.ts",
     "src/blsct.browser.ts",
+    "src/managedObj.browser.ts",
     "src/bindings/wasm/**/*",
     "src/bindings/index.ts",
     "src/bindings/interface.ts",
@@ -37,7 +35,6 @@
     "src/ctxOut.ts",
     "src/ctxOuts.ts",
     "src/hashId.ts",
-    "src/managedObj.ts",
     "src/outPoint.ts",
     "src/point.ts",
     "src/rangeProof.ts",
@@ -52,6 +49,6 @@
     "src/viewTag.ts",
     "src/keys/**/*"
   ],
-  "exclude": ["node_modules", "dist", "src/__tests__", "src/bindings/node"]
+  "exclude": ["node_modules", "dist", "src/__tests__", "src/bindings/node", "src/blsct.ts", "src/managedObj.ts"]
 }
 

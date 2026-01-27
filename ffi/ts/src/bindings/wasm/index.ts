@@ -5,10 +5,12 @@
 export {
   loadBlsctModule,
   getBlsctModule,
+  setBlsctModule,
   isModuleLoaded,
   resetModule,
   type BlsctWasmModule,
   type BlsctModuleConfig,
+  type LoadBlsctModuleOptions,
 } from './loader.js';
 
 export {

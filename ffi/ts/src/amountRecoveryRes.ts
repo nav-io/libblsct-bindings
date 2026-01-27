@@ -3,17 +3,17 @@
  */
 export class AmountRecoveryRes {
   isSucc: boolean
-  amount: number
+  amount: bigint
   msg: string
 
   /** Constructs a new `AmountRecoveryRes` instance.
    * @param isSucc - Indicates whether the recovery was successful.
-   * @param amount - The recovered amount.
+   * @param amount - The recovered amount as bigint.
    * @param msg - The recovered message.
    */
   constructor(
     isSucc: boolean,
-    amount: number,
+    amount: bigint,
     msg: string,
   ) {
     this.isSucc = isSucc

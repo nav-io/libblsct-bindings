@@ -3,6 +3,10 @@
  * 
  * This module handles loading and initializing the WASM binary
  * in both browser and web worker environments.
+ * 
+ * For browser/bundler usage, the loader automatically resolves WASM paths
+ * relative to this file using import.meta.url for compatibility with
+ * bundlers like Vite, Webpack, and Rollup.
  */
 
 export interface BlsctWasmModule {
@@ -31,6 +35,7 @@ export interface BlsctWasmModule {
   _point_from_scalar(scalar: number): number;
   _are_point_equal(a: number, b: number): number;
   _point_to_str(ptr: number): number;
+  _scalar_muliply_point(point: number, scalar: number): number;
   
   // Public key operations
   _gen_random_public_key(): number;
@@ -163,6 +168,8 @@ export interface BlsctWasmModule {
   _get_tx_out_token_id(txOut: number): number;
   _get_tx_out_output_type(txOut: number): number;
   _get_tx_out_min_stake(txOut: number): bigint;
+  _get_tx_out_subtract_fee_from_amount(txOut: number): boolean;
+  _get_tx_out_blinding_key(txOut: number): number;
   
   // Signature operations
   _sign_message(privKey: number, msg: number): number;
@@ -234,10 +241,82 @@ let moduleInstance: BlsctWasmModule | null = null;
 let modulePromise: Promise<BlsctWasmModule> | null = null;
 
 /**
+ * Add cryptoGetRandomValues to a module instance if not already present.
+ * MCL_USE_WEB_CRYPTO_API requires Module.cryptoGetRandomValues for random number generation.
+ * The MCL library calls: EM_ASM({Module.cryptoGetRandomValues($0, $1)}, buf, byteSize)
+ */
+function ensureCryptoGetRandomValues(instance: BlsctWasmModule): void {
+  const instanceWithCrypto = instance as unknown as { 
+    cryptoGetRandomValues?: (bufPtr: number, byteSize: number) => void 
+  };
+  
+  if (!instanceWithCrypto.cryptoGetRandomValues && typeof crypto !== 'undefined' && crypto.getRandomValues) {
+    instanceWithCrypto.cryptoGetRandomValues = (bufPtr: number, byteSize: number) => {
+      const buffer = instance.HEAPU8.subarray(bufPtr, bufPtr + byteSize);
+      crypto.getRandomValues(buffer);
+    };
+  }
+}
+
+/**
+ * Options for loading the BLSCT WASM module
+ */
+export interface LoadBlsctModuleOptions {
+  /**
+   * Custom path to the WASM JS loader file.
+   * If not provided, the path is automatically resolved relative to this loader file.
+   */
+  wasmPath?: string;
+  /**
+   * Pre-loaded WASM binary as ArrayBuffer.
+   * When provided, the loader skips fetching the .wasm file and uses this binary directly.
+   * Useful for environments where you want to bundle or inline the WASM binary.
+   */
+  wasmBinary?: ArrayBuffer;
+}
+
+/**
+ * Calculate the default WASM path relative to this loader file.
+ * Uses import.meta.url for bundler compatibility (Vite, Webpack, Rollup, etc.)
+ */
+function getDefaultWasmPath(): string {
+  // In browser/bundler context, use import.meta.url to resolve relative paths
+  // The WASM files are located at ../../wasm/blsct.js relative to this loader
+  // (loader is at dist/browser/bindings/wasm/loader.js, wasm is at wasm/blsct.js)
+  try {
+    // @ts-ignore - import.meta.url is available in ESM contexts
+    if (typeof import.meta !== 'undefined' && import.meta.url) {
+      // @ts-ignore
+      return new URL('../../../../wasm/blsct.mjs', import.meta.url).href;
+    }
+  } catch {
+    // Fallback for environments where import.meta is not available
+  }
+  // Fallback to relative path (may not work with bundlers)
+  return './wasm/blsct.js';
+}
+
+/**
  * Load and initialize the WASM module
+ * 
+ * @param options - Loading options or legacy wasmPath string
+ * @returns Promise resolving to the initialized WASM module
+ * 
+ * @example
+ * // Automatic path resolution (recommended for bundlers)
+ * await loadBlsctModule();
+ * 
+ * @example
+ * // Custom WASM path
+ * await loadBlsctModule({ wasmPath: '/assets/wasm/blsct.js' });
+ * 
+ * @example
+ * // Pre-loaded WASM binary (for inline/bundled WASM)
+ * const wasmBinary = await fetch('/wasm/blsct.wasm').then(r => r.arrayBuffer());
+ * await loadBlsctModule({ wasmBinary });
  */
 export async function loadBlsctModule(
-  wasmPath?: string
+  options?: string | LoadBlsctModuleOptions
 ): Promise<BlsctWasmModule> {
   if (moduleInstance) {
     return moduleInstance;
@@ -247,12 +326,16 @@ export async function loadBlsctModule(
     return modulePromise;
   }
 
+  // Handle legacy string parameter (wasmPath)
+  const opts: LoadBlsctModuleOptions = typeof options === 'string' 
+    ? { wasmPath: options } 
+    : (options || {});
+
   modulePromise = (async () => {
     let BlsctModuleFactory: BlsctModuleFactory;
+    let moduleUrl = opts.wasmPath || getDefaultWasmPath();
 
     try {
-      let moduleUrl = wasmPath || './wasm/blsct.js';
-      
       // In Node.js, convert absolute paths to file:// URLs for dynamic import
       const isNode = typeof process !== 'undefined' && process.versions?.node;
       if (isNode && moduleUrl.startsWith('/')) {
@@ -262,31 +345,106 @@ export async function loadBlsctModule(
       }
       
       const module = await import(/* webpackIgnore: true */ moduleUrl);
-      BlsctModuleFactory = module.default || module;
+      
+      // Handle both ESM default export and CommonJS module.exports
+      BlsctModuleFactory = module.default;
+      
+      // If default is not a function, try other common patterns
+      if (typeof BlsctModuleFactory !== 'function') {
+        // Try the module itself (CommonJS pattern)
+        if (typeof module === 'function') {
+          BlsctModuleFactory = module;
+        }
+        // Try named export BlsctModule
+        else if (typeof module.BlsctModule === 'function') {
+          BlsctModuleFactory = module.BlsctModule;
+        }
+        // Try the entire module object as factory
+        else if (typeof module === 'object' && module !== null) {
+          // Some bundlers wrap the factory in the module object
+          const keys = Object.keys(module);
+          for (const key of keys) {
+            if (typeof module[key] === 'function') {
+              BlsctModuleFactory = module[key];
+              break;
+            }
+          }
+        }
+      }
+      
+      // If factory still not found, try global fallback (set by script tag loading)
+      if (typeof BlsctModuleFactory !== 'function') {
+        const globalAny = globalThis as unknown as { BlsctModule?: BlsctModuleFactory };
+        if (typeof globalThis !== 'undefined' && typeof globalAny.BlsctModule === 'function') {
+          BlsctModuleFactory = globalAny.BlsctModule;
+        } else {
+          throw new Error(
+            `WASM module loaded but factory function not found. ` +
+            `Module type: ${typeof module}, keys: ${Object.keys(module || {}).join(', ')}`
+          );
+        }
+      }
     } catch (err) {
-      const originalMessage =
-        err instanceof Error
-          ? `${err.message}${err.stack ? `\nStack trace:\n${err.stack}` : ''}`
-          : String(err);
-      throw new Error(
-        'Failed to load WASM module. Ensure the WASM files are built and accessible. ' +
+      // If dynamic import failed, try global fallback (set by script tag loading)
+      const globalAny = globalThis as unknown as { BlsctModule?: BlsctModuleFactory };
+      if (typeof globalThis !== 'undefined' && typeof globalAny.BlsctModule === 'function') {
+        BlsctModuleFactory = globalAny.BlsctModule;
+      } else {
+        const originalMessage =
+          err instanceof Error
+            ? `${err.message}${err.stack ? `\nStack trace:\n${err.stack}` : ''}`
+            : String(err);
+        throw new Error(
+          `Failed to load WASM module from "${moduleUrl}". ` +
+          `Ensure the WASM files are built and accessible. ` +
+          `If using a bundler, you may need to configure it to handle WASM files. ` +
+          `You can also load the WASM via script tag and call setBlsctModule(). ` +
           `Original error: ${originalMessage}`
-      );
+        );
+      }
     }
+
+    // Calculate WASM binary path for locateFile
+    const wasmBinaryUrl = moduleUrl.replace(/\.m?js$/, '.wasm');
 
     const config: BlsctModuleConfig = {
       locateFile: (path: string, prefix: string) => {
-        if (wasmPath && path.endsWith('.wasm')) {
-          return wasmPath.replace('.js', '.wasm');
+        if (path.endsWith('.wasm')) {
+          // Use the calculated WASM binary path
+          return wasmBinaryUrl;
         }
         return prefix + path;
       },
       print: console.log,
       printErr: console.error,
     };
+    
+    // If wasmBinary is provided, use it directly
+    if (opts.wasmBinary) {
+      config.wasmBinary = opts.wasmBinary;
+    }
 
     const instance = await BlsctModuleFactory(config);
-    instance._init();
+    
+    // Add cryptoGetRandomValues for MCL web crypto support
+    ensureCryptoGetRandomValues(instance);
+    
+    // Initialize the library
+    // Note: With correct build flags (BLS_ETH, MCLBN_FP_UNIT_SIZE=6, MCLBN_FR_UNIT_SIZE=4),
+    // blsInit should succeed. If it fails, a WASM exception will be thrown.
+    try {
+      instance._init();
+    } catch (e) {
+      // WASM exceptions are often returned as integer pointers
+      const errorInfo = typeof e === 'number' 
+        ? `WASM exception pointer: ${e}. This usually indicates blsInit() failed due to MCLBN_COMPILED_TIME_VAR mismatch.`
+        : String(e);
+      throw new Error(
+        `Failed to initialize BLSCT library. ${errorInfo}\n` +
+        `Ensure the WASM module was built with consistent BLS_ETH and MCLBN_*_UNIT_SIZE flags.`
+      );
+    }
+    
     moduleInstance = instance;
     return instance;
   })();
@@ -319,5 +477,52 @@ export function isModuleLoaded(): boolean {
 export function resetModule(): void {
   moduleInstance = null;
   modulePromise = null;
+}
+
+/**
+ * Set a pre-initialized WASM module instance.
+ * 
+ * This is useful when the dynamic import fails (e.g., due to bundler ESM/CJS issues)
+ * and you need to load the module via script tag and initialize it manually.
+ * 
+ * @param module - The initialized WASM module instance
+ * @param skipInit - If true, skip calling _init() (use if already initialized)
+ * 
+ * @example
+ * // Load via script tag
+ * await new Promise((resolve, reject) => {
+ *   const script = document.createElement('script');
+ *   script.src = '/wasm/blsct.js';
+ *   script.onload = resolve;
+ *   script.onerror = reject;
+ *   document.head.appendChild(script);
+ * });
+ * 
+ * // Initialize manually
+ * const wasmModule = await window.BlsctModule({
+ *   locateFile: (path) => path.endsWith('.wasm') ? '/wasm/blsct.wasm' : path
+ * });
+ * 
+ * // Set it so the library uses this instance
+ * setBlsctModule(wasmModule);
+ */
+export function setBlsctModule(module: BlsctWasmModule, skipInit = false): void {
+  // Add cryptoGetRandomValues if not present
+  ensureCryptoGetRandomValues(module);
+  
+  // Initialize if not skipped
+  if (!skipInit) {
+    try {
+      module._init();
+    } catch (e) {
+      const errorInfo = typeof e === 'number' 
+        ? `WASM exception pointer: ${e}. This usually indicates blsInit() failed.`
+        : String(e);
+      throw new Error(`Failed to initialize BLSCT library. ${errorInfo}`);
+    }
+  }
+  
+  moduleInstance = module;
+  modulePromise = Promise.resolve(module);
 }
 

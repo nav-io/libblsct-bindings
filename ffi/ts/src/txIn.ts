@@ -98,16 +98,16 @@ export class TxIn extends ManagedObj {
   }
 
   /** Returns the amount of the transaction input.
-   * @returns The amount of the transaction input.
+   * @returns The amount of the transaction input as bigint.
    */
-  getAmount(): number {
+  getAmount(): bigint {
     return getTxInAmount(this.value())
   }
 
   /** Returns the gamma of the transaction input.
-   * @returns The gamma of the transaction input.
+   * @returns The gamma of the transaction input as bigint.
    */
-  getGamma(): number {
+  getGamma(): bigint {
     return getTxInGamma(this.value())
   }
 

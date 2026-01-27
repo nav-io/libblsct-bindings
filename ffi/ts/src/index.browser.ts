@@ -6,7 +6,7 @@
  */
 
 // Re-export WASM initialization
-export { loadBlsctModule, isModuleLoaded } from './bindings/wasm/index.js';
+export { loadBlsctModule, isModuleLoaded, type LoadBlsctModuleOptions } from './bindings/wasm/index.js';
 
 // Re-export all public API
 export * from './address.js';
@@ -19,7 +19,7 @@ export * from './ctxIns.js';
 export * from './ctxOut.js';
 export * from './ctxOuts.js';
 export * from './hashId.js';
-export * from './managedObj.js';
+export * from './managedObj.browser.js';
 export * from './outPoint.js';
 export * from './point.js';
 export * from './rangeProof.js';
