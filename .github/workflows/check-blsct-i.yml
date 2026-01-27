@@ -14,7 +14,7 @@ on:
       - 'ffi/ts/swig/blsct.i'
 
 jobs:
-  check-blsct-i-consistency:
+  common-check-blsct-i-consistency:
     runs-on: ubuntu-24.04
 
     steps:
