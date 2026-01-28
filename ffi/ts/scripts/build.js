@@ -358,7 +358,13 @@ const getSwigVersion = () => {
 
 const shouldRegenerateWrapper = (cfg) => {
   const wrapperPath = path.join(cfg.swigDir, 'blsct_wrap.cxx')
-  const interfacePath = path.join(cfg.swigDir, 'blsct.i')
+
+  // Allow forcing regeneration via environment variable
+  // Useful for developers who modify blsct.i
+  if (process.env.BLSCT_REGENERATE_SWIG === '1') {
+    console.log('[navio-blsct] BLSCT_REGENERATE_SWIG=1 set, forcing wrapper regeneration')
+    return true
+  }
 
   // If wrapper doesn't exist, we need to generate it
   if (!fs.existsSync(wrapperPath)) {
@@ -366,22 +372,53 @@ const shouldRegenerateWrapper = (cfg) => {
     return true
   }
 
-  // If interface file doesn't exist, something is wrong
-  if (!fs.existsSync(interfacePath)) {
-    console.log('[navio-blsct] blsct.i not found, skipping wrapper check')
+  // Check if wrapper has valid content and compatible SWIG version
+  // npm doesn't preserve file mtimes, so we can't rely on mtime comparison
+  // Instead, check the SWIG_VERSION define in the wrapper file
+  try {
+    const wrapperStat = fs.statSync(wrapperPath)
+    
+    // Wrapper should be at least 100KB (actual size is ~300KB)
+    if (wrapperStat.size < 100000) {
+      console.log('[navio-blsct] SWIG wrapper appears incomplete, regeneration required')
+      return true
+    }
+
+    // Check for SWIG_VERSION define in first 1KB
+    // Format: #define SWIG_VERSION 0x040401 (4.4.1 = 0x040401)
+    const fd = fs.openSync(wrapperPath, 'r')
+    const buffer = Buffer.alloc(1024)
+    fs.readSync(fd, buffer, 0, 1024, 0)
+    fs.closeSync(fd)
+    const header = buffer.toString('utf8')
+
+    // Look for SWIG_VERSION hex define
+    const versionMatch = header.match(/#define SWIG_VERSION 0x([0-9a-fA-F]+)/)
+    if (!versionMatch) {
+      console.log('[navio-blsct] SWIG wrapper missing version info, regeneration required')
+      return true
+    }
+
+    // Parse version: 0x040401 = major*0x10000 + minor*0x100 + patch
+    const versionHex = parseInt(versionMatch[1], 16)
+    const major = (versionHex >> 16) & 0xFF
+    const minor = (versionHex >> 8) & 0xFF
+    const patch = versionHex & 0xFF
+    const versionStr = `${major}.${minor}.${patch}`
+
+    // Require SWIG 4.1.0+ for Node.js 12-23 V8 compatibility
+    const minVersion = 0x040100 // 4.1.0
+    if (versionHex < minVersion) {
+      console.log(`[navio-blsct] SWIG wrapper version ${versionStr} is too old, regeneration required`)
+      return true
+    }
+
+    console.log(`[navio-blsct] Using existing SWIG wrapper (version ${versionStr})`)
     return false
-  }
-
-  // Check if interface file is newer than wrapper
-  const wrapperStat = fs.statSync(wrapperPath)
-  const interfaceStat = fs.statSync(interfacePath)
-
-  if (interfaceStat.mtimeMs > wrapperStat.mtimeMs) {
-    console.log('[navio-blsct] blsct.i is newer than wrapper, regeneration required')
+  } catch (err) {
+    console.log(`[navio-blsct] Error checking wrapper: ${err.message}, regeneration required`)
     return true
   }
-
-  return false
 }
 
 const buildSwigWrapper = (cfg) => {

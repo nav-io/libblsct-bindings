@@ -35,6 +35,9 @@ jobs:
         run: |
           cd ffi/ts
           npm install
+        env:
+          # Force SWIG wrapper regeneration to ensure it matches blsct.i
+          BLSCT_REGENERATE_SWIG: '1'
 
       - name: Build WASM module
         run: |
