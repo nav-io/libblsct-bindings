@@ -14,9 +14,8 @@ const NAVIO_CORE_REPO = IS_PROD
   : 'https://github.com/gogoex/navio-core'
 const NAVIO_CORE_BRANCH = IS_PROD ? 'master' : 'development-branch-name'
 
-// Linux apt packages required for building
+// Linux apt packages required for building (swig is installed separately only if needed)
 const LINUX_APT_PACKAGES = [
-  'swig',
   'autoconf',
   'automake',
   'libtool',
@@ -26,9 +25,8 @@ const LINUX_APT_PACKAGES = [
   'build-essential'
 ]
 
-// macOS brew packages required for building
+// macOS brew packages required for building (swig is installed separately only if needed)
 const MACOS_BREW_PACKAGES = [
-  'swig',
   'autoconf',
   'automake',
   'libtool',
@@ -152,6 +150,72 @@ function ensureMacOSDeps(pkgs) {
   if (result.status !== 0) {
     console.warn('[navio-blsct] brew install had non-zero exit, continuing anyway...')
   }
+}
+
+function ensureSwigInstalled() {
+  // Already have swig installed
+  if (hasCmd('swig')) return true
+
+  console.log('[navio-blsct] SWIG not found, attempting to install...')
+
+  if (isLinux()) {
+    const aptAvailable = hasCmd('apt-get') || hasCmd('apt')
+    if (!aptAvailable) {
+      console.error(
+        `[navio-blsct] Linux detected but apt/apt-get not found.\n` +
+        `Install SWIG manually to regenerate the wrapper.\n`
+      )
+      return false
+    }
+
+    if (!isRoot() && !shouldAllowApt()) {
+      console.error(
+        `[navio-blsct] SWIG is required to regenerate the wrapper but is not installed.\n` +
+        `Install it manually:\n  sudo apt-get update && sudo apt-get install -y swig\n\n` +
+        `Or re-run with:\n  BLSCT_BUILD_ALLOW_APT=1 npm install\n`
+      )
+      return false
+    }
+
+    if (!isRoot() && shouldAllowApt() && !hasCmd('sudo')) {
+      console.error(
+        `[navio-blsct] BLSCT_BUILD_ALLOW_APT=1 was set but sudo is not available.\n` +
+        `Install SWIG manually or run the build as root.\n`
+      )
+      return false
+    }
+
+    const installCmd = 'apt-get update && apt-get install -y swig'
+    const sudoInstallCmd = `sudo ${installCmd}`
+
+    console.log('[navio-blsct] Installing SWIG via apt...')
+    execSync(isRoot() ? installCmd : sudoInstallCmd, { stdio: 'inherit' })
+    return true
+  }
+
+  if (isDarwin()) {
+    if (!hasCmd('brew')) {
+      console.error(
+        `[navio-blsct] SWIG is required to regenerate the wrapper but is not installed.\n` +
+        `Install Homebrew and run: brew install swig\n`
+      )
+      return false
+    }
+
+    console.log('[navio-blsct] Installing SWIG via Homebrew...')
+    const result = spawnSync('brew', ['install', 'swig'], { stdio: 'inherit' })
+    if (result.status !== 0) {
+      console.error('[navio-blsct] Failed to install SWIG via Homebrew')
+      return false
+    }
+    return true
+  }
+
+  console.error(
+    `[navio-blsct] SWIG is required to regenerate the wrapper but is not installed.\n` +
+    `Please install SWIG 4.1.0 or later manually.\n`
+  )
+  return false
 }
 
 // ============================================================================
@@ -426,6 +490,18 @@ const buildSwigWrapper = (cfg) => {
   if (!shouldRegenerateWrapper(cfg)) {
     console.log('[navio-blsct] Using existing SWIG wrapper (blsct_wrap.cxx)')
     return
+  }
+
+  // Only install/check SWIG if regeneration is needed
+  if (!ensureSwigInstalled()) {
+    console.error(
+      `[navio-blsct] SWIG is required to regenerate the wrapper but could not be installed.\n` +
+      `The pre-built wrapper requires SWIG 4.1.0+ for Node.js 20/22/23 compatibility.\n\n` +
+      `Options:\n` +
+      `  1. Install SWIG 4.1.0 or later manually\n` +
+      `  2. Use the pre-built wrapper by ensuring blsct_wrap.cxx exists\n`
+    )
+    process.exit(1)
   }
 
   // Check SWIG version before regenerating
