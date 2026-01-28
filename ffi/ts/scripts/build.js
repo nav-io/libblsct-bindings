@@ -338,8 +338,89 @@ const buildLibBlsct = (cfg, numCpus, depArchDir) => {
   }
 }
 
+const getSwigVersion = () => {
+  try {
+    const res = spawnSync('swig', ['-version'], { stdio: ['ignore', 'pipe', 'ignore'] })
+    if (res.status !== 0) return null
+    const output = res.stdout.toString()
+    const match = output.match(/SWIG Version (\d+)\.(\d+)\.(\d+)/)
+    if (!match) return null
+    return {
+      major: parseInt(match[1], 10),
+      minor: parseInt(match[2], 10),
+      patch: parseInt(match[3], 10),
+      string: `${match[1]}.${match[2]}.${match[3]}`
+    }
+  } catch {
+    return null
+  }
+}
+
+const shouldRegenerateWrapper = (cfg) => {
+  const wrapperPath = path.join(cfg.swigDir, 'blsct_wrap.cxx')
+  const interfacePath = path.join(cfg.swigDir, 'blsct.i')
+
+  // If wrapper doesn't exist, we need to generate it
+  if (!fs.existsSync(wrapperPath)) {
+    console.log('[navio-blsct] SWIG wrapper not found, regeneration required')
+    return true
+  }
+
+  // If interface file doesn't exist, something is wrong
+  if (!fs.existsSync(interfacePath)) {
+    console.log('[navio-blsct] blsct.i not found, skipping wrapper check')
+    return false
+  }
+
+  // Check if interface file is newer than wrapper
+  const wrapperStat = fs.statSync(wrapperPath)
+  const interfaceStat = fs.statSync(interfacePath)
+
+  if (interfaceStat.mtimeMs > wrapperStat.mtimeMs) {
+    console.log('[navio-blsct] blsct.i is newer than wrapper, regeneration required')
+    return true
+  }
+
+  return false
+}
+
 const buildSwigWrapper = (cfg) => {
-  console.log('Building swig wrapper...')
+  // Check if we need to regenerate the wrapper
+  if (!shouldRegenerateWrapper(cfg)) {
+    console.log('[navio-blsct] Using existing SWIG wrapper (blsct_wrap.cxx)')
+    return
+  }
+
+  // Check SWIG version before regenerating
+  const swigVersion = getSwigVersion()
+  if (!swigVersion) {
+    console.error(
+      `[navio-blsct] SWIG is required to regenerate the wrapper but was not found.\n` +
+      `The pre-built wrapper requires SWIG 4.1.0+ for Node.js 20/22/23 compatibility.\n\n` +
+      `Options:\n` +
+      `  1. Install SWIG 4.1.0 or later\n` +
+      `  2. Use the pre-built wrapper by ensuring blsct_wrap.cxx exists\n`
+    )
+    process.exit(1)
+  }
+
+  // Require SWIG 4.1.0+ for Node.js 12-23 V8 compatibility
+  const minMajor = 4, minMinor = 1
+  if (swigVersion.major < minMajor || 
+      (swigVersion.major === minMajor && swigVersion.minor < minMinor)) {
+    console.error(
+      `[navio-blsct] SWIG ${swigVersion.string} is too old for Node.js 20/22/23.\n` +
+      `SWIG 4.1.0+ is required for V8 API compatibility.\n\n` +
+      `Your options:\n` +
+      `  1. Upgrade SWIG to 4.1.0 or later:\n` +
+      `     - Ubuntu/Debian: Check if a newer version is available or build from source\n` +
+      `     - macOS: brew install swig\n` +
+      `     - From source: https://github.com/swig/swig\n\n`
+    )
+    process.exit(1)
+  }
+
+  console.log(`[navio-blsct] Building SWIG wrapper with SWIG ${swigVersion.string}...`)
   const res = spawnSync(
     'swig', ['-c++', '-javascript', '-node', 'blsct.i'],
     { cwd: cfg.swigDir, stdio: 'inherit' }

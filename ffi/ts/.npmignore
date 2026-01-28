@@ -1,0 +1,22 @@
+# Build artifacts (not needed in npm package)
+build/
+build-wasm/
+core
+depends/
+libs/
+node_modules/
+navio-core/
+emsdk/
+
+# Static libraries (built during install)
+lib*.a
+
+# WASM outputs (generated during build, but keep pre-built ones)
+# Note: wasm/*.js and wasm/*.wasm are included via package.json "files"
+
+# Development files
+*.log
+.DS_Store
+
+# Note: swig/blsct_wrap.cxx is NOT ignored here
+# It must be included in the npm package for Node.js 20/22/23 compatibility
