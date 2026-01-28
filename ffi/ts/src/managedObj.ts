@@ -9,8 +9,29 @@ export type FinalizerInfo = {
   deleteMethod?: () => void,
 }
 
+// Shutdown guard: prevents finalizers from running during process exit
+// This avoids crashes when native module is being torn down
+let isShuttingDown = false
+
+// Register shutdown handlers in Node.js environment
+if (typeof process !== 'undefined' && process.on) {
+  // 'exit' fires synchronously when process is about to exit
+  process.on('exit', () => {
+    isShuttingDown = true
+  })
+  // 'beforeExit' fires when event loop is empty (before 'exit')
+  process.on('beforeExit', () => {
+    isShuttingDown = true
+  })
+}
+
 const finalizer = new FinalizationRegistry(
   (fi: FinalizerInfo) => {
+    // Skip finalization during shutdown to prevent crashes
+    // The OS will reclaim all memory anyway when the process exits
+    if (isShuttingDown) {
+      return
+    }
     if (fi.obj) {
       if (fi.deleteMethod) {
         fi.deleteMethod()
