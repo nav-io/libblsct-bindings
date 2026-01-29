@@ -41,6 +41,19 @@ export class Scalar extends ManagedObj {
     } else if (typeof obj === 'object' && obj !== null) {
       // Native NAPI object
       super(obj)
+    } else if (typeof obj === 'bigint') {
+      // Convert BigInt to hex and deserialize - supports full 256-bit scalar range
+      if (obj < 0n) {
+        throw new TypeError('Scalar cannot be negative')
+      }
+      // Convert to hex, pad to 64 chars (32 bytes) for consistent scalar format
+      const hex = obj.toString(16).padStart(64, '0')
+      if (hex.length > 64) {
+        throw new TypeError('BigInt value exceeds scalar field size (256 bits)')
+      }
+      const rv = deserializeScalar(hex)
+      super(rv.value)
+      freeObj(rv)
     } else if (typeof obj === 'number') {
       // User wants to create a scalar with this numeric value
       const rv = genScalar(obj)
