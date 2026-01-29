@@ -28,8 +28,23 @@ function getWasmPath(): string {
   return path.resolve(process.cwd(), 'wasm/blsct.js');
 }
 
+// Log environment info for CI debugging
+function logEnvironmentInfo(): void {
+  console.log('=== Environment Info ===');
+  console.log('Node.js version:', process.version);
+  console.log('Platform:', process.platform, process.arch);
+  console.log('CWD:', process.cwd());
+  console.log('WASM_PATH:', typeof WASM_PATH !== 'undefined' ? WASM_PATH : '(not set)');
+  console.log('crypto available:', typeof globalThis.crypto !== 'undefined');
+  console.log('crypto.getRandomValues available:', typeof globalThis.crypto?.getRandomValues === 'function');
+  console.log('========================');
+}
+
 describe('Browser WASM Module', () => {
   beforeAll(async () => {
+    // Log environment info for CI debugging
+    logEnvironmentInfo();
+    
     try {
       // Dynamically import the WASM loader
       wasmLoader = await import('../bindings/wasm/index.js');
@@ -37,11 +52,32 @@ describe('Browser WASM Module', () => {
       // Load the WASM module with absolute path
       const wasmPath = getWasmPath();
       console.log('Loading WASM from:', wasmPath);
+      
+      // Verify the WASM file exists before loading
+      const fs = await import('fs');
+      if (!fs.existsSync(wasmPath)) {
+        throw new Error(`WASM file not found at: ${wasmPath}`);
+      }
+      const wasmJsStats = fs.statSync(wasmPath);
+      console.log('WASM JS file size:', wasmJsStats.size, 'bytes');
+      
+      const wasmBinaryPath = wasmPath.replace(/\.m?js$/, '.wasm');
+      if (fs.existsSync(wasmBinaryPath)) {
+        const wasmBinaryStats = fs.statSync(wasmBinaryPath);
+        console.log('WASM binary file size:', wasmBinaryStats.size, 'bytes');
+      } else {
+        console.warn('WASM binary file not found at:', wasmBinaryPath);
+      }
+      
       await wasmLoader.loadBlsctModule(wasmPath);
+      console.log('WASM module loaded successfully');
+      console.log('Module loaded status:', wasmLoader.isModuleLoaded());
 
       // THEN dynamically import the browser modules after WASM is loaded
       blsctBrowser = await import('../index.browser.js');
+      console.log('Browser modules imported successfully');
     } catch (err) {
+      console.error('WASM load error:', err);
       wasmLoadError = err instanceof Error ? err : new Error(String(err));
     }
   });
@@ -263,13 +299,28 @@ describe('Browser WASM Module', () => {
 
     it('should verify range proofs', () => {
       requireWasm();
+      console.log('[Range Proof Test] Starting...');
+      
       const amounts = [1000];
+      console.log('[Range Proof Test] Amounts:', amounts);
+      
       const nonce = blsctBrowser.Point.random();
+      console.log('[Range Proof Test] Nonce created:', nonce ? 'valid' : 'null');
+      
       const message = 'test';
       const tokenId = blsctBrowser.TokenId.default();
+      console.log('[Range Proof Test] TokenId created:', tokenId ? 'valid' : 'null');
       
+      console.log('[Range Proof Test] Generating proof...');
       const proof = blsctBrowser.RangeProof.generate(amounts, nonce, message, tokenId);
-      expect(blsctBrowser.RangeProof.verifyProofs([proof])).toBe(true);
+      console.log('[Range Proof Test] Proof generated:', proof ? 'valid' : 'null');
+      console.log('[Range Proof Test] Proof size:', proof?.size?.() ?? 'unknown');
+      
+      console.log('[Range Proof Test] Verifying proof...');
+      const isValid = blsctBrowser.RangeProof.verifyProofs([proof]);
+      console.log('[Range Proof Test] Verification result:', isValid);
+      
+      expect(isValid).toBe(true);
     });
 
     it('should serialize and deserialize range proofs', () => {

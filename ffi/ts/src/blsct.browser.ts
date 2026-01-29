@@ -926,6 +926,13 @@ export function deleteRangeProofVec(rangeProofs: unknown): void {
 export function verifyRangeProofs(rangeProofsVec: unknown): BlsctBoolRetVal {
   const module = getBlsctModule();
   const resultPtr = module._verify_range_proofs(rangeProofsVec as number);
+  
+  // Check for null pointer - indicates WASM error (memory allocation failure, exception, etc.)
+  if (resultPtr === 0) {
+    console.error('[verifyRangeProofs] WASM returned null pointer - possible memory error or exception');
+    return { result: 1, value: false };
+  }
+  
   // BlsctBoolRetVal struct layout: result (uint8_t @ offset 0), value (bool @ offset 1)
   const result = module.HEAPU8[resultPtr];
   const value = module.HEAPU8[resultPtr + 1] !== 0;

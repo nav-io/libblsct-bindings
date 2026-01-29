@@ -42,6 +42,17 @@ jobs:
       - name: Verify Emscripten installation
         run: emcc --version
 
+      - name: Log environment info
+        run: |
+          echo "=== Environment Info ==="
+          echo "Node.js version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Emscripten version: $(emcc --version | head -1)"
+          echo "OS: ${{ matrix.os }}"
+          echo "Runner arch: $(uname -m)"
+          echo "Available memory: $(free -m 2>/dev/null || vm_stat 2>/dev/null || echo 'N/A')"
+          echo "========================"
+
       - name: Install dependencies
         run: |
           cd ffi/ts
@@ -51,6 +62,19 @@ jobs:
         run: |
           cd ffi/ts
           npm run build:wasm
+
+      - name: Verify WASM build artifacts
+        run: |
+          cd ffi/ts
+          echo "=== WASM Build Artifacts ==="
+          ls -la wasm/ || echo "wasm/ directory not found"
+          if [ -f wasm/blsct.js ]; then
+            echo "blsct.js size: $(wc -c < wasm/blsct.js) bytes"
+          fi
+          if [ -f wasm/blsct.wasm ]; then
+            echo "blsct.wasm size: $(wc -c < wasm/blsct.wasm) bytes"
+          fi
+          echo "============================="
 
       - name: Build TypeScript (browser)
         run: |

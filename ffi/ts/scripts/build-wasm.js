@@ -13,6 +13,8 @@ const path = require('path');
 
 // Configuration
 const IS_PROD = true;
+// Enable WASM assertions for debugging (set WASM_DEBUG=1 to enable)
+const WASM_DEBUG = process.env.WASM_DEBUG === '1';
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
@@ -581,9 +583,13 @@ function buildBlsct() {
 
 function linkWasm(objectFiles) {
   console.log('Linking WASM module...');
+  
+  if (WASM_DEBUG) {
+    console.log('DEBUG MODE: Building with assertions enabled (-sASSERTIONS=2)');
+  }
 
   const linkFlags = [
-    '-O3',
+    WASM_DEBUG ? '-O0' : '-O3',  // Disable optimization in debug mode
     '-s', 'WASM=1',
     '-s', 'WASM_BIGINT=1',  // Enable native BigInt support for i64 values
     '-s', 'MODULARIZE=1',
@@ -598,6 +604,8 @@ function linkWasm(objectFiles) {
     '-s', 'FILESYSTEM=0',
     '-s', 'SINGLE_FILE=0',
     '--no-entry',
+    // Add assertions in debug mode for better error messages
+    ...(WASM_DEBUG ? ['-s', 'ASSERTIONS=2', '-s', 'SAFE_HEAP=1', '-s', 'STACK_OVERFLOW_CHECK=2'] : []),
   ].join(' ');
 
   const allObjects = [
@@ -622,7 +630,8 @@ async function main() {
 
   console.log(`\nNavio Core directory: ${NAVIO_CORE_DIR}`);
   console.log(`WASM output directory: ${WASM_OUTPUT_DIR}`);
-  console.log(`Build directory: ${BUILD_DIR}\n`);
+  console.log(`Build directory: ${BUILD_DIR}`);
+  console.log(`Debug mode: ${WASM_DEBUG ? 'ENABLED (assertions on)' : 'disabled'}\n`);
 
   try {
     // Ensure navio-core is available
