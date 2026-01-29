@@ -87,15 +87,25 @@ export class Scalar extends ManagedObj {
    * @returns The scalar as a bigint.
    */
   toBigInt(): bigint {
-    return BigInt(scalarToUint64(this.value()))
+    const value = scalarToUint64(this.value())
+    // scalarToUint64 returns bigint with WASM_BIGINT=1
+    // Ensure we always return a proper BigInt
+    return typeof value === 'bigint' ? value : BigInt(value)
   }
 
   /** Converts the scalar to an integer.
    * @returns The scalar as a number.
+   * @throws {RangeError} If the value exceeds Number.MAX_SAFE_INTEGER.
    * @deprecated Use toBigInt() instead to avoid precision loss for large values.
    */
   toNumber(): number {
-    return Number(scalarToUint64(this.value()))
+    const bigIntValue = this.toBigInt()
+    if (bigIntValue > BigInt(Number.MAX_SAFE_INTEGER)) {
+      throw new RangeError(
+        `Scalar value ${bigIntValue} exceeds Number.MAX_SAFE_INTEGER. Use toBigInt() instead.`
+      )
+    }
+    return Number(bigIntValue)
   }
 
   /** Returns if the scalar is equal to the provided scalar.

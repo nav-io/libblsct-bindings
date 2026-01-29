@@ -84,7 +84,29 @@ describe('Browser WASM Module', () => {
     it('should create scalar from number', () => {
       requireWasm();
       const s = new blsctBrowser.Scalar(12345);
-      expect(s.toNumber()).toBe(12345);
+      // Use toBigInt() for consistent BigInt handling
+      expect(s.toBigInt()).toBe(12345n);
+    });
+
+    it('should create scalar from BigInt', () => {
+      requireWasm();
+      const bigValue = 9007199254740993n; // > Number.MAX_SAFE_INTEGER
+      const s = new blsctBrowser.Scalar(bigValue);
+      expect(s.toBigInt()).toBe(bigValue);
+    });
+
+    it('should allow toNumber() for small values', () => {
+      requireWasm();
+      const s = new blsctBrowser.Scalar(42);
+      expect(s.toNumber()).toBe(42);
+    });
+
+    it('should throw RangeError for toNumber() with large values', () => {
+      requireWasm();
+      // Create a scalar from a large BigInt value
+      const bigValue = BigInt(Number.MAX_SAFE_INTEGER) + 1n;
+      const s = new blsctBrowser.Scalar(bigValue);
+      expect(() => s.toNumber()).toThrow(RangeError);
     });
 
     it('should serialize and deserialize scalars', () => {

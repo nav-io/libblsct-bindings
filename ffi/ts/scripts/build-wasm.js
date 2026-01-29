@@ -585,6 +585,7 @@ function linkWasm(objectFiles) {
   const linkFlags = [
     '-O3',
     '-s', 'WASM=1',
+    '-s', 'WASM_BIGINT=1',  // Enable native BigInt support for i64 values
     '-s', 'MODULARIZE=1',
     '-s', 'EXPORT_NAME="BlsctModule"',
     '-s', `EXPORTED_FUNCTIONS='${JSON.stringify(EXPORTED_FUNCTIONS)}'`,
