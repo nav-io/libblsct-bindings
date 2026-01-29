@@ -9,7 +9,7 @@ import {
   serializeScalar,
 } from './blsct'
 
-import { ManagedObj, isWasmPtrWrapper, unwrapPtr } from './managedObj'
+import { ManagedObj, isWasmPtrWrapper } from './managedObj'
 
 /**
  * Represents an element of the finite field $\mathbb{F}_r$, where $r$ is the order of the generator point of the BLS12-381 G1 group.
