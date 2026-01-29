@@ -9,7 +9,7 @@ import {
   serializeScalar,
 } from './blsct'
 
-import { ManagedObj } from './managedObj'
+import { ManagedObj, isWasmPtrWrapper, unwrapPtr } from './managedObj'
 
 /**
  * Represents an element of the finite field $\mathbb{F}_r$, where $r$ is the order of the generator point of the BLS12-381 G1 group.
@@ -32,11 +32,17 @@ export class Scalar extends ManagedObj {
   /** Constructs a new `Scalar` instance.
    * - If no parameter is provided, a random scalar is generated.
    * - If a number is provided, it is converted to a scalar.
+   * - If a WASM pointer wrapper is provided (from fromObj/deserialize), it wraps the pointer.
    */
   constructor(obj?: any) {
-    if (typeof obj === 'object') {
+    if (isWasmPtrWrapper(obj)) {
+      // WASM pointer from fromObj or _deserialize - pass directly to parent
+      super(obj)
+    } else if (typeof obj === 'object' && obj !== null) {
+      // Native NAPI object
       super(obj)
     } else if (typeof obj === 'number') {
+      // User wants to create a scalar with this numeric value
       const rv = genScalar(obj)
       super(rv.value)
       freeObj(rv)

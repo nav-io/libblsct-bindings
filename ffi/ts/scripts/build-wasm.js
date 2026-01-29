@@ -196,6 +196,7 @@ const EXPORTED_FUNCTIONS = [
   '_scalar_to_uint64',
   '_are_scalar_equal',
   '_scalar_to_pub_key',
+  '_scalar_to_str',
   '_serialize_scalar',
   '_deserialize_scalar',
 
@@ -206,6 +207,7 @@ const EXPORTED_FUNCTIONS = [
   '_are_point_equal',
   '_point_from_scalar',
   '_point_to_str',
+  '_scalar_muliply_point',
   '_serialize_point',
   '_deserialize_point',
 
@@ -393,6 +395,9 @@ const EXPORTED_RUNTIME_METHODS = [
   'stackSave',
   'stackRestore',
   'stackAlloc',
+  'HEAPU8',   // Needed for cryptoGetRandomValues
+  'HEAPU32',  // Needed for memory parsing (parseRetVal)
+  'HEAP32',   // Used in some memory operations
 ];
 
 function buildMcl() {
@@ -504,6 +509,7 @@ function buildBlsct() {
     '-DHAVE_CONFIG_H',
     '-DLIBBLSCT',
     '-DBLS_ETH',
+    '-DWASM_SINGLE_THREADED',
     '-DMCLBN_FP_UNIT_SIZE=6',
     '-DMCLBN_FR_UNIT_SIZE=4',
     '-DMCL_SIZEOF_UNIT=4',
@@ -587,7 +593,7 @@ function linkWasm(objectFiles) {
     '-s', 'INITIAL_MEMORY=16777216',
     '-s', 'MAXIMUM_MEMORY=1073741824',
     '-s', 'STACK_SIZE=1048576',
-    '-s', 'ENVIRONMENT=web,worker',
+    '-s', 'ENVIRONMENT=web,worker,node',
     '-s', 'FILESYSTEM=0',
     '-s', 'SINGLE_FILE=0',
     '--no-entry',

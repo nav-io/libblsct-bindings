@@ -163,8 +163,8 @@ export function genRandomScalar(): BlsctRetVal {
 
 export function genScalar(value: number): BlsctRetVal {
   const module = getBlsctModule();
-  const [lo, hi] = splitI64(value);
-  const resultPtr = (module._gen_scalar as unknown as (lo: number, hi: number) => number)(lo, hi);
+  // Emscripten with BigInt support expects i64 as BigInt
+  const resultPtr = module._gen_scalar(BigInt(value));
   const result = parseRetVal(resultPtr);
   freePtr(resultPtr);
   return {
@@ -350,13 +350,11 @@ export function genDpkWithKeysAcctAddr(
   address: number
 ): unknown {
   const module = getBlsctModule();
-  const [acctLo, acctHi] = splitI64(account);
-  const [addrLo, addrHi] = splitI64(address);
-  return (module._gen_dpk_with_keys_acct_addr as unknown as (a: number, b: number, c: number, d: number, e: number, f: number) => number)(
+  return module._gen_dpk_with_keys_acct_addr(
     viewKey as number,
     spendingPubKey as number,
-    acctLo, acctHi,
-    addrLo, addrHi
+    BigInt(account),
+    BigInt(address)
   );
 }
 
@@ -391,8 +389,7 @@ export function deserializeDpk(hex: string): BlsctRetVal {
 
 export function genTokenId(token: number): BlsctRetVal {
   const module = getBlsctModule();
-  const [lo, hi] = splitI64(token);
-  const resultPtr = (module._gen_token_id as unknown as (lo: number, hi: number) => number)(lo, hi);
+  const resultPtr = module._gen_token_id(BigInt(token));
   const result = parseRetVal(resultPtr);
   freePtr(resultPtr);
   return {
@@ -404,12 +401,7 @@ export function genTokenId(token: number): BlsctRetVal {
 
 export function genTokenIdWithSubid(token: number, subid: number): BlsctRetVal {
   const module = getBlsctModule();
-  const [tokenLo, tokenHi] = splitI64(token);
-  const [subidLo, subidHi] = splitI64(subid);
-  const resultPtr = (module._gen_token_id_with_token_and_subid as unknown as (a: number, b: number, c: number, d: number) => number)(
-    tokenLo, tokenHi,
-    subidLo, subidHi
-  );
+  const resultPtr = module._gen_token_id_with_token_and_subid(BigInt(token), BigInt(subid));
   const result = parseRetVal(resultPtr);
   freePtr(resultPtr);
   return {
@@ -472,12 +464,7 @@ export function deserializeTokenId(hex: string): BlsctRetVal {
 
 export function genSubAddrId(account: number, address: number): unknown {
   const module = getBlsctModule();
-  const [acctLo, acctHi] = splitI64(account);
-  const [addrLo, addrHi] = splitI64(address);
-  return (module._gen_sub_addr_id as unknown as (a: number, b: number, c: number, d: number) => number)(
-    acctLo, acctHi,
-    addrLo, addrHi
-  );
+  return module._gen_sub_addr_id(BigInt(account), BigInt(address));
 }
 
 export function deriveSubAddress(
@@ -594,14 +581,12 @@ export function calcPrivSpendingKey(
   address: number
 ): unknown {
   const module = getBlsctModule();
-  const [acctLo, acctHi] = splitI64(account);
-  const [addrLo, addrHi] = splitI64(address);
-  return (module._calc_priv_spending_key as unknown as (...args: number[]) => number)(
+  return module._calc_priv_spending_key(
     blindingPubKey as number,
     viewKey as number,
     spendingKey as number,
-    acctLo, acctHi,
-    addrLo, addrHi
+    BigInt(account),
+    BigInt(address)
   );
 }
 
@@ -627,11 +612,12 @@ export function verifyMsgSig(
   const module = getBlsctModule();
   const msgPtr = allocString(msg);
   try {
-    return module._verify_msg_sig(
+    const result = module._verify_msg_sig(
       pubKey as number,
       msgPtr,
       signature as number
-    );
+    ) as unknown as number;
+    return result !== 0;
   } finally {
     freePtr(msgPtr);
   }
@@ -645,14 +631,18 @@ export function serializeSignature(signature: unknown): string {
   return str;
 }
 
-export function deserializeSignature(hex: string): unknown {
+export function deserializeSignature(hex: string): BlsctRetVal {
   const module = getBlsctModule();
   const strPtr = allocString(hex);
   try {
     const resultPtr = module._deserialize_signature(strPtr);
     const result = parseRetVal(resultPtr);
     freePtr(resultPtr);
-    return result.value;
+    return {
+      result: result.success ? 0 : (result.errorCode ?? 1),
+      value: result.value,
+      value_size: 0,
+    };
   } finally {
     freePtr(strPtr);
   }
@@ -709,11 +699,18 @@ export function deserializeKeyId(hex: string): BlsctRetVal {
 // Out Point Functions
 // ============================================================================
 
-export function genOutPoint(serCtxId: string, outIndex: number): unknown {
+export function genOutPoint(serCtxId: string, outIndex: number): BlsctRetVal {
   const module = getBlsctModule();
   const strPtr = allocString(serCtxId);
   try {
-    return module._gen_out_point(strPtr, outIndex);
+    const resultPtr = module._gen_out_point(strPtr, outIndex);
+    const result = parseRetVal(resultPtr);
+    freePtr(resultPtr);
+    return {
+      result: result.success ? 0 : (result.errorCode ?? 1),
+      value: result.value,
+      value_size: 0,
+    };
   } finally {
     freePtr(strPtr);
   }
@@ -839,8 +836,7 @@ export function createUint64Vec(): unknown {
 
 export function addToUint64Vec(vec: unknown, n: number): void {
   const module = getBlsctModule();
-  const [lo, hi] = splitI64(n);
-  (module._add_to_uint64_vec as unknown as (vec: number, lo: number, hi: number) => void)(vec as number, lo, hi);
+  module._add_to_uint64_vec(vec as number, BigInt(n));
 }
 
 export function deleteUint64Vec(vec: unknown): void {
@@ -851,23 +847,28 @@ export function deleteUint64Vec(vec: unknown): void {
 export function buildRangeProof(
   amounts: unknown,
   nonce: unknown,
-  msg: unknown,
+  msg: string,
   tokenId: unknown
 ): BlsctRetVal {
   const module = getBlsctModule();
-  const resultPtr = module._build_range_proof(
-    amounts as number,
-    nonce as number,
-    msg as number,
-    tokenId as number
-  );
-  const result = parseRetVal(resultPtr);
-  freePtr(resultPtr);
-  return {
-    result: result.success ? 0 : (result.errorCode ?? 1),
-    value: result.value,
-    value_size: 0,
-  };
+  const msgPtr = allocString(msg);
+  try {
+    const resultPtr = module._build_range_proof(
+      amounts as number,
+      nonce as number,
+      msgPtr,
+      tokenId as number
+    );
+    const result = parseRetVal(resultPtr);
+    freePtr(resultPtr);
+    return {
+      result: result.success ? 0 : (result.errorCode ?? 1),
+      value: result.value,
+      value_size: result.valueSize ?? 0,
+    };
+  } finally {
+    freePtr(msgPtr);
+  }
 }
 
 export function serializeRangeProof(rangeProof: unknown, rangeProofSize: number): string {
@@ -922,10 +923,14 @@ export function deleteRangeProofVec(rangeProofs: unknown): void {
   module._delete_range_proof_vec(rangeProofs as number);
 }
 
-export function verifyRangeProofs(rangeProofs: unknown[]): BlsctBoolRetVal {
+export function verifyRangeProofs(rangeProofsVec: unknown): BlsctBoolRetVal {
   const module = getBlsctModule();
-  const result = module._verify_range_proofs(rangeProofs as unknown as number);
-  return { result: 0, value: result !== 0 };
+  const resultPtr = module._verify_range_proofs(rangeProofsVec as number);
+  // BlsctBoolRetVal struct layout: result (uint8_t @ offset 0), value (bool @ offset 1)
+  const result = module.HEAPU8[resultPtr];
+  const value = module.HEAPU8[resultPtr + 1] !== 0;
+  freePtr(resultPtr);
+  return { result, value };
 }
 
 // ============================================================================
@@ -1036,19 +1041,24 @@ export function buildTxIn(
   outPoint: unknown,
   isStakedCommitment: boolean,
   isRbf: boolean
-): unknown {
+): BlsctRetVal {
   const module = getBlsctModule();
-  const [amountLo, amountHi] = splitI64(amount);
-  const [gammaLo, gammaHi] = splitI64(gamma);
-  return (module._build_tx_in as unknown as (...args: (number | boolean)[]) => number)(
-    amountLo, amountHi,
-    gammaLo, gammaHi,
+  const resultPtr = module._build_tx_in(
+    BigInt(amount),
+    BigInt(gamma),
     spendingKey as number,
     tokenId as number,
     outPoint as number,
     isStakedCommitment,
     isRbf
   );
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: 0,
+  };
 }
 
 export function buildTxOut(
@@ -1060,22 +1070,27 @@ export function buildTxOut(
   minStake: number,
   subtractFeeFromAmount: boolean = false,
   blindingKey: unknown = 0
-): unknown {
+): BlsctRetVal {
   const module = getBlsctModule();
   const memoPtr = allocString(memo);
-  const [amountLo, amountHi] = splitI64(amount);
-  const [minStakeLo, minStakeHi] = splitI64(minStake);
   try {
-    return (module._build_tx_out as unknown as (...args: (number | boolean)[]) => number)(
+    const resultPtr = module._build_tx_out(
       subAddr as number,
-      amountLo, amountHi,
+      BigInt(amount),
       memoPtr,
       tokenId as number,
       outputType,
-      minStakeLo, minStakeHi,
+      BigInt(minStake),
       subtractFeeFromAmount,
       blindingKey as number
     );
+    const result = parseRetVal(resultPtr);
+    freePtr(resultPtr);
+    return {
+      result: result.success ? 0 : (result.errorCode ?? 1),
+      value: result.value,
+      value_size: 0,
+    };
   } finally {
     freePtr(memoPtr);
   }

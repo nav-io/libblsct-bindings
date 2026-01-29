@@ -1,6 +1,6 @@
 {
   "name": "navio-blsct",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "description": "BLS Confidential Transaction library for Navio blockchain",
   "scripts": {
     "install": "node scripts/build.js && node-gyp configure build && npm run build:ts",
@@ -10,7 +10,7 @@
     "docs": "typedoc",
     "docs:watch": "nodemon --watch src --ext ts --exec \"npx typedoc\"",
     "test": "tsc && NODE_OPTIONS=--expose-gc jest --runInBand --verbose",
-    "test:browser": "npm run build:browser && jest --config jest.browser.config.cjs"
+    "test:browser": "npm run build:browser && NODE_OPTIONS='--experimental-vm-modules' jest --config jest.browser.config.cjs"
   },
   "license": "MIT",
   "main": "./dist/index.js",

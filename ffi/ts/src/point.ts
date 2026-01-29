@@ -11,7 +11,7 @@ import {
   scalarMultiplyPoint,
   serializePoint,
 } from './blsct'
-import { ManagedObj } from './managedObj'
+import { ManagedObj, isWasmPtrWrapper } from './managedObj'
 import { Scalar } from './scalar'
 
 /** Represents an element in the BLS12-381 G1 curve group.
@@ -38,13 +38,22 @@ import { Scalar } from './scalar'
  */
 export class Point extends ManagedObj {
   /** Constructs a new random `Point` instance.
+   * - If no parameter is provided, a random point is generated.
+   * - If a WASM pointer wrapper is provided (from fromObj/deserialize), it wraps the pointer.
    */
   constructor(obj?: any) {
-    if (typeof obj === 'object') {
+    if (isWasmPtrWrapper(obj)) {
+      // WASM pointer from fromObj or _deserialize - pass directly to parent
       super(obj)
-    } else (
-      super(genRandomPoint().value)
-    )
+    } else if (typeof obj === 'object' && obj !== null) {
+      // Native NAPI object
+      super(obj)
+    } else {
+      // Generate a random point
+      const rv = genRandomPoint()
+      super(rv.value)
+      freeObj(rv)
+    }
   }
 
   override value(): any {
@@ -89,6 +98,14 @@ export class Point extends ManagedObj {
   scalarMultiply(scalar: Scalar): Point {
     const obj = scalarMultiplyPoint(this.value(), scalar.value())
     return Point.fromObj(obj)
+  }
+
+  /** Alias for scalarMultiply. Multiplies the point by a scalar.
+   * @param scalar - The scalar to multiply the point by.
+   * @returns A new `Point` that is the result of the multiplication.
+   */
+  mulScalar(scalar: Scalar): Point {
+    return this.scalarMultiply(scalar)
   }
 
   /** Checks if the point is valid.

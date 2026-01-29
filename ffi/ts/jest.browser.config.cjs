@@ -10,8 +10,9 @@ module.exports = {
     '^(.*)/wasm/blsct\\.js$': '<rootDir>/wasm/blsct.js',
     // Transform other .js imports to remove extension for TypeScript
     '^(\\.{1,2}/.*)\\.js$': '$1',
-    // Map blsct imports to browser version for WASM tests
+    // Map imports to browser versions for WASM tests
     '^(.*)/blsct$': '$1/blsct.browser',
+    '^(.*)/managedObj$': '$1/managedObj.browser',
   },
   transform: {
     '^.+\\.tsx?$': [
