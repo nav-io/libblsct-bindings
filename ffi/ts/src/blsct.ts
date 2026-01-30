@@ -408,11 +408,13 @@ export const genAmountRecoveryReq = (
     rangeProof: any,
     rangeProofSize: number,
     nonce: any,
+    tokenId: any,
 ): any => {
   return blsct.gen_amount_recovery_req(
     rangeProof,
     rangeProofSize,
     nonce,
+    tokenId,
   )
 }
 export const getAmountRecoveryResultAmount = (

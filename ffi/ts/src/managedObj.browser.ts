@@ -58,8 +58,21 @@ export function unwrapPtr(obj: any): any {
   return obj
 }
 
+let isShuttingDown = false
+if (typeof process !== 'undefined' && process.on) {
+  process.on('exit', () => {
+    isShuttingDown = true
+  })
+  process.on('beforeExit', () => {
+    isShuttingDown = true
+  })
+}
+
 const finalizer = new FinalizationRegistry(
   (fi: FinalizerInfo) => {
+    if (isShuttingDown) {
+      return
+    }
     if (fi.obj) {
       if (fi.deleteMethod) {
         fi.deleteMethod()

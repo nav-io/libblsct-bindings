@@ -16,6 +16,8 @@ import {
   type BlsctResult,
 } from './bindings/wasm/index.js';
 
+import { unwrapPtr } from './managedObj';
+
 // Re-export initialization and utilities
 export { loadBlsctModule, isModuleLoaded } from './bindings/wasm/index.js';
 export { assertSuccess, type BlsctResult } from './bindings/wasm/memory.js';
@@ -73,6 +75,7 @@ export interface BlsctRetVal {
 export interface BlsctAmountsRetVal {
   result: number;
   value: unknown;
+  _structPtr?: number;  // Internal: WASM struct pointer for cleanup
 }
 
 export interface BlsctBoolRetVal {
@@ -505,14 +508,18 @@ export function serializeSubAddr(subAddr: unknown): string {
   return str;
 }
 
-export function deserializeSubAddr(hex: string): unknown {
+export function deserializeSubAddr(hex: string): BlsctRetVal {
   const module = getBlsctModule();
   const strPtr = allocString(hex);
   try {
     const resultPtr = module._deserialize_sub_addr(strPtr);
     const result = parseRetVal(resultPtr);
     freePtr(resultPtr);
-    return result.value;
+    return {
+      result: result.success ? 0 : (result.errorCode ?? 1),
+      value: result.value,
+      value_size: 0,
+    };
   } finally {
     freePtr(strPtr);
   }
@@ -526,14 +533,18 @@ export function serializeSubAddrId(subAddrId: unknown): string {
   return str;
 }
 
-export function deserializeSubAddrId(hex: string): unknown {
+export function deserializeSubAddrId(hex: string): BlsctRetVal {
   const module = getBlsctModule();
   const strPtr = allocString(hex);
   try {
     const resultPtr = module._deserialize_sub_addr_id(strPtr);
     const result = parseRetVal(resultPtr);
     freePtr(resultPtr);
-    return result.value;
+    return {
+      result: result.success ? 0 : (result.errorCode ?? 1),
+      value: result.value,
+      value_size: 0,
+    };
   } finally {
     freePtr(strPtr);
   }
@@ -753,14 +764,18 @@ export function serializeScript(script: unknown): string {
   return str;
 }
 
-export function deserializeScript(hex: string): unknown {
+export function deserializeScript(hex: string): BlsctRetVal {
   const module = getBlsctModule();
   const strPtr = allocString(hex);
   try {
     const resultPtr = module._deserialize_script(strPtr);
     const result = parseRetVal(resultPtr);
     freePtr(resultPtr);
-    return result.value;
+    return {
+      result: result.success ? 0 : (result.errorCode ?? 1),
+      value: result.value,
+      value_size: 0,
+    };
   } finally {
     freePtr(strPtr);
   }
@@ -929,7 +944,6 @@ export function verifyRangeProofs(rangeProofsVec: unknown): BlsctBoolRetVal {
   
   // Check for null pointer - indicates WASM error (memory allocation failure, exception, etc.)
   if (resultPtr === 0) {
-    console.error('[verifyRangeProofs] WASM returned null pointer - possible memory error or exception');
     return { result: 1, value: false };
   }
   
@@ -962,20 +976,39 @@ export function deleteAmountRecoveryReqVec(reqs: unknown): void {
 export function genAmountRecoveryReq(
   rangeProof: unknown,
   rangeProofSize: number,
-  nonce: unknown
+  nonce: unknown,
+  tokenId: unknown
 ): unknown {
   const module = getBlsctModule();
   return module._gen_amount_recovery_req(
     rangeProof as number,
     rangeProofSize,
-    nonce as number
+    nonce as number,
+    tokenId as number
   );
 }
 
 export function recoverAmount(vec: unknown): BlsctAmountsRetVal {
   const module = getBlsctModule();
-  const result = module._recover_amount(vec as number);
-  return { result: 0, value: result };
+  const ptr = module._recover_amount(vec as number);
+  
+  if (ptr === 0) {
+    return { result: 1, value: null, _structPtr: 0 };
+  }
+  
+  // BlsctAmountsRetVal struct layout:
+  // - result: uint8_t (1 byte) at offset 0
+  // - padding: 3 bytes
+  // - value: void* (4 bytes in WASM32) at offset 4
+  const RESULT_OFFSET = 0;
+  const VALUE_PTR_OFFSET = 4;
+  
+  const result = module.HEAPU8[ptr + RESULT_OFFSET];
+  const valuePtrIndex = (ptr + VALUE_PTR_OFFSET) >> 2;
+  const valuePtr = module.HEAPU32[valuePtrIndex];
+  
+  // Store original struct pointer for proper cleanup
+  return { result, value: valuePtr, _structPtr: ptr };
 }
 
 export function getAmountRecoveryResultSize(resVec: unknown): number {
@@ -985,7 +1018,9 @@ export function getAmountRecoveryResultSize(resVec: unknown): number {
 
 export function getAmountRecoveryResultIsSucc(req: unknown, i: number): boolean {
   const module = getBlsctModule();
-  return module._get_amount_recovery_result_is_succ(req as number, i);
+  // WASM returns an integer (0 or 1), need to cast through unknown to convert to boolean
+  const result = module._get_amount_recovery_result_is_succ(req as number, i) as unknown as number;
+  return result !== 0;
 }
 
 export function getAmountRecoveryResultAmount(req: unknown, i: number): bigint {
@@ -1003,7 +1038,11 @@ export function getAmountRecoveryResultMsg(req: unknown, i: number): string {
 
 export function deleteAmountsRetVal(rv: BlsctAmountsRetVal): void {
   const module = getBlsctModule();
-  module._free_amounts_ret_val(rv.value as number);
+  // In WASM, we need the struct pointer (stored in _structPtr), not the value pointer
+  const structPtr = rv._structPtr;
+  if (structPtr) {
+    module._free_amounts_ret_val(structPtr);
+  }
 }
 
 // ============================================================================
@@ -1231,7 +1270,7 @@ export function getCTxOutRangeProof(obj: unknown): BlsctRetVal {
   return {
     result: result.success ? 0 : (result.errorCode ?? 1),
     value: result.value,
-    value_size: 0,
+    value_size: result.valueSize ?? 0,
   };
 }
 
@@ -1268,12 +1307,16 @@ export function getTxInOutPoint(obj: unknown): unknown {
 
 export function getTxInStakedCommitment(obj: unknown): boolean {
   const module = getBlsctModule();
-  return module._get_tx_in_staked_commitment(obj as number);
+  // WASM returns an integer (0 or 1), need to cast through unknown to convert to boolean
+  const result = module._get_tx_in_staked_commitment(obj as number) as unknown as number;
+  return result !== 0;
 }
 
 export function getTxInRbf(obj: unknown): boolean {
   const module = getBlsctModule();
-  return module._get_tx_in_rbf(obj as number);
+  // WASM returns an integer (0 or 1), need to cast through unknown to convert to boolean
+  const result = module._get_tx_in_rbf(obj as number) as unknown as number;
+  return result !== 0;
 }
 
 // TxOut accessors
@@ -1366,21 +1409,22 @@ export function getRangeProof_tau_x(rangeProof: unknown, rangeProofSize: number)
 
 // Cast functions (no-ops in WASM as pointers are just numbers)
 export function asString(obj: unknown): unknown { return obj; }
-export function castToCTxIn(obj: unknown): unknown { return obj; }
-export function castToCTxOut(obj: unknown): unknown { return obj; }
-export function castToDpk(obj: unknown): unknown { return obj; }
-export function castToKeyId(obj: unknown): unknown { return obj; }
-export function castToOutPoint(obj: unknown): unknown { return obj; }
-export function castToPoint(obj: unknown): unknown { return obj; }
-export function castToPubKey(obj: unknown): unknown { return obj; }
-export function castToRangeProof(obj: unknown): unknown { return obj; }
-export function castToScalar(obj: unknown): unknown { return obj; }
-export function castToScript(obj: unknown): unknown { return obj; }
-export function castToSignature(obj: unknown): unknown { return obj; }
-export function castToSubAddr(obj: unknown): unknown { return obj; }
-export function castToSubAddrId(obj: unknown): unknown { return obj; }
-export function castToTokenId(obj: unknown): unknown { return obj; }
-export function castToTxIn(obj: unknown): unknown { return obj; }
-export function castToTxOut(obj: unknown): unknown { return obj; }
-export function castToUint8_tPtr(obj: unknown): unknown { return obj; }
+// Cast functions unwrap WASM pointers to return raw pointer values
+export function castToCTxIn(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToCTxOut(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToDpk(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToKeyId(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToOutPoint(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToPoint(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToPubKey(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToRangeProof(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToScalar(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToScript(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToSignature(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToSubAddr(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToSubAddrId(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToTokenId(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToTxIn(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToTxOut(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToUint8_tPtr(obj: unknown): unknown { return unwrapPtr(obj); }
 

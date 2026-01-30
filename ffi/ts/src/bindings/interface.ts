@@ -13,6 +13,7 @@ export interface BlsctRetVal {
 export interface BlsctAmountsRetVal {
   result: number;
   value: unknown;
+  _structPtr?: number;  // Internal: WASM struct pointer for cleanup
 }
 
 export interface BlsctBoolRetVal {

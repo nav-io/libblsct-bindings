@@ -28,6 +28,9 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const NAVIO_CORE_DIR = path.resolve(ROOT_DIR, 'navio-core');
 const WASM_OUTPUT_DIR = path.resolve(ROOT_DIR, 'wasm');
 const BUILD_DIR = path.resolve(ROOT_DIR, 'build-wasm');
+const PATCHES_DIR = path.resolve(__dirname, '..', 'patches');
+const SINGLE_THREADED_PATCH = path.resolve(PATCHES_DIR, 'navio-core-single-threaded.patch');
+const EM_CACHE_DIR = process.env.EM_CACHE || path.resolve(ROOT_DIR, '.emcache');
 
 // Ensure output directories exist
 if (!fs.existsSync(WASM_OUTPUT_DIR)) {
@@ -36,16 +39,53 @@ if (!fs.existsSync(WASM_OUTPUT_DIR)) {
 if (!fs.existsSync(BUILD_DIR)) {
   fs.mkdirSync(BUILD_DIR, { recursive: true });
 }
+if (!fs.existsSync(EM_CACHE_DIR)) {
+  fs.mkdirSync(EM_CACHE_DIR, { recursive: true });
+}
+process.env.EM_CACHE = EM_CACHE_DIR;
 
 /**
- * Clone navio-core repository if it doesn't exist
+ * Get the current commit SHA of the navio-core checkout
+ */
+function getNavioCoreCommit() {
+  try {
+    const result = spawnSync('git', ['rev-parse', 'HEAD'], {
+      cwd: NAVIO_CORE_DIR,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    if (result.status === 0) {
+      return result.stdout.toString().trim();
+    }
+  } catch (e) {
+    // Ignore errors
+  }
+  return null;
+}
+
+/**
+ * Clone navio-core repository if it doesn't exist or is at wrong commit
  */
 function ensureNavioCore() {
   const srcDir = path.join(NAVIO_CORE_DIR, 'src');
+  const requiredSha = IS_PROD ? MASTER_SHA : null;
 
+  // Check if navio-core exists and is at the correct commit
   if (fs.existsSync(srcDir)) {
-    console.log('✓ navio-core already exists');
-    return;
+    const currentSha = getNavioCoreCommit();
+
+    if (requiredSha && currentSha) {
+      if (currentSha.startsWith(requiredSha) || requiredSha.startsWith(currentSha)) {
+        console.log(`✓ navio-core already at correct commit ${requiredSha.slice(0, 12)}`);
+        return;
+      } else {
+        console.log(`navio-core at commit ${currentSha.slice(0, 12)}, but need ${requiredSha.slice(0, 12)}`);
+        console.log('Removing stale navio-core to re-clone...');
+        fs.rmSync(NAVIO_CORE_DIR, { recursive: true, force: true });
+      }
+    } else if (!requiredSha) {
+      console.log('✓ navio-core already exists (dev mode, no SHA check)');
+      return;
+    }
   }
 
   console.log('Cloning navio-core repository...');
@@ -74,25 +114,73 @@ function ensureNavioCore() {
   console.log('✓ navio-core cloned successfully');
 
   // For production, checkout specific SHA
-  const navioCoreMasterSha = IS_PROD ? MASTER_SHA : '';
-  if (navioCoreMasterSha !== '') {
+  if (requiredSha) {
     {
-      const fetchCmd = ['git', 'fetch', '--depth', '1', 'origin', navioCoreMasterSha];
+      const fetchCmd = ['git', 'fetch', '--depth', '1', 'origin', requiredSha];
       const fetchRes = spawnSync(fetchCmd[0], fetchCmd.slice(1), { cwd: NAVIO_CORE_DIR, stdio: 'inherit' });
       if (fetchRes.status !== 0) {
         throw new Error(`${fetchCmd.join(' ')} failed: exit code ${fetchRes.status}`);
       }
-      console.log(`Fetched navio-core commit ${navioCoreMasterSha}`);
+      console.log(`Fetched navio-core commit ${requiredSha}`);
     }
     {
-      const checkoutCmd = ['git', 'checkout', navioCoreMasterSha];
+      const checkoutCmd = ['git', 'checkout', requiredSha];
       const checkoutRes = spawnSync(checkoutCmd[0], checkoutCmd.slice(1), { cwd: NAVIO_CORE_DIR, stdio: 'inherit' });
       if (checkoutRes.status !== 0) {
         throw new Error(`${checkoutCmd.join(' ')} failed: exit code ${checkoutRes.status}`);
       }
-      console.log(`Checked out navio-core commit ${navioCoreMasterSha}`);
+      console.log(`Checked out navio-core commit ${requiredSha}`);
     }
   }
+}
+
+/**
+ * Apply WASM-specific patches to navio-core
+ * Uses git apply with --check first to see if patch is needed
+ */
+function applyPatches() {
+  if (!fs.existsSync(SINGLE_THREADED_PATCH)) {
+    console.log('⚠ Single-threaded patch not found, skipping...');
+    return;
+  }
+
+  // Check if patch can be applied (not already applied)
+  const checkResult = spawnSync('git', ['apply', '--check', '--reverse', SINGLE_THREADED_PATCH], {
+    cwd: NAVIO_CORE_DIR,
+    stdio: 'pipe',
+  });
+
+  if (checkResult.status === 0) {
+    // Patch is already applied (reverse check succeeded)
+    console.log('✓ Single-threaded patch already applied');
+    return;
+  }
+
+  // Check if patch can be applied forward
+  const canApplyResult = spawnSync('git', ['apply', '--check', SINGLE_THREADED_PATCH], {
+    cwd: NAVIO_CORE_DIR,
+    stdio: 'pipe',
+  });
+
+  if (canApplyResult.status !== 0) {
+    console.error('⚠ Single-threaded patch cannot be applied cleanly');
+    console.error('  This may indicate the patch is partially applied or conflicts exist');
+    console.error('  Stderr:', canApplyResult.stderr?.toString());
+    throw new Error('Patch application check failed');
+  }
+
+  // Apply the patch
+  console.log('Applying single-threaded patch to navio-core...');
+  const applyResult = spawnSync('git', ['apply', SINGLE_THREADED_PATCH], {
+    cwd: NAVIO_CORE_DIR,
+    stdio: 'inherit',
+  });
+
+  if (applyResult.status !== 0) {
+    throw new Error(`Failed to apply single-threaded patch: exit code ${applyResult.status}`);
+  }
+
+  console.log('✓ Single-threaded patch applied successfully');
 }
 
 // Check if emcc is available
@@ -343,8 +431,11 @@ const EXPORTED_FUNCTIONS = [
   '_get_tx_out_destination',
   '_get_tx_out_amount',
   '_get_tx_out_memo',
+  '_get_tx_out_token_id',
   '_get_tx_out_output_type',
   '_get_tx_out_min_stake',
+  '_get_tx_out_subtract_fee_from_amount',
+  '_get_tx_out_blinding_key',
 
   // Signature operations
   '_sign_message',
@@ -583,7 +674,7 @@ function buildBlsct() {
 
 function linkWasm(objectFiles) {
   console.log('Linking WASM module...');
-  
+
   if (WASM_DEBUG) {
     console.log('DEBUG MODE: Building with assertions enabled (-sASSERTIONS=2)');
   }
@@ -636,6 +727,9 @@ async function main() {
   try {
     // Ensure navio-core is available
     ensureNavioCore();
+
+    // Apply WASM-specific patches (single-threaded range proof verification)
+    applyPatches();
 
     // Install WASM-specific config header
     setupConfigHeader();

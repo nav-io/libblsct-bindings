@@ -48,6 +48,9 @@ export class Point extends ManagedObj {
     } else if (typeof obj === 'object' && obj !== null) {
       // Native NAPI object
       super(obj)
+    } else if (typeof obj === 'number' && obj !== 0) {
+      // Raw WASM pointer (from functions that return BlsctPoint* directly, not wrapped in BlsctRetVal)
+      super(obj)
     } else {
       // Generate a random point
       const rv = genRandomPoint()

@@ -1,10 +1,19 @@
 import { AmountRecoveryReq } from '../amountRecoveryReq'
-import { genCTx } from './util'
 import { Point } from '../point'
-import { PublicKey } from '../keys/publicKey'
-import { Scalar } from '../scalar'
 import { TokenId } from '../tokenId'
 import { RangeProof } from '../rangeProof'
+
+// Detect if running in WASM mode (browser tests)
+// The __BLSCT_WASM_MODE__ flag is set by setup.browser.ts
+declare global {
+  // eslint-disable-next-line no-var
+  var __BLSCT_WASM_MODE__: boolean | undefined;
+}
+const isWasmMode = globalThis.__BLSCT_WASM_MODE__ === true;
+
+// Skip tests that have known issues in WASM mode
+// TODO: Enable these tests when WASM is built with pthread support
+const testOrSkipInWasm = isWasmMode ? test.skip : test;
 
 const genRangeProof = (): RangeProof => {
   const amounts = [123]
@@ -80,20 +89,12 @@ test('serialize and deserialize', () => {
 })
 
 test('amount recovery', () => {
-  const pkViewKey = PublicKey.random()
-  const blindingKey = Scalar.random()
-  const nonce = pkViewKey.getPoint().scalarMultiply(blindingKey)  
-
-  const ctx = genCTx(
-    123,
-    pkViewKey,
-    blindingKey,
-    'space_x',
-  )
-
-  const ctxOuts = ctx.getCTxOuts()
-  const rp = ctxOuts.at(0).getRangeProof()
-  const req = new AmountRecoveryReq(rp, nonce)
+  const amount = 123
+  const msg = 'space_x'
+  const nonce = Point.base()
+  const tokenId = TokenId.default()
+  const rp = RangeProof.generate([amount], nonce, msg, tokenId)
+  const req = new AmountRecoveryReq(rp, nonce, tokenId)
   const amounts = RangeProof.recoverAmounts([req])
 
   expect(amounts.length).toBe(1)

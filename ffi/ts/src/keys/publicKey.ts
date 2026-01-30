@@ -45,6 +45,9 @@ export class PublicKey extends ManagedObj {
     } else if (typeof obj === 'object' && obj !== null) {
       // Native NAPI object
       super(obj)
+    } else if (typeof obj === 'number' && obj !== 0) {
+      // Raw WASM pointer (from functions that return BlsctPubKey* directly)
+      super(obj)
     } else {
       const rv = genRandomPublicKey()
       if (rv.result !== 0) {

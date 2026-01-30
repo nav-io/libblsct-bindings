@@ -148,6 +148,11 @@ export abstract class ManagedObj {
     this: new (obj: any, objSize?: number) => T, 
     obj: any
   ): T {
+    // In WASM, raw pointers are numbers. Wrap them so constructors can distinguish
+    // between a WASM pointer and a numeric value (e.g., Scalar(12345) vs pointer 12345)
+    if (typeof obj === 'number' && obj !== 0) {
+      return new this(wrapWasmPtr(obj))
+    }
     return new this(obj)
   }
 
@@ -162,7 +167,10 @@ export abstract class ManagedObj {
     obj: any,
     objSize: number,
   ): T {
-    const x = new this(obj)
+    // In WASM, raw pointers are numbers. Wrap them so constructors can distinguish
+    // between a WASM pointer and a numeric value
+    const wrappedObj = (typeof obj === 'number' && obj !== 0) ? wrapWasmPtr(obj) : obj
+    const x = new this(wrappedObj)
     x.objSize = objSize
     return x
   }

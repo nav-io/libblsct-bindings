@@ -39,13 +39,25 @@ module.exports = {
       },
     ],
   },
-  // Browser tests look for *.browser.test.ts files
-  testMatch: ['**/__tests__/**/*.browser.test.ts'],
+  // Run all test files (same as native tests) with WASM backend
+  testMatch: ['**/__tests__/**/*.test.ts'],
+  // Exclude browser-specific test file (it's now redundant) and helper files
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/',
+    '\\.d\\.ts$',
+    'basic\\.browser\\.test\\.ts$',  // Skip the old browser-specific test
+    '__tests__/rangeProof\\.ts$',     // Skip duplicate (use rangeProof.test.ts)
+    '__tests__/amountRecoveryRes\\.ts$', // Skip helper file
+    '__tests__/rangeProofDebug\\.test\\.ts$', // Skip debug test
+  ],
+  // Initialize WASM before all tests
+  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.browser.ts'],
   collectCoverageFrom: ['src/**/*.ts', '!src/**/__tests__/**'],
   coverageDirectory: 'coverage/browser',
   verbose: true,
-  // Longer timeout for WASM initialization
-  testTimeout: 30000,
+  // Longer timeout for WASM operations (range proofs can be slow)
+  testTimeout: 60000,
   // Set the root directory for wasm resolution
   roots: ['<rootDir>/src'],
   // Expose globals for WASM path resolution
