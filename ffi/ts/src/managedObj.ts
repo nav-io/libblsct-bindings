@@ -9,6 +9,50 @@ export type FinalizerInfo = {
   deleteMethod?: () => void,
 }
 
+/**
+ * Symbol used to mark an object as containing a WASM pointer.
+ * In native builds, this is never used but is exported for API compatibility.
+ */
+export const WASM_PTR_SYMBOL = Symbol.for('blsct.wasmPtr')
+
+/**
+ * Wrapper type for WASM pointers (browser only).
+ * In native builds, pointers are NAPI objects, not numbers.
+ */
+export interface WasmPtrWrapper {
+  [WASM_PTR_SYMBOL]: true
+  ptr: number
+}
+
+/**
+ * Creates a wrapper object for a WASM pointer.
+ * In native builds, this just returns the object as-is (never called with numbers).
+ */
+export function wrapWasmPtr(ptr: number): WasmPtrWrapper {
+  return {
+    [WASM_PTR_SYMBOL]: true,
+    ptr,
+  }
+}
+
+/**
+ * Checks if an object is a WASM pointer wrapper.
+ * In native builds, this always returns false since NAPI objects are used.
+ */
+export function isWasmPtrWrapper(obj: any): obj is WasmPtrWrapper {
+  return obj !== null && typeof obj === 'object' && obj[WASM_PTR_SYMBOL] === true
+}
+
+/**
+ * Extracts the pointer from an object, handling both wrapped and unwrapped forms.
+ */
+export function unwrapPtr(obj: any): any {
+  if (isWasmPtrWrapper(obj)) {
+    return obj.ptr
+  }
+  return obj
+}
+
 // Shutdown guard: prevents finalizers from running during process exit
 // This avoids crashes when native module is being torn down
 let isShuttingDown = false
@@ -104,6 +148,11 @@ export abstract class ManagedObj {
     this: new (obj: any, objSize?: number) => T, 
     obj: any
   ): T {
+    // In WASM, raw pointers are numbers. Wrap them so constructors can distinguish
+    // between a WASM pointer and a numeric value (e.g., Scalar(12345) vs pointer 12345)
+    if (typeof obj === 'number' && obj !== 0) {
+      return new this(wrapWasmPtr(obj))
+    }
     return new this(obj)
   }
 
@@ -118,7 +167,10 @@ export abstract class ManagedObj {
     obj: any,
     objSize: number,
   ): T {
-    const x = new this(obj)
+    // In WASM, raw pointers are numbers. Wrap them so constructors can distinguish
+    // between a WASM pointer and a numeric value
+    const wrappedObj = (typeof obj === 'number' && obj !== 0) ? wrapWasmPtr(obj) : obj
+    const x = new this(wrappedObj)
     x.objSize = objSize
     return x
   }

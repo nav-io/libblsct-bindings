@@ -4,6 +4,7 @@ import {
 
 import { Point } from './point'
 import { RangeProof } from './rangeProof'
+import { TokenId } from './tokenId'
 
 /** A request for recovering a single amount from a non-aggregated range proof.
  * Refer to `RangeProof` for a usage example.
@@ -11,6 +12,7 @@ import { RangeProof } from './rangeProof'
 export class AmountRecoveryReq {
   rangeProof: RangeProof
   nonce: Point
+  tokenId: TokenId
 
   /** Constructs a new `AmountRecoveryReq` instance.
    * @param rangeProof - The range proof to recover the amount from.
@@ -19,9 +21,11 @@ export class AmountRecoveryReq {
   constructor(
     rangeProof: RangeProof,
     nonce: Point,
+    tokenId: TokenId = TokenId.default(),
   ) {
     this.rangeProof = rangeProof
     this.nonce = nonce
+    this.tokenId = tokenId
   }
 
   /** Returns a string representation of the `AmountRecoveryReq`.

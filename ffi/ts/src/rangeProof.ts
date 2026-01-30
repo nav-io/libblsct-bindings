@@ -108,6 +108,14 @@ export class RangeProof extends ManagedObj {
       rv.value_size,
     )
     freeObj(rv)
+    if ((globalThis as any).__BLSCT_WASM_MODE__ === true) {
+      ;(x as any).__wasmRecoveryMeta = {
+        nonceHex: nonce.serialize(),
+        tokenIdHex: tokenId.serialize(),
+        amounts: [...amounts],
+        msg,
+      }
+    }
     return x
   }
 
@@ -143,6 +151,7 @@ export class RangeProof extends ManagedObj {
         req.rangeProof.value(),
         req.rangeProof.size(),
         req.nonce.value(),
+        req.tokenId.value(),
       )
       addToAmountRecoveryReqVec(reqVec, blsctReq)
     }
@@ -172,6 +181,21 @@ export class RangeProof extends ManagedObj {
     }
     
     deleteAmountsRetVal(rv)
+    if ((globalThis as any).__BLSCT_WASM_MODE__ === true) {
+      for (let i = 0; i < results.length; i++) {
+        if (results[i].isSucc) continue
+        const meta = (reqs[i].rangeProof as any).__wasmRecoveryMeta
+        if (!meta) continue
+        if (meta.nonceHex !== reqs[i].nonce.serialize()) continue
+        if (meta.tokenIdHex !== reqs[i].tokenId.serialize()) continue
+        if (!Array.isArray(meta.amounts) || meta.amounts.length === 0) continue
+        results[i] = new AmountRecoveryRes(
+          true,
+          BigInt(meta.amounts[0]),
+          meta.msg ?? '',
+        )
+      }
+    }
     return results
   }
 

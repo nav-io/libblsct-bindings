@@ -2,11 +2,11 @@ import {
   CTX_ID_SIZE,
 } from '../blsct'
 
-import * as crypto from 'crypto'
+import { randomHex } from './util'
 import { CTxId } from '../ctxId'
 
 test('serialize and deserialize', () => {
-  const orgHex = crypto.randomBytes(CTX_ID_SIZE).toString('hex')
+  const orgHex = randomHex(CTX_ID_SIZE)
   const ctxId = CTxId.deserialize(orgHex)
   const recHex = ctxId.serialize()
 

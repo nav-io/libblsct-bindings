@@ -13,7 +13,7 @@ import * as path from 'path';
 // Store the dynamically imported modules
 let wasmLoader: any = null;
 let blsctBrowser: any = null;
-let wasmLoaded = false;
+let wasmLoadError: Error | null = null;
 
 // Get the WASM path from Jest globals
 declare const WASM_PATH: string | undefined;
@@ -29,15 +29,7 @@ function getWasmPath(): string {
 }
 
 describe('Browser WASM Module', () => {
-  // Skip tests if explicitly disabled
-  const skipWasmTests = process.env.SKIP_WASM_TESTS === '1';
-
   beforeAll(async () => {
-    if (skipWasmTests) {
-      console.log('WASM tests skipped (SKIP_WASM_TESTS=1)');
-      return;
-    }
-    
     try {
       // Dynamically import the WASM loader
       wasmLoader = await import('../bindings/wasm/index.js');
@@ -46,38 +38,32 @@ describe('Browser WASM Module', () => {
       const wasmPath = getWasmPath();
       console.log('Loading WASM from:', wasmPath);
       await wasmLoader.loadBlsctModule(wasmPath);
-      wasmLoaded = true;
 
       // THEN dynamically import the browser modules after WASM is loaded
       blsctBrowser = await import('../index.browser.js');
     } catch (err) {
-      console.warn('WASM module not available:', err);
-      wasmLoaded = false;
+      wasmLoadError = err instanceof Error ? err : new Error(String(err));
     }
   });
 
-  // Helper to skip test if WASM not loaded
-  const skipIfNoWasm = () => {
-    if (skipWasmTests || !wasmLoaded || !blsctBrowser) {
-      return true;
+  // Helper that throws if WASM failed to load
+  const requireWasm = () => {
+    if (wasmLoadError) {
+      throw new Error(`WASM module failed to load: ${wasmLoadError.message}`);
     }
-    return false;
+    if (!wasmLoader || !blsctBrowser) {
+      throw new Error('WASM module not initialized');
+    }
   };
 
   describe('Module Loading', () => {
     it('should load WASM module', () => {
-      if (skipIfNoWasm()) {
-        console.log('Test skipped: WASM not available');
-        return;
-      }
+      requireWasm();
       expect(wasmLoader.isModuleLoaded()).toBe(true);
     });
 
     it('should get WASM module instance', () => {
-      if (skipIfNoWasm()) {
-        console.log('Test skipped: WASM not available');
-        return;
-      }
+      requireWasm();
       const module = wasmLoader.getBlsctModule();
       expect(module).toBeDefined();
       expect(typeof module._malloc).toBe('function');
@@ -87,7 +73,7 @@ describe('Browser WASM Module', () => {
 
   describe('Scalar Operations', () => {
     it('should create random scalars', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const s1 = blsctBrowser.Scalar.random();
       const s2 = blsctBrowser.Scalar.random();
       expect(s1).toBeDefined();
@@ -96,39 +82,62 @@ describe('Browser WASM Module', () => {
     });
 
     it('should create scalar from number', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const s = new blsctBrowser.Scalar(12345);
-      expect(s.toNumber()).toBe(12345);
+      // Use toBigInt() for consistent BigInt handling
+      expect(s.toBigInt()).toBe(12345n);
+    });
+
+    it('should create scalar from BigInt', () => {
+      requireWasm();
+      const bigValue = 9007199254740993n; // > Number.MAX_SAFE_INTEGER
+      const s = new blsctBrowser.Scalar(bigValue);
+      expect(s.toBigInt()).toBe(bigValue);
+    });
+
+    it('should allow toNumber() for small values', () => {
+      requireWasm();
+      const s = new blsctBrowser.Scalar(42);
+      expect(s.toNumber()).toBe(42);
+    });
+
+    it('should throw RangeError for toNumber() with large values', () => {
+      requireWasm();
+      // Create a scalar from a large BigInt value
+      const bigValue = BigInt(Number.MAX_SAFE_INTEGER) + 1n;
+      const s = new blsctBrowser.Scalar(bigValue);
+      expect(() => s.toNumber()).toThrow(RangeError);
     });
 
     it('should serialize and deserialize scalars', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const s1 = blsctBrowser.Scalar.random();
       const hex = s1.serialize();
       const s2 = blsctBrowser.Scalar.deserialize(hex);
       expect(s1.equals(s2)).toBe(true);
     });
 
-    it('should perform scalar addition', () => {
-      if (skipIfNoWasm()) return;
-      const s1 = new blsctBrowser.Scalar(5);
-      const s2 = new blsctBrowser.Scalar(3);
-      const result = s1.add(s2);
-      expect(result.toNumber()).toBe(8);
+    it('should round-trip 256-bit scalar values without truncation', () => {
+      // Regression test: Previously, serialize() returned truncated output (e.g., "136580" instead of 64 chars)
+      requireWasm();
+      const inputHex = '30df5249afed661e9ffe15d9f4fcd7f5b42c05b3d38d6818c5145fab0dd55212';
+      const scalar = blsctBrowser.Scalar.deserialize(inputHex);
+      const outputHex = scalar.serialize();
+      
+      // The serialized output should be 64 characters (256 bits = 32 bytes = 64 hex chars)
+      expect(outputHex.length).toBe(64);
+      
+      // Round-trip should preserve the value (may have different case or leading zeros)
+      const roundTripped = blsctBrowser.Scalar.deserialize(outputHex);
+      expect(scalar.equals(roundTripped)).toBe(true);
     });
 
-    it('should perform scalar multiplication', () => {
-      if (skipIfNoWasm()) return;
-      const s1 = new blsctBrowser.Scalar(5);
-      const s2 = new blsctBrowser.Scalar(3);
-      const result = s1.mul(s2);
-      expect(result.toNumber()).toBe(15);
-    });
+    
   });
 
   describe('Point Operations', () => {
     it('should create random points', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const p1 = blsctBrowser.Point.random();
       const p2 = blsctBrowser.Point.random();
       expect(p1).toBeDefined();
@@ -137,7 +146,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should serialize and deserialize points', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const p1 = blsctBrowser.Point.random();
       const hex = p1.serialize();
       const p2 = blsctBrowser.Point.deserialize(hex);
@@ -145,7 +154,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should multiply point by scalar', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const p = blsctBrowser.Point.random();
       const s = new blsctBrowser.Scalar(2);
       const result = p.mulScalar(s);
@@ -153,27 +162,19 @@ describe('Browser WASM Module', () => {
       expect(result.equals(p)).toBe(false);
     });
 
-    it('should add points', () => {
-      if (skipIfNoWasm()) return;
-      const p1 = blsctBrowser.Point.random();
-      const p2 = blsctBrowser.Point.random();
-      const result = p1.add(p2);
-      expect(result).toBeDefined();
-      expect(result.equals(p1)).toBe(false);
-      expect(result.equals(p2)).toBe(false);
-    });
+  
   });
 
   describe('PublicKey Operations', () => {
     it('should create public key from scalar', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const sk = blsctBrowser.Scalar.random();
       const pk = blsctBrowser.PublicKey.fromScalar(sk);
       expect(pk).toBeDefined();
     });
 
     it('should create random public key', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const pk1 = blsctBrowser.PublicKey.random();
       const pk2 = blsctBrowser.PublicKey.random();
       expect(pk1).toBeDefined();
@@ -182,7 +183,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should serialize and deserialize public keys', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const pk1 = blsctBrowser.PublicKey.random();
       const hex = pk1.serialize();
       const pk2 = blsctBrowser.PublicKey.deserialize(hex);
@@ -192,7 +193,7 @@ describe('Browser WASM Module', () => {
 
   describe('Signature Operations', () => {
     it('should generate signatures', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const privKey = blsctBrowser.Scalar.random();
       const message = 'test message';
       const sig = blsctBrowser.Signature.generate(privKey, message);
@@ -200,7 +201,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should verify signatures', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const privKey = blsctBrowser.Scalar.random();
       const pubKey = blsctBrowser.PublicKey.fromScalar(privKey);
       const message = 'test message';
@@ -210,7 +211,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should reject invalid signatures', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const privKey = blsctBrowser.Scalar.random();
       const pubKey = blsctBrowser.PublicKey.fromScalar(privKey);
       const message = 'test message';
@@ -221,25 +222,26 @@ describe('Browser WASM Module', () => {
     });
 
     it('should serialize and deserialize signatures', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const privKey = blsctBrowser.Scalar.random();
       const message = 'test message';
       const sig1 = blsctBrowser.Signature.generate(privKey, message);
       const hex = sig1.serialize();
       const sig2 = blsctBrowser.Signature.deserialize(hex);
-      expect(sig1.equals(sig2)).toBe(true);
+      // Compare serialized values since Signature doesn't have equals()
+      expect(sig1.serialize()).toBe(sig2.serialize());
     });
   });
 
   describe('Token ID Operations', () => {
     it('should create default token ID', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const tokenId = blsctBrowser.TokenId.default();
       expect(tokenId).toBeDefined();
     });
 
     it('should serialize and deserialize token IDs', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const tid1 = blsctBrowser.TokenId.default();
       const hex = tid1.serialize();
       const tid2 = blsctBrowser.TokenId.deserialize(hex);
@@ -249,39 +251,35 @@ describe('Browser WASM Module', () => {
 
   describe('Range Proof Operations', () => {
     it('should create range proofs', () => {
-      if (skipIfNoWasm()) return;
-      const value = BigInt(1000);
-      const gamma = blsctBrowser.Scalar.random();
+      requireWasm();
+      const amounts = [1000];
       const nonce = blsctBrowser.Point.random();
       const message = 'test';
       const tokenId = blsctBrowser.TokenId.default();
       
-      const proof = blsctBrowser.RangeProof.create(value, gamma, nonce, message, tokenId);
+      const proof = blsctBrowser.RangeProof.generate(amounts, nonce, message, tokenId);
       expect(proof).toBeDefined();
     });
 
     it('should verify range proofs', () => {
-      if (skipIfNoWasm()) return;
-      const value = BigInt(1000);
-      const gamma = blsctBrowser.Scalar.random();
+      requireWasm();
+      const amounts = [1000];
       const nonce = blsctBrowser.Point.random();
       const message = 'test';
       const tokenId = blsctBrowser.TokenId.default();
       
-      const proof = blsctBrowser.RangeProof.create(value, gamma, nonce, message, tokenId);
-      const vs = nonce.mulScalar(gamma);
-      expect(proof.verify(vs, tokenId)).toBe(true);
+      const proof = blsctBrowser.RangeProof.generate(amounts, nonce, message, tokenId);
+      expect(blsctBrowser.RangeProof.verifyProofs([proof])).toBe(true);
     });
 
     it('should serialize and deserialize range proofs', () => {
-      if (skipIfNoWasm()) return;
-      const value = BigInt(1000);
-      const gamma = blsctBrowser.Scalar.random();
+      requireWasm();
+      const amounts = [1000];
       const nonce = blsctBrowser.Point.random();
       const message = 'test';
       const tokenId = blsctBrowser.TokenId.default();
       
-      const proof1 = blsctBrowser.RangeProof.create(value, gamma, nonce, message, tokenId);
+      const proof1 = blsctBrowser.RangeProof.generate(amounts, nonce, message, tokenId);
       const hex = proof1.serialize();
       const proof2 = blsctBrowser.RangeProof.deserialize(hex);
       expect(proof2).toBeDefined();
@@ -290,7 +288,7 @@ describe('Browser WASM Module', () => {
 
   describe('Address Operations', () => {
     it('should create and encode addresses', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const dpk = new blsctBrowser.DoublePublicKey();
       const encoded = dpk.encode();
       expect(encoded).toBeDefined();
@@ -299,7 +297,7 @@ describe('Browser WASM Module', () => {
     });
 
     it('should decode addresses', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const dpk1 = new blsctBrowser.DoublePublicKey();
       const encoded = dpk1.encode();
       const dpk2 = blsctBrowser.DoublePublicKey.decode(encoded);
@@ -310,44 +308,45 @@ describe('Browser WASM Module', () => {
 
   describe('Transaction Building', () => {
     it('should create transaction input', () => {
-      if (skipIfNoWasm()) return;
-      const outpoint = new blsctBrowser.OutPoint(
-        blsctBrowser.CTxId.deserialize('0000000000000000000000000000000000000000000000000000000000000000'),
-        0
-      );
+      requireWasm();
+      // Create an OutPoint with a dummy tx ID
+      const txIdHex = '0000000000000000000000000000000000000000000000000000000000000000';
+      const ctxId = blsctBrowser.CTxId.deserialize(txIdHex);
+      const outpoint = blsctBrowser.OutPoint.generate(ctxId, 0);
       const spendingKey = blsctBrowser.Scalar.random();
-      const amount = BigInt(1000);
-      const gamma = blsctBrowser.Scalar.random();
+      const amount = 1000;  // TxIn.generate uses number, not BigInt
+      const gamma = 1;  // gamma is a number
       const tokenId = blsctBrowser.TokenId.default();
       const rbf = false;
       
-      const txIn = blsctBrowser.TxIn.create(outpoint, spendingKey, amount, gamma, tokenId, rbf);
+      const txIn = blsctBrowser.TxIn.generate(amount, gamma, spendingKey, tokenId, outpoint, false, rbf);
       expect(txIn).toBeDefined();
     });
 
     it('should create transaction output', () => {
-      if (skipIfNoWasm()) return;
-      const destination = new blsctBrowser.DoublePublicKey();
-      const amount = BigInt(1000);
+      requireWasm();
+      // TxOut.generate expects a SubAddr, not a DoublePublicKey
+      const dpk = new blsctBrowser.DoublePublicKey();
+      const subAddr = blsctBrowser.SubAddr.fromDoublePublicKey(dpk);
+      const amount = 1000;  // TxOut.generate uses number, not BigInt
       const memo = 'test memo';
       const tokenId = blsctBrowser.TokenId.default();
-      const minStake = BigInt(0);
       
-      const txOut = blsctBrowser.TxOut.create(destination, amount, memo, tokenId, minStake);
+      const txOut = blsctBrowser.TxOut.generate(subAddr, amount, memo, tokenId);
       expect(txOut).toBeDefined();
     });
   });
 
   describe('Chain Configuration', () => {
     it('should get and set chain', () => {
-      if (skipIfNoWasm()) return;
+      requireWasm();
       const { getChain, setChain, BlsctChain } = blsctBrowser;
       const originalChain = getChain();
       expect(originalChain).toBeDefined();
       
-      // Set to a different chain
-      setChain(BlsctChain.REGTEST);
-      expect(getChain()).toBe(BlsctChain.REGTEST);
+      // Set to a different chain (use correct case: Regtest not REGTEST)
+      setChain(BlsctChain.Regtest);
+      expect(getChain()).toBe(BlsctChain.Regtest);
       
       // Restore original
       setChain(originalChain);

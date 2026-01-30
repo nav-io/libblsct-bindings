@@ -5,7 +5,7 @@ import {
   serializeKeyId,
 } from './blsct'
 
-import { ManagedObj } from './managedObj'
+import { ManagedObj, isWasmPtrWrapper } from './managedObj'
 import { PublicKey } from './keys/publicKey'
 import { Scalar } from './scalar'
 
@@ -27,17 +27,22 @@ import { Scalar } from './scalar'
 export class HashId extends ManagedObj {
   /** Constructs a new `HashId` instance.
    * - If no parameter is provided, a random `HashId` is generated.
+   * - If a WASM pointer wrapper is provided (from fromObj/deserialize), it wraps the pointer.
    */
   constructor(obj?: any) {
-    if (typeof obj === 'object') {
+    if (isWasmPtrWrapper(obj)) {
+      // WASM pointer from fromObj or _deserialize
+      super(obj)
+    } else if (typeof obj === 'object' && obj !== null) {
+      // Native NAPI object
       super(obj)
     } else {
-      const obj = calcKeyId(
+      const newObj = calcKeyId(
         PublicKey.random().value(),
         PublicKey.random().value(),
         Scalar.random().value(),
       )
-      super(obj)
+      super(newObj)
     }
   }
 

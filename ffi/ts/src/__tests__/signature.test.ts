@@ -3,18 +3,26 @@ import { Scalar } from '../scalar'
 import { PublicKey } from '../keys/publicKey'
 
 const msg = 'navio'
-const privKey = Scalar.random()
+
+// Create privKey lazily to ensure WASM is initialized first
+let privKey: Scalar | null = null
+const getPrivKey = (): Scalar => {
+  if (!privKey) {
+    privKey = Scalar.random()
+  }
+  return privKey
+}
 
 const getInstance = (): Signature => {
-  return Signature.generate(privKey, msg)
+  return Signature.generate(getPrivKey(), msg)
 }
 
 test('generate', () => {
   getInstance()
 })
 
-test('vefiry', () => {
-  const pubKey = PublicKey.fromScalar(privKey)
+test('verify', () => {
+  const pubKey = PublicKey.fromScalar(getPrivKey())
   const sig = getInstance()
   const res = sig.verify(pubKey, msg)
   expect(res).toBe(true)
