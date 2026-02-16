@@ -49,7 +49,6 @@ module.exports = {
     'basic\\.browser\\.test\\.ts$',  // Skip the old browser-specific test
     '__tests__/rangeProof\\.ts$',     // Skip duplicate (use rangeProof.test.ts)
     '__tests__/amountRecoveryRes\\.ts$', // Skip helper file
-    '__tests__/rangeProofDebug\\.test\\.ts$', // Skip debug test
   ],
   // Initialize WASM before all tests
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.browser.ts'],
