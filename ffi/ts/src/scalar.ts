@@ -9,7 +9,7 @@ import {
   serializeScalar,
 } from './blsct'
 
-import { ManagedObj, isWasmPtrWrapper } from './managedObj'
+import { ManagedObj } from './managedObj'
 
 /**
  * Represents an element of the finite field $\mathbb{F}_r$, where $r$ is the order of the generator point of the BLS12-381 G1 group.
@@ -32,30 +32,11 @@ export class Scalar extends ManagedObj {
   /** Constructs a new `Scalar` instance.
    * - If no parameter is provided, a random scalar is generated.
    * - If a number is provided, it is converted to a scalar.
-   * - If a WASM pointer wrapper is provided (from fromObj/deserialize), it wraps the pointer.
    */
   constructor(obj?: any) {
-    if (isWasmPtrWrapper(obj)) {
-      // WASM pointer from fromObj or _deserialize - pass directly to parent
+    if (typeof obj === 'object') {
       super(obj)
-    } else if (typeof obj === 'object' && obj !== null) {
-      // Native NAPI object
-      super(obj)
-    } else if (typeof obj === 'bigint') {
-      // Convert BigInt to hex and deserialize - supports full 256-bit scalar range
-      if (obj < 0n) {
-        throw new TypeError('Scalar cannot be negative')
-      }
-      // Convert to hex, pad to 64 chars (32 bytes) for consistent scalar format
-      const hex = obj.toString(16).padStart(64, '0')
-      if (hex.length > 64) {
-        throw new TypeError('BigInt value exceeds scalar field size (256 bits)')
-      }
-      const rv = deserializeScalar(hex)
-      super(rv.value)
-      freeObj(rv)
     } else if (typeof obj === 'number') {
-      // User wants to create a scalar with this numeric value
       const rv = genScalar(obj)
       super(rv.value)
       freeObj(rv)
@@ -87,25 +68,15 @@ export class Scalar extends ManagedObj {
    * @returns The scalar as a bigint.
    */
   toBigInt(): bigint {
-    const value = scalarToUint64(this.value())
-    // scalarToUint64 returns bigint with WASM_BIGINT=1
-    // Ensure we always return a proper BigInt
-    return typeof value === 'bigint' ? value : BigInt(value)
+    return scalarToUint64(this.value())
   }
 
   /** Converts the scalar to an integer.
    * @returns The scalar as a number.
-   * @throws {RangeError} If the value exceeds Number.MAX_SAFE_INTEGER.
    * @deprecated Use toBigInt() instead to avoid precision loss for large values.
    */
   toNumber(): number {
-    const bigIntValue = this.toBigInt()
-    if (bigIntValue > BigInt(Number.MAX_SAFE_INTEGER)) {
-      throw new RangeError(
-        `Scalar value ${bigIntValue} exceeds Number.MAX_SAFE_INTEGER. Use toBigInt() instead.`
-      )
-    }
-    return Number(bigIntValue)
+    return Number(scalarToUint64(this.value()))
   }
 
   /** Returns if the scalar is equal to the provided scalar.
