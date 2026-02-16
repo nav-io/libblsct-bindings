@@ -166,8 +166,7 @@ export BlsctRetVal* encode_address(
 export BlsctAmountRecoveryReq* gen_amount_recovery_req(
     const void* vp_blsct_range_proof,
     const size_t range_proof_size,
-    const void* vp_blsct_nonce,
-    const void* vp_blsct_token_id
+    const void* vp_blsct_nonce
 );
 export void* create_amount_recovery_req_vec();
 export void add_to_amount_recovery_req_vec(

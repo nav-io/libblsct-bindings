@@ -107,7 +107,6 @@ True
         req.range_proof.value(),
         req.range_proof.obj_size,
         req.nonce.value(),
-        req.token_id.value(),
       )
       blsct.add_to_amount_recovery_req_vec(req_vec, blsct_req)
 

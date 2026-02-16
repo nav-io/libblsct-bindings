@@ -92,7 +92,7 @@ export interface BlsctWasmModule {
   _get_range_proof_tau_x(ptr: number, size: number): number;
   
   // Amount recovery operations
-  _gen_amount_recovery_req(rangeProof: number, rangeProofSize: number, nonce: number, tokenId: number): number;
+  _gen_amount_recovery_req(rangeProof: number, rangeProofSize: number, nonce: number): number;
   _create_amount_recovery_req_vec(): number;
   _add_to_amount_recovery_req_vec(vec: number, req: number): void;
   _delete_amount_recovery_req_vec(vec: number): void;
