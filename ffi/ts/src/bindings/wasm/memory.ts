@@ -50,6 +50,7 @@ export function freeObj(ptr: number): void {
 export interface BlsctResult<T> {
   success: boolean;
   value: T | null;
+  valueSize?: number;
   error?: string;
   errorCode?: number;
 }
@@ -75,6 +76,7 @@ export function parseRetVal(ptr: number): BlsctResult<number> {
   // WASM32 struct layout offsets (with 4-byte pointer alignment)
   const RESULT_OFFSET = 0;
   const VALUE_PTR_OFFSET = 4;  // After 1-byte result + 3-byte padding
+  const VALUE_SIZE_OFFSET = 8; // After value pointer
   
   // Read result as unsigned 8-bit (BLSCT_RESULT is uint8_t)
   const result = module.HEAPU8[ptr + RESULT_OFFSET];
@@ -83,13 +85,18 @@ export function parseRetVal(ptr: number): BlsctResult<number> {
   // Using HEAPU32 for direct access is more reliable than getValue
   const valuePtrIndex = (ptr + VALUE_PTR_OFFSET) >> 2;  // Divide by 4 for i32 index
   const valuePtr = module.HEAPU32[valuePtrIndex];
+  
+  // Read value_size as 32-bit integer (size_t in WASM32)
+  const valueSizeIndex = (ptr + VALUE_SIZE_OFFSET) >> 2;
+  const valueSize = module.HEAPU32[valueSizeIndex];
 
   if (result === 0) {
-    return { success: true, value: valuePtr };
+    return { success: true, value: valuePtr, valueSize };
   } else {
     return {
       success: false,
       value: null,
+      valueSize: 0,
       errorCode: result,
       error: getErrorMessage(result),
     };

@@ -29,7 +29,9 @@ export class AmountRecoveryRes {
   }
 
   serialize(): string {
-    const jsonStr = JSON.stringify(this)
+    const jsonStr = JSON.stringify(this, (_, value) =>
+      typeof value === 'bigint' ? value.toString() : value
+    )
     const buf = Buffer.from(jsonStr, 'utf-8')
     return buf.toString('hex')
   }
@@ -50,15 +52,17 @@ export class AmountRecoveryRes {
     if (
       typeof obj !== 'object' ||
       typeof obj.isSucc !== 'boolean' ||
-      typeof obj.amount !== 'number' ||
+      (typeof obj.amount !== 'number' && typeof obj.amount !== 'string') ||
       typeof obj.msg !== 'string'
     ) {
       throw new Error(`Deserialize object is not AmountRecoveryRes: ${hex}`)
     }
 
+    const amount = typeof obj.amount === 'string' ? BigInt(obj.amount) : BigInt(obj.amount)
+
     return new AmountRecoveryRes(
       obj.isSucc,
-      obj.amount,
+      amount,
       obj.msg,
     )
   }

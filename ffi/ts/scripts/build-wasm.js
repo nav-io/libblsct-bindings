@@ -13,6 +13,8 @@ const path = require('path');
 
 // Configuration
 const IS_PROD = true;
+// Enable WASM assertions for debugging (set WASM_DEBUG=1 to enable)
+const WASM_DEBUG = process.env.WASM_DEBUG === '1';
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
@@ -26,6 +28,9 @@ const ROOT_DIR = path.resolve(__dirname, '..');
 const NAVIO_CORE_DIR = path.resolve(ROOT_DIR, 'navio-core');
 const WASM_OUTPUT_DIR = path.resolve(ROOT_DIR, 'wasm');
 const BUILD_DIR = path.resolve(ROOT_DIR, 'build-wasm');
+const PATCHES_DIR = path.resolve(__dirname, '..', 'patches');
+const SINGLE_THREADED_PATCH = path.resolve(PATCHES_DIR, 'navio-core-single-threaded.patch');
+const EM_CACHE_DIR = process.env.EM_CACHE || path.resolve(ROOT_DIR, '.emcache');
 
 // Ensure output directories exist
 if (!fs.existsSync(WASM_OUTPUT_DIR)) {
@@ -34,16 +39,53 @@ if (!fs.existsSync(WASM_OUTPUT_DIR)) {
 if (!fs.existsSync(BUILD_DIR)) {
   fs.mkdirSync(BUILD_DIR, { recursive: true });
 }
+if (!fs.existsSync(EM_CACHE_DIR)) {
+  fs.mkdirSync(EM_CACHE_DIR, { recursive: true });
+}
+process.env.EM_CACHE = EM_CACHE_DIR;
 
 /**
- * Clone navio-core repository if it doesn't exist
+ * Get the current commit SHA of the navio-core checkout
+ */
+function getNavioCoreCommit() {
+  try {
+    const result = spawnSync('git', ['rev-parse', 'HEAD'], {
+      cwd: NAVIO_CORE_DIR,
+      stdio: ['ignore', 'pipe', 'ignore'],
+    });
+    if (result.status === 0) {
+      return result.stdout.toString().trim();
+    }
+  } catch (e) {
+    // Ignore errors
+  }
+  return null;
+}
+
+/**
+ * Clone navio-core repository if it doesn't exist or is at wrong commit
  */
 function ensureNavioCore() {
   const srcDir = path.join(NAVIO_CORE_DIR, 'src');
+  const requiredSha = IS_PROD ? MASTER_SHA : null;
 
+  // Check if navio-core exists and is at the correct commit
   if (fs.existsSync(srcDir)) {
-    console.log('✓ navio-core already exists');
-    return;
+    const currentSha = getNavioCoreCommit();
+
+    if (requiredSha && currentSha) {
+      if (currentSha.startsWith(requiredSha) || requiredSha.startsWith(currentSha)) {
+        console.log(`✓ navio-core already at correct commit ${requiredSha.slice(0, 12)}`);
+        return;
+      } else {
+        console.log(`navio-core at commit ${currentSha.slice(0, 12)}, but need ${requiredSha.slice(0, 12)}`);
+        console.log('Removing stale navio-core to re-clone...');
+        fs.rmSync(NAVIO_CORE_DIR, { recursive: true, force: true });
+      }
+    } else if (!requiredSha) {
+      console.log('✓ navio-core already exists (dev mode, no SHA check)');
+      return;
+    }
   }
 
   console.log('Cloning navio-core repository...');
@@ -72,25 +114,73 @@ function ensureNavioCore() {
   console.log('✓ navio-core cloned successfully');
 
   // For production, checkout specific SHA
-  const navioCoreMasterSha = IS_PROD ? MASTER_SHA : '';
-  if (navioCoreMasterSha !== '') {
+  if (requiredSha) {
     {
-      const fetchCmd = ['git', 'fetch', '--depth', '1', 'origin', navioCoreMasterSha];
+      const fetchCmd = ['git', 'fetch', '--depth', '1', 'origin', requiredSha];
       const fetchRes = spawnSync(fetchCmd[0], fetchCmd.slice(1), { cwd: NAVIO_CORE_DIR, stdio: 'inherit' });
       if (fetchRes.status !== 0) {
         throw new Error(`${fetchCmd.join(' ')} failed: exit code ${fetchRes.status}`);
       }
-      console.log(`Fetched navio-core commit ${navioCoreMasterSha}`);
+      console.log(`Fetched navio-core commit ${requiredSha}`);
     }
     {
-      const checkoutCmd = ['git', 'checkout', navioCoreMasterSha];
+      const checkoutCmd = ['git', 'checkout', requiredSha];
       const checkoutRes = spawnSync(checkoutCmd[0], checkoutCmd.slice(1), { cwd: NAVIO_CORE_DIR, stdio: 'inherit' });
       if (checkoutRes.status !== 0) {
         throw new Error(`${checkoutCmd.join(' ')} failed: exit code ${checkoutRes.status}`);
       }
-      console.log(`Checked out navio-core commit ${navioCoreMasterSha}`);
+      console.log(`Checked out navio-core commit ${requiredSha}`);
     }
   }
+}
+
+/**
+ * Apply WASM-specific patches to navio-core
+ * Uses git apply with --check first to see if patch is needed
+ */
+function applyPatches() {
+  if (!fs.existsSync(SINGLE_THREADED_PATCH)) {
+    console.log('⚠ Single-threaded patch not found, skipping...');
+    return;
+  }
+
+  // Check if patch can be applied (not already applied)
+  const checkResult = spawnSync('git', ['apply', '--check', '--reverse', SINGLE_THREADED_PATCH], {
+    cwd: NAVIO_CORE_DIR,
+    stdio: 'pipe',
+  });
+
+  if (checkResult.status === 0) {
+    // Patch is already applied (reverse check succeeded)
+    console.log('✓ Single-threaded patch already applied');
+    return;
+  }
+
+  // Check if patch can be applied forward
+  const canApplyResult = spawnSync('git', ['apply', '--check', SINGLE_THREADED_PATCH], {
+    cwd: NAVIO_CORE_DIR,
+    stdio: 'pipe',
+  });
+
+  if (canApplyResult.status !== 0) {
+    console.error('⚠ Single-threaded patch cannot be applied cleanly');
+    console.error('  This may indicate the patch is partially applied or conflicts exist');
+    console.error('  Stderr:', canApplyResult.stderr?.toString());
+    throw new Error('Patch application check failed');
+  }
+
+  // Apply the patch
+  console.log('Applying single-threaded patch to navio-core...');
+  const applyResult = spawnSync('git', ['apply', SINGLE_THREADED_PATCH], {
+    cwd: NAVIO_CORE_DIR,
+    stdio: 'inherit',
+  });
+
+  if (applyResult.status !== 0) {
+    throw new Error(`Failed to apply single-threaded patch: exit code ${applyResult.status}`);
+  }
+
+  console.log('✓ Single-threaded patch applied successfully');
 }
 
 // Check if emcc is available
@@ -196,6 +286,7 @@ const EXPORTED_FUNCTIONS = [
   '_scalar_to_uint64',
   '_are_scalar_equal',
   '_scalar_to_pub_key',
+  '_scalar_to_str',
   '_serialize_scalar',
   '_deserialize_scalar',
 
@@ -206,6 +297,7 @@ const EXPORTED_FUNCTIONS = [
   '_are_point_equal',
   '_point_from_scalar',
   '_point_to_str',
+  '_scalar_muliply_point',
   '_serialize_point',
   '_deserialize_point',
 
@@ -339,8 +431,11 @@ const EXPORTED_FUNCTIONS = [
   '_get_tx_out_destination',
   '_get_tx_out_amount',
   '_get_tx_out_memo',
+  '_get_tx_out_token_id',
   '_get_tx_out_output_type',
   '_get_tx_out_min_stake',
+  '_get_tx_out_subtract_fee_from_amount',
+  '_get_tx_out_blinding_key',
 
   // Signature operations
   '_sign_message',
@@ -393,6 +488,9 @@ const EXPORTED_RUNTIME_METHODS = [
   'stackSave',
   'stackRestore',
   'stackAlloc',
+  'HEAPU8',   // Needed for cryptoGetRandomValues
+  'HEAPU32',  // Needed for memory parsing (parseRetVal)
+  'HEAP32',   // Used in some memory operations
 ];
 
 function buildMcl() {
@@ -504,6 +602,7 @@ function buildBlsct() {
     '-DHAVE_CONFIG_H',
     '-DLIBBLSCT',
     '-DBLS_ETH',
+    '-DWASM_SINGLE_THREADED',
     '-DMCLBN_FP_UNIT_SIZE=6',
     '-DMCLBN_FR_UNIT_SIZE=4',
     '-DMCL_SIZEOF_UNIT=4',
@@ -576,9 +675,14 @@ function buildBlsct() {
 function linkWasm(objectFiles) {
   console.log('Linking WASM module...');
 
+  if (WASM_DEBUG) {
+    console.log('DEBUG MODE: Building with assertions enabled (-sASSERTIONS=2)');
+  }
+
   const linkFlags = [
-    '-O3',
+    WASM_DEBUG ? '-O0' : '-O3',  // Disable optimization in debug mode
     '-s', 'WASM=1',
+    '-s', 'WASM_BIGINT=1',  // Enable native BigInt support for i64 values
     '-s', 'MODULARIZE=1',
     '-s', 'EXPORT_NAME="BlsctModule"',
     '-s', `EXPORTED_FUNCTIONS='${JSON.stringify(EXPORTED_FUNCTIONS)}'`,
@@ -587,10 +691,12 @@ function linkWasm(objectFiles) {
     '-s', 'INITIAL_MEMORY=16777216',
     '-s', 'MAXIMUM_MEMORY=1073741824',
     '-s', 'STACK_SIZE=1048576',
-    '-s', 'ENVIRONMENT=web,worker',
+    '-s', 'ENVIRONMENT=web,worker,node',
     '-s', 'FILESYSTEM=0',
     '-s', 'SINGLE_FILE=0',
     '--no-entry',
+    // Add assertions in debug mode for better error messages
+    ...(WASM_DEBUG ? ['-s', 'ASSERTIONS=2', '-s', 'SAFE_HEAP=1', '-s', 'STACK_OVERFLOW_CHECK=2'] : []),
   ].join(' ');
 
   const allObjects = [
@@ -615,11 +721,15 @@ async function main() {
 
   console.log(`\nNavio Core directory: ${NAVIO_CORE_DIR}`);
   console.log(`WASM output directory: ${WASM_OUTPUT_DIR}`);
-  console.log(`Build directory: ${BUILD_DIR}\n`);
+  console.log(`Build directory: ${BUILD_DIR}`);
+  console.log(`Debug mode: ${WASM_DEBUG ? 'ENABLED (assertions on)' : 'disabled'}\n`);
 
   try {
     // Ensure navio-core is available
     ensureNavioCore();
+
+    // Apply WASM-specific patches (single-threaded range proof verification)
+    applyPatches();
 
     // Install WASM-specific config header
     setupConfigHeader();

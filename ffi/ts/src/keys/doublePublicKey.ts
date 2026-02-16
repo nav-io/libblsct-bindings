@@ -1,15 +1,23 @@
 import {
   castToDpk,
+  decodeAddress,
   deserializeDpk,
+  encodeAddress,
   freeObj,
   genDoublePubKey,
   genDpkWithKeysAcctAddr,
   serializeDpk,
 } from '../blsct'
 
-import { ManagedObj } from '../managedObj'
+import { ManagedObj, isWasmPtrWrapper } from '../managedObj'
 import { PublicKey } from './publicKey'
 import { Scalar } from '../scalar'
+
+// Address encoding types
+const AddressEncoding = {
+  Bech32: 0,
+  Bech32M: 1,
+} as const
 
 /** The unique source from which an address is derived.
  * A `DoublePublicKey` is a pair of `PublicKey`s that can be used to derive an address.
@@ -33,7 +41,11 @@ import { Scalar } from '../scalar'
  */ 
 export class DoublePublicKey extends ManagedObj {
   constructor(obj?: any) {
-    if (typeof obj === 'object') {
+    if (isWasmPtrWrapper(obj)) {
+      // WASM pointer from fromObj or _deserialize
+      super(obj)
+    } else if (typeof obj === 'object' && obj !== null) {
+      // Native NAPI object
       super(obj)
     } else {
       const pk1 = PublicKey.random()
@@ -112,6 +124,39 @@ export class DoublePublicKey extends ManagedObj {
     hex: string
   ): DoublePublicKey {
     return DoublePublicKey._deserialize(hex, deserializeDpk)
+  }
+
+  /** Encodes the DoublePublicKey as a bech32m address string.
+   * @returns The encoded address string.
+   */
+  encode(): string {
+    const rv = encodeAddress(this.value(), AddressEncoding.Bech32M)
+    if (rv.result !== 0) {
+      throw new Error(`Failed to encode address: ${rv.result}`)
+    }
+    // rv.value is a string pointer in WASM, or a string in native
+    // The encodeAddress function returns the string directly
+    return rv.value as unknown as string
+  }
+
+  /** Decodes a bech32/bech32m address string into a DoublePublicKey.
+   * @param encoded - The encoded address string.
+   * @returns The DoublePublicKey instance.
+   */
+  static decode(encoded: string): DoublePublicKey {
+    const rv = decodeAddress(encoded)
+    if (rv.result !== 0) {
+      throw new Error(`Failed to decode address: ${rv.result}`)
+    }
+    return DoublePublicKey.fromObj(rv.value)
+  }
+
+  /** Checks if this DoublePublicKey equals another.
+   * @param other - The other DoublePublicKey to compare.
+   * @returns true if they are equal, false otherwise.
+   */
+  equals(other: DoublePublicKey): boolean {
+    return this.serialize() === other.serialize()
   }
 }
 

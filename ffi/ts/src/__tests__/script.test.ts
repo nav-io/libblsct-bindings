@@ -2,12 +2,11 @@ import {
   SCRIPT_SIZE,
 } from '../blsct'
 
-import * as crypto from 'crypto'
-
+import { randomHex } from './util'
 import { Script } from '../script'
 
 test('serialize and deserialize', () => {
-  const org_hex = crypto.randomBytes(SCRIPT_SIZE).toString('hex')
+  const org_hex = randomHex(SCRIPT_SIZE)
   const a = Script.deserialize(org_hex)
   const rec_hex = a.serialize() 
  

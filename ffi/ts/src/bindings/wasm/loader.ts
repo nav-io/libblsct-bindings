@@ -21,6 +21,7 @@ export interface BlsctWasmModule {
   _gen_random_scalar(): number;
   _gen_scalar(n: bigint): number;
   _scalar_to_uint64(ptr: number): bigint;
+  _scalar_to_str(ptr: number): number;
   _serialize_scalar(ptr: number): number;
   _deserialize_scalar(hex: number): number;
   _are_scalar_equal(a: number, b: number): number;
@@ -29,12 +30,12 @@ export interface BlsctWasmModule {
   // Point operations
   _gen_random_point(): number;
   _gen_base_point(): number;
+  _point_to_str(ptr: number): number;
   _serialize_point(ptr: number): number;
   _deserialize_point(hex: number): number;
   _is_valid_point(ptr: number): number;
   _point_from_scalar(scalar: number): number;
   _are_point_equal(a: number, b: number): number;
-  _point_to_str(ptr: number): number;
   _scalar_muliply_point(point: number, scalar: number): number;
   
   // Public key operations
@@ -91,7 +92,7 @@ export interface BlsctWasmModule {
   _get_range_proof_tau_x(ptr: number, size: number): number;
   
   // Amount recovery operations
-  _gen_amount_recovery_req(rangeProof: number, size: number, nonce: number): number;
+  _gen_amount_recovery_req(rangeProof: number, rangeProofSize: number, nonce: number): number;
   _create_amount_recovery_req_vec(): number;
   _add_to_amount_recovery_req_vec(vec: number, req: number): void;
   _delete_amount_recovery_req_vec(vec: number): void;
@@ -284,10 +285,11 @@ function getDefaultWasmPath(): string {
   // The WASM files are located at ../../wasm/blsct.js relative to this loader
   // (loader is at dist/browser/bindings/wasm/loader.js, wasm is at wasm/blsct.js)
   try {
-    // @ts-ignore - import.meta.url is available in ESM contexts
-    if (typeof import.meta !== 'undefined' && import.meta.url) {
-      // @ts-ignore
-      return new URL('../../../../wasm/blsct.mjs', import.meta.url).href;
+    // Use indirect eval to avoid parse-time syntax errors in CommonJS/Jest environments
+    // eslint-disable-next-line no-eval
+    const importMetaUrl = (0, eval)('typeof import.meta !== "undefined" && import.meta.url');
+    if (importMetaUrl) {
+      return new URL('../../../../wasm/blsct.mjs', importMetaUrl).href;
     }
   } catch {
     // Fallback for environments where import.meta is not available
@@ -407,7 +409,10 @@ export async function loadBlsctModule(
     // Calculate WASM binary path for locateFile
     const wasmBinaryUrl = moduleUrl.replace(/\.m?js$/, '.wasm');
 
-    const config: BlsctModuleConfig = {
+    // We need a mutable reference to store the module for cryptoGetRandomValues
+    let moduleRef: BlsctWasmModule | null = null;
+    
+    const config: BlsctModuleConfig & { cryptoGetRandomValues?: (bufPtr: number, byteSize: number) => void } = {
       locateFile: (path: string, prefix: string) => {
         if (path.endsWith('.wasm')) {
           // Use the calculated WASM binary path
@@ -419,14 +424,53 @@ export async function loadBlsctModule(
       printErr: console.error,
     };
     
+    // Set up cryptoGetRandomValues for MCL's random number generation
+    // MCL calls EM_ASM({Module.cryptoGetRandomValues($0, $1)}, buf, byteSize)
+    // This must be set BEFORE module initialization
+    // Node.js 22+ and browsers both have globalThis.crypto.getRandomValues
+    if (typeof globalThis.crypto !== 'undefined' && globalThis.crypto.getRandomValues) {
+      config.cryptoGetRandomValues = (bufPtr: number, byteSize: number) => {
+        if (!moduleRef || !moduleRef.HEAPU8) {
+          throw new Error('Module not initialized yet');
+        }
+        const buffer = moduleRef.HEAPU8.subarray(bufPtr, bufPtr + byteSize);
+        globalThis.crypto.getRandomValues(buffer);
+      };
+    }
+    
     // If wasmBinary is provided, use it directly
     if (opts.wasmBinary) {
       config.wasmBinary = opts.wasmBinary;
+    } else {
+      // In Node.js, load the WASM file directly using fs since fetch doesn't work with file:// URLs
+      const isNode = typeof process !== 'undefined' && process.versions?.node;
+      if (isNode) {
+        try {
+          // Convert file:// URL or path to filesystem path
+          let wasmPath = wasmBinaryUrl;
+          if (wasmPath.startsWith('file://')) {
+            const { fileURLToPath } = await import('url');
+            wasmPath = fileURLToPath(wasmPath);
+          }
+          const fs = await import('fs');
+          const wasmBuffer = fs.readFileSync(wasmPath);
+          config.wasmBinary = wasmBuffer.buffer.slice(
+            wasmBuffer.byteOffset,
+            wasmBuffer.byteOffset + wasmBuffer.byteLength
+          );
+        } catch (fsErr) {
+          // If fs read fails, let Emscripten try its default loading
+          console.warn('Failed to load WASM via fs, falling back to Emscripten loader:', fsErr);
+        }
+      }
     }
 
     const instance = await BlsctModuleFactory(config);
     
-    // Add cryptoGetRandomValues for MCL web crypto support
+    // Set moduleRef so cryptoGetRandomValues can access HEAPU8
+    moduleRef = instance;
+    
+    // Also add cryptoGetRandomValues directly to the instance for MCL web crypto support
     ensureCryptoGetRandomValues(instance);
     
     // Initialize the library

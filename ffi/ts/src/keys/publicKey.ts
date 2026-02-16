@@ -8,7 +8,7 @@ import {
   scalarToPubKey,
 } from '../blsct'
 
-import { ManagedObj } from '../managedObj'
+import { ManagedObj, isWasmPtrWrapper } from '../managedObj'
 import { Point } from '../point'
 import { Scalar } from '../scalar'
 
@@ -36,9 +36,17 @@ import { Scalar } from '../scalar'
 export class PublicKey extends ManagedObj {
   /** Constructs a new `PublicKey` instance.
    * - If no parameter is provided, a random public key is generated.
+   * - If a WASM pointer wrapper is provided (from fromObj/deserialize), it wraps the pointer.
    */
   constructor(obj?: any) {
-    if (typeof obj === 'object') {
+    if (isWasmPtrWrapper(obj)) {
+      // WASM pointer from fromObj or _deserialize
+      super(obj)
+    } else if (typeof obj === 'object' && obj !== null) {
+      // Native NAPI object
+      super(obj)
+    } else if (typeof obj === 'number' && obj !== 0) {
+      // Raw WASM pointer (from functions that return BlsctPubKey* directly)
       super(obj)
     } else {
       const rv = genRandomPublicKey()

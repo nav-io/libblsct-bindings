@@ -2,7 +2,7 @@ import {
   CTX_ID_SIZE,
 } from '../blsct'
 
-import * as crypto from 'crypto'
+import { randomHex } from './util'
 import { CTxId } from '../ctxId'
 import { OutPoint } from '../outPoint'
 import { Scalar } from '../scalar'
@@ -12,7 +12,7 @@ import { TxIn } from '../txIn'
 const genTxIn = (): TxIn => {
   const spendingKey = Scalar.random()
   const tokenId = TokenId.default()
-  const ctxIdHex = crypto.randomBytes(CTX_ID_SIZE).toString('hex')
+  const ctxIdHex = randomHex(CTX_ID_SIZE)
   const ctxId = CTxId.deserialize(ctxIdHex)
   const outPoint = OutPoint.generate(ctxId, 1)
 
