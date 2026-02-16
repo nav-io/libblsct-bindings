@@ -31,3 +31,11 @@ beforeAll(async () => {
   await wasmLoader.loadBlsctModule(wasmPath);
   console.log('WASM module initialized successfully');
 }, 30000);
+
+// Ensure finalization doesn't happen during test shutdown
+afterAll(() => {
+  // Signal that we're shutting down to prevent WASM finalizers from running
+  if (typeof process !== 'undefined' && process.emit) {
+    process.emit('beforeExit' as any, 0);
+  }
+});
