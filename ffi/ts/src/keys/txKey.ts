@@ -24,12 +24,12 @@ export class TxKey extends Scalar {
 
   toSpendingKey(): Scalar {
     const obj = fromTxKeyToSpendingKey(this.value())
-    return new Scalar(obj)
+    return Scalar.fromObj(obj)
   }
 
   toViewKey(): Scalar {
     const obj = fromTxKeyToViewKey(this.value())
-    return new Scalar(obj)
+    return Scalar.fromObj(obj)
   }
 }
 

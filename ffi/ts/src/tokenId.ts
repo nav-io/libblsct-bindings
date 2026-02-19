@@ -39,7 +39,9 @@ export class TokenId extends ManagedObj {
    */
   static default(): TokenId {
     const rv = genDefaultTokenId()
-    return new TokenId(rv.value)
+    const tokenId = TokenId.fromObj(rv.value)
+    freeObj(rv)
+    return tokenId
   }
 
   /** Generates a `TokenId` from the provided token.

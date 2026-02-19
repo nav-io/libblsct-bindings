@@ -5,7 +5,7 @@ import {
   serializeKeyId,
 } from './blsct'
 
-import { ManagedObj, isWasmPtrWrapper } from './managedObj'
+import { ManagedObj, isWasmPtrWrapper, wrapWasmPtr } from './managedObj'
 import { PublicKey } from './keys/publicKey'
 import { Scalar } from './scalar'
 
@@ -42,7 +42,7 @@ export class HashId extends ManagedObj {
         PublicKey.random().value(),
         Scalar.random().value(),
       )
-      super(newObj)
+      super(typeof newObj === 'number' ? wrapWasmPtr(newObj) : newObj)
     }
   }
 
