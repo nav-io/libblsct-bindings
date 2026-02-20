@@ -6,6 +6,7 @@ import {
 } from '../blsct'
 
 import { Scalar } from '../scalar'
+import { wrapWasmPtr } from '../managedObj'
 import { TxKey } from './txKey'
 
 /** Represents a child key. A child key is a Scalar and introduces no new functionality; it serves purely as a semantic alias. BlindingKey, TokenKey and TxKey are exclusively derived from a ChildKey.
@@ -31,7 +32,9 @@ export class ChildKey extends Scalar {
       super(obj)
     } else {
       const childKeyObj = fromSeedToChildKey(obj.value())
-      super(childKeyObj)
+      // In WASM, the return value is a raw pointer (number) that must be
+      // wrapped so the Scalar constructor doesn't mistake it for a numeric value.
+      super(typeof childKeyObj === 'number' ? wrapWasmPtr(childKeyObj) : childKeyObj)
     }
   }
 

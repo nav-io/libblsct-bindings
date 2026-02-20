@@ -3,6 +3,7 @@ import {
 } from '../blsct'
 
 import { Scalar } from '../scalar'
+import { wrapWasmPtr } from '../managedObj'
 import { PublicKey } from './publicKey'
 
 /** Represents a private spending key. A private spending key is a `Scalar` and introduces no new functionality; it serves purely as a semantic alias.
@@ -39,7 +40,7 @@ export class PrivSpendingKey extends Scalar {
       account,
       address
     )
-    super(blsctPsk)
+    super(typeof blsctPsk === 'number' ? wrapWasmPtr(blsctPsk) : blsctPsk)
   }
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "navio-blsct",
-  "version": "1.1.7",
+  "version": "1.1.8",
   "description": "BLS Confidential Transaction library for Navio blockchain",
   "scripts": {
     "install": "node scripts/build.js && node-gyp configure build && npm run build:ts",

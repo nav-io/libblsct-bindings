@@ -1,0 +1,31 @@
+diff --git a/src/blsct/arith/mcl/mcl_scalar.cpp b/src/blsct/arith/mcl/mcl_scalar.cpp
+index 5bb2770..0cc5d05 100644
+--- a/src/blsct/arith/mcl/mcl_scalar.cpp
++++ b/src/blsct/arith/mcl/mcl_scalar.cpp
+@@ -16,7 +16,25 @@ MclScalar::MclScalar()
+ 
+ MclScalar::MclScalar(const int64_t& n)
+ {
+-    mclBnFr_setInt(&m_scalar, n); // this takes int64_t
++#ifdef __EMSCRIPTEN__
++    if (n >= INT32_MIN && n <= INT32_MAX) {
++        mclBnFr_setInt(&m_scalar, static_cast<int>(n));
++    } else {
++        bool isNeg = n < 0;
++        uint64_t abs_val = isNeg ? static_cast<uint64_t>(-n) : static_cast<uint64_t>(n);
++        uint8_t buf[8];
++        for (int i = 0; i < 8; ++i) {
++            buf[i] = static_cast<uint8_t>(abs_val & 0xFF);
++            abs_val >>= 8;
++        }
++        mclBnFr_setLittleEndian(&m_scalar, buf, 8);
++        if (isNeg) {
++            mclBnFr_neg(&m_scalar, &m_scalar);
++        }
++    }
++#else
++    mclBnFr_setInt(&m_scalar, n);
++#endif
+ }
+ 
+ MclScalar::MclScalar(const std::vector<uint8_t>& v)
