@@ -30,6 +30,7 @@ const WASM_OUTPUT_DIR = path.resolve(ROOT_DIR, 'wasm');
 const BUILD_DIR = path.resolve(ROOT_DIR, 'build-wasm');
 const PATCHES_DIR = path.resolve(__dirname, '..', 'patches');
 const SINGLE_THREADED_PATCH = path.resolve(PATCHES_DIR, 'navio-core-single-threaded.patch');
+const WASM_INT64_FIX_PATCH = path.resolve(PATCHES_DIR, 'navio-core-wasm-int64-fix.patch');
 const EM_CACHE_DIR = process.env.EM_CACHE || path.resolve(ROOT_DIR, '.emcache');
 
 // Ensure output directories exist
@@ -135,52 +136,58 @@ function ensureNavioCore() {
 }
 
 /**
- * Apply WASM-specific patches to navio-core
+ * Apply a single patch file to navio-core
  * Uses git apply with --check first to see if patch is needed
  */
-function applyPatches() {
-  if (!fs.existsSync(SINGLE_THREADED_PATCH)) {
-    console.log('⚠ Single-threaded patch not found, skipping...');
+function applyPatch(patchPath, label) {
+  if (!fs.existsSync(patchPath)) {
+    console.log(`⚠ ${label} patch not found, skipping...`);
     return;
   }
 
-  // Check if patch can be applied (not already applied)
-  const checkResult = spawnSync('git', ['apply', '--check', '--reverse', SINGLE_THREADED_PATCH], {
+  // Check if patch is already applied (reverse check succeeds)
+  const checkResult = spawnSync('git', ['apply', '--check', '--reverse', patchPath], {
     cwd: NAVIO_CORE_DIR,
     stdio: 'pipe',
   });
 
   if (checkResult.status === 0) {
-    // Patch is already applied (reverse check succeeded)
-    console.log('✓ Single-threaded patch already applied');
+    console.log(`✓ ${label} patch already applied`);
     return;
   }
 
   // Check if patch can be applied forward
-  const canApplyResult = spawnSync('git', ['apply', '--check', SINGLE_THREADED_PATCH], {
+  const canApplyResult = spawnSync('git', ['apply', '--check', patchPath], {
     cwd: NAVIO_CORE_DIR,
     stdio: 'pipe',
   });
 
   if (canApplyResult.status !== 0) {
-    console.error('⚠ Single-threaded patch cannot be applied cleanly');
+    console.error(`⚠ ${label} patch cannot be applied cleanly`);
     console.error('  This may indicate the patch is partially applied or conflicts exist');
     console.error('  Stderr:', canApplyResult.stderr?.toString());
-    throw new Error('Patch application check failed');
+    throw new Error(`${label} patch application check failed`);
   }
 
-  // Apply the patch
-  console.log('Applying single-threaded patch to navio-core...');
-  const applyResult = spawnSync('git', ['apply', SINGLE_THREADED_PATCH], {
+  console.log(`Applying ${label} patch to navio-core...`);
+  const applyResult = spawnSync('git', ['apply', patchPath], {
     cwd: NAVIO_CORE_DIR,
     stdio: 'inherit',
   });
 
   if (applyResult.status !== 0) {
-    throw new Error(`Failed to apply single-threaded patch: exit code ${applyResult.status}`);
+    throw new Error(`Failed to apply ${label} patch: exit code ${applyResult.status}`);
   }
 
-  console.log('✓ Single-threaded patch applied successfully');
+  console.log(`✓ ${label} patch applied successfully`);
+}
+
+/**
+ * Apply all WASM-specific patches to navio-core
+ */
+function applyPatches() {
+  applyPatch(SINGLE_THREADED_PATCH, 'Single-threaded');
+  applyPatch(WASM_INT64_FIX_PATCH, 'WASM int64 scalar fix');
 }
 
 // Check if emcc is available
