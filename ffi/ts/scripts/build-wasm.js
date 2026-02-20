@@ -361,15 +361,6 @@ const EXPORTED_FUNCTIONS = [
   '_get_range_proof_alpha_hat',
   '_get_range_proof_tau_x',
 
-  // Debug
-  '_debug_test_recovery',
-  '_debug_test_hash_salt',
-  '_debug_test_recovery_steps',
-  '_debug_test_bitwise_and',
-  '_debug_test_seri_byte_order',
-  '_debug_test_and_simple',
-  '_debug_test_commitment_check',
-
   // Amount recovery
   '_gen_amount_recovery_req',
   '_create_amount_recovery_req_vec',

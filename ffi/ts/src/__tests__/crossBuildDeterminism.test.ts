@@ -369,21 +369,16 @@ describe('Cross-build deterministic derivation', () => {
       expect(results[0].amount).toBe(BigInt(amount))
       return
     }
-    const { getBlsctModule } = await import('../bindings/wasm/loader.js')
-    const m = getBlsctModule() as any
-
-    const seriOrder = Number(m._debug_test_seri_byte_order())
-    console.log('seri_byte_order:', seriOrder, '(1=BE, 2=LE)')
-
-    const andSimple = Number(m._debug_test_and_simple())
-    console.log('and_simple:', andSimple, '(1=pass, negative=byte diag)')
-
-    const bitwiseAnd = Number(m._debug_test_bitwise_and(BigInt(42000)))
-    console.log('bitwise_and(42000):', bitwiseAnd, '(1=pass, 0=got zero)')
-
-    expect(seriOrder).toBeGreaterThan(0)
-    expect(andSimple).toBe(1)
-    expect(bitwiseAnd).toBe(1)
+    const viewKey = childKey.toTxKey().toViewKey()
+    const blindPk = PublicKey.fromScalar(childKey.toBlindingKey())
+    const noncePoint = blindPk.generateNonce(viewKey).getPoint()
+    const amount = 42000
+    const tokenId = TokenId.default()
+    const proof = RangeProof.generate([amount], noncePoint, 'test', tokenId)
+    const req = new AmountRecoveryReq(proof, noncePoint, tokenId)
+    const results = RangeProof.recoverAmounts([req])
+    expect(results[0].isSucc).toBe(true)
+    expect(results[0].amount).toBe(BigInt(amount))
   })
 
   it('full wallet derivation chain matches across runs', () => {
