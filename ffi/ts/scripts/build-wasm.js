@@ -504,12 +504,13 @@ function buildMcl() {
   console.log('Building mcl library for WASM...');
   const mclDir = path.join(NAVIO_CORE_DIR, 'src/bls/mcl');
 
-  // Use CYBOZU_MINIMUM_EXCEPTION as per mcl's own WASM build (not CYBOZU_DONT_USE_EXCEPTION)
-  // MCLBN_FP_UNIT_SIZE=6 and MCLBN_FR_UNIT_SIZE=4 are required for BLS12-381
-  // MCL_USE_WEB_CRYPTO_API enables browser crypto.getRandomValues() instead of /dev/urandom
   const mclBuildCmd = [
     'emcc',
     '-O3',
+    '-flto',
+    '-fno-rtti',
+    '-fno-threadsafe-statics',
+    '-fno-stack-protector',
     '-DNDEBUG',
     '-DMCLBN_FP_UNIT_SIZE=6',
     '-DMCLBN_FR_UNIT_SIZE=4',
@@ -537,12 +538,13 @@ function buildBls() {
   const blsDir = path.join(NAVIO_CORE_DIR, 'src/bls');
   const mclDir = path.join(blsDir, 'mcl');
 
-  // BLS_ETH adds 200 to MCLBN_COMPILED_TIME_VAR for correct initialization
-  // MCLBN_FP_UNIT_SIZE=6 and MCLBN_FR_UNIT_SIZE=4 are required for BLS12-381
-  // MCL_USE_WEB_CRYPTO_API enables browser crypto.getRandomValues() instead of /dev/urandom
   const blsBuildCmd = [
     'emcc',
     '-O3',
+    '-flto',
+    '-fno-rtti',
+    '-fno-threadsafe-statics',
+    '-fno-stack-protector',
     '-DNDEBUG',
     '-DBLS_ETH',
     '-DMCLBN_FP_UNIT_SIZE=6',
@@ -601,11 +603,12 @@ function buildBlsct() {
     `-I${srcDir}/univalue/include`,
   ].join(' ');
 
-  // Note: Do NOT use -DNDEBUG as navio-core requires assertions (util/check.h)
-  // BLS_ETH is critical: it adds 200 to MCLBN_COMPILED_TIME_VAR for correct BLS12-381 initialization
-  // MCL_USE_WEB_CRYPTO_API enables browser crypto.getRandomValues() instead of /dev/urandom
   const compilerFlags = [
     '-O3',
+    '-flto',
+    '-fno-rtti',
+    '-fno-threadsafe-statics',
+    '-fno-stack-protector',
     '-DHAVE_CONFIG_H',
     '-DLIBBLSCT',
     '-DBLS_ETH',
@@ -687,9 +690,10 @@ function linkWasm(objectFiles) {
   }
 
   const linkFlags = [
-    WASM_DEBUG ? '-O0' : '-O3',  // Disable optimization in debug mode
+    WASM_DEBUG ? '-O0' : '-O3',
+    '-flto',
     '-s', 'WASM=1',
-    '-s', 'WASM_BIGINT=1',  // Enable native BigInt support for i64 values
+    '-s', 'WASM_BIGINT=1',
     '-s', 'MODULARIZE=1',
     '-s', 'EXPORT_NAME="BlsctModule"',
     '-s', `EXPORTED_FUNCTIONS='${JSON.stringify(EXPORTED_FUNCTIONS)}'`,
@@ -701,8 +705,9 @@ function linkWasm(objectFiles) {
     '-s', 'ENVIRONMENT=web,worker,node',
     '-s', 'FILESYSTEM=0',
     '-s', 'SINGLE_FILE=0',
+    '-s', 'DISABLE_EXCEPTION_CATCHING=1',
+    '-s', 'ABORTING_MALLOC=0',
     '--no-entry',
-    // Add assertions in debug mode for better error messages
     ...(WASM_DEBUG ? ['-s', 'ASSERTIONS=2', '-s', 'SAFE_HEAP=1', '-s', 'STACK_OVERFLOW_CHECK=2'] : []),
   ].join(' ');
 
