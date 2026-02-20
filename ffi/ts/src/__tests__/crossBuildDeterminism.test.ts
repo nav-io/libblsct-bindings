@@ -273,6 +273,51 @@ describe('Cross-build deterministic derivation', () => {
     expect(results[0].amount).toBe(5000n)
   })
 
+  it('RangeProof recover from deserialized proof (simulates blockchain recovery)', () => {
+    const viewKey = childKey.toTxKey().toViewKey()
+    const blindPk = PublicKey.fromScalar(childKey.toBlindingKey())
+    const noncePoint = blindPk.generateNonce(viewKey).getPoint()
+
+    const amount = 10000000000 // 100 NAV in satoshis
+    const tokenId = TokenId.default()
+    const proof = RangeProof.generate([amount], noncePoint, 'hello', tokenId)
+
+    // Serialize → deserialize (simulates blockchain path)
+    const proofFromHex = RangeProof.deserialize(proof.serialize())
+    const nonceFromHex = Point.deserialize(noncePoint.serialize())
+    const tokenIdFromHex = TokenId.deserialize(tokenId.serialize())
+
+    const req = new AmountRecoveryReq(proofFromHex, nonceFromHex, tokenIdFromHex)
+    const results = RangeProof.recoverAmounts([req])
+
+    expect(results.length).toBe(1)
+    expect(results[0].isSucc).toBe(true)
+    expect(results[0].amount).toBe(BigInt(amount))
+    expect(results[0].msg).toBe('hello')
+  })
+
+  it('RangeProof C++ recoverAmounts works without JS fallback', () => {
+    const viewKey = childKey.toTxKey().toViewKey()
+    const blindPk = PublicKey.fromScalar(childKey.toBlindingKey())
+    const noncePoint = blindPk.generateNonce(viewKey).getPoint()
+
+    const amount = 42000
+    const tokenId = TokenId.default()
+    const proof = RangeProof.generate([amount], noncePoint, 'memo', tokenId)
+
+    // Disable the __wasmRecoveryMeta fallback to test the raw C++ recovery
+    const savedMode = (globalThis as any).__BLSCT_WASM_MODE__
+    ;(globalThis as any).__BLSCT_WASM_MODE__ = false
+    try {
+      const req = new AmountRecoveryReq(proof, noncePoint, tokenId)
+      const results = RangeProof.recoverAmounts([req])
+      expect(results[0].isSucc).toBe(true)
+      expect(results[0].amount).toBe(BigInt(amount))
+    } finally {
+      ;(globalThis as any).__BLSCT_WASM_MODE__ = savedMode
+    }
+  })
+
   it('RangeProof field accessors return valid objects', () => {
     const nonce = Point.fromScalar(childKey.toTxKey().toViewKey())
     const proof = RangeProof.generate([100], nonce, '', TokenId.default())
@@ -308,6 +353,37 @@ describe('Cross-build deterministic derivation', () => {
     expect(dpk.serialize()).toBe('84b249cbffbefcf62fbda1972144751560e963d76da96dd144c901f4cdb1f834d319fd05e4c3a701cc6fa2ac896a1ff1823638e3d085518c6265ae2f208dbd854287479a16643fca6f24597347dc14c259142e62785ae49a66fc494b06c93fdf')
     expect(vt.value).toBe(11533)
     expect(hi.serialize()).toBe('1a2fc8181f858ee9885a4006c230b2c683f8948e')
+  })
+
+  it('C++ internal recovery test (bypasses TS bindings)', async () => {
+    if (!(globalThis as any).__BLSCT_WASM_MODE__) {
+      const viewKey = childKey.toTxKey().toViewKey()
+      const blindPk = PublicKey.fromScalar(childKey.toBlindingKey())
+      const noncePoint = blindPk.generateNonce(viewKey).getPoint()
+      const amount = 42000
+      const tokenId = TokenId.default()
+      const proof = RangeProof.generate([amount], noncePoint, 'test', tokenId)
+      const req = new AmountRecoveryReq(proof, noncePoint, tokenId)
+      const results = RangeProof.recoverAmounts([req])
+      expect(results[0].isSucc).toBe(true)
+      expect(results[0].amount).toBe(BigInt(amount))
+      return
+    }
+    const { getBlsctModule } = await import('../bindings/wasm/loader.js')
+    const m = getBlsctModule() as any
+
+    const seriOrder = Number(m._debug_test_seri_byte_order())
+    console.log('seri_byte_order:', seriOrder, '(1=BE, 2=LE)')
+
+    const andSimple = Number(m._debug_test_and_simple())
+    console.log('and_simple:', andSimple, '(1=pass, negative=byte diag)')
+
+    const bitwiseAnd = Number(m._debug_test_bitwise_and(BigInt(42000)))
+    console.log('bitwise_and(42000):', bitwiseAnd, '(1=pass, 0=got zero)')
+
+    expect(seriOrder).toBeGreaterThan(0)
+    expect(andSimple).toBe(1)
+    expect(bitwiseAnd).toBe(1)
   })
 
   it('full wallet derivation chain matches across runs', () => {

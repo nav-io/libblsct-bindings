@@ -1031,7 +1031,8 @@ export function getAmountRecoveryResultMsg(req: unknown, i: number): string {
   const module = getBlsctModule();
   const strPtr = module._get_amount_recovery_result_msg(req as number, i);
   const str = readString(strPtr);
-  freePtr(strPtr);
+  // Don't free strPtr here - it points into the result vector and will be
+  // freed by free_amounts_ret_val via deleteAmountsRetVal
   return str;
 }
 
