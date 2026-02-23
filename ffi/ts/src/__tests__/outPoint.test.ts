@@ -9,13 +9,13 @@ import { OutPoint } from '../outPoint'
 test('generate', () => {
   const hex = randomHex(CTX_ID_SIZE)
   const ctxId = CTxId.deserialize(hex)
-  OutPoint.generate(ctxId, 2)
+  OutPoint.generate(ctxId)
 })
 
 test('serialize and deserialize', () => {
   const hex = randomHex(CTX_ID_SIZE)
   const ctxId = CTxId.deserialize(hex)
-  const a = OutPoint.generate(ctxId, 2)
+  const a = OutPoint.generate(ctxId)
 
   const a_hex = a.serialize()
   const b = OutPoint.deserialize(a_hex)

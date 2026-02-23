@@ -22,8 +22,7 @@ import { ManagedObj } from './managedObj';
  * const inAmount = fee + outAmount
  * const cTxIdHex = randomBytes(CTX_ID_SIZE).toString('hex')
  * const cTxId = CTxId.deserialize(cTxIdHex)
- * const outIndex = 0
- * const outPoint = OutPoint.generate(cTxId, outIndex)
+ * const outPoint = OutPoint.generate(cTxId)
  * const gamma = 100
  * const spendingKey = Scalar.random()
  * const tokenId = TokenId.default()

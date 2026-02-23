@@ -1,6 +1,5 @@
 import {
   getCTxInPrevOutHash,
-  getCTxInPrevOutN,
   getCTxInScriptSig,
   getCTxInSequence,
   getCTxInScriptWitness,
@@ -26,13 +25,6 @@ export class CTxIn {
   getPrevOutHash(): CTxId {
     const obj = getCTxInPrevOutHash(this.obj)
     return CTxId.fromObj(obj)
-  }
-
-  /** Returns the index of the previous output being spent.
-   * @returns The index of the previous output.
-   */
-  getPrevOutN(): number {
-    return getCTxInPrevOutN(this.obj)
   }
 
   /** Returns the `scriptSig` of the input.

@@ -312,7 +312,7 @@ describe('Browser WASM Module', () => {
       // Create an OutPoint with a dummy tx ID
       const txIdHex = '0000000000000000000000000000000000000000000000000000000000000000';
       const ctxId = blsctBrowser.CTxId.deserialize(txIdHex);
-      const outpoint = blsctBrowser.OutPoint.generate(ctxId, 0);
+      const outpoint = blsctBrowser.OutPoint.generate(ctxId);
       const spendingKey = blsctBrowser.Scalar.random();
       const amount = 1000;  // TxIn.generate uses number, not BigInt
       const gamma = 1;  // gamma is a number

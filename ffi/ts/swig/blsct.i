@@ -228,7 +228,6 @@ export const void* get_ctx_in_at(const void* vp_ctx_ins, const size_t i);
 // ctx in
 export int are_ctx_in_equal(const void* vp_a, const void* vp_b);
 export const BlsctCTxId* get_ctx_in_prev_out_hash(const void* ctx_in);
-export uint32_t get_ctx_in_prev_out_n(const void* ctx_in);
 export const BlsctScript* get_ctx_in_script_sig(const void* ctx_in);
 export uint32_t get_ctx_in_sequence(const void* ctx_in);
 export const BlsctScript* get_ctx_in_script_witness(const void* ctx_in);
@@ -289,10 +288,8 @@ export BlsctRetVal* deserialize_key_id(
 
 // out point
 export BlsctRetVal* gen_out_point(
-    const char* ctx_id_c_str,
-    const uint32_t n
+    const char* ctx_id_c_str
 );
-export uint32_t get_out_point_n(const BlsctOutPoint* blsct_out_point);
 
 export const char* serialize_out_point(const BlsctOutPoint* blsct_out_point);
 export BlsctRetVal* deserialize_out_point(const char* hex);

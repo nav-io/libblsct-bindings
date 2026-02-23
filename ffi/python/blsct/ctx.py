@@ -22,8 +22,7 @@ class CTx(ManagedObj, Serializable):
   >>> out_amount = 10000
   >>> in_amount = fee + out_amount
   >>> ctx_id = CTxId.deserialize(secrets.token_hex(32))
-  >>> out_index = 0
-  >>> out_point = OutPoint(ctx_id, out_index)
+  >>> out_point = OutPoint(ctx_id)
   >>> gamma = 100
   >>> spending_key = Scalar()
   >>> token_id = TokenId()
@@ -35,13 +34,11 @@ class CTx(ManagedObj, Serializable):
   >>> for i in range(ctx_ins.size()):
   ...   ctx_in = ctx_ins.at(i)
   ...   print(f"prev_out_hash: {ctx_in.get_prev_out_hash()}")
-  ...   print(f"prev_out_n: {ctx_in.get_prev_out_n()}")
   ...   print(f"script_sig: {ctx_in.get_script_sig()}")
   ...   print(f"sequence: {ctx_in.get_sequence()}")
   ...   print(f"script_witness: {ctx_in.get_script_witness()}")
   ...
   prev_out_hash: CTxId(9194a7eaafe70c6f623eef4740c934f569b8a7f0a246ce4377c34a5bb9a6f126)
-  prev_out_n: 0
   script_sig: Script(0000000000008f676000000000006b67400000000000726720000000)
   sequence: 4294967295
   script_witness: Script(0000000000008f676000000000006b67400000000000726720000000)

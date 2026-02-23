@@ -60,8 +60,7 @@ export const genCTx = (
   const ctxIdHex = bytesToHex(randomBytes(CTX_ID_SIZE))
   const ctxId = CTxId.deserialize(ctxIdHex)
 
-  const outIndex = 0
-  const outPoint = OutPoint.generate(ctxId, outIndex)
+  const outPoint = OutPoint.generate(ctxId)
   const gamma = 100
   const spendingKey = Scalar.random()
   const tokenId = TokenId.default()

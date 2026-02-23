@@ -11,16 +11,15 @@ class OutPoint(ManagedObj, Serializable):
   >>> from blsct import OutPoint, CTxId, CTX_ID_SIZE
   >>> import secrets
   >>> ctx_id = CTxId.deserialize(secrets.token_hex(CTX_ID_SIZE))
-  >>> out_index = 0
-  >>> out_point = OutPoint(ctx_id, out_index)
+  >>> out_point = OutPoint(ctx_id)
   >>> out_point
   OutPoint(ae8f9ba6eaef62fbd4b0215cda24e231...) # doctest: +SKIP
   >>> ser = out_point.serialize()
   >>> ser == OutPoint.deserialize(ser).serialize()
   True
   """
-  def __init__(self, ctx_id: CTxId, out_index: int):
-    rv = blsct.gen_out_point(ctx_id.serialize(), out_index)
+  def __init__(self, ctx_id: CTxId):
+    rv = blsct.gen_out_point(ctx_id.serialize())
     obj = rv.value
     blsct.free_obj(rv)
     super().__init__(obj)

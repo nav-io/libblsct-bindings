@@ -19,8 +19,7 @@ class Script(ManagedObj, Serializable):
   >>> out_amount = 10000
   >>> in_amount = fee + out_amount
   >>> ctx_id = CTxId.deserialize(secrets.token_hex(32))
-  >>> out_index = 0
-  >>> out_point = OutPoint(ctx_id, out_index)
+  >>> out_point = OutPoint(ctx_id)
   >>> gamma = 100
   >>> spending_key = Scalar()
   >>> token_id = TokenId()

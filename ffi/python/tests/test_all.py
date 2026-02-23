@@ -235,8 +235,7 @@ def test_tx():
   gamma = 100
   spending_key = Scalar(12)
   token_id = TokenId()
-  out_index = 0
-  out_point = OutPoint(ctx_id, out_index)
+  out_point = OutPoint(ctx_id)
   tx_in = TxIn(
     in_amount,
     gamma,
@@ -310,7 +309,6 @@ def test_tx():
   print("<ctx in>")
   for ctx_in in ctx_ins: 
     print(f"prev_out_hash: {ctx_in.get_prev_out_hash()}")
-    print(f"prev_out_n: {ctx_in.get_prev_out_n()}")
     print(f"scipt_sig: {ctx_in.get_script_sig()}")
     print(f"sequence: {ctx_in.get_sequence()}")
     print(f"scipt_witness: {ctx_in.get_script_witness()}")

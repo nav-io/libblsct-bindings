@@ -103,8 +103,7 @@ export interface BlsctWasmModule {
   _get_amount_recovery_result_msg(vec: number, i: number): number;
   
   // Out point operations
-  _gen_out_point(ctxId: number, n: number): number;
-  _get_out_point_n(ptr: number): number;
+  _gen_out_point(ctxId: number): number;
   _serialize_out_point(ptr: number): number;
   _deserialize_out_point(hex: number): number;
   
@@ -133,7 +132,6 @@ export interface BlsctWasmModule {
   
   // CTxIn accessors
   _get_ctx_in_prev_out_hash(ctxIn: number): number;
-  _get_ctx_in_prev_out_n(ctxIn: number): number;
   _get_ctx_in_script_sig(ctxIn: number): number;
   _get_ctx_in_sequence(ctxIn: number): number;
   _get_ctx_in_script_witness(ctxIn: number): number;
