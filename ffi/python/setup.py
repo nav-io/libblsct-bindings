@@ -41,6 +41,7 @@ src_libmcl_a = mcl_lib_path / "libmcl.a"
 src_libbls384_256_a = bls_lib_path / "libbls384_256.a"
 
 src_dot_a_files = [src_libblsct_a, src_libunivalue_blsct_a, src_libmcl_a, src_libbls384_256_a]
+dummy_impl_path = src_path / "blsct/external_api/dummy_impl.cpp"
 
 libs_dir = navio_tmp_dir / "libs"
 
@@ -92,6 +93,44 @@ class CustomBuildExt(build_ext):
         check=True,
       )
       log(f"Checked out navio-core commit {navio_core_master_sha}")
+
+    self.patch_dummy_impl()
+
+  def patch_dummy_impl(self):
+    if not dummy_impl_path.is_file():
+      log(f"Skipping dummy_impl patch (not found): {dummy_impl_path}")
+      return
+
+    content = dummy_impl_path.read_text(encoding="utf-8")
+    updated = content
+
+    decl_line = "    explicit FastRandomContext(bool fDeterministic = false) noexcept;"
+    rand_decl_line = "    uint256 rand256() noexcept;"
+    if rand_decl_line not in updated:
+      if decl_line in updated:
+        updated = updated.replace(
+          decl_line,
+          decl_line + "\n" + rand_decl_line,
+          1,
+        )
+      else:
+        log("Warning: could not add rand256 declaration to FastRandomContext")
+
+    impl_line = "FastRandomContext::FastRandomContext(bool fDeterministic) noexcept {}"
+    rand_impl_line = "uint256 FastRandomContext::rand256() noexcept { return uint256(); }"
+    if rand_impl_line not in updated:
+      if impl_line in updated:
+        updated = updated.replace(
+          impl_line,
+          impl_line + "\n" + rand_impl_line,
+          1,
+        )
+      else:
+        log("Warning: could not add rand256 implementation to FastRandomContext")
+
+    if updated != content:
+      dummy_impl_path.write_text(updated, encoding="utf-8")
+      log("Patched dummy_impl.cpp with FastRandomContext::rand256 stub")
 
   def build_libblsct(self, num_cpus: str):
     # if there is a backup of depends directory, use it
@@ -223,4 +262,3 @@ setup(
 )
 
 #print_directory_structure(".")
-
