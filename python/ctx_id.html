@@ -43,34 +43,6 @@
             
   <section id="ctxid">
 <h1>CTxId<a class="headerlink" href="#ctxid" title="Link to this heading">¶</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="blsct.CTxId">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">blsct.</span></span><span class="sig-name descname"><span class="pre">CTxId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#blsct.CTxId" title="Link to this definition">¶</a></dt>
-<dd><p>Represents the transaction ID of a CMutableTransaction</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">blsct</span><span class="w"> </span><span class="kn">import</span> <span class="n">CTxId</span><span class="p">,</span> <span class="n">CTX_ID_SIZE</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">secrets</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">hex</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">token_hex</span><span class="p">(</span><span class="n">CTX_ID_SIZE</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ctx_id</span> <span class="o">=</span> <span class="n">CTxId</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="nb">hex</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ctx_id</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
-<span class="go">&#39;ec7b726c443d3ebb7fb8704fe039a6df993a8a4552ab88c3463627ccd947f334&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ctx_id</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span> <span class="o">==</span> <span class="nb">hex</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="blsct.CTxId.deserialize">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#blsct.CTxId.deserialize" title="Link to this definition">¶</a></dt>
-<dd><p>Create a TxId from a hexadecimal string.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="blsct.CTxId.serialize">
-<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#blsct.CTxId.serialize" title="Link to this definition">¶</a></dt>
-<dd><p>Serialize the CTxId object to a hexadecimal string.</p>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 
 
@@ -80,20 +52,6 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-  <div>
-    <h3><a href="index.html">Table of Contents</a></h3>
-    <ul>
-<li><a class="reference internal" href="#">CTxId</a><ul>
-<li><a class="reference internal" href="#blsct.CTxId"><code class="docutils literal notranslate"><span class="pre">CTxId</span></code></a><ul>
-<li><a class="reference internal" href="#blsct.CTxId.deserialize"><code class="docutils literal notranslate"><span class="pre">CTxId.deserialize()</span></code></a></li>
-<li><a class="reference internal" href="#blsct.CTxId.serialize"><code class="docutils literal notranslate"><span class="pre">CTxId.serialize()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-  </div>
   <div>
     <h4>Previous topic</h4>
     <p class="topless"><a href="ctx.html"

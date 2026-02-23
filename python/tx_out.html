@@ -43,97 +43,6 @@
             
   <section id="txout">
 <h1>TxOut<a class="headerlink" href="#txout" title="Link to this heading">¶</a></h1>
-<dl class="py class">
-<dt class="sig sig-object py" id="blsct.TxOut">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">blsct.</span></span><span class="sig-name descname"><span class="pre">TxOut</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sub_addr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="sub_addr.html#blsct.SubAddr" title="blsct.sub_addr.SubAddr"><span class="pre">SubAddr</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">amount</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memo</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">token_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="token_id.html#blsct.TokenId" title="blsct.token_id.TokenId"><span class="pre">TokenId</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal['Normal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'StakedCommitment']</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Normal'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_stake</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subtract_fee_from_amount</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">blinding_key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="scalar.html#blsct.Scalar" title="blsct.scalar.Scalar"><span class="pre">Scalar</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">Scalar(17d63306049ad59a3c459239fe32db088fa566f21c5b981f507ff3d9b9e67815)</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#blsct.TxOut" title="Link to this definition">¶</a></dt>
-<dd><p>Represents a transaction output used to construct a CTxOut in a confidential transaction.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">blsct</span><span class="w"> </span><span class="kn">import</span> <span class="n">ChildKey</span><span class="p">,</span> <span class="n">DoublePublicKey</span><span class="p">,</span> <span class="n">PublicKey</span><span class="p">,</span> <span class="n">SubAddr</span><span class="p">,</span> <span class="n">SubAddrId</span><span class="p">,</span> <span class="n">TxOut</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sub_addr</span> <span class="o">=</span> <span class="n">SubAddr</span><span class="o">.</span><span class="n">from_double_public_key</span><span class="p">(</span><span class="n">DoublePublicKey</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">amount</span> <span class="o">=</span> <span class="mi">789</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">memo</span> <span class="o">=</span> <span class="s2">&quot;apple&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tx_out</span> <span class="o">=</span> <span class="n">TxOut</span><span class="p">(</span><span class="n">sub_addr</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">memo</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_destination</span><span class="p">()</span>
-<span class="go">SubAddr(827cc8283b488e5...)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_amount</span><span class="p">()</span>
-<span class="go">789</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_memo</span><span class="p">()</span>
-<span class="go">&#39;apple&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_token_id</span><span class="p">()</span>
-<span class="go">TokenId(0000000000000000000000000000000000000000000000000000000000000000ffffffffffffffff)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_min_stake</span><span class="p">()</span>
-<span class="go">0</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_subtract_fee_from_amount</span><span class="p">()</span>
-<span class="go">False</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">tx_out</span><span class="o">.</span><span class="n">get_blinding_key</span><span class="p">()</span>
-<span class="go">Scalar(827cc8283b488e5...)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ser</span> <span class="o">=</span> <span class="n">tx_out</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">deser</span> <span class="o">=</span> <span class="n">TxOut</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">ser</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ser</span> <span class="o">==</span> <span class="n">deser</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-<dl class="py method">
-<dt class="sig sig-object py" id="blsct.TxOut.deserialize">
-<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#blsct.TxOut.deserialize" title="Link to this definition">¶</a></dt>
-<dd><p>Deserialize the TxOut from a hexadecimal string</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="blsct.TxOut.get_amount">
-<span class="sig-name descname"><span class="pre">get_amount</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#blsct.TxOut.get_amount" title="Link to this definition">¶</a></dt>
-<dd><p>Get the amount of the transaction output.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="blsct.TxOut.get_blinding_key">
-<span class="sig-name descname"><span class="pre">get_blinding_key</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="scalar.html#blsct.Scalar" title="blsct.scalar.Scalar"><span class="pre">Scalar</span></a></span></span><a class="headerlink" href="#blsct.TxOut.get_blinding_key" title="Link to this definition">¶</a></dt>
-<dd><p>Get the blinding key of the transaction output.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="blsct.TxOut.get_destination">
-<span class="sig-name descname"><span class="pre">get_destination</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="sub_addr.html#blsct.SubAddr" title="blsct.sub_addr.SubAddr"><span class="pre">SubAddr</span></a></span></span><a class="headerlink" href="#blsct.TxOut.get_destination" title="Link to this definition">¶</a></dt>
-<dd><p>Get the destination of the transaction output.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="blsct.TxOut.get_memo">
-<span class="sig-name descname"><span class="pre">get_memo</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#blsct.TxOut.get_memo" title="Link to this definition">¶</a></dt>
-<dd><p>Get the memo of the transaction output.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="blsct.TxOut.get_min_stake">
-<span class="sig-name descname"><span class="pre">get_min_stake</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#blsct.TxOut.get_min_stake" title="Link to this definition">¶</a></dt>
-<dd><p>Get the min stake of the transaction output.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="blsct.TxOut.get_output_type">
-<span class="sig-name descname"><span class="pre">get_output_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'Normal'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'StakedCommitment'</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#blsct.TxOut.get_output_type" title="Link to this definition">¶</a></dt>
-<dd><p>Get the output type of the transaction output.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="blsct.TxOut.get_subtract_fee_from_amount">
-<span class="sig-name descname"><span class="pre">get_subtract_fee_from_amount</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#blsct.TxOut.get_subtract_fee_from_amount" title="Link to this definition">¶</a></dt>
-<dd><p>Get the subtract fee from amount flag of the the transaction output.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="blsct.TxOut.get_token_id">
-<span class="sig-name descname"><span class="pre">get_token_id</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="token_id.html#blsct.TokenId" title="blsct.token_id.TokenId"><span class="pre">TokenId</span></a></span></span><a class="headerlink" href="#blsct.TxOut.get_token_id" title="Link to this definition">¶</a></dt>
-<dd><p>Get the token ID of the transaction output.</p>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="blsct.TxOut.serialize">
-<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#blsct.TxOut.serialize" title="Link to this definition">¶</a></dt>
-<dd><p>Serialize the TxOut to a hexadecimal string</p>
-</dd></dl>
-
-</dd></dl>
-
 </section>
 
 
@@ -143,28 +52,6 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
-  <div>
-    <h3><a href="index.html">Table of Contents</a></h3>
-    <ul>
-<li><a class="reference internal" href="#">TxOut</a><ul>
-<li><a class="reference internal" href="#blsct.TxOut"><code class="docutils literal notranslate"><span class="pre">TxOut</span></code></a><ul>
-<li><a class="reference internal" href="#blsct.TxOut.deserialize"><code class="docutils literal notranslate"><span class="pre">TxOut.deserialize()</span></code></a></li>
-<li><a class="reference internal" href="#blsct.TxOut.get_amount"><code class="docutils literal notranslate"><span class="pre">TxOut.get_amount()</span></code></a></li>
-<li><a class="reference internal" href="#blsct.TxOut.get_blinding_key"><code class="docutils literal notranslate"><span class="pre">TxOut.get_blinding_key()</span></code></a></li>
-<li><a class="reference internal" href="#blsct.TxOut.get_destination"><code class="docutils literal notranslate"><span class="pre">TxOut.get_destination()</span></code></a></li>
-<li><a class="reference internal" href="#blsct.TxOut.get_memo"><code class="docutils literal notranslate"><span class="pre">TxOut.get_memo()</span></code></a></li>
-<li><a class="reference internal" href="#blsct.TxOut.get_min_stake"><code class="docutils literal notranslate"><span class="pre">TxOut.get_min_stake()</span></code></a></li>
-<li><a class="reference internal" href="#blsct.TxOut.get_output_type"><code class="docutils literal notranslate"><span class="pre">TxOut.get_output_type()</span></code></a></li>
-<li><a class="reference internal" href="#blsct.TxOut.get_subtract_fee_from_amount"><code class="docutils literal notranslate"><span class="pre">TxOut.get_subtract_fee_from_amount()</span></code></a></li>
-<li><a class="reference internal" href="#blsct.TxOut.get_token_id"><code class="docutils literal notranslate"><span class="pre">TxOut.get_token_id()</span></code></a></li>
-<li><a class="reference internal" href="#blsct.TxOut.serialize"><code class="docutils literal notranslate"><span class="pre">TxOut.serialize()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-  </div>
   <div>
     <h4>Previous topic</h4>
     <p class="topless"><a href="tx_key.html"
