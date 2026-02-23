@@ -17,8 +17,7 @@ import { CTxId } from './ctxId'
   * const { randomBytes } = require('crypto')
   * const cTxIdHex = randomBytes(CTX_ID_SIZE).toString('hex')
   * const cTxId = CTxId.deserialize(cTxIdHex)
-  * const outIndex = 0
-  * const outPoint = OutPoint.generate(cTxId, outIndex)
+  * const outPoint = OutPoint.generate(cTxId)
   * outPoint
   * const ser = outPoint.serialize()
   * const deser = OutPoint.deserialize(ser)
@@ -33,14 +32,12 @@ export class OutPoint extends ManagedObj {
   /** Generates a new `OutPoint` instance.
    *
    * @param ctxId - The transaction ID of the outpoint.
-   * @param outIndex - The output index of the outpoint.
-   * @return A new `OutPoint` instance with the specified transaction ID and output index.
+   * @return A new `OutPoint` instance with the specified transaction ID.
    */
   static generate(
     ctxId: CTxId,
-    outIndex: number,
   ) {
-    const rv = genOutPoint(ctxId.serialize(), outIndex)
+    const rv = genOutPoint(ctxId.serialize())
     const obj = rv.value
     freeObj(rv)
     return new OutPoint(obj)

@@ -710,11 +710,11 @@ export function deserializeKeyId(hex: string): BlsctRetVal {
 // Out Point Functions
 // ============================================================================
 
-export function genOutPoint(serCtxId: string, outIndex: number): BlsctRetVal {
+export function genOutPoint(serCtxId: string): BlsctRetVal {
   const module = getBlsctModule();
   const strPtr = allocString(serCtxId);
   try {
-    const resultPtr = module._gen_out_point(strPtr, outIndex);
+    const resultPtr = module._gen_out_point(strPtr);
     const result = parseRetVal(resultPtr);
     freePtr(resultPtr);
     return {
@@ -1197,11 +1197,6 @@ export function getCTxOutAt(ctxOuts: unknown, i: number): unknown {
 export function getCTxInPrevOutHash(obj: unknown): unknown {
   const module = getBlsctModule();
   return module._get_ctx_in_prev_out_hash(obj as number);
-}
-
-export function getCTxInPrevOutN(obj: unknown): number {
-  const module = getBlsctModule();
-  return module._get_ctx_in_prev_out_n(obj as number);
 }
 
 export function getCTxInScriptSig(obj: unknown): unknown {

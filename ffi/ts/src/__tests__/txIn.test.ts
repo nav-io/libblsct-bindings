@@ -14,7 +14,7 @@ const genTxIn = (): TxIn => {
   const tokenId = TokenId.default()
   const ctxIdHex = randomHex(CTX_ID_SIZE)
   const ctxId = CTxId.deserialize(ctxIdHex)
-  const outPoint = OutPoint.generate(ctxId, 1)
+  const outPoint = OutPoint.generate(ctxId)
 
   return TxIn.generate(
     123,

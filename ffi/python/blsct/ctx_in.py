@@ -21,10 +21,6 @@ class CTxIn(ManagedObj, Serializable):
     obj = blsct.get_ctx_in_prev_out_hash(self.value())
     return CTxId.from_obj(obj)
 
-  def get_prev_out_n(self) -> int:
-    """Get the output index of the previous output being spent."""
-    return blsct.get_ctx_in_prev_out_n(self.value())
-
   def get_script_sig(self) -> Script:
     """Get the scriptSig used to unlock the previous output."""
     obj = blsct.get_ctx_in_script_sig(self.value())

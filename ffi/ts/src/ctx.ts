@@ -38,8 +38,7 @@ import { TxOut } from './txOut'
  * const fee = (numTxIn + numTxOut) * defaultFee
  * const outAmount = 10000
  * const inAmount = fee + outAmount
- * const outIndex = 0
- * const outPoint = OutPoint.generate(cTxId, outIndex)
+ * const outPoint = OutPoint.generate(cTxId)
  * const gamma = 100
  * const spendingKey = Scalar.random()
  * const tokenId = TokenId.default()

@@ -154,9 +154,6 @@ export const serializeCTxId = (ctxId: any): string => {
 export const getCTxInPrevOutHash = (obj: any): any => {
   return blsct.get_ctx_in_prev_out_hash(obj)
 }
-export const getCTxInPrevOutN = (obj: any): number => {
-  return blsct.get_ctx_in_prev_out_n(obj)
-}
 export const getCTxInScriptSig = (obj: any): any => {
   return blsct.get_ctx_in_script_sig(obj)
 }
@@ -274,8 +271,8 @@ export const getValueAsCStr = (rv: BlsctRetVal): string => {
 export const deserializeOutPoint = (hex: string): BlsctRetVal => {
   return blsct.deserialize_out_point(hex)
 }
-export const genOutPoint = (serCtxId: string, outIndex: number): any => {
-  return blsct.gen_out_point(serCtxId, outIndex)
+export const genOutPoint = (serCtxId: string): any => {
+  return blsct.gen_out_point(serCtxId)
 }
 export const serializeOutPoint = (outPoint: any): string => {
   return blsct.serialize_out_point(outPoint)

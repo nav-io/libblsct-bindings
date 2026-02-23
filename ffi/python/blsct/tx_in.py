@@ -17,7 +17,7 @@ class TxIn(ManagedObj, Serializable):
   >>> spending_key = Scalar()
   >>> token_id = TokenId()
   >>> ctx_id = CTxId.deserialize(secrets.token_hex(CTX_ID_SIZE))
-  >>> out_point = OutPoint(ctx_id, 0)
+  >>> out_point = OutPoint(ctx_id)
   >>> tx_in = TxIn(amount, gamma, spending_key, token_id, out_point)
   >>> tx_in.get_amount()
   123

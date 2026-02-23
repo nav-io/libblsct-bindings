@@ -12,11 +12,6 @@ test('getPrevOutHash', () => {
   x.getPrevOutHash()
 })
 
-test('getPrevOutN', () => {
-  const x = genCTxIn()
-  x.getPrevOutN()
-})
-
 test('getScriptSig', () => {
   const x = genCTxIn()
   x.getScriptSig()

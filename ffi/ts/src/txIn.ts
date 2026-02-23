@@ -34,7 +34,7 @@ import { TokenId } from './tokenId'
  * const txk = ck.toTxKey()
  * const spendingKey = txk.toSpendingKey()
  * const tokenId = TokenId.default()
- * const outPoint = OutPoint.generate(cTxId, 0)
+ * const outPoint = OutPoint.generate(cTxId)
  * const txIn = TxIn.generate(amount, gamma, spendingKey, tokenId, outPoint)
  * txIn.getAmount() // 123
  * txIn.getGamma() // 100

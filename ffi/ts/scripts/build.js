@@ -8,7 +8,7 @@ const IS_PROD = true
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = 'c9a197570443aea09d434c4542b3231bc5410815'
+const MASTER_SHA = '4704c8ae116a107c902ef33e11a8c564cd68efc3'
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core'
@@ -149,6 +149,19 @@ function ensureMacOSDeps(pkgs) {
   const result = spawnSync('brew', ['install', ...pkgs], { stdio: 'inherit' })
   if (result.status !== 0) {
     console.warn('[navio-blsct] brew install had non-zero exit, continuing anyway...')
+  }
+
+  // Link packages that are installed but not linked (e.g. after brew upgrade).
+  // Without this, autogen.sh fails with "please install autoconf first".
+  console.log('[navio-blsct] Ensuring Homebrew packages are linked...')
+  for (const pkg of pkgs) {
+    const linkRes = spawnSync('brew', ['link', pkg], { stdio: 'pipe' })
+    if (linkRes.status !== 0 && linkRes.stderr) {
+      const err = linkRes.stderr.toString()
+      if (!err.includes('Already linked') && !err.includes('would conflict')) {
+        console.warn(`[navio-blsct] brew link ${pkg} had non-zero exit (may be already linked)`)
+      }
+    }
   }
 }
 
