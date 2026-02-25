@@ -16,6 +16,16 @@ declare global {
 }
 globalThis.__BLSCT_WASM_MODE__ = true;
 
+// BigInt cannot be serialized by JSON.stringify, which Jest uses internally
+// to send test results between worker processes. Without this, any assertion
+// failure involving BigInt values crashes the worker with
+// "TypeError: Do not know how to serialize a BigInt".
+if (typeof BigInt !== 'undefined' && !(BigInt.prototype as any).toJSON) {
+  ;(BigInt.prototype as any).toJSON = function () {
+    return this.toString()
+  }
+}
+
 function getWasmPath(): string {
   if (typeof WASM_PATH !== 'undefined') {
     return WASM_PATH;

@@ -10,12 +10,12 @@ import {
   deleteCTx,
   deleteTxInVec,
   deleteTxOutVec,
+  deserializeCTx,
   freeObj,
   getCTxId,
   getCTxIns,
   getCTxOuts,
-  hexToMallocedBuf,
-  toHex,
+  serializeCTx,
 } from './blsct'
 
 import { CTxId } from './ctxId'
@@ -160,8 +160,7 @@ export class CTx extends ManagedObj {
   }
 
   override serialize(): string {
-    const buf = castToUint8_tPtr(this.value())
-    return toHex(buf, this.size())
+    return serializeCTx(this.value())
   }
 
   /** Deserializes a hexadecimal string into a `CTx` instance.
@@ -169,13 +168,7 @@ export class CTx extends ManagedObj {
    * @returns A new `CTx` instance.
    */
   static deserialize(hex: string): CTx {
-    if (hex.length % 2 !== 0) {
-      hex = `0${hex}`
-    }
-    const objSize = hex.length / 2
-    const obj = hexToMallocedBuf(hex)
-
-    return CTx.fromObjAndSize(obj, objSize)
+    return CTx._deserialize(hex, deserializeCTx)
   }
 }
 

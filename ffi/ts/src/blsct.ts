@@ -145,6 +145,15 @@ export const getCTxOutsSize = (ctxOuts: any): number => {
   return blsct.get_ctx_outs_size(ctxOuts)
 }
 
+// ctx serialization
+export const serializeCTx = (ctx: any): string => {
+  return blsct.serialize_ctx(ctx)
+}
+
+export const deserializeCTx = (hex: string): BlsctRetVal => {
+  return blsct.deserialize_ctx(hex)
+}
+
 // ctx id
 export const serializeCTxId = (ctxId: any): string => {
   return blsct.serialize_ctx_id(ctxId)

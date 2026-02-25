@@ -782,6 +782,35 @@ export function deserializeScript(hex: string): BlsctRetVal {
 }
 
 // ============================================================================
+// CTx Serialization Functions
+// ============================================================================
+
+export function serializeCTx(ctx: unknown): string {
+  const module = getBlsctModule();
+  const strPtr = module._serialize_ctx(ctx as number);
+  const str = readString(strPtr);
+  freePtr(strPtr);
+  return str;
+}
+
+export function deserializeCTx(hex: string): BlsctRetVal {
+  const module = getBlsctModule();
+  const strPtr = allocString(hex);
+  try {
+    const resultPtr = module._deserialize_ctx(strPtr);
+    const result = parseRetVal(resultPtr);
+    freePtr(resultPtr);
+    return {
+      result: result.success ? 0 : (result.errorCode ?? 1),
+      value: result.value,
+      value_size: result.valueSize ?? 0,
+    };
+  } finally {
+    freePtr(strPtr);
+  }
+}
+
+// ============================================================================
 // CTx ID Functions
 // ============================================================================
 
@@ -1103,7 +1132,7 @@ export function buildTxIn(
   return {
     result: result.success ? 0 : (result.errorCode ?? 1),
     value: result.value,
-    value_size: 0,
+    value_size: result.valueSize ?? 0,
   };
 }
 
@@ -1135,7 +1164,7 @@ export function buildTxOut(
     return {
       result: result.success ? 0 : (result.errorCode ?? 1),
       value: result.value,
-      value_size: 0,
+      value_size: result.valueSize ?? 0,
     };
   } finally {
     freePtr(memoPtr);

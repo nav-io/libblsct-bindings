@@ -703,7 +703,7 @@ function linkWasm(objectFiles) {
     '-s', 'ENVIRONMENT=web,worker,node',
     '-s', 'FILESYSTEM=0',
     '-s', 'SINGLE_FILE=0',
-    '-s', 'DISABLE_EXCEPTION_CATCHING=1',
+    '-s', 'DISABLE_EXCEPTION_CATCHING=0',
     '-s', 'ABORTING_MALLOC=0',
     '--no-entry',
     ...(WASM_DEBUG ? ['-s', 'ASSERTIONS=2', '-s', 'SAFE_HEAP=1', '-s', 'STACK_OVERFLOW_CHECK=2'] : []),
