@@ -1377,17 +1377,16 @@ export function getTxOutMinStake(obj: unknown): bigint {
   return module._get_tx_out_min_stake(obj as number);
 }
 
-// Note: These functions are not yet exposed in WASM - providing stubs
-// TODO: Add to WASM exports in future version
-export function getTxOutSubtractFeeFromAmount(_obj: unknown): boolean {
-  // TxOut subtract_fee_from_amount not exposed in WASM yet
-  return false;
+export function getTxOutSubtractFeeFromAmount(obj: unknown): boolean {
+  const module = getBlsctModule();
+  // WASM may surface bools as numeric 0/1 values depending on build/runtime.
+  const result = module._get_tx_out_subtract_fee_from_amount(obj as number) as unknown as number;
+  return result !== 0;
 }
 
-export function getTxOutBlindingKey(_obj: unknown): unknown {
-  // TxOut blinding_key not exposed in WASM yet - return null
-  // For CTxOut, use getCTxOutBlindingKey instead
-  return 0;
+export function getTxOutBlindingKey(obj: unknown): unknown {
+  const module = getBlsctModule();
+  return module._get_tx_out_blinding_key(obj as number);
 }
 
 // Range proof field accessors

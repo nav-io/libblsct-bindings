@@ -9,11 +9,6 @@ declare global {
   // eslint-disable-next-line no-var
   var __BLSCT_WASM_MODE__: boolean | undefined;
 }
-const isWasmMode = globalThis.__BLSCT_WASM_MODE__ === true;
-
-// Skip tests that have known issues in WASM mode
-// TODO: Enable these tests when WASM is built with pthread support
-const testOrSkipInWasm = isWasmMode ? test.skip : test;
 
 const genRangeProof = (): RangeProof => {
   const amounts = [123]
