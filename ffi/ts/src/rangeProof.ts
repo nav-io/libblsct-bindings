@@ -5,6 +5,7 @@ import {
   buildRangeProof,
   createAmountRecoveryReqVec,
   castToRangeProof,
+  castToScalar,
   createRangeProofVec,
   createUint64Vec,
   deserializeRangeProof,
@@ -166,7 +167,7 @@ export class RangeProof extends ManagedObj {
       const isSucc = getAmountRecoveryResultIsSucc(rv.value, i)
       const amount = getAmountRecoveryResultAmount(rv.value, i)
       const gammaPtr = getAmountRecoveryResultGamma(rv.value, i)
-      const gamma = isSucc ? serializeScalar(gammaPtr) : '0'
+      const gamma = isSucc ? serializeScalar(castToScalar(gammaPtr)) : '0'
       const msg = getAmountRecoveryResultMsg(rv.value, i)
       const x = new AmountRecoveryRes(
         isSucc, 
