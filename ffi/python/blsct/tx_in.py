@@ -41,16 +41,17 @@ class TxIn(ManagedObj, Serializable):
   def __init__(
     self,
     amount: int,
-    gamma: int,
+    gamma: int | Scalar,
     spending_key: Scalar,
     token_id: TokenId,
     out_point: OutPoint,
     staked_commitment: bool = False,
     rbf: bool = False,
   ):
+    gamma_scalar = gamma if isinstance(gamma, Scalar) else Scalar(gamma)
     rv = blsct.build_tx_in(
       amount,
-      gamma,
+      gamma_scalar.value(),
       spending_key.value(),
       token_id.value(),
       out_point.value(),
@@ -75,7 +76,10 @@ class TxIn(ManagedObj, Serializable):
 
   def get_gamma(self) -> int:
     """Get the gamma value of the transaction input."""
-    return blsct.get_tx_in_gamma(self.value())
+    gamma_obj = blsct.get_tx_in_gamma(self.value())
+    gamma = blsct.scalar_to_uint64(gamma_obj)
+    blsct.free_obj(gamma_obj)
+    return gamma
 
   def get_spending_key(self) -> Scalar:
     """Get the spending key of the transaction input."""
@@ -122,4 +126,3 @@ class TxIn(ManagedObj, Serializable):
     obj_size = len(hex) // 2
     obj = blsct.hex_to_malloced_buf(hex)
     return cls.from_obj_with_size(obj, obj_size)
-

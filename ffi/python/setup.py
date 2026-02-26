@@ -19,7 +19,8 @@ package_dir = Path(os.path.abspath(os.path.dirname(__file__)))
 if IS_PROD:
   navio_core_repo = "https://github.com/nav-io/navio-core"
   # git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-  navio_core_master_sha = "4704c8ae116a107c902ef33e11a8c564cd68efc3"
+  # Keep this in sync with ffi/ts/scripts/build.js and build-wasm.js.
+  navio_core_master_sha = "d0dab8fdcaa9a0574b4a9318e2027a0fb89f4cd6"
 else:
   navio_core_repo = "https://github.com/gogoex/navio-core"
   navio_core_branch = ""
