@@ -444,7 +444,7 @@ export const getAmountRecoveryResultGamma = (
   req: any,
   i: number,
 ): any => {
-  return blsct.get_amount_recovery_result_gamma(req, i)
+  return blsct.get_amount_recovery_result_gamma_ptr(req, i)
 }
 export const getAmountRecoveryResultSize = (
   resVec: any,

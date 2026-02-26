@@ -99,6 +99,16 @@
   const char* cast_to_const_char_ptr(void* str_buf) {
     return static_cast<const char*>(str_buf);
   }
+
+  void* get_amount_recovery_result_gamma_ptr(
+      void* vp_amt_recovery_req_vec,
+      size_t idx) {
+    if (vp_amt_recovery_req_vec == nullptr) {
+      return nullptr;
+    }
+    auto vec = static_cast<std::vector<BlsctAmountRecoveryResult>*>(vp_amt_recovery_req_vec);
+    return static_cast<void*>(&vec->at(idx).gamma);
+  }
 %}
 
 %include "stdint.i"
@@ -190,7 +200,7 @@ export uint64_t get_amount_recovery_result_amount(
     void* vp_amt_recovery_req_vec,
     size_t idx
 );
-export const BlsctScalar* get_amount_recovery_result_gamma(
+export const void* get_amount_recovery_result_gamma(
     void* vp_amt_recovery_req_vec,
     size_t idx
 );
