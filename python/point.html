@@ -43,6 +43,80 @@
             
   <section id="point">
 <h1>Point<a class="headerlink" href="#point" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="blsct.Point">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">blsct.</span></span><span class="sig-name descname"><span class="pre">Point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#blsct.Point" title="Link to this definition">¶</a></dt>
+<dd><p>Represents an element in the BLS12-381 G1 curve group.
+A wrapper of <a class="reference external" href="https://github.com/nav-io/navio-core/blob/master/src/blsct/arith/mcl/mcl_g1point.h">MclG1Point</a> in navio-core.</p>
+<p>Instantiating a Point object without a parameter returns the base point of the BLS12-381 G1 curve.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">blsct</span><span class="w"> </span><span class="kn">import</span> <span class="n">Point</span><span class="p">,</span> <span class="n">Scalar</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Point</span><span class="p">()</span>
+<span class="go">Point(a4eb0bfafd459d032737596...)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Point</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+<span class="go">Point(b45f2b49f894ec369133766...)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Point</span><span class="o">.</span><span class="n">base</span><span class="p">()</span>
+<span class="go">Point(97f1d3a73197d7942695638...)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">Scalar</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">Point</span><span class="o">.</span><span class="n">from_scalar</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="go">Point(b83378b6c0b2cb416dc7391...)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">Point</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">is_valid</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q</span> <span class="o">=</span> <span class="n">Point</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">==</span> <span class="n">p</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">==</span> <span class="n">q</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ser</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deser</span> <span class="o">=</span> <span class="n">Point</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">ser</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ser</span> <span class="o">==</span> <span class="n">deser</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Point.base">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">base</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#blsct.Point.base" title="Link to this definition">¶</a></dt>
+<dd><p>Get the base point of the BLS12-381 G1 curve</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Point.deserialize">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#blsct.Point.deserialize" title="Link to this definition">¶</a></dt>
+<dd><p>Deserialize the point from a hexadecimal string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Point.is_valid">
+<span class="sig-name descname"><span class="pre">is_valid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#blsct.Point.is_valid" title="Link to this definition">¶</a></dt>
+<dd><p>Check if the point is valid</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Point.pretty_print">
+<span class="sig-name descname"><span class="pre">pretty_print</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#blsct.Point.pretty_print" title="Link to this definition">¶</a></dt>
+<dd><p>Convert the point to a string representation</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Point.random">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">random</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#blsct.Point.random" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a random point</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Point.scalar_multiply">
+<span class="sig-name descname"><span class="pre">scalar_multiply</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="scalar.html#blsct.Scalar" title="blsct.scalar.Scalar"><span class="pre">Scalar</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#blsct.Point.scalar_multiply" title="Link to this definition">¶</a></dt>
+<dd><p>Multiply the point by a scalar</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.Point.serialize">
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#blsct.Point.serialize" title="Link to this definition">¶</a></dt>
+<dd><p>Serialize the point to a hexadecimal string</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -52,6 +126,25 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Point</a><ul>
+<li><a class="reference internal" href="#blsct.Point"><code class="docutils literal notranslate"><span class="pre">Point</span></code></a><ul>
+<li><a class="reference internal" href="#blsct.Point.base"><code class="docutils literal notranslate"><span class="pre">Point.base()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.Point.deserialize"><code class="docutils literal notranslate"><span class="pre">Point.deserialize()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.Point.is_valid"><code class="docutils literal notranslate"><span class="pre">Point.is_valid()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.Point.pretty_print"><code class="docutils literal notranslate"><span class="pre">Point.pretty_print()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.Point.random"><code class="docutils literal notranslate"><span class="pre">Point.random()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.Point.scalar_multiply"><code class="docutils literal notranslate"><span class="pre">Point.scalar_multiply()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.Point.serialize"><code class="docutils literal notranslate"><span class="pre">Point.serialize()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
   <div>
     <h4>Previous topic</h4>
     <p class="topless"><a href="out_point.html"
