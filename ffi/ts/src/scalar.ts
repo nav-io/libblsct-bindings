@@ -59,9 +59,9 @@ export class Scalar extends ManagedObj {
    */
   static random(): Scalar {
     const rv = genRandomScalar()
-    const x = Scalar.fromObj(rv.value)
+    const s = Scalar.fromObj(rv.value)
     freeObj(rv)
-    return x
+    return s
   }
 
   /** Converts the scalar to an integer.

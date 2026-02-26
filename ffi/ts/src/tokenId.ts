@@ -1,12 +1,12 @@
 import {
   castToTokenId,
   deserializeTokenId,
+  freeObj,
   genDefaultTokenId,
   genTokenId,
   genTokenIdWithSubid,
   getTokenIdSubid,
   getTokenIdToken,
-  freeObj,
   serializeTokenId,
 } from './blsct'
 
@@ -39,9 +39,9 @@ export class TokenId extends ManagedObj {
    */
   static default(): TokenId {
     const rv = genDefaultTokenId()
-    const tokenId = TokenId.fromObj(rv.value)
+    const t = TokenId.fromObj(rv.value)
     freeObj(rv)
-    return tokenId
+    return t
   }
 
   /** Generates a `TokenId` from the provided token.
@@ -51,9 +51,9 @@ export class TokenId extends ManagedObj {
    */
   static fromToken(token: number): TokenId {
     const rv = genTokenId(token)
-    const tokenId = TokenId.fromObj(rv.value)
+    const t = TokenId.fromObj(rv.value)
     freeObj(rv)
-    return tokenId
+    return t
   }
 
   /** Generates a `TokenId` from the provided token and subid.
@@ -64,9 +64,9 @@ export class TokenId extends ManagedObj {
    */
   static fromTokenAndSubid(token: number, subid: number): TokenId {
     const rv = genTokenIdWithSubid(token, subid)
-    const tokenId = TokenId.fromObj(rv.value)
+    const t = TokenId.fromObj(rv.value)
     freeObj(rv)
-    return tokenId
+    return t
   }
 
   /** Returns the token number of the `TokenId`.

@@ -68,9 +68,9 @@ export class Point extends ManagedObj {
    */
   static random(): Point {
     const rv = genRandomPoint()
-    const x = Point.fromObj(rv.value)
+    const p = Point.fromObj(rv.value)
     freeObj(rv)
-    return x
+    return p
   }
 
   /** Returns the base point of the BLS12-381 G1 curve.
@@ -78,9 +78,9 @@ export class Point extends ManagedObj {
    */
   static base(): Point {
     const rv = genBasePoint()
-    const x = Point.fromObj(rv.value)
+    const p = Point.fromObj(rv.value)
     freeObj(rv)
-    return x
+    return p
   }
 
   /**

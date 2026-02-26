@@ -112,25 +112,22 @@ export class CTx extends ManagedObj {
     deleteTxOutVec(txOutVec)
 
     if (rv.result === BLSCT_IN_AMOUNT_ERROR) {
-      const msg = `Failed to build transaction. txIns[${rv.in_amount_err_index}] has an invalid amount`
       freeObj(rv)
-      throw new Error(msg)
+      throw new Error(`Failed to build transaction. txIns[${rv.in_amount_err_index}] has an invalid amount`)
     }
     if (rv.result === BLSCT_OUT_AMOUNT_ERROR) {
-      const msg = `Failed to build transaciton. tx_outs[${rv.out_amount_err_index}] has an invalid amount`
       freeObj(rv)
-      throw new Error(msg)
+      throw new Error(`Failed to build transaciton. tx_outs[${rv.out_amount_err_index}] has an invalid amount`)
     }
 
     if (rv.result !== 0) {
-      const msg = `building tx failed. Error code = ${rv.result}`
       freeObj(rv)
-      throw new Error(msg)
+      throw new Error(`building tx failed. Error code = ${rv.result}`)
     }
 
-    const obj = rv.ctx
+    const ctx = CTx.fromObjAndSize(rv.ctx, 0)
     freeObj(rv)
-    return CTx.fromObjAndSize(obj, 0)
+    return ctx
   }
 
   override value(): any {

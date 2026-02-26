@@ -53,9 +53,11 @@ export class DoublePublicKey extends ManagedObj {
 
       const rv = genDoublePubKey(pk1.value(), pk2.value())
       if (rv.result !== 0) {
+        freeObj(rv)
         throw new Error(`Failed to generate DoublePublicKey: ${rv.result}`)
       }
       super(rv.value)
+      freeObj(rv)
     }
   }
 

@@ -65,9 +65,9 @@ export class SubAddr extends ManagedObj {
     dpk: DoublePublicKey,
   ): SubAddr {
     const rv = dpkToSubAddr(dpk.value())
-    const inst = new SubAddr(rv.value)
+    const sa = new SubAddr(rv.value)
     freeObj(rv)
-    return inst
+    return sa
   }
 
   toDoublePublicKey(): DoublePublicKey {

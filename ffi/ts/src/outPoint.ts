@@ -38,9 +38,9 @@ export class OutPoint extends ManagedObj {
     ctxId: CTxId,
   ) {
     const rv = genOutPoint(ctxId.serialize())
-    const obj = rv.value
+    const op = new OutPoint(rv.value)
     freeObj(rv)
-    return new OutPoint(obj)
+    return op
   }
 
   override value(): any {

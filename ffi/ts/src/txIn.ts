@@ -82,14 +82,12 @@ export class TxIn extends ManagedObj {
       isRbf
     )
     if (rv.result !== 0) {
-      const msg = `Failed to build TxIn. Error code = ${rv.result}`
       freeObj(rv)
-      throw new Error(msg)
+      throw new Error(`Failed to build TxIn. Error code = ${rv.result}`)
     }
     const x = new TxIn(rv.value)
     x.objSize = rv.value_size
     freeObj(rv)
-
     return x
   }
 

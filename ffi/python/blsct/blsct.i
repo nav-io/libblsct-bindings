@@ -132,6 +132,14 @@ export enum TxOutputType {
     StakedCommitment
 };
 
+// Prevent SWIG from generating C++ delete destructors for these
+// malloc-allocated structs (malloc/delete mismatch is UB and corrupts
+// the heap on macOS). Memory is managed by free_obj / free_amounts_ret_val.
+%nodefaultdtor BlsctRetVal;
+%nodefaultdtor BlsctBoolRetVal;
+%nodefaultdtor BlsctAmountsRetVal;
+%nodefaultdtor BlsctCTxRetVal;
+
 typedef struct {
   BLSCT_RESULT result;
   void* value;

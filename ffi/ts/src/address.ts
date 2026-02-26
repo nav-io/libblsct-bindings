@@ -52,14 +52,12 @@ export class Address {
     const dpk = castToDpk(addrDpk.value())
     const rv = encodeAddress(dpk, blsctEncoding)
     if (rv.result !== 0) {
-      const msg = `Failed to encode address. Error code = ${rv.result}`
       freeObj(rv)
-      throw new Error(msg)
+      throw new Error(`Failed to encode address. Error code = ${rv.result}`)
     }
-    const addrCStr = getValueAsCStr(rv);
+    const result = getValueAsCStr(rv);
     freeObj(rv)
-
-    return addrCStr;
+    return result
   }
 
   /** Decode an address string to a `DoublePublicKey`.
@@ -71,14 +69,12 @@ export class Address {
   static decode(addrStr: string): DoublePublicKey {
     const rv = decodeAddress(addrStr)
     if (rv.result !== 0) {
-      const msg = `Failed to decode address. Error code = ${rv.result}`
       freeObj(rv)
-      throw new Error(msg)
+      throw new Error(`Failed to decode address. Error code = ${rv.result}`)
     }
-    const addrDpk = DoublePublicKey.fromObj(rv.value)
+    const dpk = DoublePublicKey.fromObj(rv.value)
     freeObj(rv)
-
-    return addrDpk
+    return dpk
   }
 }
 

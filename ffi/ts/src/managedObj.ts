@@ -71,16 +71,12 @@ if (typeof process !== 'undefined' && process.on) {
 
 const finalizer = new FinalizationRegistry(
   (fi: FinalizerInfo) => {
-    // Skip finalization during shutdown to prevent crashes
-    // The OS will reclaim all memory anyway when the process exits
     if (isShuttingDown) {
       return
     }
     if (fi.obj) {
       if (fi.deleteMethod) {
         fi.deleteMethod()
-      } else {
-        freeObj(fi.obj)
       }
       fi.obj = undefined
     }
@@ -200,9 +196,7 @@ export abstract class ManagedObj {
     }
     const rv = deserializer(hex)
     if (rv.result !== 0) {
-      const msg = `Deserialization failed. Error code = ${rv.result}`
-      freeObj(rv)
-      throw new Error(msg)
+      throw new Error(`Deserialization failed. Error code = ${rv.result}`)
     }
     const x = new this(rv.value)
     x.objSize = rv.value_size

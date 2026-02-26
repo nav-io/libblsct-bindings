@@ -51,9 +51,11 @@ export class PublicKey extends ManagedObj {
     } else {
       const rv = genRandomPublicKey()
       if (rv.result !== 0) {
+        freeObj(rv)
         throw new Error('Failed to generate random PublicKey')
       }
       super(rv.value)
+      freeObj(rv)
     }
   }
 

@@ -62,18 +62,17 @@ export class CTxOut {
   getVectorPredicate(): string {
     const rv = getCTxOutVectorPredicate(this.obj)
     if (rv.result != 0) {
-      const msg = `Failed to get vector predicate. Error code = ${rv.result}`
       freeObj(rv)
-      throw new Error(msg)
+      throw new Error(`Failed to get vector predicate. Error code = ${rv.result}`)
     }
     if (rv.value_size !== 0) {
       freeObj(rv)
       return ""
     }
     const buf = castToUint8_tPtr(rv.value)
-    const hex = toHex(buf, rv.value_size)
+    const result = toHex(buf, rv.value_size)
     freeObj(rv)
-    return hex 
+    return result
   }
 
   /** Returns the spending key associated with the transaction output.
@@ -108,10 +107,9 @@ export class CTxOut {
       return this.rangeProofCache
     }
     const rv = getCTxOutRangeProof(this.obj)
-    const x = RangeProof.fromObjAndSize(rv.value, rv.value_size)
+    this.rangeProofCache = RangeProof.fromObjAndSize(rv.value, rv.value_size)
     freeObj(rv)
-    this.rangeProofCache = x
-    return x
+    return this.rangeProofCache
   }
 
   /** Returns the view tag associated with the view of the transaction output.

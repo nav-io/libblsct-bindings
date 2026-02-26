@@ -8,9 +8,9 @@ import {
   castToScalar,
   createRangeProofVec,
   createUint64Vec,
+  deleteAmountsRetVal,
   deserializeRangeProof,
   deleteAmountRecoveryReqVec,
-  deleteAmountsRetVal,
   deleteRangeProofVec,
   deleteUint64Vec,
   freeObj,
@@ -102,16 +102,15 @@ export class RangeProof extends ManagedObj {
     deleteUint64Vec(vec)
 
     if (rv.result !== 0) {
-      const msg = `Building range proof failed. Error code = ${rv.result}`
       freeObj(rv)
-      throw new Error(msg)
+      throw new Error(`Building range proof failed. Error code = ${rv.result}`)
     }
-    const x = RangeProof.fromObjAndSize(
+    const rp = RangeProof.fromObjAndSize(
       rv.value,
       rv.value_size,
     )
     freeObj(rv)
-    return x
+    return rp
   }
 
   /** Verifies a list of range proofs.
@@ -125,13 +124,14 @@ export class RangeProof extends ManagedObj {
     }
     
     const rv = verifyRangeProofs(vec)
-    if (rv.result !== 0) {
-      const msg = `Verifying range proofs failed. Error code = ${rv.result}`
-      freeObj(rv)
-      throw new Error(msg)
-    }
     deleteRangeProofVec(vec)
-    return rv.value
+    if (rv.result !== 0) {
+      freeObj(rv)
+      throw new Error(`Verifying range proofs failed. Error code = ${rv.result}`)
+    }
+    const result = rv.value
+    freeObj(rv)
+    return result
   }
 
   /** Recovers amounts from a list of `AmountRecoveryReq` instances.
@@ -155,12 +155,11 @@ export class RangeProof extends ManagedObj {
     deleteAmountRecoveryReqVec(reqVec)
 
     if (rv.result !== 0) {
-      const msg = `Recovering amount failed. Error code = ${rv.result}`
       deleteAmountsRetVal(rv)
-      throw new Error(msg)
+      throw new Error(`Recovering amount failed. Error code = ${rv.result}`)
     } 
 
-    let results: AmountRecoveryRes[] = []
+    const results: AmountRecoveryRes[] = []
     const size = getAmountRecoveryResultSize(rv.value)
 
     for (let i=0; i<size; ++i) {
@@ -169,13 +168,7 @@ export class RangeProof extends ManagedObj {
       const gammaPtr = getAmountRecoveryResultGamma(rv.value, i)
       const gamma = isSucc ? serializeScalar(castToScalar(gammaPtr)) : '0'
       const msg = getAmountRecoveryResultMsg(rv.value, i)
-      const x = new AmountRecoveryRes(
-        isSucc, 
-        amount,
-        gamma,
-        msg,
-      )
-      results.push(x)
+      results.push(new AmountRecoveryRes(isSucc, amount, gamma, msg))
     }
     
     deleteAmountsRetVal(rv)
