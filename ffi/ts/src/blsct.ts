@@ -440,6 +440,12 @@ export const getAmountRecoveryResultMsg = (
 ): string => {
   return blsct.get_amount_recovery_result_msg(req, i)
 }
+export const getAmountRecoveryResultGamma = (
+  req: any,
+  i: number,
+): any => {
+  return blsct.get_amount_recovery_result_gamma(req, i)
+}
 export const getAmountRecoveryResultSize = (
   resVec: any,
 ): number => {
@@ -601,7 +607,7 @@ export const fromTxKeyToViewKey = (txKey: any): any => {
 // tx in
 export const buildTxIn = (
   amount: number,
-  gamma: number,
+  gamma: any,
   spendingKey: any,
   tokenId: any,
   outPoint: any,
@@ -623,8 +629,8 @@ export const getTxInAmount = (obj: any): bigint => {
   return BigInt(blsct.get_tx_in_amount(obj))
 }
 
-export const getTxInGamma = (obj: any): bigint => {
-  return BigInt(blsct.get_tx_in_gamma(obj))
+export const getTxInGamma = (obj: any): any => {
+  return blsct.get_tx_in_gamma(obj)
 }
 
 export const getTxInSpendingKey = (obj: any): any => {

@@ -1065,6 +1065,11 @@ export function getAmountRecoveryResultMsg(req: unknown, i: number): string {
   return str;
 }
 
+export function getAmountRecoveryResultGamma(req: unknown, i: number): unknown {
+  const module = getBlsctModule();
+  return module._get_amount_recovery_result_gamma(req as number, i);
+}
+
 export function deleteAmountsRetVal(rv: BlsctAmountsRetVal): void {
   const module = getBlsctModule();
   // In WASM, we need the struct pointer (stored in _structPtr), not the value pointer
@@ -1110,7 +1115,7 @@ export function deleteTxOutVec(txOutVec: unknown): void {
 
 export function buildTxIn(
   amount: number,
-  gamma: number,
+  gamma: unknown,
   spendingKey: unknown,
   tokenId: unknown,
   outPoint: unknown,
@@ -1120,7 +1125,7 @@ export function buildTxIn(
   const module = getBlsctModule();
   const resultPtr = module._build_tx_in(
     BigInt(amount),
-    BigInt(gamma),
+    gamma as number,
     spendingKey as number,
     tokenId as number,
     outPoint as number,
@@ -1309,7 +1314,7 @@ export function getTxInAmount(obj: unknown): bigint {
   return module._get_tx_in_amount(obj as number);
 }
 
-export function getTxInGamma(obj: unknown): bigint {
+export function getTxInGamma(obj: unknown): unknown {
   const module = getBlsctModule();
   return module._get_tx_in_gamma(obj as number);
 }

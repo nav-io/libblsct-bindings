@@ -190,6 +190,10 @@ export uint64_t get_amount_recovery_result_amount(
     void* vp_amt_recovery_req_vec,
     size_t idx
 );
+export const BlsctScalar* get_amount_recovery_result_gamma(
+    void* vp_amt_recovery_req_vec,
+    size_t idx
+);
 export const char* get_amount_recovery_result_msg(
     void* vp_amt_recovery_req_vec,
     size_t idx
@@ -444,7 +448,7 @@ export BlsctRetVal* deserialize_token_id(const char* hex);
 // tx in
 export BlsctRetVal* build_tx_in(
     const uint64_t amount,
-    const uint64_t gamma,
+    const BlsctScalar* gamma,
     const BlsctScalar* spendingKey,
     const BlsctTokenId* tokenId,
     const BlsctOutPoint* outPoint,
@@ -453,7 +457,7 @@ export BlsctRetVal* build_tx_in(
 );
 
 export uint64_t get_tx_in_amount(const BlsctTxIn* tx_in);
-export uint64_t get_tx_in_gamma(const BlsctTxIn* tx_in);
+export const BlsctScalar* get_tx_in_gamma(const BlsctTxIn* tx_in);
 export const BlsctScalar* get_tx_in_spending_key(const BlsctTxIn* tx_in);
 export const BlsctTokenId* get_tx_in_token_id(const BlsctTxIn* tx_in);
 export const BlsctOutPoint* get_tx_in_out_point(const BlsctTxIn* tx_in);

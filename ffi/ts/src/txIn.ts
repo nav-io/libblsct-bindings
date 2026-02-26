@@ -28,7 +28,7 @@ import { TokenId } from './tokenId'
  * const cTxIdHex = randomBytes(CTX_ID_SIZE).toString('hex')
  * const cTxId = CTxId.deserialize(cTxIdHex)
  * const amount = 123
- * const gamma = 100
+ * const gamma = Scalar.random()
  * const s = Scalar.random()
  * const ck = new ChildKey(s)
  * const txk = ck.toTxKey()
@@ -37,7 +37,7 @@ import { TokenId } from './tokenId'
  * const outPoint = OutPoint.generate(cTxId)
  * const txIn = TxIn.generate(amount, gamma, spendingKey, tokenId, outPoint)
  * txIn.getAmount() // 123
- * txIn.getGamma() // 100
+ * txIn.getGamma()
  * txIn.getSpendingKey()
  * txIn.getTokenId()
  * txIn.getOutPoint()
@@ -65,7 +65,7 @@ export class TxIn extends ManagedObj {
    */
   static generate(
     amount: number,
-    gamma: number,
+    gamma: Scalar,
     spendingKey: Scalar,
     tokenId: TokenId,
     outPoint: OutPoint,
@@ -74,7 +74,7 @@ export class TxIn extends ManagedObj {
   ): TxIn {
     const rv = buildTxIn(
       amount,
-      gamma,
+      gamma.value(),
       spendingKey.value(),
       tokenId.value(),
       outPoint.value(),
@@ -105,10 +105,11 @@ export class TxIn extends ManagedObj {
   }
 
   /** Returns the gamma of the transaction input.
-   * @returns The gamma of the transaction input as bigint.
+   * @returns The gamma of the transaction input.
    */
-  getGamma(): bigint {
-    return getTxInGamma(this.value())
+  getGamma(): Scalar {
+    const obj = getTxInGamma(this.value())
+    return Scalar.fromObj(obj)
   }
 
   /** Returns the spending key associated with the transaction input.

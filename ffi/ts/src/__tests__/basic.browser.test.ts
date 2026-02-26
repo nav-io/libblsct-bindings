@@ -315,7 +315,7 @@ describe('Browser WASM Module', () => {
       const outpoint = blsctBrowser.OutPoint.generate(ctxId);
       const spendingKey = blsctBrowser.Scalar.random();
       const amount = 1000;  // TxIn.generate uses number, not BigInt
-      const gamma = 1;  // gamma is a number
+      const gamma = new blsctBrowser.Scalar(1);
       const tokenId = blsctBrowser.TokenId.default();
       const rbf = false;
       

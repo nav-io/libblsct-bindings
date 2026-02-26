@@ -18,7 +18,7 @@ const WASM_DEBUG = process.env.WASM_DEBUG === '1';
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = '4704c8ae116a107c902ef33e11a8c564cd68efc3';
+const MASTER_SHA = 'd0dab8fdcaa9a0574b4a9318e2027a0fb89f4cd6';
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core';
@@ -370,6 +370,7 @@ const EXPORTED_FUNCTIONS = [
   '_get_amount_recovery_result_size',
   '_get_amount_recovery_result_is_succ',
   '_get_amount_recovery_result_amount',
+  '_get_amount_recovery_result_gamma',
   '_get_amount_recovery_result_msg',
 
   // Out point operations

@@ -4,20 +4,24 @@
 export class AmountRecoveryRes {
   isSucc: boolean
   amount: bigint
+  gamma: string
   msg: string
 
   /** Constructs a new `AmountRecoveryRes` instance.
    * @param isSucc - Indicates whether the recovery was successful.
    * @param amount - The recovered amount as bigint.
+   * @param gamma - The recovered gamma scalar serialized as a hexadecimal string.
    * @param msg - The recovered message.
    */
   constructor(
     isSucc: boolean,
     amount: bigint,
+    gamma: string,
     msg: string,
   ) {
     this.isSucc = isSucc
     this.amount = amount
+    this.gamma = gamma
     this.msg = msg
   }
 
@@ -25,7 +29,7 @@ export class AmountRecoveryRes {
    * @returns a string representation of the `AmountRecoveryRes`.
    */
   toString(): string {
-    return `${this.constructor.name}(${this.isSucc}, ${this.amount}, ${this.msg})`
+    return `${this.constructor.name}(${this.isSucc}, ${this.amount}, ${this.gamma}, ${this.msg})`
   }
 
   serialize(): string {
@@ -53,6 +57,7 @@ export class AmountRecoveryRes {
       typeof obj !== 'object' ||
       typeof obj.isSucc !== 'boolean' ||
       (typeof obj.amount !== 'number' && typeof obj.amount !== 'string') ||
+      typeof obj.gamma !== 'string' ||
       typeof obj.msg !== 'string'
     ) {
       throw new Error(`Deserialize object is not AmountRecoveryRes: ${hex}`)
@@ -63,6 +68,7 @@ export class AmountRecoveryRes {
     return new AmountRecoveryRes(
       obj.isSucc,
       amount,
+      obj.gamma,
       obj.msg,
     )
   }
