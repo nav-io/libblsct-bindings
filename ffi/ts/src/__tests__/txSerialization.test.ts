@@ -29,7 +29,7 @@ const genTxIn = (
 
   return TxIn.generate(
     amount,
-    gamma,
+    new Scalar(gamma),
     spendingKey,
     tokenId,
     outPoint,
@@ -90,7 +90,7 @@ test('TxIn: round-trip preserves amount', () => {
 test('TxIn: round-trip preserves gamma', () => {
   const a = genTxIn(100, 789)
   const b = TxIn.deserialize(a.serialize())
-  expect(b.getGamma()).toBe(a.getGamma())
+  expect(b.getGamma().serialize()).toBe(a.getGamma().serialize())
 })
 
 test('TxIn: round-trip preserves spending key', () => {
@@ -361,7 +361,7 @@ test('CTx: serialize with multiple inputs', () => {
     const outPoint = OutPoint.generate(ctxId)
     return TxIn.generate(
       outAmount + 3 * defaultFee,
-      100,
+      new Scalar(100),
       Scalar.random(),
       tokenId,
       outPoint,
@@ -401,7 +401,7 @@ test('CTx: serialize with multiple outputs', () => {
   const outPoint = OutPoint.generate(ctxId)
   const txIn = TxIn.generate(
     outAmount * 2 + 3 * defaultFee,
-    100,
+    new Scalar(100),
     Scalar.random(),
     tokenId,
     outPoint,

@@ -18,7 +18,7 @@ const genTxIn = (): TxIn => {
 
   return TxIn.generate(
     123,
-    456,
+    new Scalar(456),
     spendingKey,
     tokenId,
     outPoint,

@@ -100,6 +100,7 @@ export interface BlsctWasmModule {
   _get_amount_recovery_result_size(vec: number): number;
   _get_amount_recovery_result_is_succ(vec: number, i: number): boolean;
   _get_amount_recovery_result_amount(vec: number, i: number): bigint;
+  _get_amount_recovery_result_gamma(vec: number, i: number): number;
   _get_amount_recovery_result_msg(vec: number, i: number): number;
   
   // Out point operations
@@ -114,7 +115,7 @@ export interface BlsctWasmModule {
   _create_tx_out_vec(): number;
   _add_to_tx_out_vec(vec: number, txOut: number): void;
   _delete_tx_out_vec(vec: number): void;
-  _build_tx_in(amount: bigint, gamma: bigint, spendingKey: number, tokenId: number, outPoint: number, stakedCommitment: boolean, rbf: boolean): number;
+  _build_tx_in(amount: bigint, gamma: number, spendingKey: number, tokenId: number, outPoint: number, stakedCommitment: boolean, rbf: boolean): number;
   _build_tx_out(dest: number, amount: bigint, memo: number, tokenId: number, outputType: number, minStake: bigint, subtractFeeFromAmount: boolean, blindingKey: number): number;
   _build_ctx(txIns: number, txOuts: number): number;
   _get_ctx_id(ctx: number): number;
@@ -153,7 +154,7 @@ export interface BlsctWasmModule {
   
   // TxIn accessors
   _get_tx_in_amount(txIn: number): bigint;
-  _get_tx_in_gamma(txIn: number): bigint;
+  _get_tx_in_gamma(txIn: number): number;
   _get_tx_in_spending_key(txIn: number): number;
   _get_tx_in_token_id(txIn: number): number;
   _get_tx_in_out_point(txIn: number): number;

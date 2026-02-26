@@ -61,7 +61,7 @@ export const genCTx = (
   const ctxId = CTxId.deserialize(ctxIdHex)
 
   const outPoint = OutPoint.generate(ctxId)
-  const gamma = 100
+  const gamma = new Scalar(100)
   const spendingKey = Scalar.random()
   const tokenId = TokenId.default()
   const txIn = TxIn.generate(

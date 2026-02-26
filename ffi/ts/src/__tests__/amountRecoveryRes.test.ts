@@ -1,25 +1,28 @@
 import { AmountRecoveryRes } from '../amountRecoveryRes'
 
 const genAmountRecoveryRes = (): AmountRecoveryRes => {
-  return new AmountRecoveryRes(true, 12345n, 'test_message')
+  return new AmountRecoveryRes(true, 12345n, 'test_gamma', 'test_message')
 }
 
 test('constructor', () => {
   const isSucc = true
   const amount = 999n
+  const gamma = 'abc123'
   const msg = 'my_message'
-  const res = new AmountRecoveryRes(isSucc, amount, msg)
+  const res = new AmountRecoveryRes(isSucc, amount, gamma, msg)
 
   expect(res.isSucc).toBe(isSucc)
   expect(res.amount).toBe(amount)
+  expect(res.gamma).toBe(gamma)
   expect(res.msg).toBe(msg)
 })
 
 test('constructor with failed recovery', () => {
-  const res = new AmountRecoveryRes(false, 0n, '')
+  const res = new AmountRecoveryRes(false, 0n, '0', '')
 
   expect(res.isSucc).toBe(false)
   expect(res.amount).toBe(0n)
+  expect(res.gamma).toBe('0')
   expect(res.msg).toBe('')
 })
 
@@ -30,6 +33,7 @@ test('toString', () => {
   expect(str).toContain('AmountRecoveryRes')
   expect(str).toContain('true')
   expect(str).toContain('12345')
+  expect(str).toContain('test_gamma')
   expect(str).toContain('test_message')
 })
 
@@ -50,32 +54,34 @@ test('serialize and deserialize', () => {
 
   expect(a.isSucc).toBe(b.isSucc)
   expect(a.amount).toBe(b.amount)
+  expect(a.gamma).toBe(b.gamma)
   expect(a.msg).toBe(b.msg)
   expect(a_hex).toBe(b_hex)
 })
 
 test('deserialize with various amounts', () => {
   const testCases = [
-    { isSucc: true, amount: 0n, msg: 'zero' },
-    { isSucc: true, amount: 1n, msg: 'one' },
-    { isSucc: true, amount: 999999n, msg: 'large' },
-    { isSucc: false, amount: 0n, msg: 'failed' },
+    { isSucc: true, amount: 0n, gamma: '0', msg: 'zero' },
+    { isSucc: true, amount: 1n, gamma: '1', msg: 'one' },
+    { isSucc: true, amount: 999999n, gamma: 'beef', msg: 'large' },
+    { isSucc: false, amount: 0n, gamma: '0', msg: 'failed' },
   ]
 
   for (const tc of testCases) {
-    const res = new AmountRecoveryRes(tc.isSucc, tc.amount, tc.msg)
+    const res = new AmountRecoveryRes(tc.isSucc, tc.amount, tc.gamma, tc.msg)
     const hex = res.serialize()
     const deserialized = res.deserialize(hex)
 
     expect(deserialized.isSucc).toBe(tc.isSucc)
     expect(deserialized.amount).toBe(tc.amount)
+    expect(deserialized.gamma).toBe(tc.gamma)
     expect(deserialized.msg).toBe(tc.msg)
   }
 })
 
 test('deserialize with special characters in message', () => {
   const msg = 'special chars: !@#$%^&*()_+-={}[]|:";\'<>?,./'
-  const res = new AmountRecoveryRes(true, 123n, msg)
+  const res = new AmountRecoveryRes(true, 123n, 'test_gamma', msg)
   const hex = res.serialize()
   const deserialized = res.deserialize(hex)
 
@@ -84,7 +90,7 @@ test('deserialize with special characters in message', () => {
 
 test('deserialize with unicode in message', () => {
   const msg = 'unicode: 你好世界 🚀'
-  const res = new AmountRecoveryRes(true, 456n, msg)
+  const res = new AmountRecoveryRes(true, 456n, 'test_gamma', msg)
   const hex = res.serialize()
   const deserialized = res.deserialize(hex)
 
@@ -110,7 +116,7 @@ test('deserialize with invalid JSON structure throws error', () => {
 
 test('deserialize with missing fields throws error', () => {
   const res = genAmountRecoveryRes()
-  const incompleteObj = { isSucc: true, amount: 100 } // missing msg
+  const incompleteObj = { isSucc: true, amount: 100, gamma: 'abc' } // missing msg
   const hex = Buffer.from(JSON.stringify(incompleteObj), 'utf-8').toString('hex')
 
   expect(() => {
@@ -120,7 +126,7 @@ test('deserialize with missing fields throws error', () => {
 
 test('deserialize with wrong types throws error', () => {
   const res = genAmountRecoveryRes()
-  const wrongTypes = { isSucc: 'true', amount: '100', msg: 123 }
+  const wrongTypes = { isSucc: 'true', amount: '100', gamma: 123, msg: 123 }
   const hex = Buffer.from(JSON.stringify(wrongTypes), 'utf-8').toString('hex')
 
   expect(() => {
