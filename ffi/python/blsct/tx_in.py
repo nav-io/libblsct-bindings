@@ -77,9 +77,7 @@ class TxIn(ManagedObj, Serializable):
   def get_gamma(self) -> int:
     """Get the gamma value of the transaction input."""
     gamma_obj = blsct.get_tx_in_gamma(self.value())
-    gamma = blsct.scalar_to_uint64(gamma_obj)
-    blsct.free_obj(gamma_obj)
-    return gamma
+    return blsct.scalar_to_uint64(gamma_obj)
 
   def get_spending_key(self) -> Scalar:
     """Get the spending key of the transaction input."""
