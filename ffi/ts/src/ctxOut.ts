@@ -65,7 +65,7 @@ export class CTxOut {
       freeObj(rv)
       throw new Error(`Failed to get vector predicate. Error code = ${rv.result}`)
     }
-    if (rv.value_size !== 0) {
+    if (rv.value_size === 0) {
       freeObj(rv)
       return ""
     }
@@ -119,4 +119,3 @@ export class CTxOut {
     return getCTxOutViewTag(this.obj)
   }
 }
-

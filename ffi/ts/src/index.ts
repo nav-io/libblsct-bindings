@@ -18,8 +18,13 @@ export * from './signature'
 export * from './subAddr'
 export * from './subAddrId'
 export * from './tokenId'
+export * from './tokenInfo'
+export * from './tokenPredicate'
 export * from './txIn'
 export * from './txOut'
+export * from './unsignedInput'
+export * from './unsignedOutput'
+export * from './unsignedTransaction'
 export * from './viewTag'
 
 export * from './keys/childKey'
@@ -29,4 +34,3 @@ export * from './keys/publicKey'
 export * from './keys/txKey'
 
 export * from './blsct'
-

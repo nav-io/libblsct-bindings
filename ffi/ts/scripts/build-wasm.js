@@ -18,7 +18,7 @@ const WASM_DEBUG = process.env.WASM_DEBUG === '1';
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = 'd0dab8fdcaa9a0574b4a9318e2027a0fb89f4cd6';
+const MASTER_SHA = '5c7ca78e7a3ba10e49b2a94e92a11ba88f92fb7e';
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core';
@@ -254,6 +254,7 @@ const BLSCT_SOURCES = [
   'blsct/wallet/txfactory_base.cpp',
   'blsct/wallet/txfactory_global.cpp',
   'blsct/wallet/txfactory.cpp',
+  'blsct/wallet/unsigned_transaction.cpp',
   'blsct/wallet/verification.cpp',
 ];
 
@@ -332,6 +333,29 @@ const EXPORTED_FUNCTIONS = [
   '_get_token_id_subid',
   '_serialize_token_id',
   '_deserialize_token_id',
+
+  // Generic string map helpers
+  '_create_string_map',
+  '_add_to_string_map',
+  '_delete_string_map',
+  '_get_string_map_size',
+  '_get_string_map_key_at',
+  '_get_string_map_value_at',
+
+  // Token info helpers
+  '_build_token_info',
+  '_delete_token_info',
+  '_serialize_token_info',
+  '_deserialize_token_info',
+  '_get_token_info_type',
+  '_get_token_info_public_key',
+  '_get_token_info_total_supply',
+  '_get_token_info_metadata',
+
+  // Collection token hash and key derivation
+  '_calc_collection_token_hash',
+  '_derive_collection_token_key',
+  '_derive_collection_token_public_key',
 
   // Sub address operations
   '_gen_sub_addr_id',
@@ -424,6 +448,21 @@ const EXPORTED_FUNCTIONS = [
   '_get_ctx_out_range_proof',
   '_get_ctx_out_view_tag',
 
+  // Predicate helpers
+  '_are_vector_predicate_equal',
+  '_serialize_vector_predicate',
+  '_deserialize_vector_predicate',
+  '_get_vector_predicate_type',
+  '_build_create_token_predicate',
+  '_build_mint_token_predicate',
+  '_build_mint_nft_predicate',
+  '_get_create_token_predicate_token_info',
+  '_get_mint_token_predicate_public_key',
+  '_get_mint_token_predicate_amount',
+  '_get_mint_nft_predicate_public_key',
+  '_get_mint_nft_predicate_nft_id',
+  '_get_mint_nft_predicate_metadata',
+
   // TxIn accessors
   '_get_tx_in_amount',
   '_get_tx_in_gamma',
@@ -442,6 +481,30 @@ const EXPORTED_FUNCTIONS = [
   '_get_tx_out_min_stake',
   '_get_tx_out_subtract_fee_from_amount',
   '_get_tx_out_blinding_key',
+
+  // Unsigned input/output/transaction helpers
+  '_build_unsigned_input',
+  '_delete_unsigned_input',
+  '_serialize_unsigned_input',
+  '_deserialize_unsigned_input',
+  '_build_unsigned_output',
+  '_build_unsigned_create_token_output',
+  '_build_unsigned_mint_token_output',
+  '_build_unsigned_mint_nft_output',
+  '_delete_unsigned_output',
+  '_serialize_unsigned_output',
+  '_deserialize_unsigned_output',
+  '_create_unsigned_transaction',
+  '_add_unsigned_transaction_input',
+  '_add_unsigned_transaction_output',
+  '_set_unsigned_transaction_fee',
+  '_get_unsigned_transaction_fee',
+  '_get_unsigned_transaction_inputs_size',
+  '_get_unsigned_transaction_outputs_size',
+  '_delete_unsigned_transaction',
+  '_serialize_unsigned_transaction',
+  '_deserialize_unsigned_transaction',
+  '_sign_unsigned_transaction',
 
   // Signature operations
   '_sign_message',
@@ -765,4 +828,3 @@ async function main() {
 }
 
 main();
-

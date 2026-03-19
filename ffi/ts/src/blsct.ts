@@ -10,6 +10,7 @@ if (!blsct._initialized) {
 export const CTX_ID_SIZE = blsct.CTX_ID_SIZE
 export const POINT_SIZE = blsct.POINT_SIZE
 export const SCRIPT_SIZE = blsct.SCRIPT_SIZE
+export const UINT256_SIZE = blsct.UINT256_SIZE
 export const BLSCT_IN_AMOUNT_ERROR = blsct.BLSCT_IN_AMOUNT_ERROR
 export const BLSCT_OUT_AMOUNT_ERROR = blsct.BLSCT_OUT_AMOUNT_ERROR
 
@@ -23,6 +24,20 @@ export enum BlsctChain {
 export enum TxOutputType {
   Normal,
   StakedCommitment,
+}
+
+export enum BlsctTokenType {
+  BlsctToken = 0,
+  BlsctNft = 1,
+}
+
+export enum BlsctPredicateType {
+  BlsctCreateTokenPredicateType = 0,
+  BlsctMintTokenPredicateType = 1,
+  BlsctMintNftPredicateType = 2,
+  BlsctPayFeePredicateType = 3,
+  BlsctDataPredicateType = 4,
+  BlsctInvalidPredicateType = 255,
 }
 
 export interface BlsctRetVal {
@@ -788,6 +803,222 @@ export const castToTxOut = (obj: any): any => {
 export const castToUint8_tPtr = (obj: any): any => {
   return blsct.cast_to_uint8_t_ptr(obj)
 }
+export const castToUint256 = (obj: any): any => {
+  return blsct.cast_to_uint256(obj)
+}
+export const castToVectorPredicate = (obj: any): any => {
+  return blsct.cast_to_vector_predicate(obj)
+}
+
+// generic string map helpers
+export const createStringMap = (): any => {
+  return blsct.create_string_map()
+}
+export const addToStringMap = (stringMap: any, key: string, value: string): void => {
+  blsct.add_to_string_map(stringMap, key, value)
+}
+export const deleteStringMap = (stringMap: any): void => {
+  blsct.delete_string_map(stringMap)
+}
+export const getStringMapSize = (stringMap: any): number => {
+  return blsct.get_string_map_size(stringMap)
+}
+export const getStringMapKeyAt = (stringMap: any, i: number): string => {
+  return blsct.get_string_map_key_at(stringMap, i)
+}
+export const getStringMapValueAt = (stringMap: any, i: number): string => {
+  return blsct.get_string_map_value_at(stringMap, i)
+}
+
+// token info helpers
+export const buildTokenInfo = (
+  type: BlsctTokenType,
+  publicKey: any,
+  metadata: any,
+  totalSupply: number
+): BlsctRetVal => {
+  return blsct.build_token_info(type, publicKey, metadata, totalSupply)
+}
+export const deleteTokenInfo = (tokenInfo: any): void => {
+  blsct.delete_token_info(tokenInfo)
+}
+export const serializeTokenInfo = (tokenInfo: any): string => {
+  return blsct.serialize_token_info(tokenInfo)
+}
+export const deserializeTokenInfo = (hex: string): BlsctRetVal => {
+  return blsct.deserialize_token_info(hex)
+}
+export const getTokenInfoType = (tokenInfo: any): BlsctTokenType => {
+  return blsct.get_token_info_type(tokenInfo)
+}
+export const getTokenInfoPublicKey = (tokenInfo: any): any => {
+  return blsct.get_token_info_public_key(tokenInfo)
+}
+export const getTokenInfoTotalSupply = (tokenInfo: any): bigint => {
+  return BigInt(blsct.get_token_info_total_supply(tokenInfo))
+}
+export const getTokenInfoMetadata = (tokenInfo: any): any => {
+  return blsct.get_token_info_metadata(tokenInfo)
+}
+
+// collection token hash and token key derivation
+export const calcCollectionTokenHash = (
+  metadata: any,
+  totalSupply: number
+): BlsctRetVal => {
+  return blsct.calc_collection_token_hash(metadata, totalSupply)
+}
+export const deriveCollectionTokenKey = (
+  masterTokenKey: any,
+  collectionTokenHash: any
+): BlsctRetVal => {
+  return blsct.derive_collection_token_key(masterTokenKey, collectionTokenHash)
+}
+export const deriveCollectionTokenPublicKey = (
+  masterTokenKey: any,
+  collectionTokenHash: any
+): any => {
+  return blsct.derive_collection_token_public_key(masterTokenKey, collectionTokenHash)
+}
+
+// vector predicate helpers
+export const areVectorPredicateEqual = (
+  a: any,
+  aSize: number,
+  b: any,
+  bSize: number
+): boolean => {
+  return blsct.are_vector_predicate_equal(a, aSize, b, bSize) === 1
+}
+export const serializeVectorPredicate = (predicate: any, size: number): string => {
+  return blsct.serialize_vector_predicate(predicate, size)
+}
+export const deserializeVectorPredicate = (hex: string): BlsctRetVal => {
+  return blsct.deserialize_vector_predicate(hex)
+}
+export const getVectorPredicateType = (predicate: any, size: number): BlsctPredicateType => {
+  return blsct.get_vector_predicate_type(predicate, size)
+}
+export const buildCreateTokenPredicate = (tokenInfo: any): BlsctRetVal => {
+  return blsct.build_create_token_predicate(tokenInfo)
+}
+export const buildMintTokenPredicate = (
+  tokenPublicKey: any,
+  amount: number
+): BlsctRetVal => {
+  return blsct.build_mint_token_predicate(tokenPublicKey, amount)
+}
+export const buildMintNftPredicate = (
+  tokenPublicKey: any,
+  nftId: number,
+  metadata: any
+): BlsctRetVal => {
+  return blsct.build_mint_nft_predicate(tokenPublicKey, nftId, metadata)
+}
+export const getCreateTokenPredicateTokenInfo = (predicate: any, size: number): BlsctRetVal => {
+  return blsct.get_create_token_predicate_token_info(predicate, size)
+}
+export const getMintTokenPredicatePublicKey = (predicate: any, size: number): any => {
+  return blsct.get_mint_token_predicate_public_key(predicate, size)
+}
+export const getMintTokenPredicateAmount = (predicate: any, size: number): bigint => {
+  return BigInt(blsct.get_mint_token_predicate_amount(predicate, size))
+}
+export const getMintNftPredicatePublicKey = (predicate: any, size: number): any => {
+  return blsct.get_mint_nft_predicate_public_key(predicate, size)
+}
+export const getMintNftPredicateNftId = (predicate: any, size: number): bigint => {
+  return BigInt(blsct.get_mint_nft_predicate_nft_id(predicate, size))
+}
+export const getMintNftPredicateMetadata = (predicate: any, size: number): any => {
+  return blsct.get_mint_nft_predicate_metadata(predicate, size)
+}
+
+// unsigned input/output/transaction helpers
+export const buildUnsignedInput = (txIn: any): BlsctRetVal => {
+  return blsct.build_unsigned_input(txIn)
+}
+export const deleteUnsignedInput = (unsignedInput: any): void => {
+  blsct.delete_unsigned_input(unsignedInput)
+}
+export const serializeUnsignedInput = (unsignedInput: any): string => {
+  return blsct.serialize_unsigned_input(unsignedInput)
+}
+export const deserializeUnsignedInput = (hex: string): BlsctRetVal => {
+  return blsct.deserialize_unsigned_input(hex)
+}
+
+export const buildUnsignedOutput = (txOut: any): BlsctRetVal => {
+  return blsct.build_unsigned_output(txOut)
+}
+export const buildUnsignedCreateTokenOutput = (
+  tokenKey: any,
+  tokenInfo: any
+): BlsctRetVal => {
+  return blsct.build_unsigned_create_token_output(tokenKey, tokenInfo)
+}
+export const buildUnsignedMintTokenOutput = (
+  dest: any,
+  amount: number,
+  blindingKey: any,
+  tokenKey: any,
+  tokenPublicKey: any
+): BlsctRetVal => {
+  return blsct.build_unsigned_mint_token_output(dest, amount, blindingKey, tokenKey, tokenPublicKey)
+}
+export const buildUnsignedMintNftOutput = (
+  dest: any,
+  blindingKey: any,
+  tokenKey: any,
+  tokenPublicKey: any,
+  nftId: number,
+  metadata: any
+): BlsctRetVal => {
+  return blsct.build_unsigned_mint_nft_output(dest, blindingKey, tokenKey, tokenPublicKey, nftId, metadata)
+}
+export const deleteUnsignedOutput = (unsignedOutput: any): void => {
+  blsct.delete_unsigned_output(unsignedOutput)
+}
+export const serializeUnsignedOutput = (unsignedOutput: any): string => {
+  return blsct.serialize_unsigned_output(unsignedOutput)
+}
+export const deserializeUnsignedOutput = (hex: string): BlsctRetVal => {
+  return blsct.deserialize_unsigned_output(hex)
+}
+
+export const createUnsignedTransaction = (): any => {
+  return blsct.create_unsigned_transaction()
+}
+export const addUnsignedTransactionInput = (unsignedTx: any, unsignedInput: any): void => {
+  blsct.add_unsigned_transaction_input(unsignedTx, unsignedInput)
+}
+export const addUnsignedTransactionOutput = (unsignedTx: any, unsignedOutput: any): void => {
+  blsct.add_unsigned_transaction_output(unsignedTx, unsignedOutput)
+}
+export const setUnsignedTransactionFee = (unsignedTx: any, fee: number): void => {
+  blsct.set_unsigned_transaction_fee(unsignedTx, fee)
+}
+export const getUnsignedTransactionFee = (unsignedTx: any): bigint => {
+  return BigInt(blsct.get_unsigned_transaction_fee(unsignedTx))
+}
+export const getUnsignedTransactionInputsSize = (unsignedTx: any): number => {
+  return blsct.get_unsigned_transaction_inputs_size(unsignedTx)
+}
+export const getUnsignedTransactionOutputsSize = (unsignedTx: any): number => {
+  return blsct.get_unsigned_transaction_outputs_size(unsignedTx)
+}
+export const deleteUnsignedTransaction = (unsignedTx: any): void => {
+  blsct.delete_unsigned_transaction(unsignedTx)
+}
+export const serializeUnsignedTransaction = (unsignedTx: any): string => {
+  return blsct.serialize_unsigned_transaction(unsignedTx)
+}
+export const deserializeUnsignedTransaction = (hex: string): BlsctRetVal => {
+  return blsct.deserialize_unsigned_transaction(hex)
+}
+export const signUnsignedTransaction = (unsignedTx: any): BlsctRetVal => {
+  return blsct.sign_unsigned_transaction(unsignedTx)
+}
 
 // view tag
 export const calcViewTag = (
@@ -796,4 +1027,3 @@ export const calcViewTag = (
 ): bigint => {
   return BigInt(blsct.calc_view_tag(blindingPubKey, viewKey))
 }
-

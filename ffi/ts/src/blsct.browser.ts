@@ -43,6 +43,7 @@ function splitI64(value: number): [number, number] {
 export const CTX_ID_SIZE = 32;
 export const POINT_SIZE = 48;
 export const SCRIPT_SIZE = 28;
+export const UINT256_SIZE = 32;
 export const BLSCT_IN_AMOUNT_ERROR = 14;
 export const BLSCT_OUT_AMOUNT_ERROR = 15;
 
@@ -60,6 +61,20 @@ export enum BlsctChain {
 export enum TxOutputType {
   Normal = 0,
   StakedCommitment = 1,
+}
+
+export enum BlsctTokenType {
+  BlsctToken = 0,
+  BlsctNft = 1,
+}
+
+export enum BlsctPredicateType {
+  BlsctCreateTokenPredicateType = 0,
+  BlsctMintTokenPredicateType = 1,
+  BlsctMintNftPredicateType = 2,
+  BlsctPayFeePredicateType = 3,
+  BlsctDataPredicateType = 4,
+  BlsctInvalidPredicateType = 255,
 }
 
 // ============================================================================
@@ -1272,7 +1287,7 @@ export function getCTxOutVectorPredicate(obj: unknown): BlsctRetVal {
   return {
     result: result.success ? 0 : (result.errorCode ?? 1),
     value: result.value,
-    value_size: 0,
+    value_size: result.valueSize ?? 0,
   };
 }
 
@@ -1394,6 +1409,501 @@ export function getTxOutBlindingKey(obj: unknown): unknown {
   return module._get_tx_out_blinding_key(obj as number);
 }
 
+// ============================================================================
+// Generic String Map Helpers
+// ============================================================================
+
+export function createStringMap(): unknown {
+  const module = getBlsctModule();
+  return module._create_string_map();
+}
+
+export function addToStringMap(stringMap: unknown, key: string, value: string): void {
+  const module = getBlsctModule();
+  const keyPtr = allocString(key);
+  const valuePtr = allocString(value);
+  try {
+    module._add_to_string_map(stringMap as number, keyPtr, valuePtr);
+  } finally {
+    freePtr(keyPtr);
+    freePtr(valuePtr);
+  }
+}
+
+export function deleteStringMap(stringMap: unknown): void {
+  const module = getBlsctModule();
+  module._delete_string_map(stringMap as number);
+}
+
+export function getStringMapSize(stringMap: unknown): number {
+  const module = getBlsctModule();
+  return module._get_string_map_size(stringMap as number);
+}
+
+export function getStringMapKeyAt(stringMap: unknown, index: number): string {
+  const module = getBlsctModule();
+  const strPtr = module._get_string_map_key_at(stringMap as number, index);
+  const str = readString(strPtr);
+  freePtr(strPtr);
+  return str;
+}
+
+export function getStringMapValueAt(stringMap: unknown, index: number): string {
+  const module = getBlsctModule();
+  const strPtr = module._get_string_map_value_at(stringMap as number, index);
+  const str = readString(strPtr);
+  freePtr(strPtr);
+  return str;
+}
+
+// ============================================================================
+// Token Info Helpers
+// ============================================================================
+
+export function buildTokenInfo(
+  type: BlsctTokenType,
+  publicKey: unknown,
+  metadata: unknown,
+  totalSupply: number
+): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._build_token_info(
+    type,
+    publicKey as number,
+    metadata as number,
+    BigInt(totalSupply)
+  );
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
+export function deleteTokenInfo(tokenInfo: unknown): void {
+  const module = getBlsctModule();
+  module._delete_token_info(tokenInfo as number);
+}
+
+export function serializeTokenInfo(tokenInfo: unknown): string {
+  const module = getBlsctModule();
+  const strPtr = module._serialize_token_info(tokenInfo as number);
+  const str = readString(strPtr);
+  freePtr(strPtr);
+  return str;
+}
+
+export function deserializeTokenInfo(hex: string): BlsctRetVal {
+  const module = getBlsctModule();
+  const strPtr = allocString(hex);
+  try {
+    const resultPtr = module._deserialize_token_info(strPtr);
+    const result = parseRetVal(resultPtr);
+    freePtr(resultPtr);
+    return {
+      result: result.success ? 0 : (result.errorCode ?? 1),
+      value: result.value,
+      value_size: result.valueSize ?? 0,
+    };
+  } finally {
+    freePtr(strPtr);
+  }
+}
+
+export function getTokenInfoType(tokenInfo: unknown): BlsctTokenType {
+  const module = getBlsctModule();
+  return module._get_token_info_type(tokenInfo as number);
+}
+
+export function getTokenInfoPublicKey(tokenInfo: unknown): unknown {
+  const module = getBlsctModule();
+  return module._get_token_info_public_key(tokenInfo as number);
+}
+
+export function getTokenInfoTotalSupply(tokenInfo: unknown): bigint {
+  const module = getBlsctModule();
+  return module._get_token_info_total_supply(tokenInfo as number);
+}
+
+export function getTokenInfoMetadata(tokenInfo: unknown): unknown {
+  const module = getBlsctModule();
+  return module._get_token_info_metadata(tokenInfo as number);
+}
+
+// ============================================================================
+// Collection Token Hash / Key Derivation
+// ============================================================================
+
+export function calcCollectionTokenHash(metadata: unknown, totalSupply: number): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._calc_collection_token_hash(metadata as number, BigInt(totalSupply));
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
+export function deriveCollectionTokenKey(masterTokenKey: unknown, collectionTokenHash: unknown): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._derive_collection_token_key(masterTokenKey as number, collectionTokenHash as number);
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
+export function deriveCollectionTokenPublicKey(masterTokenKey: unknown, collectionTokenHash: unknown): unknown {
+  const module = getBlsctModule();
+  return module._derive_collection_token_public_key(masterTokenKey as number, collectionTokenHash as number);
+}
+
+// ============================================================================
+// Predicate Helpers
+// ============================================================================
+
+export function areVectorPredicateEqual(a: unknown, aSize: number, b: unknown, bSize: number): boolean {
+  const module = getBlsctModule();
+  return module._are_vector_predicate_equal(a as number, aSize, b as number, bSize) === 1;
+}
+
+export function serializeVectorPredicate(vectorPredicate: unknown, objSize: number): string {
+  const module = getBlsctModule();
+  const strPtr = module._serialize_vector_predicate(vectorPredicate as number, objSize);
+  const str = readString(strPtr);
+  freePtr(strPtr);
+  return str;
+}
+
+export function deserializeVectorPredicate(hex: string): BlsctRetVal {
+  const module = getBlsctModule();
+  const strPtr = allocString(hex);
+  try {
+    const resultPtr = module._deserialize_vector_predicate(strPtr);
+    const result = parseRetVal(resultPtr);
+    freePtr(resultPtr);
+    return {
+      result: result.success ? 0 : (result.errorCode ?? 1),
+      value: result.value,
+      value_size: result.valueSize ?? 0,
+    };
+  } finally {
+    freePtr(strPtr);
+  }
+}
+
+export function getVectorPredicateType(vectorPredicate: unknown, objSize: number): BlsctPredicateType {
+  const module = getBlsctModule();
+  return module._get_vector_predicate_type(vectorPredicate as number, objSize);
+}
+
+export function buildCreateTokenPredicate(tokenInfo: unknown): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._build_create_token_predicate(tokenInfo as number);
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
+export function buildMintTokenPredicate(tokenPublicKey: unknown, amount: number): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._build_mint_token_predicate(tokenPublicKey as number, BigInt(amount));
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
+export function buildMintNftPredicate(tokenPublicKey: unknown, nftId: number, metadata: unknown): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._build_mint_nft_predicate(tokenPublicKey as number, BigInt(nftId), metadata as number);
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
+export function getCreateTokenPredicateTokenInfo(vectorPredicate: unknown, objSize: number): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._get_create_token_predicate_token_info(vectorPredicate as number, objSize);
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
+export function getMintTokenPredicatePublicKey(vectorPredicate: unknown, objSize: number): unknown {
+  const module = getBlsctModule();
+  return module._get_mint_token_predicate_public_key(vectorPredicate as number, objSize);
+}
+
+export function getMintTokenPredicateAmount(vectorPredicate: unknown, objSize: number): bigint {
+  const module = getBlsctModule();
+  return module._get_mint_token_predicate_amount(vectorPredicate as number, objSize);
+}
+
+export function getMintNftPredicatePublicKey(vectorPredicate: unknown, objSize: number): unknown {
+  const module = getBlsctModule();
+  return module._get_mint_nft_predicate_public_key(vectorPredicate as number, objSize);
+}
+
+export function getMintNftPredicateNftId(vectorPredicate: unknown, objSize: number): bigint {
+  const module = getBlsctModule();
+  return module._get_mint_nft_predicate_nft_id(vectorPredicate as number, objSize);
+}
+
+export function getMintNftPredicateMetadata(vectorPredicate: unknown, objSize: number): unknown {
+  const module = getBlsctModule();
+  return module._get_mint_nft_predicate_metadata(vectorPredicate as number, objSize);
+}
+
+// ============================================================================
+// Unsigned Input/Output/Transaction Helpers
+// ============================================================================
+
+export function buildUnsignedInput(txIn: unknown): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._build_unsigned_input(txIn as number);
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
+export function deleteUnsignedInput(unsignedInput: unknown): void {
+  const module = getBlsctModule();
+  module._delete_unsigned_input(unsignedInput as number);
+}
+
+export function serializeUnsignedInput(unsignedInput: unknown): string {
+  const module = getBlsctModule();
+  const strPtr = module._serialize_unsigned_input(unsignedInput as number);
+  const str = readString(strPtr);
+  freePtr(strPtr);
+  return str;
+}
+
+export function deserializeUnsignedInput(hex: string): BlsctRetVal {
+  const module = getBlsctModule();
+  const strPtr = allocString(hex);
+  try {
+    const resultPtr = module._deserialize_unsigned_input(strPtr);
+    const result = parseRetVal(resultPtr);
+    freePtr(resultPtr);
+    return {
+      result: result.success ? 0 : (result.errorCode ?? 1),
+      value: result.value,
+      value_size: result.valueSize ?? 0,
+    };
+  } finally {
+    freePtr(strPtr);
+  }
+}
+
+export function buildUnsignedOutput(txOut: unknown): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._build_unsigned_output(txOut as number);
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
+export function buildUnsignedCreateTokenOutput(tokenKey: unknown, tokenInfo: unknown): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._build_unsigned_create_token_output(tokenKey as number, tokenInfo as number);
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
+export function buildUnsignedMintTokenOutput(
+  dest: unknown,
+  amount: number,
+  blindingKey: unknown,
+  tokenKey: unknown,
+  tokenPublicKey: unknown
+): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._build_unsigned_mint_token_output(
+    dest as number,
+    BigInt(amount),
+    blindingKey as number,
+    tokenKey as number,
+    tokenPublicKey as number
+  );
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
+export function buildUnsignedMintNftOutput(
+  dest: unknown,
+  blindingKey: unknown,
+  tokenKey: unknown,
+  tokenPublicKey: unknown,
+  nftId: number,
+  metadata: unknown
+): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._build_unsigned_mint_nft_output(
+    dest as number,
+    blindingKey as number,
+    tokenKey as number,
+    tokenPublicKey as number,
+    BigInt(nftId),
+    metadata as number
+  );
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
+export function deleteUnsignedOutput(unsignedOutput: unknown): void {
+  const module = getBlsctModule();
+  module._delete_unsigned_output(unsignedOutput as number);
+}
+
+export function serializeUnsignedOutput(unsignedOutput: unknown): string {
+  const module = getBlsctModule();
+  const strPtr = module._serialize_unsigned_output(unsignedOutput as number);
+  const str = readString(strPtr);
+  freePtr(strPtr);
+  return str;
+}
+
+export function deserializeUnsignedOutput(hex: string): BlsctRetVal {
+  const module = getBlsctModule();
+  const strPtr = allocString(hex);
+  try {
+    const resultPtr = module._deserialize_unsigned_output(strPtr);
+    const result = parseRetVal(resultPtr);
+    freePtr(resultPtr);
+    return {
+      result: result.success ? 0 : (result.errorCode ?? 1),
+      value: result.value,
+      value_size: result.valueSize ?? 0,
+    };
+  } finally {
+    freePtr(strPtr);
+  }
+}
+
+export function createUnsignedTransaction(): unknown {
+  const module = getBlsctModule();
+  return module._create_unsigned_transaction();
+}
+
+export function addUnsignedTransactionInput(unsignedTx: unknown, unsignedInput: unknown): void {
+  const module = getBlsctModule();
+  module._add_unsigned_transaction_input(unsignedTx as number, unsignedInput as number);
+}
+
+export function addUnsignedTransactionOutput(unsignedTx: unknown, unsignedOutput: unknown): void {
+  const module = getBlsctModule();
+  module._add_unsigned_transaction_output(unsignedTx as number, unsignedOutput as number);
+}
+
+export function setUnsignedTransactionFee(unsignedTx: unknown, fee: number): void {
+  const module = getBlsctModule();
+  module._set_unsigned_transaction_fee(unsignedTx as number, BigInt(fee));
+}
+
+export function getUnsignedTransactionFee(unsignedTx: unknown): bigint {
+  const module = getBlsctModule();
+  return module._get_unsigned_transaction_fee(unsignedTx as number);
+}
+
+export function getUnsignedTransactionInputsSize(unsignedTx: unknown): number {
+  const module = getBlsctModule();
+  return module._get_unsigned_transaction_inputs_size(unsignedTx as number);
+}
+
+export function getUnsignedTransactionOutputsSize(unsignedTx: unknown): number {
+  const module = getBlsctModule();
+  return module._get_unsigned_transaction_outputs_size(unsignedTx as number);
+}
+
+export function deleteUnsignedTransaction(unsignedTx: unknown): void {
+  const module = getBlsctModule();
+  module._delete_unsigned_transaction(unsignedTx as number);
+}
+
+export function serializeUnsignedTransaction(unsignedTx: unknown): string {
+  const module = getBlsctModule();
+  const strPtr = module._serialize_unsigned_transaction(unsignedTx as number);
+  const str = readString(strPtr);
+  freePtr(strPtr);
+  return str;
+}
+
+export function deserializeUnsignedTransaction(hex: string): BlsctRetVal {
+  const module = getBlsctModule();
+  const strPtr = allocString(hex);
+  try {
+    const resultPtr = module._deserialize_unsigned_transaction(strPtr);
+    const result = parseRetVal(resultPtr);
+    freePtr(resultPtr);
+    return {
+      result: result.success ? 0 : (result.errorCode ?? 1),
+      value: result.value,
+      value_size: result.valueSize ?? 0,
+    };
+  } finally {
+    freePtr(strPtr);
+  }
+}
+
+export function signUnsignedTransaction(unsignedTx: unknown): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._sign_unsigned_transaction(unsignedTx as number);
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
 // Range proof field accessors
 export function getRangeProof_A(rangeProof: unknown, rangeProofSize: number): unknown {
   const module = getBlsctModule();
@@ -1455,4 +1965,5 @@ export function castToTokenId(obj: unknown): unknown { return unwrapPtr(obj); }
 export function castToTxIn(obj: unknown): unknown { return unwrapPtr(obj); }
 export function castToTxOut(obj: unknown): unknown { return unwrapPtr(obj); }
 export function castToUint8_tPtr(obj: unknown): unknown { return unwrapPtr(obj); }
-
+export function castToUint256(obj: unknown): unknown { return unwrapPtr(obj); }
+export function castToVectorPredicate(obj: unknown): unknown { return unwrapPtr(obj); }

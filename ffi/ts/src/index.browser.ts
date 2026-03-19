@@ -29,8 +29,13 @@ export * from './signature.js';
 export * from './subAddr.js';
 export * from './subAddrId.js';
 export * from './tokenId.js';
+export * from './tokenInfo.js';
+export * from './tokenPredicate.js';
 export * from './txIn.js';
 export * from './txOut.js';
+export * from './unsignedInput.js';
+export * from './unsignedOutput.js';
+export * from './unsignedTransaction.js';
 export * from './viewTag.js';
 
 export * from './keys/childKey.js';
@@ -41,4 +46,3 @@ export * from './keys/txKey.js';
 
 // Re-export blsct functions (browser version)
 export * from './blsct.browser.js';
-

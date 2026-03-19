@@ -39,3 +39,17 @@ export enum TxOutputType {
   Normal = 0,
   StakedCommitment = 1,
 }
+
+export enum BlsctTokenType {
+  BlsctToken = 0,
+  BlsctNft = 1,
+}
+
+export enum BlsctPredicateType {
+  BlsctCreateTokenPredicateType = 0,
+  BlsctMintTokenPredicateType = 1,
+  BlsctMintNftPredicateType = 2,
+  BlsctPayFeePredicateType = 3,
+  BlsctDataPredicateType = 4,
+  BlsctInvalidPredicateType = 255,
+}

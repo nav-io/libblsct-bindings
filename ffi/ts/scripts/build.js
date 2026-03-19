@@ -8,11 +8,14 @@ const IS_PROD = true
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = 'd0dab8fdcaa9a0574b4a9318e2027a0fb89f4cd6'
+const MASTER_SHA = '5c7ca78e7a3ba10e49b2a94e92a11ba88f92fb7e'
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core'
 const NAVIO_CORE_BRANCH = IS_PROD ? 'master' : 'development-branch-name'
+const PATCHES_DIR = path.resolve(__dirname, '..', 'patches')
+const LIBS_CACHE_META_BASENAME = '.build-cache-meta.json'
+const LIBS_CACHE_VERSION = 'navio-core-sign-unsigned-tx-v1'
 
 // Linux apt packages required for building (swig is installed separately only if needed)
 const LINUX_APT_PACKAGES = [
@@ -56,6 +59,69 @@ function hasCmd(cmd) {
     return true
   } catch {
     return false
+  }
+}
+
+function archiveHasSymbols(archivePath, requiredSymbols) {
+  if (!fs.existsSync(archivePath)) return false
+  if (!hasCmd('nm')) return false
+
+  try {
+    const nmOut = execSync(`nm ${archivePath}`, {
+      stdio: ['ignore', 'pipe', 'ignore'],
+      maxBuffer: 50 * 1024 * 1024,
+    }).toString()
+
+    return requiredSymbols.every((sym) => {
+      const re = new RegExp(`\\b${sym}\\b`)
+      return re.test(nmOut)
+    })
+  } catch {
+    return false
+  }
+}
+
+function applyPatch(repoDir, patchPath, label) {
+  if (!fs.existsSync(patchPath)) {
+    console.log(`[navio-blsct] ${label} patch not found, skipping...`)
+    return
+  }
+
+  // Check if patch is already applied
+  const reverseCheck = spawnSync('git', ['apply', '--check', '--reverse', patchPath], {
+    cwd: repoDir,
+    stdio: 'pipe',
+  })
+  if (reverseCheck.status === 0) {
+    console.log(`[navio-blsct] ${label} patch already applied`)
+    return
+  }
+
+  // Check if patch can be applied cleanly
+  const forwardCheck = spawnSync('git', ['apply', '--check', patchPath], {
+    cwd: repoDir,
+    stdio: 'pipe',
+  })
+  if (forwardCheck.status !== 0) {
+    throw new Error(
+      `${label} patch cannot be applied cleanly.\n` +
+      `${forwardCheck.stderr ? forwardCheck.stderr.toString() : ''}`
+    )
+  }
+
+  console.log(`[navio-blsct] Applying ${label} patch...`)
+  const applyRes = spawnSync('git', ['apply', patchPath], { cwd: repoDir, stdio: 'inherit' })
+  if (applyRes.status !== 0) {
+    throw new Error(`Failed to apply ${label} patch: exit code ${applyRes.status}`)
+  }
+}
+
+function readCacheMeta(metaPath) {
+  if (!fs.existsSync(metaPath)) return null
+  try {
+    return JSON.parse(fs.readFileSync(metaPath, 'utf8'))
+  } catch {
+    return null
   }
 }
 
@@ -263,6 +329,7 @@ const getCfg = () => {
     path.join(libsDir, 'libbls384_256.a'),
     path.join(libsDir, 'libmcl.a'),
   ]
+  const libsCacheMetaPath = path.join(libsDir, LIBS_CACHE_META_BASENAME)
 
   return {
     swigDir,
@@ -277,6 +344,21 @@ const getCfg = () => {
     srcDotAFiles,
     destDotAFiles,
     libsDir,
+    libsCacheMetaPath,
+    libsCacheVersion: LIBS_CACHE_VERSION,
+    requiredLibBlsctSymbols: [
+      'create_string_map',
+      'build_token_info',
+      'calc_collection_token_hash',
+      'derive_collection_token_key',
+      'build_create_token_predicate',
+      'build_mint_token_predicate',
+      'build_mint_nft_predicate',
+      'build_unsigned_create_token_output',
+      'build_unsigned_mint_token_output',
+      'build_unsigned_mint_nft_output',
+      'sign_unsigned_transaction',
+    ],
   }
 }
 
@@ -413,6 +495,13 @@ const buildLibBlsct = (cfg, numCpus, depArchDir) => {
     console.log(`Copying ${src} to ${dest}...`)
     fs.copyFileSync(src, dest)
   }
+
+  const meta = {
+    navioCoreSha: cfg.navioCoreMasterSha,
+    cacheVersion: cfg.libsCacheVersion,
+    updatedAt: new Date().toISOString(),
+  }
+  fs.writeFileSync(cfg.libsCacheMetaPath, JSON.stringify(meta, null, 2))
 }
 
 const getSwigVersion = () => {
@@ -577,16 +666,29 @@ const main = () => {
 
   gitCloneNavioCore(cfg)
 
-  // if .a files have been built, copy them from the backup dir
-  if (cfg.destDotAFiles.every(file => fs.existsSync(file))) {
+  // If cached .a files exist and contain the required symbols, reuse them.
+  // Otherwise rebuild libblsct from the checked-out navio-core commit.
+  const haveAllArchives = cfg.destDotAFiles.every(file => fs.existsSync(file))
+  const cachedLibBlsctPath = path.join(cfg.libsDir, 'libblsct.a')
+  const cacheMeta = readCacheMeta(cfg.libsCacheMetaPath)
+  const cacheMetaMatches = cacheMeta !== null &&
+    cacheMeta.cacheVersion === cfg.libsCacheVersion &&
+    cacheMeta.navioCoreSha === cfg.navioCoreMasterSha
+  const cachedLibsAreCompatible = archiveHasSymbols(
+    cachedLibBlsctPath,
+    cfg.requiredLibBlsctSymbols
+  )
+
+  if (haveAllArchives && cachedLibsAreCompatible && cacheMetaMatches) {
     const src_dest = cfg.srcDotAFiles.map((src, i) => [src, cfg.destDotAFiles[i]])
     for (const [src, dest] of src_dest) {
       console.log(`Copying ${dest} to ${src}...`)
       fs.copyFileSync(dest, src)
     }
-  }
-  // otherwise, build them and create backups
-  else {
+  } else {
+    if (haveAllArchives && (!cachedLibsAreCompatible || !cacheMetaMatches)) {
+      console.log('[navio-blsct] Cached static libraries are stale or incompatible; rebuilding static libraries...')
+    }
     const depArchDir = buildDepends(cfg, numCpus)
     buildLibBlsct(cfg, numCpus, depArchDir)
   }

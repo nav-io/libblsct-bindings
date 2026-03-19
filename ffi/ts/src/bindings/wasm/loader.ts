@@ -62,6 +62,29 @@ export interface BlsctWasmModule {
   _get_token_id_subid(tokenId: number): bigint;
   _serialize_token_id(ptr: number): number;
   _deserialize_token_id(hex: number): number;
+
+  // Generic string map helpers
+  _create_string_map(): number;
+  _add_to_string_map(stringMap: number, key: number, value: number): void;
+  _delete_string_map(stringMap: number): void;
+  _get_string_map_size(stringMap: number): number;
+  _get_string_map_key_at(stringMap: number, index: number): number;
+  _get_string_map_value_at(stringMap: number, index: number): number;
+
+  // Token info helpers
+  _build_token_info(type: number, publicKey: number, metadata: number, totalSupply: bigint): number;
+  _delete_token_info(tokenInfo: number): void;
+  _serialize_token_info(tokenInfo: number): number;
+  _deserialize_token_info(hex: number): number;
+  _get_token_info_type(tokenInfo: number): number;
+  _get_token_info_public_key(tokenInfo: number): number;
+  _get_token_info_total_supply(tokenInfo: number): bigint;
+  _get_token_info_metadata(tokenInfo: number): number;
+
+  // Collection token hash and token key derivation
+  _calc_collection_token_hash(metadata: number, totalSupply: bigint): number;
+  _derive_collection_token_key(masterTokenKey: number, collectionTokenHash: number): number;
+  _derive_collection_token_public_key(masterTokenKey: number, collectionTokenHash: number): number;
   
   // Sub address operations
   _gen_sub_addr_id(account: bigint, address: bigint): number;
@@ -151,6 +174,21 @@ export interface BlsctWasmModule {
   _get_ctx_out_blinding_key(ctxOut: number): number;
   _get_ctx_out_range_proof(ctxOut: number): number;
   _get_ctx_out_view_tag(ctxOut: number): number;
+
+  // Predicate helpers
+  _are_vector_predicate_equal(a: number, aSize: number, b: number, bSize: number): number;
+  _serialize_vector_predicate(predicate: number, objSize: number): number;
+  _deserialize_vector_predicate(hex: number): number;
+  _get_vector_predicate_type(predicate: number, objSize: number): number;
+  _build_create_token_predicate(tokenInfo: number): number;
+  _build_mint_token_predicate(tokenPublicKey: number, amount: bigint): number;
+  _build_mint_nft_predicate(tokenPublicKey: number, nftId: bigint, metadata: number): number;
+  _get_create_token_predicate_token_info(predicate: number, objSize: number): number;
+  _get_mint_token_predicate_public_key(predicate: number, objSize: number): number;
+  _get_mint_token_predicate_amount(predicate: number, objSize: number): bigint;
+  _get_mint_nft_predicate_public_key(predicate: number, objSize: number): number;
+  _get_mint_nft_predicate_nft_id(predicate: number, objSize: number): bigint;
+  _get_mint_nft_predicate_metadata(predicate: number, objSize: number): number;
   
   // TxIn accessors
   _get_tx_in_amount(txIn: number): bigint;
@@ -170,6 +208,30 @@ export interface BlsctWasmModule {
   _get_tx_out_min_stake(txOut: number): bigint;
   _get_tx_out_subtract_fee_from_amount(txOut: number): boolean;
   _get_tx_out_blinding_key(txOut: number): number;
+
+  // Unsigned input/output/transaction helpers
+  _build_unsigned_input(txIn: number): number;
+  _delete_unsigned_input(unsignedInput: number): void;
+  _serialize_unsigned_input(unsignedInput: number): number;
+  _deserialize_unsigned_input(hex: number): number;
+  _build_unsigned_output(txOut: number): number;
+  _build_unsigned_create_token_output(tokenKey: number, tokenInfo: number): number;
+  _build_unsigned_mint_token_output(dest: number, amount: bigint, blindingKey: number, tokenKey: number, tokenPublicKey: number): number;
+  _build_unsigned_mint_nft_output(dest: number, blindingKey: number, tokenKey: number, tokenPublicKey: number, nftId: bigint, metadata: number): number;
+  _delete_unsigned_output(unsignedOutput: number): void;
+  _serialize_unsigned_output(unsignedOutput: number): number;
+  _deserialize_unsigned_output(hex: number): number;
+  _create_unsigned_transaction(): number;
+  _add_unsigned_transaction_input(unsignedTx: number, unsignedInput: number): void;
+  _add_unsigned_transaction_output(unsignedTx: number, unsignedOutput: number): void;
+  _set_unsigned_transaction_fee(unsignedTx: number, fee: bigint): void;
+  _get_unsigned_transaction_fee(unsignedTx: number): bigint;
+  _get_unsigned_transaction_inputs_size(unsignedTx: number): number;
+  _get_unsigned_transaction_outputs_size(unsignedTx: number): number;
+  _delete_unsigned_transaction(unsignedTx: number): void;
+  _serialize_unsigned_transaction(unsignedTx: number): number;
+  _deserialize_unsigned_transaction(hex: number): number;
+  _sign_unsigned_transaction(unsignedTx: number): number;
   
   // Signature operations
   _sign_message(privKey: number, msg: number): number;
@@ -423,17 +485,35 @@ export async function loadBlsctModule(
       printErr: console.error,
     };
     
-    // Set up cryptoGetRandomValues for MCL's random number generation
-    // MCL calls EM_ASM({Module.cryptoGetRandomValues($0, $1)}, buf, byteSize)
-    // This must be set BEFORE module initialization
-    // Node.js 22+ and browsers both have globalThis.crypto.getRandomValues
-    if (typeof globalThis.crypto !== 'undefined' && globalThis.crypto.getRandomValues) {
+    // Set up cryptoGetRandomValues for MCL's random number generation.
+    // This must be configured BEFORE module initialization.
+    // Prefer Web Crypto API; fall back to Node.js randomFillSync on older Node versions.
+    const isNodeRuntime = typeof process !== 'undefined' && !!process.versions?.node;
+    let nodeRandomFillSync: ((buf: Uint8Array) => void) | undefined;
+    if (isNodeRuntime && !(typeof globalThis.crypto !== 'undefined' && globalThis.crypto.getRandomValues)) {
+      try {
+        const nodeCrypto = await import('crypto');
+        nodeRandomFillSync = (nodeCrypto as unknown as { randomFillSync?: (buf: Uint8Array) => void }).randomFillSync;
+      } catch {
+        nodeRandomFillSync = undefined;
+      }
+    }
+
+    if ((typeof globalThis.crypto !== 'undefined' && globalThis.crypto.getRandomValues) || nodeRandomFillSync) {
       config.cryptoGetRandomValues = (bufPtr: number, byteSize: number) => {
         if (!moduleRef || !moduleRef.HEAPU8) {
           throw new Error('Module not initialized yet');
         }
         const buffer = moduleRef.HEAPU8.subarray(bufPtr, bufPtr + byteSize);
-        globalThis.crypto.getRandomValues(buffer);
+        if (typeof globalThis.crypto !== 'undefined' && globalThis.crypto.getRandomValues) {
+          globalThis.crypto.getRandomValues(buffer);
+          return;
+        }
+        if (nodeRandomFillSync) {
+          nodeRandomFillSync(buffer);
+          return;
+        }
+        throw new Error('No secure random source available for WASM crypto');
       };
     }
     
@@ -568,4 +648,3 @@ export function setBlsctModule(module: BlsctWasmModule, skipInit = false): void 
   moduleInstance = module;
   modulePromise = Promise.resolve(module);
 }
-
