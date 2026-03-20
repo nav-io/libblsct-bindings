@@ -107,6 +107,7 @@ True
         req.range_proof.value(),
         req.range_proof.obj_size,
         req.nonce.value(),
+        req.token_id.value(),
       )
       blsct.add_to_amount_recovery_req_vec(req_vec, blsct_req)
 
@@ -200,4 +201,3 @@ True
     obj_size = rv.value_size
     blsct.free_obj(rv)
     return cls.from_obj_with_size(obj, obj_size)
-

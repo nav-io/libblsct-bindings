@@ -3,6 +3,7 @@ from . import blsct
 from .point import Point
 from .range_proof import RangeProof
 from .serializable import Serializable
+from .token_id import TokenId
 from typing import override, Self, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -18,9 +19,13 @@ class AmountRecoveryReq(Serializable):
     self,
     range_proof: "RangeProof",
     nonce: Point,
+    token_id: TokenId | None = None,
   ):
+    if token_id is None:
+      token_id = TokenId()
     self.range_proof = range_proof
     self.nonce = nonce
+    self.token_id = token_id
 
   def serialize(self) -> str:
     """Serialize the AmountRecoveryReq to a hexadecimal string"""
@@ -45,4 +50,3 @@ class AmountRecoveryReq(Serializable):
     range_proof = RangeProof.deserialize(range_proof_hex)
 
     return cls(range_proof, nonce)
-

@@ -43,6 +43,7 @@ pub struct BlsctAmountRecoveryReq {
   range_proof: *mut BlsctRangeProof,
   range_proof_size: usize,
   nonce: *mut BlsctPoint,
+  token_id: *mut BlsctTokenId,
 }
 
 #[repr(C)]
@@ -279,6 +280,7 @@ pub fn gen_amount_recovery_req(
   vp_blsct_range_proof: *const c_void,
   range_proof_size: usize,
   vp_blsct_nonce: *const c_void,
+  vp_blsct_token_id: *const c_void,
 ) -> *mut BlsctAmountRecoveryReq;
 
 pub fn recover_amount(
@@ -523,4 +525,3 @@ mod tests {
     }
   }
 }
-

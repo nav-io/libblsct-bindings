@@ -129,6 +129,22 @@ def test_range_proof():
   assert(rec_res1[0].message == "navcoin")
   assert(rec_res1[0].amount == 456)
 
+  token_id_2 = TokenId.from_token(777)
+  rp2 = RangeProof([789], nonce1, 'fungible', token_id_2)
+  req2 = AmountRecoveryReq(rp2, nonce1, token_id_2)
+  rec_res2 = RangeProof.recover_amounts([req2])
+  assert(rec_res2[0].is_succ == True)
+  assert(rec_res2[0].amount == 789)
+  assert(rec_res2[0].message == "fungible")
+
+  token_id_3 = TokenId.from_token_and_subid(777, 42)
+  rp3 = RangeProof([1], nonce1, 'nft', token_id_3)
+  req3 = AmountRecoveryReq(rp3, nonce1, token_id_3)
+  rec_res3 = RangeProof.recover_amounts([req3])
+  assert(rec_res3[0].is_succ == True)
+  assert(rec_res3[0].amount == 1)
+  assert(rec_res3[0].message == "nft")
+
 def test_sig_gen_verify():
   msg = "navio"
   priv_key = Scalar.random()
@@ -346,4 +362,3 @@ def test_tx():
   assert amounts[0].is_succ == True
   assert amounts[0].amount == out_amount
   assert amounts[0].message == message
-

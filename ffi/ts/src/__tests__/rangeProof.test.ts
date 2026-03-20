@@ -97,3 +97,56 @@ test('amount recovery', () => {
   expect(amounts[0].amount).toBe(123n)
   expect(amounts[0].msg).toBe('space_x')
 })
+
+test('amount recovery with non-default fungible token id', () => {
+  const amount = 321
+  const msg = 'fungible-token'
+  const nonce = Point.base()
+  const tokenId = TokenId.fromToken(777)
+  const rp = RangeProof.generate([amount], nonce, msg, tokenId)
+  const req = new AmountRecoveryReq(rp, nonce, tokenId)
+  const amounts = RangeProof.recoverAmounts([req])
+
+  expect(amounts.length).toBe(1)
+  expect(amounts[0].isSucc).toBe(true)
+  expect(amounts[0].amount).toBe(321n)
+  expect(amounts[0].msg).toBe('fungible-token')
+})
+
+test('amount recovery with NFT-like token id (token + subid)', () => {
+  const amount = 1
+  const msg = 'nft-output'
+  const nonce = Point.base()
+  const tokenId = TokenId.fromTokenAndSubid(777, 42)
+  const rp = RangeProof.generate([amount], nonce, msg, tokenId)
+  const req = new AmountRecoveryReq(rp, nonce, tokenId)
+  const amounts = RangeProof.recoverAmounts([req])
+
+  expect(amounts.length).toBe(1)
+  expect(amounts[0].isSucc).toBe(true)
+  expect(amounts[0].amount).toBe(1n)
+  expect(amounts[0].msg).toBe('nft-output')
+})
+
+test('amount recovery with non-default token id after proof deserialization', () => {
+  const amount = 654
+  const msg = 'deser-token'
+  const nonce = Point.random()
+  const tokenId = TokenId.fromToken(333)
+  const rp = RangeProof.generate([amount], nonce, msg, tokenId)
+
+  const proofFromHex = RangeProof.deserialize(rp.serialize())
+  const nonceFromHex = Point.deserialize(nonce.serialize())
+  const tokenIdFromHex = TokenId.deserialize(tokenId.serialize())
+  const req = new AmountRecoveryReq(
+    proofFromHex,
+    nonceFromHex,
+    tokenIdFromHex,
+  )
+  const amounts = RangeProof.recoverAmounts([req])
+
+  expect(amounts.length).toBe(1)
+  expect(amounts[0].isSucc).toBe(true)
+  expect(amounts[0].amount).toBe(654n)
+  expect(amounts[0].msg).toBe('deser-token')
+})

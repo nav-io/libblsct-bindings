@@ -1,6 +1,7 @@
 use crate::{
   point::Point,
   range_proof::RangeProof,
+  token_id::TokenId,
 };
 use serde::{Deserialize, Serialize};
 
@@ -8,6 +9,7 @@ use serde::{Deserialize, Serialize};
 pub struct AmountRecoveryReq {
   pub range_proof: RangeProof,
   pub nonce: Point,
+  pub token_id: Option<TokenId>,
 }
 
 impl AmountRecoveryReq {
@@ -15,13 +17,24 @@ impl AmountRecoveryReq {
     AmountRecoveryReq {
       range_proof: range_proof.clone(),
       nonce: nonce.clone(),
+      token_id: None,
+    }
+  }
+
+  pub fn new_with_token_id(range_proof: &RangeProof, nonce: &Point, token_id: &TokenId) -> Self {
+    AmountRecoveryReq {
+      range_proof: range_proof.clone(),
+      nonce: nonce.clone(),
+      token_id: Some(token_id.clone()),
     }
   }
 }
 
 impl PartialEq for AmountRecoveryReq {
   fn eq(&self, other: &Self) -> bool {
-    self.range_proof == other.range_proof && self.nonce == other.nonce
+    self.range_proof == other.range_proof &&
+    self.nonce == other.nonce &&
+    self.token_id == other.token_id
   }
 }
 
@@ -43,10 +56,9 @@ mod tests {
 
     let nonce = Point::random().unwrap();
 
-    let a = AmountRecoveryReq::new(&rp, &nonce);
+    let a = AmountRecoveryReq::new_with_token_id(&rp, &nonce, &token_id);
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<AmountRecoveryReq>(&hex).unwrap();
     assert_eq!(a, b);
   }
 }
-

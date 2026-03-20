@@ -69,6 +69,7 @@ pub enum Error<'a> {
   FailedToCreateRangeProofVector,
   FailedToVerifyRangeProofs(u8),
   FailedToCreateAmountRecoveryRequestVector,
+  FailedToCreateDefaultTokenId,
   FailedToRecoverAmount(u8),
 }
 
@@ -89,6 +90,8 @@ impl<'a> fmt::Display for Error<'a> {
         write!(f, "Failed to verify range proofs: {e}"),
       Error::FailedToCreateAmountRecoveryRequestVector =>
         write!(f, "Failed to create amount recovery request vector"),
+      Error::FailedToCreateDefaultTokenId =>
+        write!(f, "Failed to create default token id"),
       Error::FailedToRecoverAmount(e) =>
         write!(f, "Failed to recover amount: {e}"),
     }
@@ -175,10 +178,18 @@ impl RangeProof {
       return Err(Error::FailedToCreateAmountRecoveryRequestVector);
     }
     for req in reqs {
+      let default_token_id = if req.token_id.is_none() {
+        Some(TokenId::default().map_err(|_| Error::FailedToCreateDefaultTokenId)?)
+      } else {
+        None
+      };
+      let token_id = req.token_id.as_ref().or(default_token_id.as_ref()).unwrap();
+
       let blsct_req = unsafe { gen_amount_recovery_req(
         req.range_proof.value() as *mut c_void,
         req.range_proof.size(),
         req.nonce.value() as *mut c_void,
+        token_id.value() as *mut c_void,
       )};
 
       unsafe { add_to_amount_recovery_req_vec(
@@ -415,6 +426,28 @@ mod tests {
   }
 
   #[test]
+  fn test_recover_amounts_with_non_default_token() {
+    init();
+
+    let msg = "navio-token";
+    let amount = 321u64;
+
+    let values = vec![amount];
+    let nonce = Point::random().unwrap();
+    let token_id = TokenId::from_token_and_subid(123, 456).unwrap();
+
+    let rp = RangeProof::new(&values, &nonce, msg, &token_id).unwrap();
+
+    let req = AmountRecoveryReq::new_with_token_id(&rp, &nonce, &token_id);
+    let res = RangeProof::recover_amounts(vec![req]).unwrap();
+
+    assert_eq!(res.len(), 1);
+    assert_eq!(res[0].is_succ, true);
+    assert_eq!(res[0].amount, amount);
+    assert_eq!(res[0].msg, msg);
+  }
+
+  #[test]
   fn test_deser() {
     init();
     let a = gen_range_proof();
@@ -423,4 +456,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-

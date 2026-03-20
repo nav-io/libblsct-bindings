@@ -435,6 +435,7 @@ export const genAmountRecoveryReq = (
     rangeProof,
     rangeProofSize,
     nonce,
+    tokenId,
   )
 }
 export const getAmountRecoveryResultAmount = (

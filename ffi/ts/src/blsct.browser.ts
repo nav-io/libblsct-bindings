@@ -1027,7 +1027,8 @@ export function genAmountRecoveryReq(
   return module._gen_amount_recovery_req(
     rangeProof as number,
     rangeProofSize,
-    nonce as number
+    nonce as number,
+    tokenId as number
   );
 }
 

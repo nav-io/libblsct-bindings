@@ -199,7 +199,7 @@ export BlsctRetVal* decode_address(
 );
 
 export BlsctRetVal* encode_address(
-  const void* blsct_dpk,
+  const void* void_blsct_dpk,
   const enum AddressEncoding encoding
 );
 
@@ -207,7 +207,8 @@ export BlsctRetVal* encode_address(
 export BlsctAmountRecoveryReq* gen_amount_recovery_req(
     const void* vp_blsct_range_proof,
     const size_t range_proof_size,
-    const void* vp_blsct_nonce
+    const void* vp_blsct_nonce,
+    const void* vp_blsct_token_id
 );
 export void* create_amount_recovery_req_vec();
 export void add_to_amount_recovery_req_vec(
@@ -255,8 +256,8 @@ export BlsctCTxRetVal* build_ctx(
 );
 // using void* insetead of const void* to avoid const_cast
 export const char* get_ctx_id(void* vp_ctx);
-export const std::vector<CTxIn>* get_ctx_ins(void* vp_ctx);
-export const std::vector<CTxOut>* get_ctx_outs(void* vp_ctx);
+export const void* get_ctx_ins(void* vp_ctx);
+export const void* get_ctx_outs(void* vp_ctx);
 export const char* serialize_ctx(void* vp_ctx);
 export BlsctRetVal* deserialize_ctx(const char* hex);
 export void delete_ctx(void* vp_ctx);
@@ -271,35 +272,35 @@ export size_t get_ctx_ins_size(const void* blsct_ctx_ins);
 export const void* get_ctx_in_at(const void* vp_ctx_ins, const size_t i);
 
 // ctx in
-export int are_ctx_in_equal(const void* vp_a, const void* vp_b);
-export const BlsctCTxId* get_ctx_in_prev_out_hash(const void* ctx_in);
-export const BlsctScript* get_ctx_in_script_sig(const void* ctx_in);
-export uint32_t get_ctx_in_sequence(const void* ctx_in);
-export const BlsctScript* get_ctx_in_script_witness(const void* ctx_in);
+export bool are_ctx_in_equal(const void* vp_a, const void* vp_b);
+export const BlsctCTxId* get_ctx_in_prev_out_hash(const void* vp_ctx_in);
+export const BlsctScript* get_ctx_in_script_sig(const void* vp_ctx_in);
+export uint32_t get_ctx_in_sequence(const void* vp_ctx_in);
+export const BlsctScript* get_ctx_in_script_witness(const void* vp_ctx_in);
 
 // ctx_outs
-export int are_ctx_outs_equal(const void* vp_a, const void* vp_b);
+export bool are_ctx_outs_equal(const void* vp_a, const void* vp_b);
 export size_t get_ctx_outs_size(const void* vp_ctx_outs);
 export const void* get_ctx_out_at(const void* vp_ctx_outs, const size_t i);
 
 // ctx out
-export int are_ctx_out_equal(const void* vp_a, const void* vp_b);
-export uint64_t get_ctx_out_value(const void* ctx_out);
-export const BlsctScript* get_ctx_out_script_pub_key(const void* ctx_out);
-export const BlsctTokenId* get_ctx_out_token_id(const void* ctx_out);
-export const BlsctRetVal* get_ctx_out_vector_predicate(const void* ctx_out);
+export bool are_ctx_out_equal(const void* vp_a, const void* vp_b);
+export uint64_t get_ctx_out_value(const void* vp_ctx_out);
+export const BlsctScript* get_ctx_out_script_pub_key(const void* vp_ctx_out);
+export const BlsctTokenId* get_ctx_out_token_id(const void* vp_ctx_out);
+export BlsctRetVal* get_ctx_out_vector_predicate(const void* vp_ctx_out);
 
 // ctx out blsct data
-export const BlsctPoint* get_ctx_out_spending_key(const void* ctx_out);
-export const BlsctPoint* get_ctx_out_ephemeral_key(const void* ctx_out);
-export const BlsctPoint* get_ctx_out_blinding_key(const void* ctx_out);
-export const BlsctRetVal* get_ctx_out_range_proof(const void* ctx_out);
-export uint16_t get_ctx_out_view_tag(const void* ctx_out);
+export const BlsctPoint* get_ctx_out_spending_key(const void* vp_ctx_out);
+export const BlsctPoint* get_ctx_out_ephemeral_key(const void* vp_jctx_out);
+export const BlsctPoint* get_ctx_out_blinding_key(const void* vp_ctx_out);
+export const BlsctRetVal* get_ctx_out_range_proof(const void* vp_ctx_out);
+export uint16_t get_ctx_out_view_tag(const void* vp_ctx_out);
 
 // double public key
 export BlsctRetVal* gen_double_pub_key(
-  const BlsctPubKey* pk1,
-  const BlsctPubKey* pk2
+  const BlsctPubKey* blsct_pk1,
+  const BlsctPubKey* blsct_pk2
 );
 
 export BlsctDoublePubKey* gen_dpk_with_keys_acct_addr(
@@ -350,7 +351,7 @@ export BlsctPoint* scalar_muliply_point( # fix type after next navio-core is rel
 );
 export const char* point_to_str(const BlsctPoint* blsct_point);
 export BlsctPoint* point_from_scalar(const BlsctScalar* blsct_scalar);
-export int is_valid_point(const BlsctPoint* blsct_point);
+export bool is_valid_point(const BlsctPoint* blsct_point);
 
 export const char* serialize_point(const BlsctPoint* blsct_point);
 export BlsctRetVal* deserialize_point(const char* hex);
@@ -360,22 +361,14 @@ export BlsctRetVal* gen_random_public_key();
 export BlsctPoint* get_public_key_point(const BlsctPubKey* blsct_pub_key);
 export BlsctPubKey* point_to_public_key(const BlsctPoint* blsct_point);
 
-const char* serialize_public_key(const BlsctPoint* blsct_point);
-BlsctRetVal* deserialize_public_key(const char* hex);
+export const char* serialize_public_key(const BlsctPoint* blsct_point);
+export BlsctRetVal* deserialize_public_key(const char* hex);
 
 // range proof
-void* create_range_proof_vec();
-void add_to_range_proof_vec(
-    void* vp_range_proofs,
-    const BlsctRangeProof* blsct_range_proof,
-    size_t blsct_range_proof_size
-);
-void delete_range_proof_vec(const void* vp_range_proofs);
-
 export BlsctRetVal* build_range_proof(
-  const void* vp_int_vec,
+  const void* vp_uint64_vec,
   const BlsctPoint* blsct_nonce,
-  const char* blsct_message,
+  const char* blsct_msg,
   const BlsctTokenId* blsct_token_id
 );
 
@@ -383,15 +376,15 @@ export BlsctBoolRetVal* verify_range_proofs(
   const void* vp_range_proofs
 );
 
-export const BlsctPoint* get_range_proof_A(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
-export const BlsctPoint* get_range_proof_A_wip(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
-export const BlsctPoint* get_range_proof_B(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
+export BlsctPoint* get_range_proof_A(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
+export BlsctPoint* get_range_proof_A_wip(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
+export BlsctPoint* get_range_proof_B(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
 
-export const BlsctScalar* get_range_proof_r_prime(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
-export const BlsctScalar* get_range_proof_s_prime(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
-export const BlsctScalar* get_range_proof_delta_prime(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
-export const BlsctScalar* get_range_proof_alpha_hat(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
-export const BlsctScalar* get_range_proof_tau_x(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
+export BlsctScalar* get_range_proof_r_prime(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
+export BlsctScalar* get_range_proof_s_prime(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
+export BlsctScalar* get_range_proof_delta_prime(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
+export BlsctScalar* get_range_proof_alpha_hat(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
+export BlsctScalar* get_range_proof_tau_x(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
 
 export void* create_range_proof_vec();
 export void add_to_range_proof_vec(
@@ -414,7 +407,7 @@ export BlsctRetVal* deserialize_range_proof(
 export int are_scalar_equal(const BlsctScalar* a, const BlsctScalar* b);
 export BlsctRetVal* gen_random_scalar();
 export BlsctRetVal* gen_scalar(const uint64_t n);
-export uint64_t scalar_to_uint64(BlsctScalar* blsct_scalar);
+export uint64_t scalar_to_uint64(const BlsctScalar* blsct_scalar);
 export const char* scalar_to_str(const BlsctScalar* blsct_scalar);
 export BlsctPubKey* scalar_to_pub_key(const BlsctScalar* blsct_scalar);
 
