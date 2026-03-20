@@ -18,7 +18,7 @@ const WASM_DEBUG = process.env.WASM_DEBUG === '1';
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = '5c7ca78e7a3ba10e49b2a94e92a11ba88f92fb7e';
+const MASTER_SHA = '97f28f6f8c36ae82b9ac3339d880ba4052e4325f';
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core';
