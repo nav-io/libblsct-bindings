@@ -8,7 +8,7 @@ const IS_PROD = true
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = '2f1e939e04ee00f97e6267307d6324e7b71a2480'
+const MASTER_SHA = 'e923847b0644f566dfcb96c04e6ef454eb2afb45'
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core'
