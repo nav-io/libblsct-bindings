@@ -104,6 +104,8 @@ class CustomBuildExt(build_ext):
 
     content = dummy_impl_path.read_text(encoding="utf-8")
     updated = content
+    patched_rand = False
+    patched_translation = False
 
     decl_line = "    explicit FastRandomContext(bool fDeterministic = false) noexcept;"
     rand_decl_line = "    uint256 rand256() noexcept;"
@@ -114,6 +116,7 @@ class CustomBuildExt(build_ext):
           decl_line + "\n" + rand_decl_line,
           1,
         )
+        patched_rand = True
       else:
         log("Warning: could not add rand256 declaration to FastRandomContext")
 
@@ -126,12 +129,44 @@ class CustomBuildExt(build_ext):
           impl_line + "\n" + rand_impl_line,
           1,
         )
+        patched_rand = True
       else:
         log("Warning: could not add rand256 implementation to FastRandomContext")
 
+    translation_fixed_line = "extern const std::function<std::string(const char*)> G_TRANSLATION_FUN = nullptr;"
+    if "G_TRANSLATION_FUN" not in updated:
+      anchor = "const size_t OUTPUT_SIZE = 0;\n"
+      insertion = "\n" + translation_fixed_line + "\n"
+      if anchor in updated:
+        updated = updated.replace(anchor, anchor + insertion, 1)
+      else:
+        updated = updated + insertion
+      patched_translation = True
+    elif "extern const std::function<std::string(const char" not in updated:
+      translation_lines = [
+        "const std::function<std::string(const char*)> G_TRANSLATION_FUN = nullptr;",
+        "const std::function<std::string(const char *)> G_TRANSLATION_FUN = nullptr;",
+      ]
+      for translation_line in translation_lines:
+        if translation_line in updated:
+          updated = updated.replace(
+            translation_line,
+            translation_fixed_line,
+            1,
+          )
+          patched_translation = True
+          break
+      else:
+        log("Warning: could not patch G_TRANSLATION_FUN linkage in dummy_impl.cpp")
+
     if updated != content:
       dummy_impl_path.write_text(updated, encoding="utf-8")
-      log("Patched dummy_impl.cpp with FastRandomContext::rand256 stub")
+      if patched_rand and patched_translation:
+        log("Patched dummy_impl.cpp with rand256 + G_TRANSLATION_FUN stubs")
+      elif patched_rand:
+        log("Patched dummy_impl.cpp with FastRandomContext::rand256 stub")
+      elif patched_translation:
+        log("Patched dummy_impl.cpp with G_TRANSLATION_FUN linkage stub")
 
   def build_libblsct(self, num_cpus: str):
     # if there is a backup of depends directory, use it
