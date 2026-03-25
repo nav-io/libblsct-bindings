@@ -1,13 +1,17 @@
 import {
+  addToTxHexVec,
   addToTxInVec,
   addToTxOutVec,
+  aggregateTransactions as aggregateTransactionsNative,
   BLSCT_IN_AMOUNT_ERROR,
   BLSCT_OUT_AMOUNT_ERROR,
   buildCTx,
   castToUint8_tPtr,
+  createTxHexVec,
   createTxInVec,
   createTxOutVec,
   deleteCTx,
+  deleteTxHexVec,
   deleteTxInVec,
   deleteTxOutVec,
   deserializeCTx,
@@ -15,6 +19,7 @@ import {
   getCTxId,
   getCTxIns,
   getCTxOuts,
+  getValueAsCStr,
   serializeCTx,
 } from './blsct'
 
@@ -130,6 +135,38 @@ export class CTx extends ManagedObj {
     return ctx
   }
 
+  /** Aggregates one or more signed transaction hex strings into a single signed transaction.
+   * @param txHexes - Signed transaction hex strings to aggregate.
+   * @returns The aggregated signed transaction as a hexadecimal string.
+   */
+  static aggregateTransactions(txHexes: string[]): string {
+    if (txHexes.length === 0) {
+      throw new Error('At least one signed transaction is required')
+    }
+
+    const txHexVec = createTxHexVec()
+    try {
+      for (const txHex of txHexes) {
+        addToTxHexVec(txHexVec, txHex)
+      }
+
+      const rv = aggregateTransactionsNative(txHexVec)
+      if (rv.result !== 0) {
+        freeObj(rv)
+        throw new Error(`Failed to aggregate signed transactions. Error code = ${rv.result}`)
+      }
+
+      try {
+        return getValueAsCStr(rv)
+      } finally {
+        freeObj(rv.value)
+        freeObj(rv)
+      }
+    } finally {
+      deleteTxHexVec(txHexVec)
+    }
+  }
+
   override value(): any {
     return castToUint8_tPtr(this.obj)
   }
@@ -168,4 +205,3 @@ export class CTx extends ManagedObj {
     return CTx._deserialize(hex, deserializeCTx)
   }
 }
-

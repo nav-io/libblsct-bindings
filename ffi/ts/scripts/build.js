@@ -8,14 +8,13 @@ const IS_PROD = true
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = 'e923847b0644f566dfcb96c04e6ef454eb2afb45'
+const MASTER_SHA = '623ad2da8e9031d8b900c54af6d393ec88e9a32a'
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core'
 const NAVIO_CORE_BRANCH = IS_PROD ? 'master' : 'development-branch-name'
-const PATCHES_DIR = path.resolve(__dirname, '..', 'patches')
 const LIBS_CACHE_META_BASENAME = '.build-cache-meta.json'
-const LIBS_CACHE_VERSION = 'navio-core-sign-unsigned-tx-v1'
+const LIBS_CACHE_VERSION = 'navio-core-sign-unsigned-tx-v3-aggregate-upstream'
 
 // Linux apt packages required for building (swig is installed separately only if needed)
 const LINUX_APT_PACKAGES = [
@@ -78,41 +77,6 @@ function archiveHasSymbols(archivePath, requiredSymbols) {
     })
   } catch {
     return false
-  }
-}
-
-function applyPatch(repoDir, patchPath, label) {
-  if (!fs.existsSync(patchPath)) {
-    console.log(`[navio-blsct] ${label} patch not found, skipping...`)
-    return
-  }
-
-  // Check if patch is already applied
-  const reverseCheck = spawnSync('git', ['apply', '--check', '--reverse', patchPath], {
-    cwd: repoDir,
-    stdio: 'pipe',
-  })
-  if (reverseCheck.status === 0) {
-    console.log(`[navio-blsct] ${label} patch already applied`)
-    return
-  }
-
-  // Check if patch can be applied cleanly
-  const forwardCheck = spawnSync('git', ['apply', '--check', patchPath], {
-    cwd: repoDir,
-    stdio: 'pipe',
-  })
-  if (forwardCheck.status !== 0) {
-    throw new Error(
-      `${label} patch cannot be applied cleanly.\n` +
-      `${forwardCheck.stderr ? forwardCheck.stderr.toString() : ''}`
-    )
-  }
-
-  console.log(`[navio-blsct] Applying ${label} patch...`)
-  const applyRes = spawnSync('git', ['apply', patchPath], { cwd: repoDir, stdio: 'inherit' })
-  if (applyRes.status !== 0) {
-    throw new Error(`Failed to apply ${label} patch: exit code ${applyRes.status}`)
   }
 }
 
@@ -358,6 +322,7 @@ const getCfg = () => {
       'build_unsigned_mint_token_output',
       'build_unsigned_mint_nft_output',
       'sign_unsigned_transaction',
+      'aggregate_transactions',
     ],
   }
 }

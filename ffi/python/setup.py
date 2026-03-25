@@ -20,7 +20,7 @@ if IS_PROD:
   navio_core_repo = "https://github.com/nav-io/navio-core"
   # git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
   # Keep this in sync with ffi/ts/scripts/build.js and build-wasm.js.
-  navio_core_master_sha = "e923847b0644f566dfcb96c04e6ef454eb2afb45"
+  navio_core_master_sha = "623ad2da8e9031d8b900c54af6d393ec88e9a32a"
 else:
   navio_core_repo = "https://github.com/gogoex/navio-core"
   navio_core_branch = ""

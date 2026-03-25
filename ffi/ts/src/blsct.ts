@@ -174,6 +174,23 @@ export const serializeCTxId = (ctxId: any): string => {
   return blsct.serialize_ctx_id(ctxId)
 }
 
+// signed transaction aggregation
+export const createTxHexVec = (): any => {
+  return blsct.create_tx_hex_vec()
+}
+
+export const addToTxHexVec = (txHexVec: any, txHex: string): void => {
+  blsct.add_to_tx_hex_vec(txHexVec, txHex)
+}
+
+export const deleteTxHexVec = (txHexVec: any): void => {
+  blsct.delete_tx_hex_vec(txHexVec)
+}
+
+export const aggregateTransactions = (txHexVec: any): BlsctRetVal => {
+  return blsct.aggregate_transactions(txHexVec)
+}
+
 // ctx in
 export const getCTxInPrevOutHash = (obj: any): any => {
   return blsct.get_ctx_in_prev_out_hash(obj)

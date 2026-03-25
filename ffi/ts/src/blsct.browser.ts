@@ -838,6 +838,42 @@ export function serializeCTxId(ctxId: unknown): string {
 }
 
 // ============================================================================
+// Signed Transaction Aggregation
+// ============================================================================
+
+export function createTxHexVec(): unknown {
+  const module = getBlsctModule();
+  return module._create_tx_hex_vec();
+}
+
+export function addToTxHexVec(txHexVec: unknown, txHex: string): void {
+  const module = getBlsctModule();
+  const txHexPtr = allocString(txHex);
+  try {
+    module._add_to_tx_hex_vec(txHexVec as number, txHexPtr);
+  } finally {
+    freePtr(txHexPtr);
+  }
+}
+
+export function deleteTxHexVec(txHexVec: unknown): void {
+  const module = getBlsctModule();
+  module._delete_tx_hex_vec(txHexVec as number);
+}
+
+export function aggregateTransactions(txHexVec: unknown): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._aggregate_transactions(txHexVec as number);
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
+// ============================================================================
 // Memory Management
 // ============================================================================
 

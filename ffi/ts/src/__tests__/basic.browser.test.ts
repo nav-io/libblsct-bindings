@@ -335,6 +335,56 @@ describe('Browser WASM Module', () => {
       const txOut = blsctBrowser.TxOut.generate(subAddr, amount, memo, tokenId);
       expect(txOut).toBeDefined();
     });
+
+    it('should aggregate signed transactions', () => {
+      requireWasm();
+
+      const makeSignedTxHex = (hexByte: string, outAmount: number): string => {
+        const tokenId = blsctBrowser.TokenId.default();
+        const ctxId = blsctBrowser.CTxId.deserialize(hexByte.repeat(32));
+        const outPoint = blsctBrowser.OutPoint.generate(ctxId);
+        const txIn = blsctBrowser.TxIn.generate(
+          250000,
+          new blsctBrowser.Scalar(100),
+          new blsctBrowser.Scalar(101),
+          tokenId,
+          outPoint,
+          false,
+          false,
+        );
+
+        const destination = blsctBrowser.SubAddr.generate(
+          new blsctBrowser.Scalar(91),
+          blsctBrowser.PublicKey.fromScalar(new blsctBrowser.Scalar(92)),
+          blsctBrowser.SubAddrId.generate(7, 9),
+        );
+        const txOut = blsctBrowser.TxOut.generate(
+          destination,
+          outAmount,
+          `memo-${hexByte}`,
+          tokenId,
+          blsctBrowser.TxOutputType.Normal,
+          0,
+          false,
+          new blsctBrowser.Scalar(777),
+        );
+
+        const unsignedTx = blsctBrowser.UnsignedTransaction.create();
+        unsignedTx.addInput(blsctBrowser.UnsignedInput.fromTxIn(txIn));
+        unsignedTx.addOutput(blsctBrowser.UnsignedOutput.fromTxOut(txOut));
+        unsignedTx.setFee(1000);
+        return unsignedTx.sign();
+      };
+
+      const txHex1 = makeSignedTxHex('11', 10000);
+      const txHex2 = makeSignedTxHex('22', 20000);
+      const aggregatedHex = blsctBrowser.CTx.aggregateTransactions([txHex1, txHex2]);
+
+      expect(aggregatedHex).toMatch(/^[0-9a-f]+$/);
+      const aggregatedTx = blsctBrowser.CTx.deserialize(aggregatedHex);
+      expect(aggregatedTx.getCTxIns().size()).toBe(2);
+      expect(aggregatedTx.getCTxOuts().size()).toBe(3);
+    });
   });
 
   describe('Chain Configuration', () => {

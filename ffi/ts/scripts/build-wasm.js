@@ -18,7 +18,7 @@ const WASM_DEBUG = process.env.WASM_DEBUG === '1';
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = 'e923847b0644f566dfcb96c04e6ef454eb2afb45';
+const MASTER_SHA = '623ad2da8e9031d8b900c54af6d393ec88e9a32a';
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core';
@@ -422,6 +422,10 @@ const EXPORTED_FUNCTIONS = [
   // CTx ID
   '_serialize_ctx_id',
   '_deserialize_ctx_id',
+  '_create_tx_hex_vec',
+  '_add_to_tx_hex_vec',
+  '_delete_tx_hex_vec',
+  '_aggregate_transactions',
 
   // CTxIns accessors
   '_get_ctx_ins_size',

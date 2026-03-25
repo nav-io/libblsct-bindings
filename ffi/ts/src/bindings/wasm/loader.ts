@@ -148,6 +148,10 @@ export interface BlsctWasmModule {
   _deserialize_ctx(hex: number): number;
   _serialize_ctx_id(ctxId: number): number;
   _deserialize_ctx_id(hex: number): number;
+  _create_tx_hex_vec(): number;
+  _add_to_tx_hex_vec(txHexVec: number, txHex: number): void;
+  _delete_tx_hex_vec(txHexVec: number): void;
+  _aggregate_transactions(txHexVec: number): number;
   _delete_ctx(ctx: number): void;
   
   // CTxIns accessors
