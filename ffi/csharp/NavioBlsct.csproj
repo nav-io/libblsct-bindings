@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0;netstandard2.1</TargetFrameworks>
+    <LangVersion>12.0</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>NavioBlsct</AssemblyName>
+    <RootNamespace>NavioBlsct</RootNamespace>
+    <PackageId>NavioBlsct</PackageId>
+    <Version>0.1.0</Version>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <Authors>nav-io</Authors>
+    <Description>C# bindings for libblsct (BLS Confidential Transactions)</Description>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/nav-io/libblsct-bindings</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/nav-io/libblsct-bindings</RepositoryUrl>
+    <PackageTags>blsct;navio;crypto;bls;confidential-transactions</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <SwigOutputDir>$(MSBuildProjectDirectory)/obj/swig</SwigOutputDir>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="tests/**/*.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="blsct.i" Pack="true" PackagePath="swig/" />
+    <None Include="runtimes/**/*" Pack="true" PackagePath="runtimes/" />
+    <None Include="README.md" Pack="true" PackagePath="/" />
+  </ItemGroup>
+
+  <Target Name="GenerateSwigBindings" BeforeTargets="BeforeCompile">
+    <MakeDir Directories="$(SwigOutputDir)" />
+    <Exec
+      Command='swig -c++ -csharp -namespace NavioBlsct -dllimport blsct -outdir "$(SwigOutputDir)" -o "$(SwigOutputDir)/blsct_wrap.cxx" "$(MSBuildProjectDirectory)/blsct.i"' />
+
+    <ItemGroup>
+      <Compile Include="$(SwigOutputDir)/*.cs" />
+    </ItemGroup>
+  </Target>
+</Project>

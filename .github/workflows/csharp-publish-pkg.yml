@@ -1,0 +1,138 @@
+name: 'C#: Publish package'
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'ffi/blsct.i'
+      - 'ffi/csharp/**'
+      - '.github/workflows/csharp-publish-pkg.yml'
+      - '.github/workflows/csharp-build-native.yml'
+  pull_request:
+    paths:
+      - 'ffi/blsct.i'
+      - 'ffi/csharp/**'
+      - '.github/workflows/csharp-publish-pkg.yml'
+      - '.github/workflows/csharp-build-native.yml'
+
+env:
+  NAVIO_CORE_SHA: '623ad2da8e9031d8b900c54af6d393ec88e9a32a'
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            rid: linux-x64
+            lib: libblsct.so
+            host: ''
+          - os: macos-15
+            rid: osx-arm64
+            lib: libblsct.dylib
+            host: ''
+          - os: ubuntu-24.04
+            rid: win-x64
+            lib: blsct.dll
+            host: x86_64-w64-mingw32
+
+    uses: ./.github/workflows/csharp-build-native.yml
+    with:
+      runner: ${{ matrix.os }}
+      artifact-name: native-${{ matrix.rid }}
+      host: ${{ matrix.host }}
+
+  verify:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          clean: true
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Install SWIG
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y swig
+
+      - name: Download native artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: ffi/csharp/runtimes
+
+      - name: Arrange runtimes
+        run: |
+          cd ffi/csharp/runtimes
+          for dir in native-*; do
+            rid="${dir#native-}"
+            mkdir -p "$rid/native"
+            mv "$dir"/* "$rid/native/"
+            rmdir "$dir"
+          done
+
+      - name: Pack
+        run:
+          dotnet pack NavioBlsct.csproj --configuration Release --output ./nupkg
+        working-directory: ffi/csharp
+
+      - name: Upload nupkg artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: navioblsct-nupkg
+          path: ffi/csharp/nupkg/*.nupkg
+
+      - name: Verify package contents
+        run: |
+          unzip -l ./ffi/csharp/nupkg/*.nupkg | grep 'runtimes/.*/native/'
+
+      - name: Smoke test package in consumer app
+        run: |
+          rm -rf /tmp/navioblsct-package-smoke
+          mkdir -p /tmp/navioblsct-package-smoke
+          cd /tmp/navioblsct-package-smoke
+          dotnet new console -n PackageSmoke --framework net8.0 >/dev/null
+          cd PackageSmoke
+          VERSION=$(dotnet msbuild "$GITHUB_WORKSPACE/ffi/csharp/NavioBlsct.csproj" -nologo -getProperty:Version | tr -d '\r')
+          dotnet add package NavioBlsct --version "$VERSION" --source "$GITHUB_WORKSPACE/ffi/csharp/nupkg" >/dev/null
+          cat > Program.cs <<'EOF'
+          using System;
+          using NavioBlsct;
+
+          blsct.init();
+          Console.WriteLine(blsct.get_blsct_chain());
+          EOF
+          dotnet run
+
+  publish:
+    needs: verify
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Download nupkg artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: navioblsct-nupkg
+          path: ffi/csharp/nupkg
+
+      - name: Publish to NuGet
+        run: |
+          dotnet nuget push ./ffi/csharp/nupkg/*.nupkg \
+            --api-key ${{ secrets.NUGET_API_KEY }} \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate

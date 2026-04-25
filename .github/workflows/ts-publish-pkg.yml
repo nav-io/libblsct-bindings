@@ -2,24 +2,37 @@ name: 'TypeScript: Publish package'
 
 on:
   workflow_dispatch:
+  push:
+    paths:
+      - 'ffi/blsct.i'
+      - 'ffi/ts/**'
+      - '.github/workflows/ts-publish-pkg.yml'
+  pull_request:
+    paths:
+      - 'ffi/blsct.i'
+      - 'ffi/ts/**'
+      - '.github/workflows/ts-publish-pkg.yml'
+
 
 jobs:
-  ts-public-package:
+  build:
     runs-on: macos-15
 
     steps:
+      - uses: actions/checkout@v6
+        with:
+          clean: true
+
       - name: Install system dependencies
-        run: |
-          brew install swig autoconf automake libtool pkg-config git
+        run: brew install swig autoconf automake libtool pkg-config git
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22'
-          registry-url: 'https://registry.npmjs.org/'
 
       - name: Setup Emscripten
-        uses: mymindstorm/setup-emsdk@v14
+        uses: mymindstorm/setup-emsdk@v16
         with:
           version: '5.0.0'
           actions-cache-folder: 'emsdk-cache-v5'
@@ -27,16 +40,11 @@ jobs:
       - name: Verify Emscripten installation
         run: emcc --version
 
-      - uses: actions/checkout@v4
-        with:
-          clean: true
-
       - name: Install dependencies and build native module
         run: |
           cd ffi/ts
           npm install
         env:
-          # Force SWIG wrapper regeneration to ensure it matches blsct.i
           BLSCT_REGENERATE_SWIG: '1'
 
       - name: Build WASM module
@@ -54,9 +62,65 @@ jobs:
           cd ffi/ts
           npm test
 
-      - name: Publish to npm
+      - name: Pack
         run: |
+          mkdir -p /tmp/ts-pkg
           cd ffi/ts
-          npm publish --access public
+          npm pack --pack-destination /tmp/ts-pkg
+
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: ts-pkg
+          path: /tmp/ts-pkg/*.tgz
+
+  verify:
+    needs: build
+    runs-on: macos-15
+
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+
+      - name: Download package artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ts-pkg
+          path: /tmp/ts-pkg
+
+      - name: Smoke test package
+        run: |
+          mkdir -p /tmp/ts-pkg-smoke && cd /tmp/ts-pkg-smoke
+          npm init -y
+          npm install /tmp/ts-pkg/*.tgz
+          node -e "
+            const { getChain, Bech32 } = require('navio-blsct');
+            const chain = getChain();
+            console.log('chain:', chain);
+            console.log('Bech32:', Bech32);
+          "
+
+  publish:
+    needs: verify
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set up Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org/'
+
+      - name: Download package artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: ts-pkg
+          path: /tmp/ts-pkg
+
+      - name: Publish to npm
+        run: npm publish /tmp/ts-pkg/*.tgz --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
