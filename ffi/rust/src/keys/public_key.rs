@@ -1,34 +1,17 @@
 use crate::{
-  blsct_obj::{BlsctObj, self},
-  blsct_serde::BlsctSerde, 
+  blsct_obj::{self, BlsctObj},
+  blsct_serde::BlsctSerde,
   ffi::{
-    BLSCT_FAILURE,
-    BlsctPubKey,
-    BlsctRetVal,
-    calc_nonce,
-    err_bool,
-    gen_random_public_key,
-    get_public_key_point,
-    point_to_public_key,
-    PUBLIC_KEY_SIZE,
-    scalar_to_pub_key,
-    serialize_point,
+    calc_nonce, err_bool, gen_random_public_key, get_public_key_point, point_to_public_key,
+    scalar_to_pub_key, serialize_point, BlsctPubKey, BlsctRetVal, BLSCT_FAILURE, PUBLIC_KEY_SIZE,
   },
-  macros::{
-    impl_clone,
-    impl_display,
-    impl_from_retval,
-    impl_value,
-  },
+  macros::{impl_clone, impl_display, impl_from_retval, impl_value},
   point::Point,
   scalar::Scalar,
-  util::{
-    c_hex_str_to_array,
-    build_succ_blsct_ret_val,
-  },
+  util::{build_succ_blsct_ret_val, c_hex_str_to_array},
 };
-use std::ffi::c_char;
 use serde::{Deserialize, Serialize};
+use std::ffi::c_char;
 
 #[derive(PartialEq, Eq, Debug, Deserialize, Serialize)]
 pub struct PublicKey {
@@ -45,9 +28,7 @@ impl PublicKey {
   }
 
   pub fn generate_nonce(&self, view_key: &Scalar) -> Self {
-    let blsct_point = unsafe {
-      calc_nonce(self.value(), view_key.value())
-    };
+    let blsct_point = unsafe { calc_nonce(self.value(), view_key.value()) };
     let obj = BlsctObj::from_c_obj(blsct_point);
     let point: Point = obj.into();
     (&point).into()
@@ -70,7 +51,7 @@ impl BlsctSerde for PublicKey {
   }
 
   unsafe fn deserialize(hex: *const c_char) -> *mut BlsctRetVal {
-    // since hex is a serialized Point, convert it back to BlsctPoint 
+    // since hex is a serialized Point, convert it back to BlsctPoint
     match c_hex_str_to_array(hex) {
       Ok(buf) => {
         let blsct_pub_key = unsafe { point_to_public_key(&buf) };
@@ -78,10 +59,8 @@ impl BlsctSerde for PublicKey {
           Ok(rv) => rv,
           Err(_) => err_bool(BLSCT_FAILURE),
         }
-      },
-      Err(_) => {
-        err_bool(BLSCT_FAILURE)
-      },
+      }
+      Err(_) => err_bool(BLSCT_FAILURE),
     }
   }
 }
@@ -119,10 +98,7 @@ impl From<&Scalar> for PublicKey {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::{
-    initializer::init,
-    keys::child_key::ChildKey,
-  };
+  use crate::{initializer::init, keys::child_key::ChildKey};
 
   #[test]
   fn test_random() {
@@ -188,4 +164,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-

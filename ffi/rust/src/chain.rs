@@ -1,7 +1,4 @@
-use crate::ffi::{
-  get_blsct_chain,
-  set_blsct_chain,
-};
+use crate::ffi::{get_blsct_chain, set_blsct_chain};
 use std::os::raw::c_int;
 use thiserror::Error;
 
@@ -56,7 +53,12 @@ mod tests {
 
   #[test]
   fn test_get_set_chain() {
-    for exp_chain in [Chain::Mainnet, Chain::Testnet, Chain::Signet, Chain::Regtest] {
+    for exp_chain in [
+      Chain::Mainnet,
+      Chain::Testnet,
+      Chain::Signet,
+      Chain::Regtest,
+    ] {
       Chain::set(exp_chain);
       assert_eq!(exp_chain, Chain::get());
     }
@@ -64,4 +66,3 @@ mod tests {
     Chain::set(Chain::Mainnet);
   }
 }
-

@@ -23,7 +23,8 @@ macro_rules! impl_from_retval {
 
 macro_rules! impl_size {
   () => {
-    #[inline] pub fn size(&self) -> usize {
+    #[inline]
+    pub fn size(&self) -> usize {
       self.obj.size()
     }
   };
@@ -31,7 +32,8 @@ macro_rules! impl_size {
 
 macro_rules! impl_value {
   ($t:ident) => {
-    #[inline] pub fn value(&self) -> *const $t {
+    #[inline]
+    pub fn value(&self) -> *const $t {
       self.obj.as_ptr()
     }
   };
@@ -39,7 +41,8 @@ macro_rules! impl_value {
 
 macro_rules! impl_value_raw_const_obj {
   () => {
-    #[inline] pub fn value(&self) -> *const c_void {
+    #[inline]
+    pub fn value(&self) -> *const c_void {
       self.obj
     }
   };
@@ -53,16 +56,12 @@ macro_rules! impl_clone {
         bincode::deserialize::<$name>(&hex).unwrap()
       }
     }
-  }
+  };
 }
 
 macro_rules! impl_key {
   ($name:ident) => {
-    use crate::{
-      blsct_obj::BlsctObj,
-      ffi::BlsctScalar,
-      scalar::Scalar,
-    };
+    use crate::{blsct_obj::BlsctObj, ffi::BlsctScalar, scalar::Scalar};
     use serde::{Deserialize, Serialize};
 
     #[derive(PartialEq, Eq, Debug, Deserialize, Serialize)]
@@ -96,4 +95,3 @@ pub(crate) use impl_key;
 pub(crate) use impl_size;
 pub(crate) use impl_value;
 pub(crate) use impl_value_raw_const_obj;
-
