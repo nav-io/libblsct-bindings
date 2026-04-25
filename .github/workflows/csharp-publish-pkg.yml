@@ -42,7 +42,7 @@ jobs:
       artifact-name: native-${{ matrix.rid }}
       host: ${{ matrix.host }}
 
-  verify:
+  pack:
     needs: build
     runs-on: ubuntu-latest
 
@@ -83,21 +83,50 @@ jobs:
           dotnet pack NavioBlsct.csproj --configuration Release --output ./nupkg
         working-directory: ffi/csharp
 
+      - name: Verify package contents
+        run: |
+          unzip -l ./ffi/csharp/nupkg/*.nupkg | grep 'runtimes/.*/native/'
+
       - name: Upload nupkg artifact
         uses: actions/upload-artifact@v7
         with:
           name: navioblsct-nupkg
           path: ffi/csharp/nupkg/*.nupkg
 
-      - name: Verify package contents
-        run: |
-          unzip -l ./ffi/csharp/nupkg/*.nupkg | grep 'runtimes/.*/native/'
+  verify:
+    needs: pack
+    strategy:
+      matrix:
+        os: ['ubuntu-latest', 'macos-15', 'windows-2022']
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          clean: true
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Download nupkg artifact
+        uses: actions/download-artifact@v8
+        with:
+          name: navioblsct-nupkg
+          path: ffi/csharp/nupkg
 
       - name: Smoke test package in consumer app
         run: |
-          rm -rf /tmp/navioblsct-package-smoke
-          mkdir -p /tmp/navioblsct-package-smoke
-          cd /tmp/navioblsct-package-smoke
+          SMOKE_DIR="${RUNNER_TEMP}/navioblsct-package-smoke"
+          rm -rf "$SMOKE_DIR"
+          mkdir -p "$SMOKE_DIR"
+          cd "$SMOKE_DIR"
           dotnet new console -n PackageSmoke --framework net8.0 >/dev/null
           cd PackageSmoke
           VERSION=$(dotnet msbuild "$GITHUB_WORKSPACE/ffi/csharp/NavioBlsct.csproj" -nologo -getProperty:Version | tr -d '\r')
