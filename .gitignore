@@ -1,5 +1,7 @@
 *~
 build/
-docs/
+docs/site/
+ffi/ts/docs/
 ffi/.pytest_cache/
 ffi/ts/.emcache/
+ffi/csharp/runtimes/

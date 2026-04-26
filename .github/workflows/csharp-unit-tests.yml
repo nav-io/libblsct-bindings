@@ -1,0 +1,108 @@
+name: 'C#: Run unit tests'
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'ffi/blsct.i'
+      - 'ffi/csharp/**'
+      - '.github/workflows/csharp-unit-tests.yml'
+      - '.github/workflows/csharp-build-native.yml'
+  pull_request:
+    paths:
+      - 'ffi/blsct.i'
+      - 'ffi/csharp/**'
+      - '.github/workflows/csharp-unit-tests.yml'
+      - '.github/workflows/csharp-build-native.yml'
+
+
+jobs:
+  build-native:
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            artifact-suffix: ubuntu-24.04
+            host: ''
+          - os: macos-15
+            artifact-suffix: macos-15
+            host: ''
+          - os: ubuntu-24.04
+            artifact-suffix: windows-2022
+            host: x86_64-w64-mingw32
+
+    uses: ./.github/workflows/csharp-build-native.yml
+    with:
+      runner: ${{ matrix.os }}
+      artifact-name: libblsct-${{ matrix.artifact-suffix }}
+      host: ${{ matrix.host }}
+
+  csharp-run-unit-tests:
+    needs: build-native
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        os: ['ubuntu-24.04', 'macos-15', 'windows-2022']
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          clean: true
+
+      - name: Install system dependencies (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          if command -v apt-get >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y swig autoconf automake libtool pkg-config build-essential libgmp-dev
+          else
+            brew install swig autoconf automake libtool pkg-config gmp
+          fi
+
+      - name: Download native library
+        uses: actions/download-artifact@v8
+        with:
+          name: libblsct-${{ matrix.os }}
+          path: ${{ github.workspace }}
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+
+      - name: Run tests
+        run: |
+          cd ffi/csharp
+
+          # Build first so we know the output directory
+          dotnet build tests/NavioBlsct.Tests.csproj
+
+          # Copy native lib next to test assembly so DllImport finds it
+          if [[ $RUNNER_OS == 'Windows' ]]; then
+            cp "$GITHUB_WORKSPACE/blsct.dll" tests/bin/Debug/net8.0/blsct.dll
+            cp "$GITHUB_WORKSPACE/blsct.dll" tests/bin/Debug/net10.0/blsct.dll
+          elif [[ $RUNNER_OS == 'macOS' ]]; then
+            cp "$GITHUB_WORKSPACE/libblsct.dylib" tests/bin/Debug/net8.0/libblsct.dylib
+            cp "$GITHUB_WORKSPACE/libblsct.dylib" tests/bin/Debug/net10.0/libblsct.dylib
+          else
+            cp "$GITHUB_WORKSPACE/libblsct.so" tests/bin/Debug/net8.0/libblsct.so
+            cp "$GITHUB_WORKSPACE/libblsct.so" tests/bin/Debug/net10.0/libblsct.so
+          fi
+
+          if [[ $RUNNER_OS == 'Windows' ]]; then
+            export LIBBLSCT_SO_PATH="$GITHUB_WORKSPACE/blsct.dll"
+          elif [[ $RUNNER_OS == 'macOS' ]]; then
+            export LIBBLSCT_SO_PATH="$GITHUB_WORKSPACE/libblsct.dylib"
+          else
+            export LIBBLSCT_SO_PATH="$GITHUB_WORKSPACE/libblsct.so"
+          fi
+
+          dotnet test tests/NavioBlsct.Tests.csproj --no-build
