@@ -1,7 +1,4 @@
-use crate::ffi::{
-  from_tx_key_to_spending_key,
-  from_tx_key_to_view_key,
-};
+use crate::ffi::{from_tx_key_to_spending_key, from_tx_key_to_view_key};
 
 crate::macros::impl_key!(TxKey);
 
@@ -22,10 +19,7 @@ impl TxKey {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::{
-    initializer::init,
-    keys::child_key::ChildKey,
-  };
+  use crate::{initializer::init, keys::child_key::ChildKey};
 
   fn get_tx_key() -> TxKey {
     init();
@@ -47,4 +41,3 @@ mod tests {
     tx_key.to_view_key();
   }
 }
-

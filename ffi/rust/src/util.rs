@@ -1,19 +1,12 @@
 use crate::{
   blsct_obj,
-  ffi::{
-    BlsctRetVal,
-    malloc,
-  },
+  ffi::{malloc, BlsctRetVal},
   keys::child_key::ChildKey,
   scalar::Scalar,
 };
 use rand::Rng;
 use std::{
-  ffi::{
-    c_char,
-    CStr,
-    CString,
-  },
+  ffi::{c_char, CStr, CString},
   fmt,
 };
 
@@ -22,23 +15,17 @@ pub enum Error {
   InvalidHexSize(String),
 }
 
-impl<'a> std::error::Error for Error {}
+impl std::error::Error for Error {}
 
 impl fmt::Display for Error {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
-      Error::InvalidHexSize(msg) =>
-        write!(f, "Invalid hex size: {msg:?}"),
+      Error::InvalidHexSize(msg) => write!(f, "Invalid hex size: {msg:?}"),
     }
   }
 }
-pub fn c_hex_str_to_array<const N: usize>(
-  raw_hex_c_str: *const c_char
-) -> Result<[u8; N], Error> {
-
-  let hex_c_str = unsafe {
-    std::ffi::CStr::from_ptr(raw_hex_c_str)
-  };
+pub fn c_hex_str_to_array<const N: usize>(raw_hex_c_str: *const c_char) -> Result<[u8; N], Error> {
+  let hex_c_str = unsafe { std::ffi::CStr::from_ptr(raw_hex_c_str) };
   let hex_str = hex_c_str.to_str().unwrap();
 
   let bytes = hex::decode(hex_str).unwrap();
@@ -49,13 +36,10 @@ pub fn c_hex_str_to_array<const N: usize>(
 }
 
 pub fn build_succ_blsct_ret_val<'a, const N: usize>(
-  value: *const u8
+  value: *const u8,
 ) -> Result<*mut BlsctRetVal, blsct_obj::Error<'a>> {
-
   // allocate memory for BlsctRetVal
-  let rv_ptr = unsafe {
-    malloc(std::mem::size_of::<BlsctRetVal>()) as *mut BlsctRetVal
-  };
+  let rv_ptr = unsafe { malloc(std::mem::size_of::<BlsctRetVal>()) as *mut BlsctRetVal };
   if rv_ptr.is_null() {
     return Err(blsct_obj::Error::FailedToAllocateMemory("BlsctRetVal"));
   }
@@ -72,9 +56,7 @@ pub fn build_succ_blsct_ret_val<'a, const N: usize>(
 }
 
 pub fn pad_hex_left<T>(hex: *const c_char) -> CString {
-  let mut h = unsafe {
-    CStr::from_ptr(hex).to_bytes().to_vec()
-  };
+  let mut h = unsafe { CStr::from_ptr(hex).to_bytes().to_vec() };
   let len = std::mem::size_of::<T>() * 2;
 
   if h.len() < len {
@@ -104,4 +86,3 @@ pub fn gen_random_malloced_buf<const N: usize>() -> *mut [u8; N] {
   }
   c_obj
 }
-

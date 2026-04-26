@@ -1,27 +1,15 @@
-use std::slice;
 use crate::{
   blsct_serde::BlsctSerde,
-  ffi::{
-    BlsctRetVal,
-    free_obj,
-  },
+  ffi::{free_obj, malloc, BlsctRetVal},
 };
+use std::slice;
 
 use serde::{
-  de::Error as DeError,
-  ser::Error as SerError,
-  Deserialize,
-  Deserializer,
-  Serialize,
-  Serializer,
+  de::Error as DeError, ser::Error as SerError, Deserialize, Deserializer, Serialize, Serializer,
 };
 use std::{
   any::type_name,
-  ffi::{
-    c_void,
-    CStr,
-    CString,
-  },
+  ffi::{c_void, CStr, CString},
   fmt,
   ptr::NonNull,
 };
@@ -37,10 +25,12 @@ impl<'a> std::error::Error for Error<'a> {}
 impl<'a> fmt::Display for Error<'a> {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
-      Error::FailedToAllocateMemory(target) =>
-        write!(f, "Failed to allocate memory for {target}"),
-      Error::FailedToGenerateObject(target) =>
-        write!(f, "Failed to generate object for {target}"),
+      Error::FailedToAllocateMemory(target) => {
+        write!(f, "Failed to allocate memory for {target}")
+      }
+      Error::FailedToGenerateObject(target) => {
+        write!(f, "Failed to generate object for {target}")
+      }
     }
   }
 }
@@ -91,10 +81,7 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
     }
   }
 
-  pub fn new(
-    ptr: NonNull<u8>,
-    size: usize,
-  ) -> Self {
+  pub fn new(ptr: NonNull<u8>, size: usize) -> Self {
     Self {
       ptr,
       size,
@@ -109,19 +96,21 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
     if rv.is_null() {
       return Err(Error::FailedToAllocateMemory("BlsctRetVal"));
     }
-    let (result, value, value_size) = unsafe {
-      ((*rv).result, (*rv).value, (*rv).value_size)
-    };
+    let (result, value, value_size) = unsafe { ((*rv).result, (*rv).value, (*rv).value_size) };
 
     // BlscRetVal is no longer needed
-    unsafe { free_obj(rv as *mut c_void); }
+    unsafe {
+      free_obj(rv as *mut c_void);
+    }
 
     // check if generating object is failed
     if result != 0 {
       return Err(Error::FailedToGenerateObject(type_name::<Self>()));
     }
-    assert!(!value.is_null(),
-      "the value is null altough result is 0. check code.");
+    assert!(
+      !value.is_null(),
+      "the value is null altough result is 0. check code."
+    );
 
     let ptr = NonNull::new(value as *mut u8).unwrap();
 
@@ -146,10 +135,23 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
     }
   }
 
-  pub fn from_c_obj_and_size(
-    c_obj: *mut c_void,
-    size: usize,
-  ) -> Self {
+  pub fn copy_from_c_obj(c_obj: *const U) -> Self {
+    let size = std::mem::size_of::<U>();
+    let new_ptr = unsafe {
+      let buf = malloc(size) as *mut u8;
+      std::ptr::copy_nonoverlapping(c_obj as *const u8, buf, size);
+      NonNull::new(buf).unwrap()
+    };
+    Self {
+      ptr: new_ptr,
+      size,
+      _t: std::marker::PhantomData,
+      _u: std::marker::PhantomData,
+      deallocator: None,
+    }
+  }
+
+  pub fn from_c_obj_and_size(c_obj: *mut c_void, size: usize) -> Self {
     let ptr = NonNull::new(c_obj as *mut u8).unwrap();
     Self {
       ptr,
@@ -160,9 +162,13 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
     }
   }
 
-  #[inline] pub fn size(&self) -> usize { self.size }
+  #[inline]
+  pub fn size(&self) -> usize {
+    self.size
+  }
 
-  #[inline] pub fn as_ptr(&self) -> *const U {
+  #[inline]
+  pub fn as_ptr(&self) -> *const U {
     self.ptr.as_ptr() as *const U
   }
 }
@@ -171,7 +177,9 @@ impl<T: BlsctSerde, U> BlsctObj<T, U> {
 // and return a pointer to a c-string (null-terminated byte sequence)
 impl<T: BlsctSerde, U> Serialize for BlsctObj<T, U> {
   fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-  where S: Serializer {
+  where
+    S: Serializer,
+  {
     let c_hex = unsafe { T::serialize(self.as_ptr() as *const u8, self.size()) };
     if c_hex.is_null() {
       return Err(SerError::custom("Serialization failed. c_hex is null"));
@@ -181,7 +189,9 @@ impl<T: BlsctSerde, U> Serialize for BlsctObj<T, U> {
       .map_err(|e| SerError::custom(format!("Converting C-Str to String failed: {:?}", e)))?
       .to_owned();
 
-    unsafe { free_obj(c_hex as *mut c_void); }
+    unsafe {
+      free_obj(c_hex as *mut c_void);
+    }
 
     serializer.serialize_str(&hex)
   }
@@ -191,26 +201,27 @@ impl<T: BlsctSerde, U> Serialize for BlsctObj<T, U> {
 // and return a pointer to a BlsctRetVal
 impl<'de, T: BlsctSerde, U> Deserialize<'de> for BlsctObj<T, U> {
   fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-  where D: Deserializer<'de> {
+  where
+    D: Deserializer<'de>,
+  {
     let hex: String = Deserialize::deserialize(deserializer)?;
-    let hex_c_str = CString::new(hex)
-      .map_err(|_| DeError::custom("string contains interior NUL"))?;
+    let hex_c_str =
+      CString::new(hex).map_err(|_| DeError::custom("string contains interior NUL"))?;
 
     let rv = unsafe { T::deserialize(hex_c_str.as_ptr()) };
 
-    Ok(BlsctObj::<T, U>::from_retval(rv)
-      .map_err(|e| DeError::custom(format!("Deserialization failed: {:?}", e)))?)
+    BlsctObj::<T, U>::from_retval(rv)
+      .map_err(|e| DeError::custom(format!("Deserialization failed: {:?}", e)))
   }
 }
 
 impl<T: BlsctSerde, U> Drop for BlsctObj<T, U> {
   fn drop(&mut self) {
     match self.deallocator {
-      Some(f) => unsafe { 
-        f(self.ptr.as_ptr().cast::<c_void>())
+      Some(f) => unsafe { f(self.ptr.as_ptr().cast::<c_void>()) },
+      None => unsafe {
+        free_obj(self.ptr.as_ptr() as *mut c_void);
       },
-      None => unsafe { free_obj(self.ptr.as_ptr() as *mut c_void); },
     }
   }
 }
-

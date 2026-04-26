@@ -1,19 +1,8 @@
 use crate::{
   blsct_obj::BlsctObj,
-  blsct_serde::BlsctSerde, 
-  ffi::{
-    BlsctScript,
-    BlsctRetVal,
-    deserialize_script,
-    SCRIPT_SIZE,
-    serialize_script,
-  },
-  macros::{
-    impl_clone,
-    impl_display,
-    impl_from_retval,
-    impl_value,
-  },
+  blsct_serde::BlsctSerde,
+  ffi::{deserialize_script, serialize_script, BlsctRetVal, BlsctScript, SCRIPT_SIZE},
+  macros::{impl_clone, impl_display, impl_from_retval, impl_value},
   util::gen_random_malloced_buf,
 };
 use serde::{Deserialize, Serialize};
@@ -54,7 +43,7 @@ impl BlsctSerde for Script {
 
 impl PartialEq for Script {
   fn eq(&self, other: &Self) -> bool {
-    self.obj == other.obj 
+    self.obj == other.obj
   }
 }
 
@@ -109,4 +98,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-

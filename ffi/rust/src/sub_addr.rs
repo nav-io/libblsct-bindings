@@ -1,24 +1,12 @@
 use crate::{
   blsct_obj::BlsctObj,
-  blsct_serde::BlsctSerde, 
+  blsct_serde::BlsctSerde,
   ffi::{
+    derive_sub_address, deserialize_sub_addr, dpk_to_sub_addr, serialize_sub_addr, BlsctRetVal,
     BlsctSubAddr,
-    BlsctRetVal,
-    derive_sub_address,
-    deserialize_sub_addr,
-    dpk_to_sub_addr,
-    serialize_sub_addr,
   },
-  keys::{
-    double_public_key::DoublePublicKey,
-    public_key::PublicKey,
-  },
-  macros::{
-    impl_clone,
-    impl_display,
-    impl_from_retval,
-    impl_value,
-  },
+  keys::{double_public_key::DoublePublicKey, public_key::PublicKey},
+  macros::{impl_clone, impl_display, impl_from_retval, impl_value},
   scalar::Scalar,
   sub_addr_id::SubAddrId,
 };
@@ -35,16 +23,14 @@ impl_display!(SubAddr);
 impl_clone!(SubAddr);
 
 impl SubAddr {
-  pub fn new(
-    view_key: &Scalar,
-    spending_pub_key: &PublicKey,
-    sub_addr_id: &SubAddrId,
-  ) -> Self {
-    let blsct_sub_addr = unsafe { derive_sub_address(
-      view_key.value(),
-      spending_pub_key.value(),
-      sub_addr_id.value(),
-    )};
+  pub fn new(view_key: &Scalar, spending_pub_key: &PublicKey, sub_addr_id: &SubAddrId) -> Self {
+    let blsct_sub_addr = unsafe {
+      derive_sub_address(
+        view_key.value(),
+        spending_pub_key.value(),
+        sub_addr_id.value(),
+      )
+    };
     BlsctObj::from_c_obj(blsct_sub_addr).into()
   }
 
@@ -54,7 +40,9 @@ impl SubAddr {
 impl From<DoublePublicKey> for SubAddr {
   fn from(dpk: DoublePublicKey) -> SubAddr {
     let rv = unsafe { dpk_to_sub_addr(dpk.value()) };
-    BlsctObj::<SubAddr, BlsctSubAddr>::from_retval(rv).unwrap().into()
+    BlsctObj::<SubAddr, BlsctSubAddr>::from_retval(rv)
+      .unwrap()
+      .into()
   }
 }
 
@@ -70,7 +58,7 @@ impl BlsctSerde for SubAddr {
 
 impl PartialEq for SubAddr {
   fn eq(&self, other: &Self) -> bool {
-    self.obj == other.obj 
+    self.obj == other.obj
   }
 }
 
@@ -84,9 +72,7 @@ impl From<BlsctObj<SubAddr, BlsctSubAddr>> for SubAddr {
 mod tests {
   use super::*;
   use crate::{
-    keys::double_public_key::DoublePublicKey,
-    initializer::init,
-    util::gen_random_view_key,
+    initializer::init, keys::double_public_key::DoublePublicKey, util::gen_random_view_key,
   };
 
   #[test]
@@ -119,15 +105,10 @@ mod tests {
     let spending_pub_key = PublicKey::random().unwrap();
     let view_key = gen_random_view_key().unwrap();
     let sub_addr_id = SubAddrId::new(123, 456);
-    
-    let a = SubAddr::new(
-      &view_key,
-      &spending_pub_key,
-      &sub_addr_id,
-    );
+
+    let a = SubAddr::new(&view_key, &spending_pub_key, &sub_addr_id);
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<SubAddr>(&hex).unwrap();
     assert_eq!(a, b);
   }
 }
-

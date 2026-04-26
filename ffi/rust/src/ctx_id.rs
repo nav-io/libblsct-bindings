@@ -1,19 +1,8 @@
 use crate::{
   blsct_obj::BlsctObj,
-  blsct_serde::BlsctSerde, 
-  ffi::{
-    BlsctCTxId,
-    BlsctRetVal,
-    CTX_ID_SIZE,
-    deserialize_ctx_id,
-    serialize_ctx_id,
-  },
-  macros::{
-    impl_clone,
-    impl_display,
-    impl_from_retval,
-    impl_value,
-  },
+  blsct_serde::BlsctSerde,
+  ffi::{deserialize_ctx_id, serialize_ctx_id, BlsctCTxId, BlsctRetVal, CTX_ID_SIZE},
+  macros::{impl_clone, impl_display, impl_from_retval, impl_value},
   util::gen_random_malloced_buf,
 };
 use serde::{Deserialize, Serialize};
@@ -74,5 +63,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-
-
