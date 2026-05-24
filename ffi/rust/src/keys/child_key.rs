@@ -1,14 +1,11 @@
 use crate::{
-  blsct_obj::{BlsctObj, self},
+  blsct_obj::{self, BlsctObj},
   ffi::{
-    BlsctScalar,
-    from_child_key_to_blinding_key,
-    from_child_key_to_token_key,
-    from_child_key_to_tx_key,
-    from_seed_to_child_key,
+    from_child_key_to_blinding_key, from_child_key_to_token_key, from_child_key_to_tx_key,
+    from_seed_to_child_key, BlsctScalar,
   },
-  scalar::Scalar,
   keys::tx_key::TxKey,
+  scalar::Scalar,
 };
 use serde::{Deserialize, Serialize};
 
@@ -100,4 +97,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-

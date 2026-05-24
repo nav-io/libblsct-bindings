@@ -1,21 +1,9 @@
 use crate::{
-  blsct_obj::{BlsctObj, self},
-  blsct_serde::BlsctSerde, 
+  blsct_obj::{self, BlsctObj},
+  blsct_serde::BlsctSerde,
   ctx_id::CTxId,
-  ffi::{
-    BlsctOutPoint,
-    BlsctRetVal,
-    deserialize_out_point,
-    gen_out_point,
-    get_out_point_n,
-    serialize_out_point,
-  },
-  macros::{
-    impl_clone,
-    impl_display,
-    impl_from_retval,
-    impl_value,
-  },
+  ffi::{deserialize_out_point, gen_out_point, serialize_out_point, BlsctOutPoint, BlsctRetVal},
+  macros::{impl_clone, impl_display, impl_from_retval, impl_value},
 };
 use serde::{Deserialize, Serialize};
 use std::ffi::c_char;
@@ -30,14 +18,10 @@ impl_display!(OutPoint);
 impl_clone!(OutPoint);
 
 impl OutPoint {
-  pub fn new<'a>(ctx_id: &CTxId, index: u32) -> Result<Self, blsct_obj::Error<'a>> {
-    let rv = unsafe { gen_out_point(ctx_id.value() as *const c_char, index) };
+  pub fn new<'a>(ctx_id: &CTxId) -> Result<Self, blsct_obj::Error<'a>> {
+    let rv = unsafe { gen_out_point(ctx_id.value() as *const c_char) };
     let obj = BlsctObj::from_retval(rv)?;
     Ok(obj.into())
-  }
-
-  pub fn index(&self) -> u32 {
-    unsafe { get_out_point_n(self.value()) }
   }
 
   impl_value!(BlsctOutPoint);
@@ -55,9 +39,7 @@ impl BlsctSerde for OutPoint {
 
 impl PartialEq for OutPoint {
   fn eq(&self, other: &Self) -> bool {
-    let self_n = unsafe { get_out_point_n(self.value()) };
-    let other_n = unsafe { get_out_point_n(other.value()) };
-    self.obj == other.obj && self_n == other_n
+    self.obj == other.obj
   }
 }
 
@@ -70,29 +52,15 @@ impl From<BlsctObj<OutPoint, BlsctOutPoint>> for OutPoint {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::{
-    ctx_id::CTxId,
-    initializer::init,
-  };
-
-  #[test]
-  fn test_index() {
-    init();
-    let ctx_id = CTxId::random();
-    let index = 3;
-    let a = OutPoint::new(&ctx_id, index).unwrap();
-    assert_eq!(a.index(), 3);
-  }
+  use crate::{ctx_id::CTxId, initializer::init};
 
   #[test]
   fn test_deser() {
     init();
     let ctx_id = CTxId::random();
-    let index = 3;
-    let a = OutPoint::new(&ctx_id, index).unwrap();
+    let a = OutPoint::new(&ctx_id).unwrap();
     let hex = bincode::serialize(&a).unwrap();
     let b = bincode::deserialize::<OutPoint>(&hex).unwrap();
     assert_eq!(a, b);
   }
 }
-

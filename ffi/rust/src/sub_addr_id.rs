@@ -1,21 +1,11 @@
 use crate::{
   blsct_obj::BlsctObj,
-  blsct_serde::BlsctSerde, 
+  blsct_serde::BlsctSerde,
   ffi::{
-    BlsctSubAddrId,
-    BlsctRetVal,
-    deserialize_sub_addr_id,
-    gen_sub_addr_id,
-    get_sub_addr_id_account,
-    get_sub_addr_id_address,
-    serialize_sub_addr_id,
+    deserialize_sub_addr_id, gen_sub_addr_id, get_sub_addr_id_account, get_sub_addr_id_address,
+    serialize_sub_addr_id, BlsctRetVal, BlsctSubAddrId,
   },
-  macros::{
-    impl_clone,
-    impl_display,
-    impl_from_retval,
-    impl_value,
-  },
+  macros::{impl_clone, impl_display, impl_from_retval, impl_value},
 };
 use serde::{Deserialize, Serialize};
 use std::ffi::c_char;
@@ -30,10 +20,7 @@ impl_display!(SubAddrId);
 impl_clone!(SubAddrId);
 
 impl SubAddrId {
-  pub fn new(
-    account: i64,
-    address: u64,
-  ) -> Self {
+  pub fn new(account: i64, address: u64) -> Self {
     let blsct_key_id = unsafe { gen_sub_addr_id(account, address) };
     BlsctObj::from_c_obj(blsct_key_id).into()
   }
@@ -61,7 +48,7 @@ impl BlsctSerde for SubAddrId {
 
 impl PartialEq for SubAddrId {
   fn eq(&self, other: &Self) -> bool {
-    self.obj == other.obj 
+    self.obj == other.obj
   }
 }
 
@@ -111,4 +98,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-

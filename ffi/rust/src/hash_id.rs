@@ -1,23 +1,9 @@
 use crate::{
-  blsct_obj::{BlsctObj, self},
-  blsct_serde::BlsctSerde, 
-  ffi::{
-    BlsctKeyId,
-    BlsctRetVal,
-    calc_key_id,
-    deserialize_key_id,
-    serialize_key_id,
-  },
-  keys::{
-    child_key::ChildKey,
-    public_key::PublicKey,
-  },
-  macros::{
-    impl_clone,
-    impl_display,
-    impl_from_retval,
-    impl_value,
-  },
+  blsct_obj::{self, BlsctObj},
+  blsct_serde::BlsctSerde,
+  ffi::{calc_key_id, deserialize_key_id, serialize_key_id, BlsctKeyId, BlsctRetVal},
+  keys::{child_key::ChildKey, public_key::PublicKey},
+  macros::{impl_clone, impl_display, impl_from_retval, impl_value},
   scalar::Scalar,
 };
 use serde::{Deserialize, Serialize};
@@ -38,11 +24,13 @@ impl HashId {
     spending_pub_key: &PublicKey,
     view_key: &Scalar,
   ) -> Self {
-    let blsct_key_id = unsafe { calc_key_id(
-      blinding_pub_key.value(),
-      spending_pub_key.value(),
-      view_key.value(),
-    )};
+    let blsct_key_id = unsafe {
+      calc_key_id(
+        blinding_pub_key.value(),
+        spending_pub_key.value(),
+        view_key.value(),
+      )
+    };
     BlsctObj::from_c_obj(blsct_key_id).into()
   }
 
@@ -51,13 +39,9 @@ impl HashId {
     let spending_pub_key = PublicKey::random()?;
     let view_key = {
       let child_key = ChildKey::random()?;
-      child_key.to_tx_key().to_view_key() 
+      child_key.to_tx_key().to_view_key()
     };
-    Ok(Self::new(
-      &blinding_pub_key,
-      &spending_pub_key,
-      &view_key,
-    ))
+    Ok(Self::new(&blinding_pub_key, &spending_pub_key, &view_key))
   }
 
   impl_value!(BlsctKeyId);
@@ -75,7 +59,7 @@ impl BlsctSerde for HashId {
 
 impl PartialEq for HashId {
   fn eq(&self, other: &Self) -> bool {
-    self.obj == other.obj 
+    self.obj == other.obj
   }
 }
 
@@ -117,4 +101,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-

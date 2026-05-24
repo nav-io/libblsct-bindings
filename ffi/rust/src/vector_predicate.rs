@@ -1,20 +1,11 @@
 use crate::{
   blsct_obj::BlsctObj,
-  blsct_serde::BlsctSerde, 
+  blsct_serde::BlsctSerde,
   ffi::{
-    BlsctRetVal,
-    BlsctVectorPredicate,
-    deserialize_vector_predicate,
-    are_vector_predicate_equal,
-    serialize_vector_predicate,
+    are_vector_predicate_equal, deserialize_vector_predicate, serialize_vector_predicate,
+    BlsctRetVal, BlsctVectorPredicate,
   },
-  macros::{
-    impl_clone,
-    impl_display,
-    impl_from_retval,
-    impl_size,
-    impl_value,
-  },
+  macros::{impl_clone, impl_display, impl_from_retval, impl_size, impl_value},
 };
 use serde::{Deserialize, Serialize};
 use std::ffi::c_char;
@@ -34,19 +25,11 @@ impl VectorPredicate {
 }
 
 impl BlsctSerde for VectorPredicate {
-  unsafe fn serialize(
-    ptr: *const u8,
-    obj_size: usize,
-  ) -> *const i8 {
-    serialize_vector_predicate(
-      ptr as *const BlsctVectorPredicate,
-      obj_size,
-    )
+  unsafe fn serialize(ptr: *const u8, obj_size: usize) -> *const i8 {
+    serialize_vector_predicate(ptr as *const BlsctVectorPredicate, obj_size)
   }
 
-  unsafe fn deserialize(
-    hex: *const c_char,
-  ) -> *mut BlsctRetVal {
+  unsafe fn deserialize(hex: *const c_char) -> *mut BlsctRetVal {
     deserialize_vector_predicate(hex)
   }
 }
@@ -54,12 +37,7 @@ impl BlsctSerde for VectorPredicate {
 impl PartialEq for VectorPredicate {
   fn eq(&self, other: &Self) -> bool {
     unsafe {
-      are_vector_predicate_equal(
-        self.value(),
-        self.size(),
-        other.value(),
-        other.size(),
-      ) != 0
+      are_vector_predicate_equal(self.value(), self.size(), other.value(), other.size()) != 0
     }
   }
 }
@@ -73,9 +51,7 @@ impl From<BlsctObj<VectorPredicate, BlsctVectorPredicate>> for VectorPredicate {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::{
-    initializer::init,
-  };
+  use crate::initializer::init;
   use std::ffi::c_void;
 
   fn gen_vector_predicate(n: u8) -> VectorPredicate {
@@ -89,10 +65,7 @@ mod tests {
       c_obj
     };
     let obj: BlsctObj<VectorPredicate, BlsctVectorPredicate> =
-      BlsctObj::from_c_obj_and_size(
-        c_obj as *mut c_void, 
-        OBJ_SIZE,
-      );
+      BlsctObj::from_c_obj_and_size(c_obj as *mut c_void, OBJ_SIZE);
     obj.into()
   }
 
@@ -121,5 +94,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-
-

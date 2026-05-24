@@ -1,7 +1,4 @@
-use crate::{
-  ffi::calc_priv_spending_key,
-  keys::public_key::PublicKey,
-};
+use crate::{ffi::calc_priv_spending_key, keys::public_key::PublicKey};
 
 crate::macros::impl_key!(PrivSpendingKey);
 
@@ -30,10 +27,7 @@ impl PrivSpendingKey {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::{
-    initializer::init,
-    keys::child_key::ChildKey,
-  };
+  use crate::{initializer::init, keys::child_key::ChildKey};
 
   #[test]
   fn test_new() {
@@ -44,12 +38,7 @@ mod tests {
     let spending_key = tx_key.to_spending_key();
     let blinding_pub_key = PublicKey::random().unwrap();
 
-    let _: PrivSpendingKey = PrivSpendingKey::new(
-      blinding_pub_key,
-      view_key,
-      spending_key,
-      123,
-      456,
-    );
+    let _: PrivSpendingKey =
+      PrivSpendingKey::new(blinding_pub_key, view_key, spending_key, 123, 456);
   }
 }

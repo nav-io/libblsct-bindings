@@ -1,18 +1,9 @@
 use crate::{
   ctx_out::CTxOut,
-  ffi::{
-    are_ctx_outs_equal,
-    get_ctx_out_at,
-    get_ctx_outs_size,
-  },
-  macros::{
-    impl_value_raw_const_obj,
-  },
+  ffi::{are_ctx_outs_equal, get_ctx_out_at, get_ctx_outs_size},
+  macros::impl_value_raw_const_obj,
 };
-use std::{
-  ffi::c_void,
-  fmt,
-};
+use std::{ffi::c_void, fmt};
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum Error {
@@ -24,14 +15,15 @@ impl std::error::Error for Error {}
 impl fmt::Display for Error {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
-      Error::IndexOutOfRange { index, max_index } =>
-        write!(f, "Index {index} is out of range. Max index is {max_index}"),
+      Error::IndexOutOfRange { index, max_index } => {
+        write!(f, "Index {index} is out of range. Max index is {max_index}")
+      }
     }
   }
 }
 
 /* obj is an opaque pointer to:
- 
+
    struct BlsctCTxOuts {
      std::vector<CTxOut>* vec;
    };
@@ -71,4 +63,3 @@ impl PartialEq for CTxOuts {
     unsafe { are_ctx_outs_equal(self.value(), other.value()) }
   }
 }
-

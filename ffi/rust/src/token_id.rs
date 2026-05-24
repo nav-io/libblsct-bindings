@@ -1,26 +1,14 @@
 use crate::{
-  blsct_obj::{BlsctObj, self},
-  blsct_serde::BlsctSerde, 
+  blsct_obj::{self, BlsctObj},
+  blsct_serde::BlsctSerde,
   ffi::{
-    BlsctRetVal,
-    BlsctTokenId,
-    deserialize_token_id,
-    gen_default_token_id,
-    gen_token_id,
-    get_token_id_subid,
-    get_token_id_token,
-    gen_token_id_with_token_and_subid,
-    serialize_token_id,
+    deserialize_token_id, gen_default_token_id, gen_token_id, gen_token_id_with_token_and_subid,
+    get_token_id_subid, get_token_id_token, serialize_token_id, BlsctRetVal, BlsctTokenId,
   },
-  macros::{
-    impl_clone,
-    impl_display,
-    impl_from_retval,
-    impl_value,
-  },
+  macros::{impl_clone, impl_display, impl_from_retval, impl_value},
 };
-use std::ffi::c_char;
 use serde::{Deserialize, Serialize};
+use std::ffi::c_char;
 
 #[derive(Debug, Deserialize, Serialize, Eq)]
 pub struct TokenId {
@@ -44,8 +32,7 @@ impl TokenId {
     Ok(obj.into())
   }
 
-  pub fn from_token_and_subid<'a>(token: u64, subid: u64)
-    -> Result<Self, blsct_obj::Error<'a>> {
+  pub fn from_token_and_subid<'a>(token: u64, subid: u64) -> Result<Self, blsct_obj::Error<'a>> {
     let rv = unsafe { gen_token_id_with_token_and_subid(token, subid) };
     let obj = BlsctObj::from_retval(rv)?;
     Ok(obj.into())
@@ -125,4 +112,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-

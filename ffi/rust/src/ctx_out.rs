@@ -1,23 +1,11 @@
 use crate::{
-  blsct_obj::{BlsctObj, self},
+  blsct_obj::{self, BlsctObj},
   ffi::{
-    are_ctx_out_equal,
-    BlsctPoint,
-    BlsctRangeProof,
-    BlsctRetVal,
-    BlsctScalar,
-    BlsctScript,
-    BlsctTokenId,
+    are_ctx_out_equal, get_ctx_out_blinding_key, get_ctx_out_ephemeral_key,
+    get_ctx_out_range_proof, get_ctx_out_script_pub_key, get_ctx_out_spending_key,
+    get_ctx_out_token_id, get_ctx_out_value, get_ctx_out_vector_predicate, get_ctx_out_view_tag,
+    BlsctPoint, BlsctRangeProof, BlsctRetVal, BlsctScalar, BlsctScript, BlsctTokenId,
     BlsctVectorPredicate,
-    get_ctx_out_blinding_key,
-    get_ctx_out_ephemeral_key,
-    get_ctx_out_range_proof,
-    get_ctx_out_script_pub_key,
-    get_ctx_out_spending_key,
-    get_ctx_out_token_id,
-    get_ctx_out_value,
-    get_ctx_out_view_tag,
-    get_ctx_out_vector_predicate,
   },
   macros::impl_value_raw_const_obj,
   point::Point,
@@ -41,47 +29,37 @@ impl CTxOut {
 
   pub fn script_pub_key(&self) -> Script {
     let c_obj = unsafe { get_ctx_out_script_pub_key(self.value()) };
-    BlsctObj::<Script, BlsctScript>::from_c_obj(
-      c_obj as *mut BlsctScript
-    ).into()
+    BlsctObj::<Script, BlsctScript>::from_c_obj(c_obj as *mut BlsctScript).into()
   }
 
   pub fn token_id(&self) -> TokenId {
     let c_obj = unsafe { get_ctx_out_token_id(self.value()) };
-    BlsctObj::<TokenId, BlsctTokenId>::from_c_obj(
-      c_obj as *mut BlsctTokenId
-    ).into()
+    BlsctObj::<TokenId, BlsctTokenId>::from_c_obj(c_obj as *mut BlsctTokenId).into()
   }
 
-  pub fn vector_predicate(&self) -> Result<VectorPredicate, blsct_obj::Error> {
+  pub fn vector_predicate(&self) -> Result<VectorPredicate, blsct_obj::Error<'_>> {
     let rv = unsafe { get_ctx_out_vector_predicate(self.value()) };
     let obj = BlsctObj::<VectorPredicate, BlsctVectorPredicate>::from_retval(rv)?;
     Ok(obj.into())
   }
 
   pub fn blsct_data_spending_key(&self) -> Scalar {
-    let c_obj = unsafe { get_ctx_out_spending_key(self.value()) }; 
-    BlsctObj::<Scalar, BlsctScalar>::from_c_obj(
-      c_obj as *mut BlsctScalar
-    ).into()
+    let c_obj = unsafe { get_ctx_out_spending_key(self.value()) };
+    BlsctObj::<Scalar, BlsctScalar>::from_c_obj(c_obj as *mut BlsctScalar).into()
   }
 
   pub fn blsct_data_ephemeral_key(&self) -> Point {
-    let c_obj = unsafe { get_ctx_out_ephemeral_key(self.value()) }; 
-    BlsctObj::<Point, BlsctPoint>::from_c_obj(
-      c_obj as *mut BlsctPoint
-    ).into()
+    let c_obj = unsafe { get_ctx_out_ephemeral_key(self.value()) };
+    BlsctObj::<Point, BlsctPoint>::from_c_obj(c_obj as *mut BlsctPoint).into()
   }
 
   pub fn blsct_data_blinding_key(&self) -> Scalar {
-    let c_obj = unsafe { get_ctx_out_blinding_key(self.value()) }; 
-    BlsctObj::<Scalar, BlsctScalar>::from_c_obj(
-      c_obj as *mut BlsctScalar
-    ).into()
+    let c_obj = unsafe { get_ctx_out_blinding_key(self.value()) };
+    BlsctObj::<Scalar, BlsctScalar>::from_c_obj(c_obj as *mut BlsctScalar).into()
   }
 
-  pub fn blsct_data_range_proof(&self) -> Result<RangeProof, blsct_obj::Error> {
-    let rv = unsafe { get_ctx_out_range_proof(self.value()) } as *mut BlsctRetVal; 
+  pub fn blsct_data_range_proof(&self) -> Result<RangeProof, blsct_obj::Error<'_>> {
+    let rv = unsafe { get_ctx_out_range_proof(self.value()) } as *mut BlsctRetVal;
     let obj = BlsctObj::<RangeProof, BlsctRangeProof>::from_retval(rv)?;
     Ok(obj.into())
   }
@@ -110,11 +88,8 @@ impl Eq for CTxOut {}
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::{
-    initializer::init,
-    test_util::gen_ctx,
-  };
-  
+  use crate::{initializer::init, test_util::gen_ctx};
+
   fn get_ctx_out() -> CTxOut {
     let ctx = gen_ctx();
     let ctx_outs = ctx.get_ctx_outs();
@@ -194,4 +169,3 @@ mod tests {
     println!("BlsctData.ViewTag: {view_tag}");
   }
 }
-

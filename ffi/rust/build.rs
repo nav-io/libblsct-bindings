@@ -3,13 +3,12 @@ use std::fs;
 use std::io;
 use std::path::{Path, PathBuf};
 use std::process::Command;
-use num_cpus;
 
 const IS_PROD: bool = true;
 
 const NAVIO_REPO_URL_PROD: &str = "https://github.com/nav-io/navio-core";
 const NAIVO_REPO_URL_DEV: &str = "https://github.com/gogoex/navio-core";
-const NAVIO_REPO_PROD_SHA: &str = "4704c8ae116a107c902ef33e11a8c564cd68efc3";
+const NAVIO_REPO_PROD_SHA: &str = "623ad2da8e9031d8b900c54af6d393ec88e9a32a";
 const NAVIO_REPO_DEV_BRANCH: &str = "";
 
 fn copy_dir(src_dir: &Path, dest_dir: &Path) -> io::Result<()> {
@@ -18,7 +17,7 @@ fn copy_dir(src_dir: &Path, dest_dir: &Path) -> io::Result<()> {
   for f in fs::read_dir(src_dir)? {
     let f = f?;
     let f = f.path();
-    let dest_path = dest_dir.join(&f.file_name().unwrap());
+    let dest_path = dest_dir.join(f.file_name().unwrap());
 
     if f.is_file() {
       fs::copy(&f, &dest_path)?;
@@ -30,10 +29,8 @@ fn copy_dir(src_dir: &Path, dest_dir: &Path) -> io::Result<()> {
 }
 
 fn get_navio_core_path() -> PathBuf {
-  let manifest_dir = PathBuf::from(
-    env::var("CARGO_MANIFEST_DIR")
-      .expect("CARGO_MANIFEST_DIR not set")
-  );
+  let manifest_dir =
+    PathBuf::from(env::var("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR not set"));
   manifest_dir.join("target").join("navio-core")
 }
 
@@ -48,9 +45,9 @@ fn clone_navio_core(navio_core_path: &Path) {
 
   // construct git clone command
   let (repo_url, branch) = match IS_PROD {
-    true => (NAVIO_REPO_URL_PROD, None), 
+    true => (NAVIO_REPO_URL_PROD, None),
     false => (NAIVO_REPO_URL_DEV, Some(NAVIO_REPO_DEV_BRANCH)),
-  }; 
+  };
   let mut args = vec!["clone", "--depth", "1"];
   if let Some(branch) = branch {
     args.push("--branch");
@@ -75,14 +72,14 @@ fn clone_navio_core(navio_core_path: &Path) {
       .args(args)
       .current_dir(navio_core_path)
       .status()
-      .expect(format!("Failed to fetch commit {NAVIO_REPO_PROD_SHA}").as_str());
+      .unwrap_or_else(|_| panic!("Failed to fetch commit {NAVIO_REPO_PROD_SHA}"));
 
     let args = vec!["checkout", NAVIO_REPO_PROD_SHA];
     Command::new("git")
       .args(args)
       .current_dir(navio_core_path)
       .status()
-      .expect(format!("Failed to checkout commit {NAVIO_REPO_PROD_SHA}").as_str());
+      .unwrap_or_else(|_| panic!("Failed to checkout commit {NAVIO_REPO_PROD_SHA}"));
   }
 }
 
@@ -94,8 +91,7 @@ fn get_depends_arch_path(depends_path: &Path) -> io::Result<PathBuf> {
     ));
   }
   let arches = [
-    "x86_64", "i686", "mips", "arm", "aarch64",
-    "powerpc", "riscv32", "riscv64", "s390x"
+    "x86_64", "i686", "mips", "arm", "aarch64", "powerpc", "riscv32", "riscv64", "s390x",
   ];
   for entry in fs::read_dir(depends_path)? {
     let entry = entry?;
@@ -118,22 +114,22 @@ fn get_depends_arch_path(depends_path: &Path) -> io::Result<PathBuf> {
 }
 
 fn build_depends(
-  navio_core_path: &Path, 
+  navio_core_path: &Path,
   depends_path: &Path,
   num_cpus: &str,
 ) -> io::Result<PathBuf> {
-  let depends_bak_path =
-    navio_core_path
-      .parent().unwrap()
-      .parent().unwrap()
-      .join("depends");
+  let depends_bak_path = navio_core_path
+    .parent()
+    .unwrap()
+    .parent()
+    .unwrap()
+    .join("depends");
 
   if depends_bak_path.exists() {
     println!("Copying backup of depends under navio-core...");
 
-    fs::remove_dir_all(&depends_path).unwrap();
-    copy_dir(&depends_bak_path, &depends_path).unwrap();
-
+    fs::remove_dir_all(depends_path).unwrap();
+    copy_dir(&depends_bak_path, depends_path).unwrap();
   } else {
     // if there is no backup directory of depends dir,
     // build navio-core dependencies and create the backup
@@ -143,10 +139,10 @@ fn build_depends(
       .current_dir(depends_path)
       .status()
       .expect("Failed to clone navio-core repository");
-  
+
     // create the backup
     println!("Creating backup of navio-core dependencies...");
-    copy_dir(&depends_path, &depends_bak_path).unwrap();
+    copy_dir(depends_path, &depends_bak_path).unwrap();
   }
 
   get_depends_arch_path(depends_path)
@@ -162,7 +158,7 @@ fn build_libblsct(
   println!("Building libblsct.a and its dependencies...");
 
   Command::new("./autogen.sh")
-    .current_dir(&navio_core_path)
+    .current_dir(navio_core_path)
     .status()
     .expect("Failed to run autogen.sh");
 
@@ -171,25 +167,29 @@ fn build_libblsct(
       &format!("--prefix={}", depends_arch_path.display()),
       "--enable-build-libblsct-only",
     ])
-    .current_dir(&navio_core_path)
+    .current_dir(navio_core_path)
     .status()
     .expect("Failed to run configure");
 
   Command::new("make")
-    .args(["-j", &num_cpus])
-    .current_dir(&navio_core_path)
+    .args(["-j", num_cpus])
+    .current_dir(navio_core_path)
     .status()
     .expect("Failed to build libblsct");
 
   // copy libblsct.a and its dependencies to libs directory
   for (src, dest) in dot_a_src_dest_paths {
     println!("Copying {} to {}...", &src.display(), &dest.display());
-    fs::copy(&src, &dest).unwrap();
+    fs::copy(src, dest).unwrap();
   }
 }
 
 fn print_link_instructions(libs_path: &Path) {
-  println!("cargo:rustc-link-lib=c++");
+  if cfg!(target_os = "macos") {
+    println!("cargo:rustc-link-lib=c++");
+  } else {
+    println!("cargo:rustc-link-lib=stdc++");
+  }
 
   // library search path
   println!("cargo:rustc-link-search=native={}", libs_path.display());
@@ -210,28 +210,35 @@ fn get_lib_paths(navio_core_path: &Path, libs_path: &Path) -> Vec<(PathBuf, Path
 
   vec![
     (src_path.join("libblsct.a"), libs_path.join("libblsct.a")),
-    (src_path.join("libunivalue_blsct.a"), libs_path.join("libunivalue_blsct.a")),
+    (
+      src_path.join("libunivalue_blsct.a"),
+      libs_path.join("libunivalue_blsct.a"),
+    ),
     (mcl_lib_path.join("libmcl.a"), libs_path.join("libmcl.a")),
-    (bls_lib_path.join("libbls384_256.a"), libs_path.join("libbls384_256.a")),
+    (
+      bls_lib_path.join("libbls384_256.a"),
+      libs_path.join("libbls384_256.a"),
+    ),
   ]
 }
 
 fn prepare_fresh_libs_dir(libs_path: &Path) {
   if libs_path.exists() {
-    fs::remove_dir_all(&libs_path).unwrap();
+    fs::remove_dir_all(libs_path).unwrap();
   }
-  fs::create_dir(&libs_path).unwrap();
+  fs::create_dir(libs_path).unwrap();
 }
 
 fn main() {
   let navio_core_path = get_navio_core_path();
   let libs_path = navio_core_path
-    .parent().unwrap()
-    .parent().unwrap()
+    .parent()
+    .unwrap()
+    .parent()
+    .unwrap()
     .join("libs");
 
-  let dot_a_src_dest_paths =
-    get_lib_paths(&navio_core_path, &libs_path);
+  let dot_a_src_dest_paths = get_lib_paths(&navio_core_path, &libs_path);
 
   // build libblsct.a and its dependency if not built yet
   if dot_a_src_dest_paths.iter().any(|(_, dest)| !dest.exists()) {
@@ -242,11 +249,7 @@ fn main() {
 
     clone_navio_core(&navio_core_path);
 
-    let depends_arch_path = build_depends(
-      &navio_core_path,
-      &depends_path,
-      &num_cpus,
-    ).unwrap();
+    let depends_arch_path = build_depends(&navio_core_path, &depends_path, &num_cpus).unwrap();
 
     build_libblsct(
       &navio_core_path,
@@ -258,4 +261,3 @@ fn main() {
 
   print_link_instructions(&libs_path);
 }
-

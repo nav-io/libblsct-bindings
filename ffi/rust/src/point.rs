@@ -1,26 +1,13 @@
+use crate::macros::{impl_clone, impl_display, impl_from_retval, impl_value};
+use crate::scalar::Scalar;
 use crate::{
-  blsct_obj::{BlsctObj, self},
+  blsct_obj::{self, BlsctObj},
   blsct_serde::BlsctSerde,
   ffi::{
-    are_point_equal,
-    BlsctPoint,
-    BlsctRetVal,
-    deserialize_point,
-    gen_base_point,
-    gen_random_point,
-    is_valid_point,
-    point_from_scalar,
-    scalar_muliply_point,
-    serialize_point,
+    are_point_equal, deserialize_point, gen_base_point, gen_random_point, is_valid_point,
+    point_from_scalar, scalar_muliply_point, serialize_point, BlsctPoint, BlsctRetVal,
   },
 };
-use crate::macros::{
-  impl_clone,
-  impl_display,
-  impl_from_retval,
-  impl_value,
-};
-use crate::scalar::Scalar;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -43,7 +30,7 @@ impl Point {
 
   pub fn is_valid(&self) -> bool {
     let b = unsafe { is_valid_point(self.obj.as_ptr()) };
-    return b != 0;
+    b != 0
   }
 
   pub fn scalar_multiply(&self, n: &Scalar) -> Self {
@@ -84,10 +71,12 @@ impl BlsctSerde for Point {
 
 impl PartialEq for Point {
   fn eq(&self, other: &Self) -> bool {
-    unsafe { are_point_equal(
-      self.obj.as_ptr() as *const BlsctPoint,
-      other.obj.as_ptr() as *const BlsctPoint
-    ) != 0 }
+    unsafe {
+      are_point_equal(
+        self.obj.as_ptr() as *const BlsctPoint,
+        other.obj.as_ptr() as *const BlsctPoint,
+      ) != 0
+    }
   }
 }
 
@@ -114,7 +103,7 @@ mod tests {
 
     for _ in 0..1000 {
       let x = Point::random().unwrap();
-      
+
       if prev == x {
         dup_tolerance -= 1;
         if dup_tolerance == 0 {
@@ -169,4 +158,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-

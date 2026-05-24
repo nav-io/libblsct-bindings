@@ -1,19 +1,8 @@
 use crate::{
   blsct_obj::BlsctObj,
-  blsct_serde::BlsctSerde, 
-  ffi::{
-    BlsctSignature,
-    BlsctRetVal,
-    deserialize_signature,
-    serialize_signature,
-    SIGNATURE_SIZE,
-  },
-  macros::{
-    impl_clone,
-    impl_display,
-    impl_from_retval,
-    impl_value,
-  },
+  blsct_serde::BlsctSerde,
+  ffi::{deserialize_signature, serialize_signature, BlsctRetVal, BlsctSignature, SIGNATURE_SIZE},
+  macros::{impl_clone, impl_display, impl_from_retval, impl_value},
   util::gen_random_malloced_buf,
 };
 use serde::{Deserialize, Serialize};
@@ -54,7 +43,7 @@ impl BlsctSerde for Signature {
 
 impl PartialEq for Signature {
   fn eq(&self, other: &Self) -> bool {
-    self.obj == other.obj 
+    self.obj == other.obj
   }
 }
 
@@ -109,5 +98,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-
-

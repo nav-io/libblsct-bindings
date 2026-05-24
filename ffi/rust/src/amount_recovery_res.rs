@@ -19,9 +19,7 @@ impl AmountRecoveryRes {
 
 impl PartialEq for AmountRecoveryRes {
   fn eq(&self, other: &Self) -> bool {
-    self.is_succ == other.is_succ 
-    && self.amount == other.amount
-    && self.msg == other.msg
+    self.is_succ == other.is_succ && self.amount == other.amount && self.msg == other.msg
   }
 }
 
@@ -42,4 +40,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-

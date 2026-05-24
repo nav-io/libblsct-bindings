@@ -1,22 +1,12 @@
+use crate::macros::{impl_display, impl_from_retval, impl_value};
 use crate::{
-  blsct_obj::{BlsctObj, self},
+  blsct_obj::{self, BlsctObj},
   blsct_serde::BlsctSerde,
   ffi::{
-    BlsctRetVal,
-    BlsctScalar,
-    deserialize_scalar,
-    gen_scalar,
-    gen_random_scalar,
-    are_scalar_equal,
-    scalar_to_uint64,
-    serialize_scalar,
+    are_scalar_equal, deserialize_scalar, gen_random_scalar, gen_scalar, scalar_to_uint64,
+    serialize_scalar, BlsctRetVal, BlsctScalar,
   },
   util::pad_hex_left,
-};
-use crate::macros::{
-  impl_display,
-  impl_from_retval,
-  impl_value,
 };
 use serde::{Deserialize, Serialize};
 use std::ffi::c_char;
@@ -67,10 +57,12 @@ impl From<BlsctObj<Scalar, BlsctScalar>> for Scalar {
 
 impl PartialEq for Scalar {
   fn eq(&self, other: &Self) -> bool {
-    unsafe { are_scalar_equal(
-      self.obj.as_ptr() as *const BlsctScalar,
-      other.obj.as_ptr() as *const BlsctScalar
-    ) != 0 }
+    unsafe {
+      are_scalar_equal(
+        self.obj.as_ptr() as *const BlsctScalar,
+        other.obj.as_ptr() as *const BlsctScalar,
+      ) != 0
+    }
   }
 }
 
@@ -100,7 +92,7 @@ mod tests {
     for _ in 0..1000 {
       let x = Scalar::random().unwrap();
       let x_u64: u64 = x.into();
-      
+
       if prev == x_u64 {
         dup_tolerance -= 1;
         if dup_tolerance == 0 {
@@ -153,4 +145,3 @@ mod tests {
     assert!(re.is_match(&s));
   }
 }
-

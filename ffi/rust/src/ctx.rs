@@ -1,44 +1,22 @@
 use crate::{
-  blsct_obj::{BlsctObj, self},
-  blsct_serde::BlsctSerde, 
+  blsct_obj::{self, BlsctObj},
+  blsct_serde::BlsctSerde,
   ctx_id::CTxId,
   ctx_ins::CTxIns,
   ctx_outs::CTxOuts,
   ffi::{
-    add_to_tx_in_vec,
-    add_to_tx_out_vec,
-    BlsctRetVal,
-    BlsctCTx,
-    BlsctCTxId,
-    BLSCT_IN_AMOUNT_ERROR,
-    BLSCT_OUT_AMOUNT_ERROR,
-    build_ctx,
-    create_tx_in_vec,
-    create_tx_out_vec,
-    delete_ctx,
-    delete_tx_in_vec,
-    delete_tx_out_vec,
-    deserialize_ctx,
-    deserialize_ctx_id,
-    free_obj,
-    get_ctx_id,
-    get_ctx_ins,
-    get_ctx_outs,
-    serialize_ctx,
+    add_to_tx_in_vec, add_to_tx_out_vec, build_ctx, create_tx_in_vec, create_tx_out_vec,
+    delete_ctx, delete_tx_in_vec, delete_tx_out_vec, deserialize_ctx, deserialize_ctx_id, free_obj,
+    get_ctx_id, get_ctx_ins, get_ctx_outs, serialize_ctx, BlsctCTx, BlsctCTxId, BlsctRetVal,
+    BLSCT_IN_AMOUNT_ERROR, BLSCT_OUT_AMOUNT_ERROR,
   },
-  macros::{
-    impl_clone,
-    impl_display,
-  },
+  macros::{impl_clone, impl_display},
   tx_in::TxIn,
   tx_out::TxOut,
 };
 use serde::{Deserialize, Serialize};
 use std::{
-  ffi::{
-    c_char,
-    c_void,
-  },
+  ffi::{c_char, c_void},
   fmt,
   ptr::NonNull,
 };
@@ -56,14 +34,10 @@ impl std::error::Error for Error {}
 impl fmt::Display for Error {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
-      Error::FailedToAllocateMemory =>
-        write!(f, "Failed to allocate memory for CTx"),
-      Error::InAmountError(index) =>
-        write!(f, "Invalid in-amount found at {index}"),
-      Error::OutAmountError(index) =>
-        write!(f, "Invalid out-amount found at {index}"),
-      Error::FailedToBuildCTx(e) =>
-        write!(f, "Failed to build CTx: {e}"),
+      Error::FailedToAllocateMemory => write!(f, "Failed to allocate memory for CTx"),
+      Error::InAmountError(index) => write!(f, "Invalid in-amount found at {index}"),
+      Error::OutAmountError(index) => write!(f, "Invalid out-amount found at {index}"),
+      Error::FailedToBuildCTx(e) => write!(f, "Failed to build CTx: {e}"),
     }
   }
 }
@@ -77,10 +51,7 @@ impl_display!(CTx);
 impl_clone!(CTx);
 
 impl CTx {
-  pub fn new(
-    tx_ins: &Vec<TxIn>,
-    tx_outs: &Vec<TxOut>
-  ) -> Result<Self, Error> {
+  pub fn new(tx_ins: &Vec<TxIn>, tx_outs: &Vec<TxOut>) -> Result<Self, Error> {
     unsafe {
       let vp_tx_ins = create_tx_in_vec();
       let vp_tx_outs = create_tx_out_vec();
@@ -110,31 +81,28 @@ impl CTx {
 
         clean_up();
         Ok(obj.into())
-
       } else {
         let e = {
           match (*rv).result {
             BLSCT_IN_AMOUNT_ERROR => {
               let index = (*rv).in_amount_err_index;
               Error::InAmountError(index)
-            },
+            }
             BLSCT_OUT_AMOUNT_ERROR => {
               let index = (*rv).out_amount_err_index;
               Error::OutAmountError(index)
-            },
-            err_code => {
-              Error::FailedToBuildCTx(err_code)
             }
+            err_code => Error::FailedToBuildCTx(err_code),
           }
         };
         clean_up();
         Err(e)
-      } 
+      }
     }
   }
 
   pub fn get_ctx_id<'a>(&self) -> Result<CTxId, blsct_obj::Error<'a>> {
-    let rv = unsafe { 
+    let rv = unsafe {
       let c_str_hex = get_ctx_id(self.value());
       deserialize_ctx_id(c_str_hex)
     };
@@ -186,15 +154,9 @@ mod tests {
   use super::*;
   use crate::{
     amount_recovery_req::AmountRecoveryReq,
-    ffi::{
-      get_ctx_ins_size,
-      get_ctx_outs_size,
-    },
+    ffi::{get_ctx_ins_size, get_ctx_outs_size},
     initializer::init,
-    keys::{
-      double_public_key::DoublePublicKey,
-      public_key::PublicKey,
-    },
+    keys::{double_public_key::DoublePublicKey, public_key::PublicKey},
     range_proof::RangeProof,
     scalar::Scalar,
     sub_addr::SubAddr,
@@ -231,20 +193,12 @@ mod tests {
     init();
     let pk_view_key = PublicKey::random().unwrap();
     let pk_spend_key = PublicKey::random().unwrap();
-    let dpk = DoublePublicKey::from_view_and_spend_keys(
-      &pk_view_key,
-      &pk_spend_key,
-    ).unwrap();
+    let dpk = DoublePublicKey::from_view_and_spend_keys(&pk_view_key, &pk_spend_key).unwrap();
     let destination: SubAddr = dpk.into();
     let blinding_key = Scalar::random().unwrap();
     let out_amount = 12345;
     let msg = "space_x";
-    let ctx = gen_ctx_actual(
-      out_amount,
-      msg,
-      &destination,
-      &blinding_key,
-    );
+    let ctx = gen_ctx_actual(out_amount, msg, &destination, &blinding_key);
     let ctx_outs = ctx.get_ctx_outs();
     let ctx_outs_size = unsafe { get_ctx_outs_size(ctx_outs.value()) };
     assert_eq!(ctx_outs_size, 3);
@@ -252,8 +206,8 @@ mod tests {
 
     let rp = out0.blsct_data_range_proof().unwrap();
     let nonce = pk_view_key.get_point().scalar_multiply(&blinding_key);
-    let req = AmountRecoveryReq::new(&rp, &nonce); 
-    let amounts = RangeProof::recover_amounts(vec![req]).unwrap(); 
+    let req = AmountRecoveryReq::new(&rp, &nonce);
+    let amounts = RangeProof::recover_amounts(vec![req]).unwrap();
 
     assert_eq!(amounts.len(), 1);
     assert_eq!(amounts[0].is_succ, true);
@@ -270,4 +224,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-

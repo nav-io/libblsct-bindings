@@ -1,26 +1,17 @@
 use crate::{
-  blsct_obj,
-  ffi::calc_view_tag,
-  keys::public_key::PublicKey,
+  blsct_obj, ffi::calc_view_tag, keys::public_key::PublicKey, scalar::Scalar,
   util::gen_random_view_key,
-  scalar::Scalar,
 };
 use serde::{Deserialize, Serialize};
 
-
 #[derive(Clone, Debug, Deserialize, Serialize, PartialEq, Eq)]
 pub struct ViewTag {
-  value: u64
+  value: u64,
 }
 
 impl ViewTag {
-  pub fn new(
-    blinding_pub_key: &PublicKey,
-    view_key: &Scalar,
-  ) -> Self {
-    let value = unsafe {
-      calc_view_tag(blinding_pub_key.value(), view_key.value()) 
-    };
+  pub fn new(blinding_pub_key: &PublicKey, view_key: &Scalar) -> Self {
+    let value = unsafe { calc_view_tag(blinding_pub_key.value(), view_key.value()) };
     ViewTag { value }
   }
 
@@ -34,10 +25,7 @@ impl ViewTag {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::{
-    initializer::init,
-    util::gen_random_view_key,
-  };
+  use crate::{initializer::init, util::gen_random_view_key};
 
   #[test]
   fn test_new() {
@@ -62,4 +50,3 @@ mod tests {
     assert_eq!(a, b);
   }
 }
-

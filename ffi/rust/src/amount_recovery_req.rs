@@ -1,8 +1,4 @@
-use crate::{
-  point::Point,
-  range_proof::RangeProof,
-  token_id::TokenId,
-};
+use crate::{point::Point, range_proof::RangeProof, token_id::TokenId};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Deserialize, Serialize, Eq)]
@@ -32,19 +28,16 @@ impl AmountRecoveryReq {
 
 impl PartialEq for AmountRecoveryReq {
   fn eq(&self, other: &Self) -> bool {
-    self.range_proof == other.range_proof &&
-    self.nonce == other.nonce &&
-    self.token_id == other.token_id
+    self.range_proof == other.range_proof
+      && self.nonce == other.nonce
+      && self.token_id == other.token_id
   }
 }
 
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::{
-    initializer::init,
-    token_id::TokenId,
-  };
+  use crate::{initializer::init, token_id::TokenId};
 
   #[test]
   fn test_deser() {

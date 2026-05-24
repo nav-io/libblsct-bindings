@@ -2,8 +2,8 @@ use std::sync::Once;
 
 extern "C" {
 
-#[link_name = "init"]
-pub fn init_impl();  // rename on the rust side to avoid name conflict
+  #[link_name = "init"]
+  pub fn init_impl(); // rename on the rust side to avoid name conflict
 
 }
 
@@ -24,4 +24,3 @@ mod tests {
     init();
   }
 }
-

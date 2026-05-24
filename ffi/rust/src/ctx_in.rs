@@ -2,14 +2,8 @@ use crate::{
   blsct_obj::BlsctObj,
   ctx_id::CTxId,
   ffi::{
-    are_ctx_in_equal,
-    BlsctCTxId,
-    BlsctScript,
-    get_ctx_in_prev_out_hash,
-    get_ctx_in_prev_out_n,
-    get_ctx_in_script_sig,
-    get_ctx_in_sequence,
-    get_ctx_in_script_witness,
+    are_ctx_in_equal, get_ctx_in_prev_out_hash, get_ctx_in_script_sig, get_ctx_in_script_witness,
+    get_ctx_in_sequence, BlsctCTxId, BlsctScript,
   },
   macros::impl_value_raw_const_obj,
   script::Script,
@@ -24,20 +18,12 @@ pub struct CTxIn {
 impl CTxIn {
   pub fn prev_out_hash(&self) -> CTxId {
     let c_obj = unsafe { get_ctx_in_prev_out_hash(self.value()) };
-    BlsctObj::<CTxId, BlsctCTxId>::from_c_obj(
-      c_obj as *mut BlsctCTxId
-    ).into()
-  }
-
-  pub fn prev_out_n(&self) -> u32 {
-    unsafe { get_ctx_in_prev_out_n(self.value()) }
+    BlsctObj::<CTxId, BlsctCTxId>::from_c_obj(c_obj as *mut BlsctCTxId).into()
   }
 
   pub fn script_sig(&self) -> Script {
     let c_obj = unsafe { get_ctx_in_script_sig(self.value()) };
-    BlsctObj::<Script, BlsctScript>::from_c_obj(
-      c_obj as *mut BlsctScript
-    ).into()
+    BlsctObj::<Script, BlsctScript>::from_c_obj(c_obj as *mut BlsctScript).into()
   }
 
   pub fn sequence(&self) -> u32 {
@@ -46,9 +32,7 @@ impl CTxIn {
 
   pub fn script_witness(&self) -> Script {
     let c_obj = unsafe { get_ctx_in_script_witness(self.value()) };
-    BlsctObj::<Script, BlsctScript>::from_c_obj(
-      c_obj as *mut BlsctScript
-    ).into()
+    BlsctObj::<Script, BlsctScript>::from_c_obj(c_obj as *mut BlsctScript).into()
   }
 
   impl_value_raw_const_obj!();
@@ -71,11 +55,8 @@ impl Eq for CTxIn {}
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::{
-    initializer::init,
-    test_util::gen_ctx,
-  };
-  
+  use crate::{initializer::init, test_util::gen_ctx};
+
   fn get_ctx_in() -> CTxIn {
     let ctx = gen_ctx();
     let ctx_ins = ctx.get_ctx_ins();
@@ -88,13 +69,6 @@ mod tests {
     init();
     let ctx_in = get_ctx_in();
     let _ = ctx_in.prev_out_hash();
-  }
-
-  #[test]
-  fn test_prev_out_n() {
-    init();
-    let ctx_in = get_ctx_in();
-    let _ = ctx_in.prev_out_n();
   }
 
   #[test]
@@ -118,4 +92,3 @@ mod tests {
     let _ = ctx_in.script_witness();
   }
 }
-

@@ -1,27 +1,17 @@
 use crate::{
-  blsct_obj::{BlsctObj, self},
+  blsct_obj::{self, BlsctObj},
   blsct_serde::BlsctSerde,
   ffi::{
-    BlsctDoublePubKey,
-    BlsctRetVal,
-    deserialize_dpk,
-    gen_double_pub_key,
-    gen_dpk_with_keys_acct_addr,
-    serialize_dpk,
-    sub_addr_to_dpk,
+    deserialize_dpk, gen_double_pub_key, gen_dpk_with_keys_acct_addr, serialize_dpk,
+    sub_addr_to_dpk, BlsctDoublePubKey, BlsctRetVal,
   },
   keys::public_key::PublicKey,
-  macros::{
-    impl_clone,
-    impl_display,
-    impl_from_retval,
-    impl_value,
-  },
+  macros::{impl_clone, impl_display, impl_from_retval, impl_value},
   scalar::Scalar,
   sub_addr::SubAddr,
 };
-use std::ffi::c_char;
 use serde::{Deserialize, Serialize};
+use std::ffi::c_char;
 
 #[derive(PartialEq, Eq, Debug, Deserialize, Serialize)]
 pub struct DoublePublicKey {
@@ -53,9 +43,7 @@ impl DoublePublicKey {
     view_key: &PublicKey,
     spend_key: &PublicKey,
   ) -> Result<Self, blsct_obj::Error<'a>> {
-    let rv = unsafe {
-      gen_double_pub_key(view_key.value(), spend_key.value())
-    };
+    let rv = unsafe { gen_double_pub_key(view_key.value(), spend_key.value()) };
     let obj = BlsctObj::from_retval(rv)?;
     Ok(obj.into())
   }
@@ -67,18 +55,13 @@ impl DoublePublicKey {
     address: u64,
   ) -> Self {
     let dpk = unsafe {
-      gen_dpk_with_keys_acct_addr(
-        view_key.value(),
-        spending_pub_key.value(),
-        account,
-        address,
-      )
+      gen_dpk_with_keys_acct_addr(view_key.value(), spending_pub_key.value(), account, address)
     };
     let obj = BlsctObj::from_c_obj(dpk);
     obj.into()
   }
 
-  pub fn random<'a>() -> Result<Self, blsct_obj::Error<'a>> { 
+  pub fn random<'a>() -> Result<Self, blsct_obj::Error<'a>> {
     let view_key = PublicKey::random()?;
     let spend_key = PublicKey::random()?;
     Self::from_view_and_spend_keys(&view_key, &spend_key)
@@ -98,10 +81,7 @@ impl BlsctSerde for DoublePublicKey {
 #[cfg(test)]
 mod tests {
   use super::*;
-  use crate::{
-    initializer::init,
-    keys::child_key::ChildKey,
-  };
+  use crate::{initializer::init, keys::child_key::ChildKey};
 
   #[test]
   fn test_random() {
@@ -114,8 +94,7 @@ mod tests {
     init();
     let a = PublicKey::random().unwrap();
     let b = PublicKey::random().unwrap();
-    let _: DoublePublicKey = 
-      DoublePublicKey::from_view_and_spend_keys(&a, &b).unwrap();
+    let _: DoublePublicKey = DoublePublicKey::from_view_and_spend_keys(&a, &b).unwrap();
   }
 
   #[test]
@@ -126,12 +105,7 @@ mod tests {
     let view_key = tx_key.to_view_key();
     let pub_key = PublicKey::random().unwrap();
 
-    DoublePublicKey::from_keys_acct_addr(
-      &view_key,
-      &pub_key,
-      123,
-      456,
-    );
+    DoublePublicKey::from_keys_acct_addr(&view_key, &pub_key, 123, 456);
   }
 
   #[test]

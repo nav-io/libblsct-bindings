@@ -1,63 +1,28 @@
 use crate::{
   amount_recovery_req::AmountRecoveryReq,
   amount_recovery_res::AmountRecoveryRes,
-  blsct_obj::{BlsctObj, self},
-  blsct_serde::BlsctSerde, 
+  blsct_obj::{self, BlsctObj},
+  blsct_serde::BlsctSerde,
   ffi::{
-    add_to_amount_recovery_req_vec,
-    add_to_uint64_vec,
-    add_to_range_proof_vec,
-    BlsctPoint,
-    BlsctRangeProof,
-    BlsctRetVal,
-    BlsctScalar,
-    build_range_proof,
-    create_amount_recovery_req_vec,
-    create_range_proof_vec,
-    create_uint64_vec,
-    delete_amount_recovery_req_vec,
-    delete_range_proof_vec,
-    delete_uint64_vec,
-    deserialize_range_proof,
-    free_obj,
-    free_amounts_ret_val,
-    gen_amount_recovery_req,
-    get_amount_recovery_result_amount,
-    get_amount_recovery_result_is_succ,
-    get_amount_recovery_result_msg,
-    get_amount_recovery_result_size,
-    get_range_proof_A,
-    get_range_proof_A_wip,
-    get_range_proof_B,
-    get_range_proof_r_prime,
-    get_range_proof_s_prime,
-    get_range_proof_delta_prime,
-    get_range_proof_alpha_hat,
-    get_range_proof_tau_x,
-    recover_amount,
-    serialize_range_proof,
-    verify_range_proofs,
+    add_to_amount_recovery_req_vec, add_to_range_proof_vec, add_to_uint64_vec, build_range_proof,
+    create_amount_recovery_req_vec, create_range_proof_vec, create_uint64_vec,
+    delete_amount_recovery_req_vec, delete_range_proof_vec, delete_uint64_vec,
+    deserialize_range_proof, free_amounts_ret_val, free_obj, gen_amount_recovery_req,
+    get_amount_recovery_result_amount, get_amount_recovery_result_is_succ,
+    get_amount_recovery_result_msg, get_amount_recovery_result_size, get_range_proof_A,
+    get_range_proof_A_wip, get_range_proof_B, get_range_proof_alpha_hat,
+    get_range_proof_delta_prime, get_range_proof_r_prime, get_range_proof_s_prime,
+    get_range_proof_tau_x, recover_amount, serialize_range_proof, verify_range_proofs, BlsctPoint,
+    BlsctRangeProof, BlsctRetVal, BlsctScalar,
   },
-  macros::{
-    impl_clone,
-    impl_display,
-    impl_from_retval,
-    impl_size,
-    impl_value,
-  },
+  macros::{impl_clone, impl_display, impl_from_retval, impl_size, impl_value},
   point::Point,
   scalar::Scalar,
   token_id::TokenId,
 };
 use serde::{Deserialize, Serialize};
 use std::{
-  ffi::{
-    CStr,
-    CString,
-    c_char,
-    c_void,
-    NulError,
-  },
+  ffi::{c_char, c_void, CStr, CString, NulError},
   fmt,
 };
 
@@ -78,22 +43,18 @@ impl<'a> std::error::Error for Error<'a> {}
 impl<'a> fmt::Display for Error<'a> {
   fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
     match self {
-      Error::BlsctObjError(e) =>
-        write!(f, "BlsctObjError: {e:?}"),
-      Error::FailedToCreateUint64Vec =>
-        write!(f, "Failed to create uint64_t vector"),
-      Error::FailedToCreateCString(e) =>
-        write!(f, "Failed to create CString: {e:?}"),
-      Error::FailedToCreateRangeProofVector =>
-        write!(f, "Failed to create range proof vector"),
-      Error::FailedToVerifyRangeProofs(e) =>
-        write!(f, "Failed to verify range proofs: {e}"),
-      Error::FailedToCreateAmountRecoveryRequestVector =>
-        write!(f, "Failed to create amount recovery request vector"),
-      Error::FailedToCreateDefaultTokenId =>
-        write!(f, "Failed to create default token id"),
-      Error::FailedToRecoverAmount(e) =>
-        write!(f, "Failed to recover amount: {e}"),
+      Error::BlsctObjError(e) => write!(f, "BlsctObjError: {e:?}"),
+      Error::FailedToCreateUint64Vec => write!(f, "Failed to create uint64_t vector"),
+      Error::FailedToCreateCString(e) => write!(f, "Failed to create CString: {e:?}"),
+      Error::FailedToCreateRangeProofVector => {
+        write!(f, "Failed to create range proof vector")
+      }
+      Error::FailedToVerifyRangeProofs(e) => write!(f, "Failed to verify range proofs: {e}"),
+      Error::FailedToCreateAmountRecoveryRequestVector => {
+        write!(f, "Failed to create amount recovery request vector")
+      }
+      Error::FailedToCreateDefaultTokenId => write!(f, "Failed to create default token id"),
+      Error::FailedToRecoverAmount(e) => write!(f, "Failed to recover amount: {e}"),
     }
   }
 }
@@ -112,7 +73,7 @@ impl RangeProof {
     amounts: &Vec<u64>,
     nonce: &Point,
     msg: &str,
-    token_id: &TokenId
+    token_id: &TokenId,
   ) -> Result<Self, Error<'a>> {
     let vp_u64_vec = {
       let vec = unsafe { create_uint64_vec() };
@@ -124,19 +85,13 @@ impl RangeProof {
       }
       vec
     };
-    let c_msg = CString::new(msg)
-      .map_err(|e| Error::FailedToCreateCString(e))?;
+    let c_msg = CString::new(msg).map_err(Error::FailedToCreateCString)?;
 
-    let rv = unsafe { build_range_proof(
-      vp_u64_vec,
-      nonce.value(),
-      c_msg.as_ptr(),
-      token_id.value(),
-    )};
+    let rv =
+      unsafe { build_range_proof(vp_u64_vec, nonce.value(), c_msg.as_ptr(), token_id.value()) };
     unsafe { delete_uint64_vec(vp_u64_vec) };
 
-    let obj = BlsctObj::from_retval(rv)
-      .map_err(|e| Error::BlsctObjError(e))?;
+    let obj = BlsctObj::from_retval(rv).map_err(Error::BlsctObjError)?;
     Ok(obj.into())
   }
 
@@ -148,21 +103,17 @@ impl RangeProof {
 
     for proof in proofs {
       let proof_size = proof.obj.size();
-      unsafe { add_to_range_proof_vec(
-        range_proofs,
-        proof.value(),
-        proof_size,
-      )};
+      unsafe { add_to_range_proof_vec(range_proofs, proof.value(), proof_size) };
     }
 
     let rv = unsafe { verify_range_proofs(range_proofs) };
     let (result, value) = unsafe { ((*rv).result, (*rv).value) };
-    unsafe { 
+    unsafe {
       delete_range_proof_vec(range_proofs);
       free_obj(rv as *mut c_void);
     };
 
-    if result == 0 { 
+    if result == 0 {
       Ok(value)
     } else {
       Err(Error::FailedToVerifyRangeProofs(result))
@@ -172,7 +123,6 @@ impl RangeProof {
   pub fn recover_amounts<'a>(
     reqs: Vec<AmountRecoveryReq>,
   ) -> Result<Vec<AmountRecoveryRes>, Error<'a>> {
-
     let req_vec = unsafe { create_amount_recovery_req_vec() };
     if req_vec.is_null() {
       return Err(Error::FailedToCreateAmountRecoveryRequestVector);
@@ -185,17 +135,16 @@ impl RangeProof {
       };
       let token_id = req.token_id.as_ref().or(default_token_id.as_ref()).unwrap();
 
-      let blsct_req = unsafe { gen_amount_recovery_req(
-        req.range_proof.value() as *mut c_void,
-        req.range_proof.size(),
-        req.nonce.value() as *mut c_void,
-        token_id.value() as *mut c_void,
-      )};
+      let blsct_req = unsafe {
+        gen_amount_recovery_req(
+          req.range_proof.value() as *mut c_void,
+          req.range_proof.size(),
+          req.nonce.value() as *mut c_void,
+          token_id.value() as *mut c_void,
+        )
+      };
 
-      unsafe { add_to_amount_recovery_req_vec(
-        req_vec,
-        blsct_req as *mut c_void,
-      )};
+      unsafe { add_to_amount_recovery_req_vec(req_vec, blsct_req as *mut c_void) };
     }
 
     let rv = unsafe { recover_amount(req_vec) };
@@ -214,14 +163,12 @@ impl RangeProof {
       let is_succ = unsafe { get_amount_recovery_result_is_succ(value, i) };
       let amount = unsafe { get_amount_recovery_result_amount(value, i) };
       let msg_c_str = unsafe { get_amount_recovery_result_msg(value, i) };
-      let msg = if msg_c_str.is_null() { "" } else {
+      let msg = if msg_c_str.is_null() {
+        ""
+      } else {
         unsafe { CStr::from_ptr(msg_c_str) }.to_str().unwrap()
       };
-      let result = AmountRecoveryRes::new(
-        is_succ,
-        amount,
-        &msg,
-      );
+      let result = AmountRecoveryRes::new(is_succ, amount, msg);
       results.push(result);
     }
 
@@ -308,16 +255,15 @@ impl From<BlsctObj<RangeProof, BlsctRangeProof>> for RangeProof {
 
 impl PartialEq for RangeProof {
   fn eq(&self, other: &Self) -> bool {
-    self.get_A() == other.get_A() &&
-    self.get_B() == other.get_B() &&
-    self.get_r_prime() == other.get_r_prime() &&
-    self.get_s_prime() == other.get_s_prime() &&
-    self.get_delta_prime() == other.get_delta_prime() &&
-    self.get_alpha_hat() == other.get_alpha_hat() &&
-    self.get_tau_x() == other.get_tau_x()
+    self.get_A() == other.get_A()
+      && self.get_B() == other.get_B()
+      && self.get_r_prime() == other.get_r_prime()
+      && self.get_s_prime() == other.get_s_prime()
+      && self.get_delta_prime() == other.get_delta_prime()
+      && self.get_alpha_hat() == other.get_alpha_hat()
+      && self.get_tau_x() == other.get_tau_x()
   }
 }
-
 
 #[cfg(test)]
 mod tests {
