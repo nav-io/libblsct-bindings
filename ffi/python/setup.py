@@ -16,6 +16,14 @@ std_cpp = "-std=c++20"
 
 package_dir = Path(os.path.abspath(os.path.dirname(__file__)))
 
+# Copy the shared SWIG contract into the package tree so it is included in the
+# sdist and available when building from a downloaded sdist (where ffi/blsct.i
+# is outside the package root and therefore absent).
+_shared_i_src = package_dir.parent / "blsct.i"
+_shared_i_dst = package_dir / "blsct.i"
+if _shared_i_src.exists():
+  shutil.copy2(_shared_i_src, _shared_i_dst)
+
 if IS_PROD:
   navio_core_repo = "https://github.com/nav-io/navio-core"
   # git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master

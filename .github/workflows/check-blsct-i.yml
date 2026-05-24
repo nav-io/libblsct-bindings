@@ -1,28 +1,32 @@
-name: 'Common: Check blsct.i cosiscency'
+name: 'Common: Check blsct.i consistency'
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      - '**'
     paths:
+      - 'ffi/blsct.i'
       - 'ffi/python/blsct/blsct.i'
+      - 'ffi/csharp/blsct.i'
       - 'ffi/ts/swig/blsct.i'
   pull_request:
     paths:
+      - 'ffi/blsct.i'
       - 'ffi/python/blsct/blsct.i'
+      - 'ffi/csharp/blsct.i'
       - 'ffi/ts/swig/blsct.i'
+
 
 jobs:
   common-check-blsct-i-consistency:
     runs-on: ubuntu-24.04
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           clean: true
 
       - name: Run consistency check
         run: |
-          ./script/blsct-i-consistency.sh 
-
+          ./script/blsct-i-consistency.sh

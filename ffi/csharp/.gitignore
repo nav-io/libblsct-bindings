@@ -1,0 +1,12 @@
+/bin/
+/obj/
+**/bin/
+**/obj/
+**/TestResults/
+
+# DocFX build output
+docs/_site/
+docs/api/*.yml
+docs/api/*.json
+docs/api/.manifest
+!docs/api/.gitkeep

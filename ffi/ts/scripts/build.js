@@ -407,7 +407,9 @@ const buildDepends = (cfg, numCpus) => {
   } else {
     console.log('Building navio-core dependencies...')
 
-    const res = spawnSync('make', ['-j', String(numCpus)], { cwd: cfg.dependsDir, stdio: 'inherit' })
+    const dependsEnv = { ...process.env }
+    delete dependsEnv.SSL_CERT_FILE
+    const res = spawnSync('make', ['-j', String(numCpus)], { cwd: cfg.dependsDir, stdio: 'inherit', env: dependsEnv })
     if (res.status !== 0) {
       throw new Error(`Failed to build dependencies: exit code ${res.status}`)
     }

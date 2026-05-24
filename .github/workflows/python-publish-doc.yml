@@ -9,24 +9,29 @@ on:
       - 'ffi/python/docs/source/**'
       - 'ffi/python/blsct/**'
 
+concurrency:
+  group: gh-pages-deploy
+  cancel-in-progress: false
+
 permissions:
   contents: write
 
+
 jobs:
-  python-publick-docs:
+  python-publish-docs:
     runs-on: ubuntu-latest
 
     steps:
       - name: Install system dependencies
         run: |
           if [[ $RUNNER_OS == 'Linux' ]]; then
-            sudo apt-get update && sudo apt-get install -y swig autoconf automake libtool pkg-config 
+            sudo apt-get update && sudo apt-get install -y swig autoconf automake libtool pkg-config
           elif [[ $RUNNER_OS == 'macOS' ]]; then
-            brew install swig autoconf automake libtool pkg-config 
+            brew install swig autoconf automake libtool pkg-config
           fi
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: 3.12
 
@@ -35,7 +40,7 @@ jobs:
           pip install sphinx ghp-import setuptools build pytest
 
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: Build and install the package
         run: |
@@ -56,4 +61,3 @@ jobs:
           publish_branch: gh-pages
           destination_dir: python
           keep_files: true
-
