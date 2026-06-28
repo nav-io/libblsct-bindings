@@ -8,7 +8,7 @@ const IS_PROD: bool = true;
 
 const NAVIO_REPO_URL_PROD: &str = "https://github.com/nav-io/navio-core";
 const NAIVO_REPO_URL_DEV: &str = "https://github.com/gogoex/navio-core";
-const NAVIO_REPO_PROD_SHA: &str = "623ad2da8e9031d8b900c54af6d393ec88e9a32a";
+const NAVIO_REPO_PROD_SHA: &str = "459f3e8e9bc216ac82f2c472a84cc7540fa97f0b"; // tag v0.1.0
 const NAVIO_REPO_DEV_BRANCH: &str = "";
 
 fn copy_dir(src_dir: &Path, dest_dir: &Path) -> io::Result<()> {
