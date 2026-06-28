@@ -34,9 +34,9 @@ else:
   navio_core_branch = ""
 
 navio_core_dir = package_dir / "navio-core"
-depends_dir = navio_core_dir / "depends"
+# navio-core v0.1.0+ uses an out-of-source CMake build tree.
+cmake_build_dir = navio_core_dir / "build"
 navio_tmp_dir = Path.home() / ".navio-tmp"
-depends_bak_dir = navio_tmp_dir / "depends"
 
 src_path = navio_core_dir / "src"
 bls_path = src_path / "bls"
@@ -44,8 +44,11 @@ bls_lib_path = bls_path / "lib"
 mcl_path = bls_path / "mcl"
 mcl_lib_path = mcl_path / "lib"
 
-src_libblsct_a = src_path / "libblsct.a"
-src_libunivalue_blsct_a = src_path / "libunivalue_blsct.a"
+# Static archives produced by the CMake BUILD_LIBBLSCT_ONLY build.
+# libblsct.a / libunivalue.a land in the out-of-source build tree; bls and
+# mcl are built in-source under src/bls (same paths as the old autotools build).
+src_libblsct_a = cmake_build_dir / "lib" / "libblsct.a"
+src_libunivalue_blsct_a = cmake_build_dir / "src" / "univalue" / "libunivalue.a"
 src_libmcl_a = mcl_lib_path / "libmcl.a"
 src_libbls384_256_a = bls_lib_path / "libbls384_256.a"
 
@@ -65,18 +68,6 @@ def log(s):
   print(f"===> {s}")
 
 class CustomBuildExt(build_ext):
-  def get_arch_path(self, depends_dir: Path) -> Path:
-    arches = ["x86_64", "i686", "mips", "arm", "aarch64",
-              "powerpc", "riscv32", "riscv64", "s390x"]
-    if not depends_dir.is_dir():
-      raise FileNotFoundError("Failed to read depends directory")
-
-    for entry in depends_dir.iterdir():
-      if any(entry.name.startswith(arch) for arch in arches) and entry.is_dir():
-        return entry.resolve()
-
-    raise FileNotFoundError("Arch dependency directory missing")
-
   def clone_navio_core(self):
     if os.path.isdir(navio_core_dir):
       shutil.rmtree(navio_core_dir)
@@ -177,32 +168,40 @@ class CustomBuildExt(build_ext):
         log("Patched dummy_impl.cpp with G_TRANSLATION_FUN linkage stub")
 
   def build_libblsct(self, num_cpus: str):
-    # if there is a backup of depends directory, use it
-    if os.path.isdir(depends_bak_dir):
-      log("Using backup of dependency directory...")
-      shutil.rmtree(depends_dir)
-      shutil.copytree(depends_bak_dir, depends_dir)
-    else:
-      log("Building dependendencies...")
-      # otherwise, build the dependencies
-      subprocess.run(
-        ["make", "-j", num_cpus],
-        cwd=depends_dir,
-        check=True,
-      )
-      shutil.copytree(depends_dir, depends_bak_dir)
-      log("Created backup of dependency directory")
+    # navio-core v0.1.0+ builds with CMake. BUILD_LIBBLSCT_ONLY builds the
+    # standalone libblsct.a and disables all node/wallet/daemon targets, so no
+    # autotools `depends` prefix is required — mcl, bls, univalue and secp256k1
+    # are vendored in-tree.
+    if os.path.isdir(cmake_build_dir):
+      shutil.rmtree(cmake_build_dir)
 
-    # Run autogen, configure, and make
-    subprocess.run(["./autogen.sh"], cwd=navio_core_dir, check=True)
-    arch_path = self.get_arch_path(depends_dir)
-
+    log("Configuring navio-core (CMake, BUILD_LIBBLSCT_ONLY)...")
     subprocess.run(
-      ["./configure", f"--prefix={arch_path}", "--enable-build-libblsct-only"],
+      [
+        "cmake",
+        "-S", str(navio_core_dir),
+        "-B", str(cmake_build_dir),
+        "-DBUILD_LIBBLSCT_ONLY=ON",
+        "-DCMAKE_BUILD_TYPE=Release",
+        "-DBUILD_TESTS=OFF",
+        "-DBUILD_BENCH=OFF",
+        "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
+      ],
       cwd=navio_core_dir,
       check=True,
     )
-    subprocess.run(["make", "-j", num_cpus], cwd=navio_core_dir, check=True)
+
+    log("Building libblsct...")
+    subprocess.run(
+      [
+        "cmake",
+        "--build", str(cmake_build_dir),
+        "--target", "blsct", "univalue",
+        "-j", num_cpus,
+      ],
+      cwd=navio_core_dir,
+      check=True,
+    )
 
     os.makedirs(libs_dir, exist_ok=True)
     for (src, dest) in zip(src_dot_a_files, dest_dot_a_files):

@@ -17,10 +17,9 @@ const LIBS_CACHE_META_BASENAME = '.build-cache-meta.json'
 const LIBS_CACHE_VERSION = 'navio-core-sign-unsigned-tx-v3-aggregate-upstream'
 
 // Linux apt packages required for building (swig is installed separately only if needed)
+// navio-core v0.1.0+ builds with CMake instead of autotools.
 const LINUX_APT_PACKAGES = [
-  'autoconf',
-  'automake',
-  'libtool',
+  'cmake',
   'pkg-config',
   'git',
   'python3',
@@ -29,9 +28,7 @@ const LINUX_APT_PACKAGES = [
 
 // macOS brew packages required for building (swig is installed separately only if needed)
 const MACOS_BREW_PACKAGES = [
-  'autoconf',
-  'automake',
-  'libtool',
+  'cmake',
   'pkg-config',
   'git'
 ]
@@ -181,8 +178,8 @@ function ensureMacOSDeps(pkgs) {
     console.warn('[navio-blsct] brew install had non-zero exit, continuing anyway...')
   }
 
-  // Link packages that are installed but not linked (e.g. after brew upgrade).
-  // Without this, autogen.sh fails with "please install autoconf first".
+  // Link packages that are installed but not linked (e.g. after brew upgrade)
+  // so the build toolchain (cmake, pkg-config) is on PATH.
   console.log('[navio-blsct] Ensuring Homebrew packages are linked...')
   for (const pkg of pkgs) {
     const linkRes = spawnSync('brew', ['link', pkg], { stdio: 'pipe' })
@@ -269,11 +266,9 @@ const getCfg = () => {
   const baseDir = path.resolve(__dirname, '..')
   const swigDir = path.join(baseDir, 'swig')
   const navioCoreDir = path.join(baseDir, 'navio-core')
-  const dependsDir = path.join(navioCoreDir, 'depends')
+  // navio-core v0.1.0+ uses an out-of-source CMake build tree.
+  const cmakeBuildDir = path.join(navioCoreDir, 'build')
   const libsDir = path.join(baseDir, 'libs')
-
-  const bakDir = path.join(os.homedir(), '.navio-tmp')
-  const dependsBakDir = path.join(bakDir, 'depends')
 
   const srcPath = path.join(navioCoreDir, 'src')
   const blsPath = path.join(srcPath, 'bls')
@@ -281,9 +276,13 @@ const getCfg = () => {
   const mclPath = path.join(blsPath, 'mcl')
   const mclLibPath = path.join(mclPath, 'lib')
 
+  // Static archives produced by the CMake `BUILD_LIBBLSCT_ONLY` build.
+  // libblsct.a + libunivalue.a land in the out-of-source build tree;
+  // bls/mcl are built in-source under src/bls (same paths as the old
+  // autotools build).
   const srcDotAFiles = [
-    path.join(srcPath, 'libblsct.a'),
-    path.join(srcPath, 'libunivalue_blsct.a'),
+    path.join(cmakeBuildDir, 'lib', 'libblsct.a'),
+    path.join(cmakeBuildDir, 'src', 'univalue', 'libunivalue.a'),
     path.join(blsLibPath, 'libbls384_256.a'),
     path.join(mclLibPath, 'libmcl.a'),
   ]
@@ -302,8 +301,7 @@ const getCfg = () => {
     navioCoreMasterSha: IS_PROD ? MASTER_SHA : '',
     navioCoreBranch: NAVIO_CORE_BRANCH,
     navioCoreDir,
-    dependsDir,
-    dependsBakDir,
+    cmakeBuildDir,
 
     srcDotAFiles,
     destDotAFiles,
@@ -330,28 +328,6 @@ const getCfg = () => {
 // ============================================================================
 // Build Steps
 // ============================================================================
-
-const getDepArchDir = (dependsDir) => {
-  if (!fs.existsSync(dependsDir)) {
-    throw new Error(`${dependsDir} not found`)
-  }
-  const arches = [
-    'x86_64', 'i686', 'mips', 'arm', 'aarch64',
-    'powerpc', 'riscv32', 'riscv64', 's390x'
-  ]
-
-  const files = fs.readdirSync(dependsDir, { withFileTypes: true })
-  for (const file of files) {
-    if (
-      file.isDirectory() &&
-      arches.some(arch => file.name.startsWith(arch))
-    ) {
-      console.log(`Found dependency arch dir: ${file.name}`)
-      return path.resolve(dependsDir, file.name)
-    }
-  }
-  throw new Error(`Failed to find dependency arch dir in ${dependsDir}`)
-}
 
 const gitCloneNavioCore = (cfg) => {
   // Remove existing directory
@@ -400,54 +376,45 @@ const gitCloneNavioCore = (cfg) => {
   }
 }
 
-const buildDepends = (cfg, numCpus) => {
-  if (fs.existsSync(cfg.dependsBakDir)) {
-    console.log('Copying the backup of dependency dir...')
-    fs.cpSync(cfg.dependsBakDir, cfg.dependsDir, { recursive: true })
-  } else {
-    console.log('Building navio-core dependencies...')
-
-    const dependsEnv = { ...process.env }
-    delete dependsEnv.SSL_CERT_FILE
-    const res = spawnSync('make', ['-j', String(numCpus)], { cwd: cfg.dependsDir, stdio: 'inherit', env: dependsEnv })
-    if (res.status !== 0) {
-      throw new Error(`Failed to build dependencies: exit code ${res.status}`)
-    }
-    console.log('Creating backup of depends dir...')
-    fs.cpSync(cfg.dependsDir, cfg.dependsBakDir, { recursive: true })
-  }
-  return getDepArchDir(cfg.dependsDir)
-}
-
-const buildLibBlsct = (cfg, numCpus, depArchDir) => {
-  // run autogen.sh
-  console.log('Running autogen.sh...')
-  const autogenRes = spawnSync('./autogen.sh', [], { cwd: cfg.navioCoreDir, stdio: 'inherit' })
-  if (autogenRes.status !== 0) {
-    throw new Error(`autogen.sh failed: exit code ${autogenRes.status}`)
+const buildLibBlsct = (cfg, numCpus) => {
+  // navio-core v0.1.0+ builds with CMake. The BUILD_LIBBLSCT_ONLY option
+  // builds the standalone libblsct.a and disables every node/wallet/daemon
+  // target, so no autotools `depends` prefix is required — mcl, bls,
+  // univalue and secp256k1 are all vendored in-tree.
+  if (fs.existsSync(cfg.cmakeBuildDir)) {
+    fs.rmSync(cfg.cmakeBuildDir, { recursive: true, force: true })
   }
 
-  // run configure
-  console.log(`Running configure...`)
-  const configureRes = spawnSync('./configure', [
-    `--prefix=${depArchDir}`,
-    '--enable-build-libblsct-only'
+  console.log('Configuring navio-core (CMake, BUILD_LIBBLSCT_ONLY)...')
+  const configureRes = spawnSync('cmake', [
+    '-S', cfg.navioCoreDir,
+    '-B', cfg.cmakeBuildDir,
+    '-DBUILD_LIBBLSCT_ONLY=ON',
+    '-DCMAKE_BUILD_TYPE=Release',
+    '-DBUILD_TESTS=OFF',
+    '-DBUILD_BENCH=OFF',
+    '-DCMAKE_POSITION_INDEPENDENT_CODE=ON',
   ], {
     cwd: cfg.navioCoreDir,
-    stdio: 'inherit'
+    stdio: 'inherit',
   })
   if (configureRes.status !== 0) {
-    throw new Error(`Running configure failed: exit code ${configureRes.status}`)
+    throw new Error(`CMake configure failed: exit code ${configureRes.status}`)
   }
 
-  // build libblsct
+  // Build libblsct plus the in-tree static deps the node addon links
+  // against. bls/mcl are pulled in as dependencies of the blsct target.
   console.log('Building libblsct...')
-  const makeRes = spawnSync('make', ['-j', String(numCpus)], {
+  const buildRes = spawnSync('cmake', [
+    '--build', cfg.cmakeBuildDir,
+    '--target', 'blsct', 'univalue',
+    '-j', String(numCpus),
+  ], {
     cwd: cfg.navioCoreDir,
-    stdio: 'inherit'
+    stdio: 'inherit',
   })
-  if (makeRes.status !== 0) {
-    throw new Error(`Building libblsct failed: exit code ${makeRes.status}`)
+  if (buildRes.status !== 0) {
+    throw new Error(`Building libblsct failed: exit code ${buildRes.status}`)
   }
 
   // prepare a fresh libs dir
@@ -656,8 +623,7 @@ const main = () => {
     if (haveAllArchives && (!cachedLibsAreCompatible || !cacheMetaMatches)) {
       console.log('[navio-blsct] Cached static libraries are stale or incompatible; rebuilding static libraries...')
     }
-    const depArchDir = buildDepends(cfg, numCpus)
-    buildLibBlsct(cfg, numCpus, depArchDir)
+    buildLibBlsct(cfg, numCpus)
   }
 
   buildSwigWrapper(cfg)

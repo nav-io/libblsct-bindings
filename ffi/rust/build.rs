@@ -1,6 +1,5 @@
 use std::env;
 use std::fs;
-use std::io;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -10,23 +9,6 @@ const NAVIO_REPO_URL_PROD: &str = "https://github.com/nav-io/navio-core";
 const NAIVO_REPO_URL_DEV: &str = "https://github.com/gogoex/navio-core";
 const NAVIO_REPO_PROD_SHA: &str = "459f3e8e9bc216ac82f2c472a84cc7540fa97f0b"; // tag v0.1.0
 const NAVIO_REPO_DEV_BRANCH: &str = "";
-
-fn copy_dir(src_dir: &Path, dest_dir: &Path) -> io::Result<()> {
-  fs::create_dir_all(dest_dir)?;
-
-  for f in fs::read_dir(src_dir)? {
-    let f = f?;
-    let f = f.path();
-    let dest_path = dest_dir.join(f.file_name().unwrap());
-
-    if f.is_file() {
-      fs::copy(&f, &dest_path)?;
-    } else {
-      copy_dir(&f, &dest_path)?
-    }
-  }
-  Ok(())
-}
 
 fn get_navio_core_path() -> PathBuf {
   let manifest_dir =
@@ -83,96 +65,50 @@ fn clone_navio_core(navio_core_path: &Path) {
   }
 }
 
-fn get_depends_arch_path(depends_path: &Path) -> io::Result<PathBuf> {
-  if !depends_path.exists() {
-    return Err(io::Error::new(
-      io::ErrorKind::NotFound,
-      format!("{} is missing", depends_path.display()),
-    ));
-  }
-  let arches = [
-    "x86_64", "i686", "mips", "arm", "aarch64", "powerpc", "riscv32", "riscv64", "s390x",
-  ];
-  for entry in fs::read_dir(depends_path)? {
-    let entry = entry?;
-    if entry.file_type()?.is_dir() {
-      let name = entry.file_name();
-      let name = name.to_string_lossy();
-      if arches.iter().any(|arch| name.starts_with(arch)) {
-        println!("Found dependency arch dir: {}", name);
-        return Ok(entry.path());
-      }
-    }
-  }
-  Err(io::Error::new(
-    io::ErrorKind::NotFound,
-    format!(
-      "Failed to find dependency arch dir in {}",
-      depends_path.display()
-    ),
-  ))
-}
-
-fn build_depends(
-  navio_core_path: &Path,
-  depends_path: &Path,
-  num_cpus: &str,
-) -> io::Result<PathBuf> {
-  let depends_bak_path = navio_core_path
-    .parent()
-    .unwrap()
-    .parent()
-    .unwrap()
-    .join("depends");
-
-  if depends_bak_path.exists() {
-    println!("Copying backup of depends under navio-core...");
-
-    fs::remove_dir_all(depends_path).unwrap();
-    copy_dir(&depends_bak_path, depends_path).unwrap();
-  } else {
-    // if there is no backup directory of depends dir,
-    // build navio-core dependencies and create the backup
-    println!("Buliding dependencies of navio-core...");
-    Command::new("make")
-      .args(["-j", num_cpus])
-      .current_dir(depends_path)
-      .status()
-      .expect("Failed to clone navio-core repository");
-
-    // create the backup
-    println!("Creating backup of navio-core dependencies...");
-    copy_dir(depends_path, &depends_bak_path).unwrap();
-  }
-
-  get_depends_arch_path(depends_path)
-}
-
 fn build_libblsct(
   navio_core_path: &Path,
-  depends_arch_path: &Path,
+  cmake_build_path: &Path,
   dot_a_src_dest_paths: &Vec<(PathBuf, PathBuf)>,
   num_cpus: &str,
 ) {
-  // build libblsct.a and its dependencies
+  // navio-core v0.1.0+ builds with CMake. BUILD_LIBBLSCT_ONLY builds the
+  // standalone libblsct.a and disables all node/wallet/daemon targets, so no
+  // autotools `depends` prefix is required — mcl, bls, univalue and secp256k1
+  // are vendored in-tree.
   println!("Building libblsct.a and its dependencies...");
 
-  Command::new("./autogen.sh")
-    .current_dir(navio_core_path)
-    .status()
-    .expect("Failed to run autogen.sh");
+  if cmake_build_path.exists() {
+    fs::remove_dir_all(cmake_build_path).unwrap();
+  }
 
-  Command::new("./configure")
+  println!("Configuring navio-core (CMake, BUILD_LIBBLSCT_ONLY)...");
+  Command::new("cmake")
     .args([
-      &format!("--prefix={}", depends_arch_path.display()),
-      "--enable-build-libblsct-only",
+      "-S",
+      &navio_core_path.display().to_string(),
+      "-B",
+      &cmake_build_path.display().to_string(),
+      "-DBUILD_LIBBLSCT_ONLY=ON",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DBUILD_TESTS=OFF",
+      "-DBUILD_BENCH=OFF",
+      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
     ])
     .current_dir(navio_core_path)
     .status()
-    .expect("Failed to run configure");
+    .expect("Failed to run cmake configure");
 
-  Command::new("make")
-    .args(["-j", num_cpus])
+  println!("Building libblsct...");
+  Command::new("cmake")
+    .args([
+      "--build",
+      &cmake_build_path.display().to_string(),
+      "--target",
+      "blsct",
+      "univalue",
+      "-j",
+      num_cpus,
+    ])
     .current_dir(navio_core_path)
     .status()
     .expect("Failed to build libblsct");
@@ -208,10 +144,21 @@ fn get_lib_paths(navio_core_path: &Path, libs_path: &Path) -> Vec<(PathBuf, Path
   let mcl_path = bls_path.join("mcl");
   let mcl_lib_path = mcl_path.join("lib");
 
+  // Static archives produced by the CMake BUILD_LIBBLSCT_ONLY build.
+  // libblsct.a / libunivalue.a land in the out-of-source build tree; bls and
+  // mcl are built in-source under src/bls (same paths as the old autotools build).
+  let cmake_build_path = navio_core_path.join("build");
+
   vec![
-    (src_path.join("libblsct.a"), libs_path.join("libblsct.a")),
     (
-      src_path.join("libunivalue_blsct.a"),
+      cmake_build_path.join("lib").join("libblsct.a"),
+      libs_path.join("libblsct.a"),
+    ),
+    (
+      cmake_build_path
+        .join("src")
+        .join("univalue")
+        .join("libunivalue.a"),
       libs_path.join("libunivalue_blsct.a"),
     ),
     (mcl_lib_path.join("libmcl.a"), libs_path.join("libmcl.a")),
@@ -244,16 +191,14 @@ fn main() {
   if dot_a_src_dest_paths.iter().any(|(_, dest)| !dest.exists()) {
     prepare_fresh_libs_dir(&libs_path);
 
-    let depends_path = navio_core_path.join("depends");
+    let cmake_build_path = navio_core_path.join("build");
     let num_cpus = num_cpus::get().to_string();
 
     clone_navio_core(&navio_core_path);
 
-    let depends_arch_path = build_depends(&navio_core_path, &depends_path, &num_cpus).unwrap();
-
     build_libblsct(
       &navio_core_path,
-      &depends_arch_path,
+      &cmake_build_path,
       &dot_a_src_dest_paths,
       &num_cpus,
     );
