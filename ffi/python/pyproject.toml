@@ -24,7 +24,8 @@ archs = ["native"]
 skip = ["*-musllinux*"]
 
 [tool.cibuildwheel.linux]
-before-all = "dnf install -y libtool autoconf-archive"
+# navio-core v0.1.0+ builds with CMake; the manylinux container needs cmake
+# and git (setup.py clones navio-core) for the BUILD_LIBBLSCT_ONLY build.
+before-all = "dnf install -y cmake git"
 manylinux-x86_64-image = "quay.io/pypa/manylinux_2_28_x86_64"
-environment = { ACLOCAL_PATH = "/usr/share/aclocal", AUTOCONF = "/usr/bin/autoconf" }
 
