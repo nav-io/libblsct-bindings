@@ -126,6 +126,13 @@ jobs:
     if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
 
+    # OIDC trusted publishing (same mechanism as nav-io/navio-sdk). Replaces
+    # the classic NODE_AUTH_TOKEN, which was returning E404 on publish.
+    # Requires navio-blsct to have a trusted publisher configured on npm
+    # pointing at this repo + workflow.
+    permissions:
+      id-token: write
+
     steps:
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -133,13 +140,14 @@ jobs:
           node-version: '22'
           registry-url: 'https://registry.npmjs.org/'
 
+      - name: Upgrade npm for OIDC trusted publishing
+        run: npm install -g npm@latest
+
       - name: Download package artifact
         uses: actions/download-artifact@v8
         with:
           name: ts-pkg
           path: /tmp/ts-pkg
 
-      - name: Publish to npm
-        run: npm publish /tmp/ts-pkg/*.tgz --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish to npm with provenance
+        run: npm publish /tmp/ts-pkg/*.tgz --access public --provenance
