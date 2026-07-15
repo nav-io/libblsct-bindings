@@ -640,6 +640,8 @@ export BlsctRetVal* build_unsigned_mint_nft_output(
 export void delete_unsigned_output(void* vp_unsigned_output);
 export const char* serialize_unsigned_output(const void* vp_unsigned_output);
 export BlsctRetVal* deserialize_unsigned_output(const char* hex);
+export const BlsctScalar* get_unsigned_output_gamma(const void* vp_unsigned_output);
+export bool set_unsigned_output_data_predicate(void* vp_unsigned_output, const char* data_hex);
 
 export void* create_unsigned_transaction();
 export void add_unsigned_transaction_input(void* vp_unsigned_transaction, const void* vp_unsigned_input);
