@@ -18,7 +18,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: ['ubuntu-24.04', 'macos-15']
+        os: ['ubuntu-24.04', 'macos-15', 'windows-2022']
         python-version: ['3.12']
 
     runs-on: ${{ matrix.os }}
@@ -37,17 +37,32 @@ jobs:
         run: pip install cibuildwheel
 
       - name: Install system dependencies
+        shell: bash
         run: |
           if [[ $RUNNER_OS == 'Linux' ]]; then
             sudo apt-get update && sudo apt-get install -y swig cmake pkg-config
           elif [[ $RUNNER_OS == 'macOS' ]]; then
             brew install swig cmake pkg-config
+          elif [[ $RUNNER_OS == 'Windows' ]]; then
+            # cmake + ninja ship with the runner image; swig does not
+            choco install swig --no-progress -y
+            swig -version
           fi
 
+      - name: Configure MSVC developer environment (Windows)
+        if: runner.os == 'Windows'
+        # puts cl.exe / link.exe on PATH for the cmake -G Ninja build of
+        # navio-core that setup.py drives; cibuildwheel inherits the env
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       - name: Copy shared blsct.i into python package tree
+        shell: bash
         run: cp ffi/blsct.i ffi/python/blsct.i
 
       - name: Build wheels with cibuildwheel
+        shell: bash
         run: |
           cd ffi/python
           if [ "${{ matrix.python-version }}" = "3.12" ]; then
@@ -72,6 +87,8 @@ jobs:
             artifact-pattern: wheels-ubuntu-24.04-*
           - os: macos-15
             artifact-pattern: wheels-macos-15-*
+          - os: windows-2022
+            artifact-pattern: wheels-windows-2022-*
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -88,6 +105,7 @@ jobs:
           python-version: '3.12'
 
       - name: Smoke test wheel
+        shell: bash
         run: |
           pip install wheelhouse/*.whl
           python -c "from blsct import get_chain; print(get_chain())"
@@ -117,4 +135,6 @@ jobs:
         env:
           TWINE_USERNAME: __token__
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: twine upload wheelhouse/*.whl
+        # --skip-existing: lets a re-run add wheels for a new platform to an
+        # already-published version instead of failing on the existing files
+        run: twine upload --skip-existing wheelhouse/*.whl

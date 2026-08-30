@@ -30,19 +30,29 @@ jobs:
   python-run-unit-tests:
     strategy:
       matrix:
-        os: ['ubuntu-24.04', 'macos-15']
+        os: ['ubuntu-24.04', 'macos-15', 'windows-2022']
         python-version: ['3.12']
 
     runs-on: ${{ matrix.os }}
 
     steps:
       - name: Install system dependencies
+        shell: bash
         run: |
           if [[ $RUNNER_OS == 'Linux' ]]; then
             sudo apt-get update && sudo apt-get install -y swig cmake pkg-config
           elif [[ $RUNNER_OS == 'macOS' ]]; then
             brew install swig cmake pkg-config
+          elif [[ $RUNNER_OS == 'Windows' ]]; then
+            choco install swig --no-progress -y
+            swig -version
           fi
+
+      - name: Configure MSVC developer environment (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
 
       - name: macOS SDK setup
         if: runner.os == 'macOS'
@@ -66,6 +76,7 @@ jobs:
           clean: true
 
       - name: Build and install the package
+        shell: bash
         run: |
           cd ffi/python
           if [[ "$RUNNER_OS" == "macOS" ]]; then
@@ -78,6 +89,7 @@ jobs:
           pip install dist/*.whl
 
       - name: Run tests
+        shell: bash
         run: |
           cd ffi/python
           pytest tests

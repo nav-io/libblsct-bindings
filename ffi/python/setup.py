@@ -12,7 +12,22 @@ import subprocess
 # TODO: turn this on for production builds
 IS_PROD = True
 
-std_cpp = "-std=c++20"
+# setuptools drives MSVC on Windows; navio-core's cmake/bls.cmake has a
+# dedicated MSVC path that compiles mcl/bls as plain cmake targets.
+IS_MSVC = sys.platform == "win32"
+
+std_cpp = "/std:c++20" if IS_MSVC else "-std=c++20"
+
+
+def _on_rmtree_error(func, path, exc):
+  # git checkouts on Windows leave read-only objects; clear the bit and retry
+  import stat
+  os.chmod(path, stat.S_IWRITE)
+  func(path)
+
+
+def rmtree(path):
+  shutil.rmtree(path, onexc=_on_rmtree_error)
 
 package_dir = Path(os.path.abspath(os.path.dirname(__file__)))
 
@@ -47,22 +62,47 @@ mcl_lib_path = mcl_path / "lib"
 # Static archives produced by the CMake BUILD_LIBBLSCT_ONLY build.
 # libblsct.a / libunivalue.a land in the out-of-source build tree; bls and
 # mcl are built in-source under src/bls (same paths as the old autotools build).
-src_libblsct_a = cmake_build_dir / "lib" / "libblsct.a"
-src_libunivalue_blsct_a = cmake_build_dir / "src" / "univalue" / "libunivalue.a"
-src_libmcl_a = mcl_lib_path / "libmcl.a"
-src_libbls384_256_a = bls_lib_path / "libbls384_256.a"
-
-src_dot_a_files = [src_libblsct_a, src_libunivalue_blsct_a, src_libmcl_a, src_libbls384_256_a]
 dummy_impl_path = src_path / "blsct/external_api/dummy_impl.cpp"
 
 libs_dir = navio_tmp_dir / "libs"
 
-dest_libblsct_a = libs_dir / "libblsct.a"
-dest_libunivalue_blsct_a = libs_dir / "libunivalue_blsct.a"
-dest_libmcl_a = libs_dir / "libmcl.a"
-dest_libbls384_256_a = libs_dir / "libbls384_256.a"
+if IS_MSVC:
+  # MSVC: every archive is a cmake target. Located by name after the build
+  # (see find_msvc_archives) since the output dir depends on the generator.
+  msvc_archive_names = [
+    "blsct.lib",
+    "univalue.lib",
+    "mcl.lib",
+    "mclbn384_256_inner.lib",
+    "bls384_256.lib",
+  ]
+  src_dot_a_files = []  # filled in by find_msvc_archives()
+  dest_dot_a_files = [libs_dir / name for name in msvc_archive_names]
+else:
+  src_libblsct_a = cmake_build_dir / "lib" / "libblsct.a"
+  src_libunivalue_blsct_a = cmake_build_dir / "src" / "univalue" / "libunivalue.a"
+  src_libmcl_a = mcl_lib_path / "libmcl.a"
+  src_libbls384_256_a = bls_lib_path / "libbls384_256.a"
 
-dest_dot_a_files = [dest_libblsct_a, dest_libunivalue_blsct_a, dest_libmcl_a, dest_libbls384_256_a]
+  src_dot_a_files = [src_libblsct_a, src_libunivalue_blsct_a, src_libmcl_a, src_libbls384_256_a]
+
+  dest_libblsct_a = libs_dir / "libblsct.a"
+  dest_libunivalue_blsct_a = libs_dir / "libunivalue_blsct.a"
+  dest_libmcl_a = libs_dir / "libmcl.a"
+  dest_libbls384_256_a = libs_dir / "libbls384_256.a"
+
+  dest_dot_a_files = [dest_libblsct_a, dest_libunivalue_blsct_a, dest_libmcl_a, dest_libbls384_256_a]
+
+
+def find_msvc_archives():
+  """Locate the MSVC static libs in the cmake build tree by file name."""
+  found = []
+  for name in msvc_archive_names:
+    matches = [p for p in cmake_build_dir.rglob(name) if p.is_file()]
+    if not matches:
+      raise FileNotFoundError(f"{name} not found under {cmake_build_dir}")
+    found.append(matches[0])
+  return found
 
 def log(s):
   print(f"===> {s}")
@@ -70,7 +110,7 @@ def log(s):
 class CustomBuildExt(build_ext):
   def clone_navio_core(self):
     if os.path.isdir(navio_core_dir):
-      shutil.rmtree(navio_core_dir)
+      rmtree(navio_core_dir)
 
     cmd = ["git", "clone", "--depth", "1"]
     if not IS_PROD:
@@ -173,35 +213,42 @@ class CustomBuildExt(build_ext):
     # autotools `depends` prefix is required — mcl, bls, univalue and secp256k1
     # are vendored in-tree.
     if os.path.isdir(cmake_build_dir):
-      shutil.rmtree(cmake_build_dir)
+      rmtree(cmake_build_dir)
+
+    configure_cmd = [
+      "cmake",
+      "-S", str(navio_core_dir),
+      "-B", str(cmake_build_dir),
+      "-DBUILD_LIBBLSCT_ONLY=ON",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DBUILD_TESTS=OFF",
+      "-DBUILD_BENCH=OFF",
+      "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
+    ]
+    build_cmd = [
+      "cmake",
+      "--build", str(cmake_build_dir),
+      "--target", "blsct", "univalue",
+      "-j", num_cpus,
+    ]
+    if IS_MSVC:
+      # Ninja gives a single-config tree; needs cl.exe on PATH (vcvars).
+      # Fall back to the default (Visual Studio) generator otherwise.
+      if shutil.which("ninja"):
+        configure_cmd += ["-G", "Ninja"]
+      else:
+        build_cmd += ["--config", "Release"]
+      # match the /MD runtime that CPython extension modules are built with
+      configure_cmd += ["-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"]
 
     log("Configuring navio-core (CMake, BUILD_LIBBLSCT_ONLY)...")
-    subprocess.run(
-      [
-        "cmake",
-        "-S", str(navio_core_dir),
-        "-B", str(cmake_build_dir),
-        "-DBUILD_LIBBLSCT_ONLY=ON",
-        "-DCMAKE_BUILD_TYPE=Release",
-        "-DBUILD_TESTS=OFF",
-        "-DBUILD_BENCH=OFF",
-        "-DCMAKE_POSITION_INDEPENDENT_CODE=ON",
-      ],
-      cwd=navio_core_dir,
-      check=True,
-    )
+    subprocess.run(configure_cmd, cwd=navio_core_dir, check=True)
 
     log("Building libblsct...")
-    subprocess.run(
-      [
-        "cmake",
-        "--build", str(cmake_build_dir),
-        "--target", "blsct", "univalue",
-        "-j", num_cpus,
-      ],
-      cwd=navio_core_dir,
-      check=True,
-    )
+    subprocess.run(build_cmd, cwd=navio_core_dir, check=True)
+
+    if IS_MSVC:
+      src_dot_a_files[:] = find_msvc_archives()
 
     os.makedirs(libs_dir, exist_ok=True)
     for (src, dest) in zip(src_dot_a_files, dest_dot_a_files):
@@ -256,20 +303,42 @@ class build(build_org):
     rest, sub_build_ext = self.partition(pred, self.sub_commands)
     self.sub_commands[:] = list(sub_build_ext) + list(rest)
 
-python_include_dirs = [
-    path[2:] for path in subprocess.check_output(["python3-config", "--includes"])
-    .decode()
-    .strip()
-    .split()
-    if path.startswith("-I")
-]
+import sysconfig
 
-extra_link_args = [std_cpp]
-extra_link_args = (
-    extra_link_args + ["-undefined", "dynamic_lookup"]
-    if sys.platform == "darwin"
-    else extra_link_args
-)
+python_include_dirs = list(dict.fromkeys(
+  d for d in (sysconfig.get_paths().get("include"), sysconfig.get_paths().get("platinclude")) if d
+))
+
+if IS_MSVC:
+  extra_compile_args = [std_cpp, "/EHsc", "/bigobj", "/utf-8", "/Zc:__cplusplus", "/Zc:preprocessor"]
+  extra_link_args = []
+  # Mirror navio-core's cmake/bls.cmake MSVC defs (_MCL_DEFS + bls_interface):
+  # the mcl headers pulled in via blsct.h must see the same configuration the
+  # archives were compiled with (vint bignum, no xbyak/openssl, no dllexport).
+  define_macros = [
+    ("MCL_USE_VINT", None),
+    ("MCL_VINT_FIXED_BUFFER", None),
+    ("MCL_DONT_USE_OPENSSL", None),
+    ("MCL_DONT_USE_XBYAK", None),
+    ("MCL_NO_AUTOLINK", None),
+    ("MCLBN_NO_AUTOLINK", None),
+    ("MCLBN_DONT_EXPORT", None),
+    ("BLS_DONT_EXPORT", None),
+    ("BLS_ETH", "1"),
+    ("NOMINMAX", None),
+    ("WIN32_LEAN_AND_MEAN", None),
+    ("_WIN32_WINNT", "0x0A00"),
+    ("_CRT_SECURE_NO_WARNINGS", None),
+  ]
+  # the archives are passed as extra_objects; only system import libs here
+  libraries = ["kernel32", "user32", "advapi32", "shell32", "ws2_32", "iphlpapi"]
+else:
+  extra_compile_args = [std_cpp]
+  extra_link_args = [std_cpp]
+  if sys.platform == "darwin":
+    extra_link_args += ["-undefined", "dynamic_lookup"]
+  define_macros = []
+  libraries = ["blsct", "univalue_blsct", "mcl", "bls384_256"]
 
 swig_module = Extension(
   "blsct._blsct",
@@ -281,12 +350,12 @@ swig_module = Extension(
     os.path.join(navio_core_dir, "src"),
     os.path.join(navio_core_dir, "src/bls/include"),
     os.path.join(navio_core_dir, "src/bls/mcl/include"),
+    os.path.join(navio_core_dir, "src/bls/mcl/src"),
   ],
+  define_macros=define_macros,
   library_dirs=[str(libs_dir)],
-  libraries=["blsct", "univalue_blsct", "mcl", "bls384_256"],
-  extra_compile_args=[
-    std_cpp,
-  ],
+  libraries=libraries,
+  extra_compile_args=extra_compile_args,
   extra_objects=[str(p) for p in dest_dot_a_files],
   extra_link_args=extra_link_args,
   swig_opts=[
