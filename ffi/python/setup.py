@@ -240,6 +240,12 @@ class CustomBuildExt(build_ext):
         build_cmd += ["--config", "Release"]
       # match the /MD runtime that CPython extension modules are built with
       configure_cmd += ["-DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreadedDLL"]
+      # static-lib link deps are not build prerequisites, so the mcl/bls
+      # archives (plain cmake targets on MSVC, see cmake/bls.cmake) must be
+      # requested explicitly. On Unix they are ExternalProject byproducts
+      # pulled in by the blsct target.
+      build_cmd[build_cmd.index("univalue") + 1:build_cmd.index("univalue") + 1] = \
+        ["mcl", "mclbn384_256_inner", "bls384_256"]
 
     log("Configuring navio-core (CMake, BUILD_LIBBLSCT_ONLY)...")
     subprocess.run(configure_cmd, cwd=navio_core_dir, check=True)
