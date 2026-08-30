@@ -69,11 +69,12 @@ libs_dir = navio_tmp_dir / "libs"
 if IS_MSVC:
   # MSVC: every archive is a cmake target. Located by name after the build
   # (see find_msvc_archives) since the output dir depends on the generator.
+  # bls_c384_256.cpp already compiles in the bn_c implementation, so
+  # mclbn384_256_inner.lib is not linked (it would only duplicate mclBn*).
   msvc_archive_names = [
     "blsct.lib",
     "univalue.lib",
     "mcl.lib",
-    "mclbn384_256_inner.lib",
     "bls384_256.lib",
   ]
   src_dot_a_files = []  # filled in by find_msvc_archives()
