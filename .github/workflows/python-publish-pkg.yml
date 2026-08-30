@@ -137,4 +137,4 @@ jobs:
           TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         # --skip-existing: lets a re-run add wheels for a new platform to an
         # already-published version instead of failing on the existing files
-        run: twine upload --skip-existing wheelhouse/*.whl
+        run: twine upload --verbose --skip-existing wheelhouse/*.whl
