@@ -16,6 +16,10 @@
     "test:browser": "npm run build:browser && NODE_OPTIONS='--experimental-vm-modules' jest --config jest.browser.config.cjs"
   },
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nav-io/libblsct-bindings.git"
+  },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
