@@ -8,13 +8,13 @@ const IS_PROD = true
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = '988a4998f648fc2a2a590bfc71615c085b0c7ee4' // v0.1.0 + regtest HRP fix (navio-core#316)
+const MASTER_SHA = '9c6700ff68456a3a607c5e83e240e1666ee47bce' // v0.1.10 (BLSCT proof transcript v2)
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core'
 const NAVIO_CORE_BRANCH = IS_PROD ? 'master' : 'development-branch-name'
 const LIBS_CACHE_META_BASENAME = '.build-cache-meta.json'
-const LIBS_CACHE_VERSION = 'navio-core-sign-unsigned-tx-v3-aggregate-upstream'
+const LIBS_CACHE_VERSION = 'navio-core-v0.1.9-blsct-proof-v2'
 
 // Linux apt packages required for building (swig is installed separately only if needed)
 // navio-core v0.1.0+ builds with CMake instead of autotools.
@@ -330,6 +330,17 @@ const getCfg = () => {
 // ============================================================================
 
 const gitCloneNavioCore = (cfg) => {
+  // Local-source bypass for building against an in-place navio-core checkout
+  // (e.g. an embargoed branch not on the public remote). When set, use the
+  // existing navio-core dir as-is instead of wiping + cloning the pinned SHA.
+  if (process.env.BLSCT_LOCAL_NAVIO_CORE === '1') {
+    if (!fs.existsSync(cfg.navioCoreDir)) {
+      throw new Error(`BLSCT_LOCAL_NAVIO_CORE=1 but ${cfg.navioCoreDir} does not exist`)
+    }
+    console.log(`Using existing local navio-core dir (BLSCT_LOCAL_NAVIO_CORE=1): ${cfg.navioCoreDir}`)
+    return
+  }
+
   // Remove existing directory
   if (fs.existsSync(cfg.navioCoreDir)) {
     fs.rmSync(cfg.navioCoreDir, { recursive: true, force: true })

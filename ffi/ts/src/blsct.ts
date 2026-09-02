@@ -518,6 +518,15 @@ export const verifyRangeProofs = (rangeProofs: any[]): BlsctBoolRetVal => {
   return blsct.verify_range_proofs(rangeProofs)
 }
 
+// Verify range proofs under an explicit transcript version (e.g. taken from the
+// containing tx's BLSCT_PROOF_V2_MARKER), rather than guessing v1-then-v2.
+export const verifyRangeProofsWithTranscript = (
+  rangeProofs: any[],
+  transcriptV2: boolean,
+): BlsctBoolRetVal => {
+  return blsct.verify_range_proofs_with_transcript(rangeProofs, transcriptV2)
+}
+
 // scalar
 export const deserializeScalar = (hex: string): BlsctRetVal => {
   return blsct.deserialize_scalar(hex)
@@ -764,6 +773,17 @@ export const getTxOutSubtractFeeFromAmount = (obj: any): boolean => {
 
 export const getTxOutBlindingKey = (obj: any): any => {
   return blsct.get_tx_out_blinding_key(obj)
+}
+
+// Request/read the v2 range-proof transcript for an output. Set true when the
+// output is for a transaction at or above the transcript-v2 activation height;
+// any v2 output makes the assembled tx carry BLSCT_PROOF_V2_MARKER.
+export const setTxOutTranscriptV2 = (obj: any, transcriptV2: boolean): void => {
+  blsct.set_tx_out_transcript_v2(obj, transcriptV2)
+}
+
+export const getTxOutTranscriptV2 = (obj: any): boolean => {
+  return blsct.get_tx_out_transcript_v2(obj)
 }
 
 // typecast

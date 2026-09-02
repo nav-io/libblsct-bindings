@@ -11,6 +11,8 @@ import {
   getTxOutMinStake,
   getTxOutSubtractFeeFromAmount,
   getTxOutBlindingKey,
+  setTxOutTranscriptV2,
+  getTxOutTranscriptV2,
   hexToMallocedBuf,
   toHex,
   TxOutputType,
@@ -156,6 +158,23 @@ export class TxOut extends ManagedObj {
   getBlindingKey(): Scalar {
     const obj = getTxOutBlindingKey(this.value())
     return Scalar.fromObj(obj)
+  }
+
+  /** Requests the v2 range-proof transcript for this output. Set `true` when
+   * the output is for a transaction at or above the network's transcript-v2
+   * activation height; the assembled transaction then carries
+   * BLSCT_PROOF_V2_MARKER automatically (any v2 output makes the tx v2).
+   * @param transcriptV2 - Whether to build this output's range proof under v2.
+   */
+  setTranscriptV2(transcriptV2: boolean): void {
+    setTxOutTranscriptV2(this.value(), transcriptV2)
+  }
+
+  /** Returns whether this output requests the v2 range-proof transcript.
+   * @returns `true` if the output is built under the v2 transcript.
+   */
+  getTranscriptV2(): boolean {
+    return getTxOutTranscriptV2(this.value())
   }
 
   /** Returns a deep copy of the instance.

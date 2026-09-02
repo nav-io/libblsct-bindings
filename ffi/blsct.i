@@ -376,6 +376,13 @@ export BlsctBoolRetVal* verify_range_proofs(
   const void* vp_range_proofs
 );
 
+// Verify range proofs under an explicit transcript version, for callers that
+// already know it (e.g. from the containing transaction's BLSCT_PROOF_V2_MARKER).
+export BlsctBoolRetVal* verify_range_proofs_with_transcript(
+  const void* vp_range_proofs,
+  const bool transcript_v2
+);
+
 export BlsctPoint* get_range_proof_A(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
 export BlsctPoint* get_range_proof_A_wip(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
 export BlsctPoint* get_range_proof_B(const BlsctRangeProof* blsct_range_proof, const size_t range_proof_size);
@@ -555,6 +562,11 @@ export TxOutputType get_tx_out_output_type(const BlsctTxOut* tx_out);
 export uint64_t get_tx_out_min_stake(const BlsctTxOut* tx_out);
 export bool get_tx_out_subtract_fee_from_amount(const BlsctTxOut* tx_out);
 export const BlsctScalar* get_tx_out_blinding_key(const BlsctTxOut* tx_out);
+// Request the v2 transcript for this output's range proof. Set true when the
+// output is for a transaction at or above the transcript-v2 activation height;
+// the assembled transaction then carries BLSCT_PROOF_V2_MARKER automatically.
+export void set_tx_out_transcript_v2(BlsctTxOut* tx_out, const bool transcript_v2);
+export bool get_tx_out_transcript_v2(const BlsctTxOut* tx_out);
 
 // vector predicate
 export int are_vector_predicate_equal(
