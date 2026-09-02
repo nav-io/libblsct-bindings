@@ -115,7 +115,7 @@ jobs:
           npm init -y
           npm install "$GITHUB_WORKSPACE"/ts-pkg/*.tgz
           node -e "
-            const { getChain, Bech32 } = require('navio-blsct');
+            const { getChain, Bech32 } = require('@nav-io/navio-blsct');
             const chain = getChain();
             console.log('chain:', chain);
             console.log('Bech32:', Bech32);
