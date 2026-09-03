@@ -24,7 +24,17 @@ jobs:
           clean: true
 
       - name: Install system dependencies
-        run: brew install swig cmake pkg-config git
+        run: |
+          brew install cmake pkg-config git
+          # Pin SWIG 4.5.0: the committed ffi/ts/swig/blsct_wrap.cxx is
+          # regenerated with SWIG 4.5.0 (V8 API compat for Node 24+).
+          # Homebrew's `swig` formula may lag behind, so install via pip
+          # into a fixed prefix and put it on PATH for every step.
+          python3 -m pip install --user --quiet --break-system-packages 'swig==4.5.0' || python3 -m pip install --user --quiet 'swig==4.5.0'
+          SWIG_BIN="$(python3 -m site --user-base)/bin"
+          echo "$SWIG_BIN" >> "$GITHUB_PATH"
+          export PATH="$SWIG_BIN:$PATH"
+          which swig && swig -version | head -1
 
       - name: Set up Node.js
         uses: actions/setup-node@v6
@@ -81,7 +91,10 @@ jobs:
         # Windows is omitted: scripts/build.js (run by the package's npm
         # install hook) only supports Linux and Darwin. Browser/WASM
         # consumers on Windows go through bundlers, not direct npm install.
+        # Node 24 is included because its V8 removed the old SWIG wrapper
+        # APIs (Holder/WriteUtf8) — regression guard for the wrapper.
         os: ['ubuntu-24.04', 'macos-15']
+        node: ['22', '24']
     runs-on: ${{ matrix.os }}
     defaults:
       run:
@@ -91,7 +104,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '22'
+          node-version: ${{ matrix.node }}
 
       - name: Install system dependencies
         run: |

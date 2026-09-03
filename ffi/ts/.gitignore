@@ -1,4 +1,3 @@
-blsct_wrap.cxx
 lib*.a
 build/
 build-wasm/
