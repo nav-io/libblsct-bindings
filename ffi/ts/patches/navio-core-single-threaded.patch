@@ -1,96 +1,33 @@
-diff --git a/src/blsct/range_proof/bulletproofs/range_proof_logic.cpp b/src/blsct/range_proof/bulletproofs/range_proof_logic.cpp
-index 4fcbb4b..60c2480 100644
---- a/src/blsct/range_proof/bulletproofs/range_proof_logic.cpp
-+++ b/src/blsct/range_proof/bulletproofs/range_proof_logic.cpp
-@@ -14,7 +14,9 @@
- #include <blsct/range_proof/bulletproofs/range_proof_logic.h>
- #include <blsct/range_proof/common.h>
- #include <blsct/range_proof/msg_amt_cipher.h>
-+#ifndef WASM_SINGLE_THREADED
- #include <future>
-+#endif
- #include <optional>
- #include <stdexcept>
- #include <variant>
-@@ -250,14 +252,8 @@ bool RangeProofLogic<T>::VerifyProofs(
-     using Scalar = typename T::Scalar;
-     using Scalars = Elements<Scalar>;
- 
--    // Vector to hold future results from async tasks
--    std::vector<std::future<bool>> futures;
--
--    futures.reserve(proof_transcripts.size());
--
--    // Launch a verification task for each proof transcript in parallel
--    for (const RangeProofWithTranscript<T>& p : proof_transcripts) {
--        futures.emplace_back(std::async(std::launch::async, [this, &p, max_mn]() -> bool {
-+    // Verify a single proof transcript.
-+    auto verify_single = [this, max_mn](const RangeProofWithTranscript<T>& p) -> bool {
-             if (p.proof.Ls.Size() != p.proof.Rs.Size()) return false;
- 
-             const range_proof::Generators<T> gens = m_common.Gf().GetInstance(p.proof.seed);
-@@ -326,6 +322,24 @@ bool RangeProofLogic<T>::VerifyProofs(
-                 gens.GetGiSubset(max_mn),
-                 gens.GetHiSubset(max_mn));
-             return res;
-+    };
-+
-+#ifdef WASM_SINGLE_THREADED
-+    // Single-threaded: verify proofs sequentially (no std::async/threads).
-+    for (const RangeProofWithTranscript<T>& p : proof_transcripts) {
-+        if (!verify_single(p)) return false;
-+    }
-+    return true;
-+#else
-+    // Vector to hold future results from async tasks
-+    std::vector<std::future<bool>> futures;
-+
-+    futures.reserve(proof_transcripts.size());
-+
-+    // Launch a verification task for each proof transcript in parallel
-+    for (const RangeProofWithTranscript<T>& p : proof_transcripts) {
-+        futures.emplace_back(std::async(std::launch::async, [&verify_single, &p]() -> bool {
-+            return verify_single(p);
-         }));
-     }
- 
-@@ -335,6 +349,7 @@ bool RangeProofLogic<T>::VerifyProofs(
-     }
- 
-     return true;
-+#endif
- }
- template bool RangeProofLogic<Mcl>::VerifyProofs(
-     const std::vector<RangeProofWithTranscript<Mcl>>&,
 diff --git a/src/blsct/range_proof/bulletproofs_plus/range_proof_logic.cpp b/src/blsct/range_proof/bulletproofs_plus/range_proof_logic.cpp
-index e8cb724..332d7ee 100644
+index 27b3387b99..46ccf98eac 100644
 --- a/src/blsct/range_proof/bulletproofs_plus/range_proof_logic.cpp
 +++ b/src/blsct/range_proof/bulletproofs_plus/range_proof_logic.cpp
-@@ -17,7 +17,9 @@
+@@ -18,7 +18,9 @@
  #include <blsct/range_proof/bulletproofs_plus/range_proof_logic.h>
  #include <blsct/range_proof/common.h>
  #include <blsct/range_proof/msg_amt_cipher.h>
 +#ifndef WASM_SINGLE_THREADED
  #include <future>
 +#endif
+ #include <type_traits>
  #include <tinyformat.h>
  
- // Bulletproofs+ implementation based on
-@@ -520,6 +522,13 @@ bool RangeProofLogic<T>::VerifyProofs(
+@@ -580,6 +582,14 @@ bool RangeProofLogic<T>::VerifyProofs(
          return true;
-     };
+     }
  
 +#ifdef WASM_SINGLE_THREADED
-+    // Single-threaded: verify proofs sequentially (no std::async/threads).
++    // Single-threaded (WASM): no std::async/threads available; verify each
++    // proof transcript sequentially.
 +    for (size_t idx = 0; idx < proof_transcripts.size(); ++idx) {
 +        if (!verify_one(idx)) return false;
 +    }
 +    return true;
 +#else
-     // With HAVE_OPENMP, the dominant work inside lp.Sum() already fans out via
-     // MCL's multi-threaded MSM. Spawning a fresh std::async host thread per
-     // proof on top of that adds thread churn and makes Windows/OpenMP runtime
-@@ -546,6 +555,7 @@ bool RangeProofLogic<T>::VerifyProofs(
+     std::vector<std::future<bool>> futures;
+     futures.reserve(proof_transcripts.size());
+ 
+@@ -595,6 +605,7 @@ bool RangeProofLogic<T>::VerifyProofs(
      }
  
      return true;
