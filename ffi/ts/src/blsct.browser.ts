@@ -1165,6 +1165,20 @@ export function deleteTxOutVec(txOutVec: unknown): void {
   module._delete_tx_out_vec(txOutVec as number);
 }
 
+// Request/read the v2 range-proof transcript for an output. Set true when the
+// output is for a transaction at or above the transcript-v2 activation height;
+// any v2 output makes the assembled tx carry BLSCT_PROOF_V2_MARKER. Mirrors the
+// Node binding (blsct.ts); the WASM exports the same C entry points.
+export function setTxOutTranscriptV2(obj: unknown, transcriptV2: boolean): void {
+  const module = getBlsctModule();
+  module._set_tx_out_transcript_v2(obj as number, transcriptV2 ? 1 : 0);
+}
+
+export function getTxOutTranscriptV2(obj: unknown): boolean {
+  const module = getBlsctModule();
+  return !!module._get_tx_out_transcript_v2(obj as number);
+}
+
 export function buildTxIn(
   amount: number,
   gamma: unknown,

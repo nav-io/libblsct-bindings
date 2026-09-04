@@ -409,6 +409,8 @@ const EXPORTED_FUNCTIONS = [
   '_create_tx_out_vec',
   '_add_to_tx_out_vec',
   '_delete_tx_out_vec',
+  '_set_tx_out_transcript_v2',
+  '_get_tx_out_transcript_v2',
   '_build_tx_in',
   '_build_tx_out',
   '_build_ctx',
