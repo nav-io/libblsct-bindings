@@ -263,6 +263,9 @@ const BLSCT_SOURCES = [
 
 // Additional source files needed from navio-core
 const UTIL_SOURCES = [
+  'crypto/chacha20.cpp',
+  'crypto/chacha20poly1305.cpp',
+  'crypto/poly1305.cpp',
   'crypto/hmac_sha256.cpp',
   'crypto/hmac_sha512.cpp',
   'crypto/ripemd160.cpp',
