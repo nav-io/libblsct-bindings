@@ -138,6 +138,8 @@ export interface BlsctWasmModule {
   _create_tx_out_vec(): number;
   _add_to_tx_out_vec(vec: number, txOut: number): void;
   _delete_tx_out_vec(vec: number): void;
+  _set_tx_out_transcript_v2(txOut: number, transcriptV2: number): void;
+  _get_tx_out_transcript_v2(txOut: number): number;
   _build_tx_in(amount: bigint, gamma: number, spendingKey: number, tokenId: number, outPoint: number, stakedCommitment: boolean, rbf: boolean): number;
   _build_tx_out(dest: number, amount: bigint, memo: number, tokenId: number, outputType: number, minStake: bigint, subtractFeeFromAmount: boolean, blindingKey: number): number;
   _build_ctx(txIns: number, txOuts: number): number;
