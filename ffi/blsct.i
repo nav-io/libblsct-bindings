@@ -641,6 +641,16 @@ export BlsctRetVal* build_unsigned_mint_token_output(
   const BlsctScalar* blsct_token_key,
   const BlsctPubKey* blsct_token_public_key
 );
+// Same, but builds the mint output's range proof under the requested proof
+// transcript (transcript_v2=true at/above the network's activation height).
+export BlsctRetVal* build_unsigned_mint_token_output_with_transcript(
+  const BlsctSubAddr* blsct_dest,
+  const uint64_t amount,
+  const BlsctScalar* blsct_blinding_key,
+  const BlsctScalar* blsct_token_key,
+  const BlsctPubKey* blsct_token_public_key,
+  const bool transcript_v2
+);
 export BlsctRetVal* build_unsigned_mint_nft_output(
   const BlsctSubAddr* blsct_dest,
   const BlsctScalar* blsct_blinding_key,

@@ -2,6 +2,7 @@ import {
   buildUnsignedCreateTokenOutput,
   buildUnsignedMintNftOutput,
   buildUnsignedMintTokenOutput,
+  buildUnsignedMintTokenOutputWithTranscript,
   buildUnsignedOutput,
   deleteUnsignedOutput,
   deserializeUnsignedOutput,
@@ -47,20 +48,39 @@ export class UnsignedOutput extends ManagedObj {
     return output
   }
 
+  /** Builds a fungible-token mint output.
+   *
+   * A mint output carries a range proof (its amount is committed), so it must
+   * be built under the proof transcript of the transaction it goes into. Pass
+   * `transcriptV2 = true` for a transaction at or above the network's
+   * BLSCT proof transcript v2 activation height — the same flag as
+   * {@link TxOut.setTranscriptV2}; a v1 mint output in a v2 transaction is
+   * rejected by consensus with `failed-rangeproof-check`.
+   */
   static mintToken(
     destination: SubAddr,
     amount: number,
     blindingKey: Scalar,
     tokenKey: Scalar,
-    tokenPublicKey: PublicKey
+    tokenPublicKey: PublicKey,
+    transcriptV2: boolean = false
   ): UnsignedOutput {
-    const rv = buildUnsignedMintTokenOutput(
-      destination.value(),
-      amount,
-      blindingKey.value(),
-      tokenKey.value(),
-      tokenPublicKey.value()
-    )
+    const rv = transcriptV2
+      ? buildUnsignedMintTokenOutputWithTranscript(
+          destination.value(),
+          amount,
+          blindingKey.value(),
+          tokenKey.value(),
+          tokenPublicKey.value(),
+          true
+        )
+      : buildUnsignedMintTokenOutput(
+          destination.value(),
+          amount,
+          blindingKey.value(),
+          tokenKey.value(),
+          tokenPublicKey.value()
+        )
     if (rv.result !== 0) {
       freeObj(rv)
       throw new Error(`Failed to build unsigned mint-token output. Error code = ${rv.result}`)

@@ -8,13 +8,13 @@ const IS_PROD = true
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = 'cae2069e65a0cae7ba1446b91ee7cb93f5596fe2' // v0.1.10 (BLSCT proof transcript v2)
+const MASTER_SHA = '830a9a91d0e06b32971824e8f58a5a5cfbb09d16' // v0.1.10 (cae2069) + nav-io/navio-core#431 mint transcript_v2, branch bindings/v0.1.10-mint-transcript
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core'
 const NAVIO_CORE_BRANCH = IS_PROD ? 'master' : 'development-branch-name'
 const LIBS_CACHE_META_BASENAME = '.build-cache-meta.json'
-const LIBS_CACHE_VERSION = 'navio-core-v0.1.9-blsct-proof-v2'
+const LIBS_CACHE_VERSION = 'navio-core-mint-transcript-v2'
 
 // Linux apt packages required for building (swig is installed separately only if needed)
 // navio-core v0.1.0+ builds with CMake instead of autotools.
@@ -318,6 +318,7 @@ const getCfg = () => {
       'build_mint_nft_predicate',
       'build_unsigned_create_token_output',
       'build_unsigned_mint_token_output',
+      'build_unsigned_mint_token_output_with_transcript',
       'build_unsigned_mint_nft_output',
       'sign_unsigned_transaction',
       'aggregate_transactions',

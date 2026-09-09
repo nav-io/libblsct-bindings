@@ -1822,6 +1822,35 @@ export function buildUnsignedMintTokenOutput(
   };
 }
 
+// Builds the mint output's range proof under the requested BLSCT proof
+// transcript (transcriptV2=true at/above the network's activation height).
+// Mirrors the Node binding (blsct.ts); the WASM exports the same C entry point.
+export function buildUnsignedMintTokenOutputWithTranscript(
+  dest: unknown,
+  amount: number,
+  blindingKey: unknown,
+  tokenKey: unknown,
+  tokenPublicKey: unknown,
+  transcriptV2: boolean
+): BlsctRetVal {
+  const module = getBlsctModule();
+  const resultPtr = module._build_unsigned_mint_token_output_with_transcript(
+    dest as number,
+    BigInt(amount),
+    blindingKey as number,
+    tokenKey as number,
+    tokenPublicKey as number,
+    transcriptV2 ? 1 : 0
+  );
+  const result = parseRetVal(resultPtr);
+  freePtr(resultPtr);
+  return {
+    result: result.success ? 0 : (result.errorCode ?? 1),
+    value: result.value,
+    value_size: result.valueSize ?? 0,
+  };
+}
+
 export function buildUnsignedMintNftOutput(
   dest: unknown,
   blindingKey: unknown,

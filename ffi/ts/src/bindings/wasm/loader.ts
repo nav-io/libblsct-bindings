@@ -223,6 +223,7 @@ export interface BlsctWasmModule {
   _build_unsigned_output(txOut: number): number;
   _build_unsigned_create_token_output(tokenKey: number, tokenInfo: number): number;
   _build_unsigned_mint_token_output(dest: number, amount: bigint, blindingKey: number, tokenKey: number, tokenPublicKey: number): number;
+  _build_unsigned_mint_token_output_with_transcript(dest: number, amount: bigint, blindingKey: number, tokenKey: number, tokenPublicKey: number, transcriptV2: number): number;
   _build_unsigned_mint_nft_output(dest: number, blindingKey: number, tokenKey: number, tokenPublicKey: number, nftId: bigint, metadata: number): number;
   _delete_unsigned_output(unsignedOutput: number): void;
   _serialize_unsigned_output(unsignedOutput: number): number;

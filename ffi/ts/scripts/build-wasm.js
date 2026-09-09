@@ -18,7 +18,7 @@ const WASM_DEBUG = process.env.WASM_DEBUG === '1';
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = 'cae2069e65a0cae7ba1446b91ee7cb93f5596fe2'; // v0.1.10 (BLSCT proof transcript v2) — must match build.js
+const MASTER_SHA = '830a9a91d0e06b32971824e8f58a5a5cfbb09d16'; // v0.1.10 (cae2069) + nav-io/navio-core#431 mint transcript_v2, branch bindings/v0.1.10-mint-transcript — must match build.js
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core';
@@ -502,6 +502,7 @@ const EXPORTED_FUNCTIONS = [
   '_build_unsigned_output',
   '_build_unsigned_create_token_output',
   '_build_unsigned_mint_token_output',
+  '_build_unsigned_mint_token_output_with_transcript',
   '_build_unsigned_mint_nft_output',
   '_delete_unsigned_output',
   '_serialize_unsigned_output',

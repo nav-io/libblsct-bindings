@@ -1004,6 +1004,22 @@ export const buildUnsignedMintTokenOutput = (
 ): BlsctRetVal => {
   return blsct.build_unsigned_mint_token_output(dest, amount, blindingKey, tokenKey, tokenPublicKey)
 }
+// Builds the mint output's range proof under the requested BLSCT proof
+// transcript. Pass transcriptV2=true at/above the network's transcript-v2
+// activation height; a fungible mint output carries a range proof, so a v1
+// mint output in a v2 transaction fails consensus (failed-rangeproof-check).
+export const buildUnsignedMintTokenOutputWithTranscript = (
+  dest: any,
+  amount: number,
+  blindingKey: any,
+  tokenKey: any,
+  tokenPublicKey: any,
+  transcriptV2: boolean
+): BlsctRetVal => {
+  return blsct.build_unsigned_mint_token_output_with_transcript(
+    dest, amount, blindingKey, tokenKey, tokenPublicKey, transcriptV2
+  )
+}
 export const buildUnsignedMintNftOutput = (
   dest: any,
   blindingKey: any,
