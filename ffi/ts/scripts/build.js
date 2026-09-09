@@ -8,13 +8,13 @@ const IS_PROD = true
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = '830a9a91d0e06b32971824e8f58a5a5cfbb09d16' // v0.1.10 (cae2069) + nav-io/navio-core#431 mint transcript_v2, branch bindings/v0.1.10-mint-transcript
+const MASTER_SHA = 'cecaaf92c61c13ed87cf79497735fa13361c61f9' // master 2026-09-09 (blst backend, nav-io/navio-core#431)
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core'
 const NAVIO_CORE_BRANCH = IS_PROD ? 'master' : 'development-branch-name'
 const LIBS_CACHE_META_BASENAME = '.build-cache-meta.json'
-const LIBS_CACHE_VERSION = 'navio-core-mint-transcript-v2'
+const LIBS_CACHE_VERSION = 'navio-core-blst-1'
 
 // Linux apt packages required for building (swig is installed separately only if needed)
 // navio-core v0.1.0+ builds with CMake instead of autotools.
@@ -270,27 +270,19 @@ const getCfg = () => {
   const cmakeBuildDir = path.join(navioCoreDir, 'build')
   const libsDir = path.join(baseDir, 'libs')
 
-  const srcPath = path.join(navioCoreDir, 'src')
-  const blsPath = path.join(srcPath, 'bls')
-  const blsLibPath = path.join(blsPath, 'lib')
-  const mclPath = path.join(blsPath, 'mcl')
-  const mclLibPath = path.join(mclPath, 'lib')
-
-  // Static archives produced by the CMake `BUILD_LIBBLSCT_ONLY` build.
-  // libblsct.a + libunivalue.a land in the out-of-source build tree;
-  // bls/mcl are built in-source under src/bls (same paths as the old
-  // autotools build).
+  // Static archives produced by the CMake `BUILD_LIBBLSCT_ONLY` build. All
+  // of them land in the out-of-source build tree: libblsct.a, the vendored
+  // supranational/blst (src/blst, built by cmake/blst.cmake — assembly on
+  // x86_64/arm64, portable C elsewhere) and univalue.
   const srcDotAFiles = [
     path.join(cmakeBuildDir, 'lib', 'libblsct.a'),
     path.join(cmakeBuildDir, 'src', 'univalue', 'libunivalue.a'),
-    path.join(blsLibPath, 'libbls384_256.a'),
-    path.join(mclLibPath, 'libmcl.a'),
+    path.join(cmakeBuildDir, 'lib', 'libblst.a'),
   ]
   const destDotAFiles = [
     path.join(libsDir, 'libblsct.a'),
     path.join(libsDir, 'libunivalue_blsct.a'),
-    path.join(libsDir, 'libbls384_256.a'),
-    path.join(libsDir, 'libmcl.a'),
+    path.join(libsDir, 'libblst.a'),
   ]
   const libsCacheMetaPath = path.join(libsDir, LIBS_CACHE_META_BASENAME)
 
@@ -391,8 +383,8 @@ const gitCloneNavioCore = (cfg) => {
 const buildLibBlsct = (cfg, numCpus) => {
   // navio-core v0.1.0+ builds with CMake. The BUILD_LIBBLSCT_ONLY option
   // builds the standalone libblsct.a and disables every node/wallet/daemon
-  // target, so no autotools `depends` prefix is required — mcl, bls,
-  // univalue and secp256k1 are all vendored in-tree.
+  // target, so no autotools `depends` prefix is required — blst, univalue
+  // and secp256k1 are all vendored in-tree.
   if (fs.existsSync(cfg.cmakeBuildDir)) {
     fs.rmSync(cfg.cmakeBuildDir, { recursive: true, force: true })
   }
@@ -415,11 +407,12 @@ const buildLibBlsct = (cfg, numCpus) => {
   }
 
   // Build libblsct plus the in-tree static deps the node addon links
-  // against. bls/mcl are pulled in as dependencies of the blsct target.
+  // against (blst is named explicitly: a static library's private link
+  // dependency is not built by `--target blsct` alone).
   console.log('Building libblsct...')
   const buildRes = spawnSync('cmake', [
     '--build', cfg.cmakeBuildDir,
-    '--target', 'blsct', 'univalue',
+    '--target', 'blsct', 'blst', 'univalue',
     '-j', String(numCpus),
   ], {
     cwd: cfg.navioCoreDir,

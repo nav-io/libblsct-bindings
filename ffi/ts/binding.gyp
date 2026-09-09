@@ -3,8 +3,7 @@
     {
       'target_name': 'blsct',
       'include_dirs': [
-         '<(module_root_dir)/navio-core/src/bls/include',
-         '<(module_root_dir)/navio-core/src/bls/mcl/include',
+         '<(module_root_dir)/navio-core/src/blst/bindings',
          '<(module_root_dir)/navio-core/src',
       ],
       'sources': [
@@ -17,8 +16,7 @@
         'libraries': [
           '-lblsct',
           '-lunivalue_blsct',
-          '-lbls384_256',
-          '-lmcl'
+          '-lblst'
         ]
       },
       'cflags_cc': ['-std=c++20', '-fPIC', '-fexceptions'],

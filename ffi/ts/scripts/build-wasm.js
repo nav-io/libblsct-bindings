@@ -18,7 +18,7 @@ const WASM_DEBUG = process.env.WASM_DEBUG === '1';
 
 // Production: clone by specific SHA from nav-io/navio-core
 // git ls-remote https://github.com/nav-io/navio-core.git refs/heads/master
-const MASTER_SHA = '830a9a91d0e06b32971824e8f58a5a5cfbb09d16'; // v0.1.10 (cae2069) + nav-io/navio-core#431 mint transcript_v2, branch bindings/v0.1.10-mint-transcript — must match build.js
+const MASTER_SHA = 'cecaaf92c61c13ed87cf79497735fa13361c61f9'; // master 2026-09-09 (blst backend, nav-io/navio-core#431) — must match build.js
 const NAVIO_CORE_REPO = IS_PROD
   ? 'https://github.com/nav-io/navio-core'
   : 'https://github.com/gogoex/navio-core';
@@ -29,8 +29,12 @@ const NAVIO_CORE_DIR = path.resolve(ROOT_DIR, 'navio-core');
 const WASM_OUTPUT_DIR = path.resolve(ROOT_DIR, 'wasm');
 const BUILD_DIR = path.resolve(ROOT_DIR, 'build-wasm');
 const PATCHES_DIR = path.resolve(__dirname, '..', 'patches');
+// Single-threaded + entropy patch: the WASM module is built without pthreads
+// (SharedArrayBuffer would require COOP/COEP headers on every consumer), so
+// the std::thread / std::async fan-out in navio-core is compiled out under
+// WASM_SINGLE_THREADED, and BlstScalar::Rand takes getentropy() (crypto
+// .getRandomValues) instead of /dev/urandom, which FILESYSTEM=0 does not have.
 const SINGLE_THREADED_PATCH = path.resolve(PATCHES_DIR, 'navio-core-single-threaded.patch');
-const WASM_INT64_FIX_PATCH = path.resolve(PATCHES_DIR, 'navio-core-wasm-int64-fix.patch');
 const EM_CACHE_DIR = process.env.EM_CACHE || path.resolve(ROOT_DIR, '.emcache');
 
 // Ensure output directories exist
@@ -187,7 +191,6 @@ function applyPatch(patchPath, label) {
  */
 function applyPatches() {
   applyPatch(SINGLE_THREADED_PATCH, 'Single-threaded');
-  applyPatch(WASM_INT64_FIX_PATCH, 'WASM int64 scalar fix');
 }
 
 // Check if emcc is available
@@ -208,9 +211,11 @@ function checkEmscripten() {
 // Source files needed for libblsct WASM build
 const BLSCT_SOURCES = [
   'blsct/external_api/blsct.cpp',
+  'blsct/external_api/blsct_clientversion.cpp',
   'blsct/arith/elements.cpp',
-  'blsct/arith/mcl/mcl_g1point.cpp',
-  'blsct/arith/mcl/mcl_scalar.cpp',
+  'blsct/arith/blst/blst_g1point.cpp',
+  'blsct/arith/blst/blst_scalar.cpp',
+  'blsct/arith/blst/blst_util.cpp',
   'blsct/bech32_mod.cpp',
   'blsct/building_block/fixed_base_window.cpp',
   'blsct/building_block/g_h_gi_hi_zero_verifier.cpp',
@@ -235,6 +240,11 @@ const BLSCT_SOURCES = [
   'blsct/range_proof/generators.cpp',
   'blsct/range_proof/msg_amt_cipher.cpp',
   'blsct/range_proof/proof_base.cpp',
+  'blsct/range_proof/bulletproofs/amount_recovery_request.cpp',
+  'blsct/range_proof/bulletproofs/amount_recovery_result.cpp',
+  'blsct/range_proof/bulletproofs/range_proof.cpp',
+  'blsct/range_proof/bulletproofs/range_proof_logic.cpp',
+  'blsct/range_proof/bulletproofs/range_proof_with_transcript.cpp',
   'blsct/range_proof/bulletproofs_plus/amount_recovery_request.cpp',
   'blsct/range_proof/bulletproofs_plus/amount_recovery_result.cpp',
   'blsct/range_proof/bulletproofs_plus/fixed_base_cache.cpp',
@@ -575,73 +585,39 @@ const EXPORTED_RUNTIME_METHODS = [
   'HEAP32',   // Used in some memory operations
 ];
 
-function buildMcl() {
-  console.log('Building mcl library for WASM...');
-  const mclDir = path.join(NAVIO_CORE_DIR, 'src/bls/mcl');
+function buildBlst() {
+  // supranational/blst is vendored in navio-core (src/blst). wasm32 has no
+  // assembly back end, so build its portable C implementation (32-bit limbs,
+  // vect.h selects them under __BLST_NO_ASM__) from the single translation
+  // unit server.c — the same thing navio-core's cmake/blst.cmake does for
+  // non-x86_64/arm64 targets.
+  //
+  // No -flto here, on purpose: blst.h declares its predicates as `bool`
+  // (blst_p1_is_inf, blst_p1_on_curve, ...) while the C definitions return
+  // `int`. Native ABIs do not care, but with both sides in LTO LLVM sees the
+  // `i1` vs `i32` prototype mismatch and replaces every such call with an
+  // `unreachable` trap (".Lblst_p1_is_inf_bitcast_invalid"), which fires the
+  // first time init() derives a generator. Linking blst as a plain wasm
+  // object keeps the comparison at the wasm-signature level, where both are
+  // (i32) -> i32.
+  console.log('Building blst library for WASM...');
+  const blstDir = path.join(NAVIO_CORE_DIR, 'src/blst');
 
-  const mclBuildCmd = [
+  const blstBuildCmd = [
     'emcc',
-    '-O3',
-    '-flto',
-    '-fno-rtti',
-    '-fno-threadsafe-statics',
+    '-O2',
+    '-fno-builtin',
     '-fno-stack-protector',
     '-DNDEBUG',
-    '-DMCLBN_FP_UNIT_SIZE=6',
-    '-DMCLBN_FR_UNIT_SIZE=4',
-    '-DMCL_SIZEOF_UNIT=4',
-    '-DMCL_MAX_BIT_SIZE=384',
-    '-DMCL_USE_VINT',
-    '-DMCL_VINT_FIXED_BUFFER',
-    '-DMCL_DONT_USE_OPENSSL',
-    '-DMCL_DONT_USE_XBYAK',
-    '-DMCL_USE_WEB_CRYPTO_API',
-    '-DCYBOZU_MINIMUM_EXCEPTION',
-    `-I${mclDir}/include`,
-    `-I${mclDir}/src`,
+    '-D__BLST_NO_ASM__',
+    `-I${blstDir}/bindings`,
     '-c',
-    `${mclDir}/src/fp.cpp`,
-    '-o', `${BUILD_DIR}/fp.o`
+    `${blstDir}/src/server.c`,
+    '-o', `${BUILD_DIR}/blst.o`
   ].join(' ');
 
-  execSync(mclBuildCmd, { stdio: 'inherit', cwd: BUILD_DIR });
-  console.log('✓ mcl built');
-}
-
-function buildBls() {
-  console.log('Building bls library for WASM...');
-  const blsDir = path.join(NAVIO_CORE_DIR, 'src/bls');
-  const mclDir = path.join(blsDir, 'mcl');
-
-  const blsBuildCmd = [
-    'emcc',
-    '-O3',
-    '-flto',
-    '-fno-rtti',
-    '-fno-threadsafe-statics',
-    '-fno-stack-protector',
-    '-DNDEBUG',
-    '-DBLS_ETH',
-    '-DMCLBN_FP_UNIT_SIZE=6',
-    '-DMCLBN_FR_UNIT_SIZE=4',
-    '-DMCL_SIZEOF_UNIT=4',
-    '-DMCL_MAX_BIT_SIZE=384',
-    '-DMCL_USE_VINT',
-    '-DMCL_VINT_FIXED_BUFFER',
-    '-DMCL_DONT_USE_OPENSSL',
-    '-DMCL_DONT_USE_XBYAK',
-    '-DMCL_USE_WEB_CRYPTO_API',
-    '-DCYBOZU_MINIMUM_EXCEPTION',
-    `-I${blsDir}/include`,
-    `-I${mclDir}/include`,
-    `-I${mclDir}/src`,
-    '-c',
-    `${blsDir}/src/bls_c384_256.cpp`,
-    '-o', `${BUILD_DIR}/bls_c384_256.o`
-  ].join(' ');
-
-  execSync(blsBuildCmd, { stdio: 'inherit', cwd: BUILD_DIR });
-  console.log('✓ bls built');
+  execSync(blstBuildCmd, { stdio: 'inherit', cwd: BUILD_DIR });
+  console.log('✓ blst built');
 }
 
 function setupConfigHeader() {
@@ -662,8 +638,7 @@ function setupConfigHeader() {
 function buildBlsct() {
   console.log('Building libblsct for WASM...');
   const srcDir = path.join(NAVIO_CORE_DIR, 'src');
-  const blsDir = path.join(srcDir, 'bls');
-  const mclDir = path.join(blsDir, 'mcl');
+  const blstDir = path.join(srcDir, 'blst');
 
   // Include boost stubs for WASM builds (avoids needing real Boost installation)
   const boostStubsDir = path.join(__dirname, 'boost-stubs');
@@ -672,9 +647,7 @@ function buildBlsct() {
     `-I${boostStubsDir}`,
     `-I${srcDir}`,
     `-I${srcDir}/config`,
-    `-I${blsDir}/include`,
-    `-I${mclDir}/include`,
-    `-I${mclDir}/src`,
+    `-I${blstDir}/bindings`,
     `-I${srcDir}/univalue/include`,
   ].join(' ');
 
@@ -686,18 +659,7 @@ function buildBlsct() {
     '-fno-stack-protector',
     '-DHAVE_CONFIG_H',
     '-DLIBBLSCT',
-    '-DBLS_ETH',
     '-DWASM_SINGLE_THREADED',
-    '-DMCLBN_FP_UNIT_SIZE=6',
-    '-DMCLBN_FR_UNIT_SIZE=4',
-    '-DMCL_SIZEOF_UNIT=4',
-    '-DMCL_MAX_BIT_SIZE=384',
-    '-DMCL_USE_VINT',
-    '-DMCL_VINT_FIXED_BUFFER',
-    '-DMCL_DONT_USE_OPENSSL',
-    '-DMCL_DONT_USE_XBYAK',
-    '-DMCL_USE_WEB_CRYPTO_API',
-    '-DCYBOZU_MINIMUM_EXCEPTION',
     '-std=c++20',
   ].join(' ');
 
@@ -788,8 +750,7 @@ function linkWasm(objectFiles) {
 
   const allObjects = [
     ...objectFiles,
-    `${BUILD_DIR}/fp.o`,
-    `${BUILD_DIR}/bls_c384_256.o`,
+    `${BUILD_DIR}/blst.o`,
   ].join(' ');
 
   const outputJs = path.join(WASM_OUTPUT_DIR, 'blsct.js');
@@ -821,8 +782,7 @@ async function main() {
     // Install WASM-specific config header
     setupConfigHeader();
 
-    buildMcl();
-    buildBls();
+    buildBlst();
     const objectFiles = buildBlsct();
 
     if (objectFiles.length === 0) {
