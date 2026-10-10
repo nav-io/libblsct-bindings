@@ -43,6 +43,64 @@
             
   <section id="tokenid">
 <h1>TokenId<a class="headerlink" href="#tokenid" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="blsct.TokenId">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">blsct.</span></span><span class="sig-name descname"><span class="pre">TokenId</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#blsct.TokenId" title="Link to this definition">¶</a></dt>
+<dd><p>Represents a token ID. A token ID consists of two parameters: token and subid, both of which are optional. When omitted, default values are used instead of random values.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">blsct</span><span class="w"> </span><span class="kn">import</span> <span class="n">TokenId</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TokenId</span><span class="p">()</span>
+<span class="go">TokenId(000000000000000...0000000ffffffffffffffff)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">TokenId</span><span class="o">.</span><span class="n">from_token</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+<span class="go">TokenId(7b0000000000000...0000000ffffffffffffffff)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">token_id</span> <span class="o">=</span> <span class="n">TokenId</span><span class="o">.</span><span class="n">from_token_and_subid</span><span class="p">(</span><span class="mi">123</span><span class="p">,</span> <span class="mi">456</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">token_id</span><span class="o">.</span><span class="n">token</span><span class="p">()</span>
+<span class="go">123</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">token_id</span><span class="o">.</span><span class="n">subid</span><span class="p">()</span>
+<span class="go">456</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ser</span> <span class="o">=</span> <span class="n">token_id</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">deser</span> <span class="o">=</span> <span class="n">TokenId</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">ser</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ser</span> <span class="o">==</span> <span class="n">deser</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.TokenId.deserialize">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hex</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#blsct.TokenId.deserialize" title="Link to this definition">¶</a></dt>
+<dd><p>Deserialize the TokenId from a hexadecimal string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.TokenId.from_token">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_token</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#blsct.TokenId.from_token" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a token ID from a given token.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.TokenId.from_token_and_subid">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_token_and_subid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">token</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Self</span></span></span><a class="headerlink" href="#blsct.TokenId.from_token_and_subid" title="Link to this definition">¶</a></dt>
+<dd><p>Generate a token ID from a given token and subid.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.TokenId.serialize">
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#blsct.TokenId.serialize" title="Link to this definition">¶</a></dt>
+<dd><p>Serialize the TokenId to a hexadecimal string</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.TokenId.subid">
+<span class="sig-name descname"><span class="pre">subid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#blsct.TokenId.subid" title="Link to this definition">¶</a></dt>
+<dd><p>Get the subid from the token ID.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="blsct.TokenId.token">
+<span class="sig-name descname"><span class="pre">token</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#blsct.TokenId.token" title="Link to this definition">¶</a></dt>
+<dd><p>Get the token from the token ID.</p>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 
@@ -52,6 +110,24 @@
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">TokenId</a><ul>
+<li><a class="reference internal" href="#blsct.TokenId"><code class="docutils literal notranslate"><span class="pre">TokenId</span></code></a><ul>
+<li><a class="reference internal" href="#blsct.TokenId.deserialize"><code class="docutils literal notranslate"><span class="pre">TokenId.deserialize()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.TokenId.from_token"><code class="docutils literal notranslate"><span class="pre">TokenId.from_token()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.TokenId.from_token_and_subid"><code class="docutils literal notranslate"><span class="pre">TokenId.from_token_and_subid()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.TokenId.serialize"><code class="docutils literal notranslate"><span class="pre">TokenId.serialize()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.TokenId.subid"><code class="docutils literal notranslate"><span class="pre">TokenId.subid()</span></code></a></li>
+<li><a class="reference internal" href="#blsct.TokenId.token"><code class="docutils literal notranslate"><span class="pre">TokenId.token()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
   <div>
     <h4>Previous topic</h4>
     <p class="topless"><a href="sub_addr_id.html"
