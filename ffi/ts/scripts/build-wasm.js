@@ -538,6 +538,8 @@ const EXPORTED_FUNCTIONS = [
   '_add_unsigned_transaction_output',
   '_set_unsigned_transaction_fee',
   '_get_unsigned_transaction_fee',
+  '_set_unsigned_transaction_emit_fee_output',
+  '_get_unsigned_transaction_emit_fee_output',
   '_get_unsigned_transaction_inputs_size',
   '_get_unsigned_transaction_outputs_size',
   '_delete_unsigned_transaction',

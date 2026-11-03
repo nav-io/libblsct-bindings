@@ -699,6 +699,8 @@ export void add_unsigned_transaction_input(void* vp_unsigned_transaction, const 
 export void add_unsigned_transaction_output(void* vp_unsigned_transaction, const void* vp_unsigned_output);
 export void set_unsigned_transaction_fee(void* vp_unsigned_transaction, const uint64_t fee);
 export uint64_t get_unsigned_transaction_fee(const void* vp_unsigned_transaction);
+export void set_unsigned_transaction_emit_fee_output(void* vp_unsigned_transaction, const bool emit_fee_output);
+export bool get_unsigned_transaction_emit_fee_output(const void* vp_unsigned_transaction);
 export size_t get_unsigned_transaction_inputs_size(const void* vp_unsigned_transaction);
 export size_t get_unsigned_transaction_outputs_size(const void* vp_unsigned_transaction);
 export void delete_unsigned_transaction(void* vp_unsigned_transaction);
