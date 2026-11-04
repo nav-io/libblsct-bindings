@@ -470,6 +470,51 @@ def test_set_unsigned_output_stake_delegation():
     blsct_swig.delete_unsigned_output(staked)
     blsct_swig.delete_unsigned_output(normal)
 
+def test_unsigned_transaction_without_fee_output():
+  # A fee-0 aggregation cover candidate: 1 input, 1 output of the same
+  # amount, no OP_RETURN fee output.
+  amount = 12345
+  dest = _memo_dest()
+  tx_out = TxOut(dest, amount, '', TokenId(), "Normal", 0, False, Scalar.random())
+  rv = blsct_swig.build_unsigned_output(tx_out.value())
+  assert rv.result == 0
+  unsigned_out = rv.value
+  blsct_swig.free_obj(rv)
+  tx_in = TxIn(amount, 100, Scalar(101), TokenId(), OutPoint(CTxId.deserialize('54' * 32)))
+  rv = blsct_swig.build_unsigned_input(tx_in.value())
+  assert rv.result == 0
+  unsigned_in = rv.value
+  blsct_swig.free_obj(rv)
+
+  unsigned_tx = blsct_swig.create_unsigned_transaction()
+  try:
+    blsct_swig.add_unsigned_transaction_input(unsigned_tx, unsigned_in)
+    blsct_swig.add_unsigned_transaction_output(unsigned_tx, unsigned_out)
+    assert blsct_swig.get_unsigned_transaction_emit_fee_output(unsigned_tx)
+    blsct_swig.set_unsigned_transaction_emit_fee_output(unsigned_tx, False)
+    assert not blsct_swig.get_unsigned_transaction_emit_fee_output(unsigned_tx)
+
+    # without a fee output there is nothing to pay a fee with
+    blsct_swig.set_unsigned_transaction_fee(unsigned_tx, 1)
+    rv = blsct_swig.sign_unsigned_transaction(unsigned_tx)
+    assert rv.result != 0
+    blsct_swig.free_obj(rv)
+    blsct_swig.set_unsigned_transaction_fee(unsigned_tx, 0)
+
+    rv = blsct_swig.sign_unsigned_transaction(unsigned_tx)
+    assert rv.result == 0
+    signed_hex = blsct_swig.cast_to_const_char_ptr(rv.value)
+    blsct_swig.free_obj(rv.value)
+    blsct_swig.free_obj(rv)
+  finally:
+    blsct_swig.delete_unsigned_transaction(unsigned_tx)
+
+  ctx = CTx.deserialize(signed_hex)
+  assert ctx.get_ctx_ins().size() == 1
+  ctx_outs = ctx.get_ctx_outs()
+  assert ctx_outs.size() == 1
+  assert ctx_outs.at(0).get_script_pub_key_hex() != '6a'   # not the OP_RETURN fee output
+
 def test_cold_staking_end_to_end():
   # Delegate a staked output, sign the transaction, then recover the
   # delegation as the owner's syncing wallet would.
